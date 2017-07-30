@@ -5,7 +5,12 @@ import "fmt"
 type SpaceType int
 type ObjectID string
 
-//// AssetType //////
+type GrapheneObject interface {
+	Id() ObjectID
+	Type() ObjectType
+}
+
+//AssetType
 type AssetType int
 
 const (
@@ -16,9 +21,7 @@ const (
 	AssetTypePredictionMarket
 )
 
-
-
-//// ObjectType //////
+//ObjectType
 type ObjectType int
 
 const (

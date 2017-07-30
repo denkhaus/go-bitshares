@@ -21,6 +21,7 @@ func (p *WSClient) CallApi(apiID int, method string, args ...interface{}) (inter
 
 	var reply interface{}
 	err := p.client.Call("call", param, &reply)
+
 	return reply, err
 }
 

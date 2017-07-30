@@ -1,6 +1,7 @@
 package objects
 
+//easyjson:json
 type Price struct {
-	base  AssetAmount
-	quote AssetAmount
+	Base  AssetAmount `json:"base"`
+	Quote AssetAmount `json:"quote"`
 }

@@ -1,19 +1,22 @@
 package objects
 
+//easyjson:json
 type Asset struct {
-	GrapheneID
+	//TODO: GrapheneID doesn't deserialize properly when nested
+	GrapheneID         `json:"id"`
 	Symbol             string       `json:"symbol"`
 	Precision          int          `json:"precision"`
-	Issuer             string       `json:"issuer"`
-	Description        string       `json:"description"`
-	DynamicAssetDataID string       `json:"dynamic_asset_data_id"`
+	Issuer             GrapheneID   `json:"issuer"`
+	DynamicAssetDataID GrapheneID   `json:"dynamic_asset_data_id"`
+	BitassetDataID     GrapheneID   `json:"bitasset_data_id"`
 	Options            AssetOptions `json:"options"`
-	BitassetDataID     string       `json:"bitasset_data_id"`
-	typ                AssetType
 }
 
+//NewAsset creates a new Asset object
 func NewAsset(id ObjectID) *Asset {
-	asset := Asset{}
-	asset.ID = id
+	asset := Asset{
+		GrapheneID: *NewGrapheneID(id),
+	}
+
 	return &asset
 }

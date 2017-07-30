@@ -7,7 +7,7 @@ import (
 )
 
 //Get a list of accounts by ID.
-func (p *BitsharesApi) GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.UserAccount, error) {
+func (p *BitsharesApi) GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error) {
 	params := []interface{}{}
 	for _, ai := range accountIDs {
 		params = append(params, ai.Id())
@@ -19,11 +19,11 @@ func (p *BitsharesApi) GetAccounts(accountIDs ...objects.GrapheneObject) ([]obje
 	}
 
 	data := resp.([]interface{})
-	ret := make([]objects.UserAccount, len(data))
+	ret := make([]objects.Account, len(data))
 
 	for idx, acct := range data {
 		if err := easyjson.Unmarshal(toBytes(acct), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal UserAccount")
+			return nil, errors.Annotate(err, "unmarshal Account")
 		}
 	}
 

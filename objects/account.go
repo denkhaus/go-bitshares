@@ -1,10 +1,11 @@
 package objects
 
 //easyjson:json
-type UserAccount struct {
-	GrapheneID
+type Account struct {
+	//TODO: GrapheneID doesn't deserialize properly when nested
+	GrapheneID                    `json:"id"`
 	Name                          string         `json:"name"`
-	Statistics                    string         `json:"statistics"`
+	Statistics                    GrapheneID     `json:"statistics"`
 	MembershipExpirationDate      RFC3339Time    `json:"membership_expiration_date"`
 	NetworkFeePercentage          int64          `json:"network_fee_percentage"`
 	LifetimeReferrerFeePercentage int64          `json:"lifetime_referrer_fee_percentage"`
@@ -15,11 +16,20 @@ type UserAccount struct {
 	WhitelistedAccounts           []string       `json:"whitelisted_accounts"`
 	BlacklistedAccounts           []string       `json:"blacklisted_accounts"`
 	Options                       AccountOptions `json:"options"`
-	// Registrar                     GrapheneID `json:"registrar"`
-	// Referrer                      GrapheneID `json:"referrer"`
-	// LifetimeReferrer              GrapheneID `json:"lifetime_referrer"`
-	Owner                  Authority     `json:"owner"`
-	Active                 Authority     `json:"active"`
-	OwnerSpecialAuthority  []interface{} `json:"owner_special_authority"`
-	ActiveSpecialAuthority []interface{} `json:"active_special_authority"`
+	Registrar                     GrapheneID     `json:"registrar"`
+	Referrer                      GrapheneID     `json:"referrer"`
+	LifetimeReferrer              GrapheneID     `json:"lifetime_referrer"`
+	Owner                         Authority      `json:"owner"`
+	Active                        Authority      `json:"active"`
+	OwnerSpecialAuthority         []interface{}  `json:"owner_special_authority"`
+	ActiveSpecialAuthority        []interface{}  `json:"active_special_authority"`
+}
+
+//NewAccount creates a new Account object
+func NewAccount(id ObjectID) *Account {
+	acc := Account{
+		GrapheneID: *NewGrapheneID(id),
+	}
+
+	return &acc
 }
