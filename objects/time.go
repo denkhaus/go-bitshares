@@ -1,0 +1,37 @@
+package objects
+
+import (
+	"strconv"
+	"time"
+)
+
+type RFC3339Time time.Time
+
+func (t RFC3339Time) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(time.Time(t).Format(time.RFC3339))), nil
+}
+
+func (t *RFC3339Time) UnmarshalJSON(s []byte) (err error) {
+	str := string(s)
+	if len(str) > 0 && str != "null" {
+		q, err := strconv.Unquote(str)
+		if err != nil {
+			return err
+		}
+
+		*(*time.Time)(t), err = time.Parse("2006-01-02T15:04:05", q)
+	}
+
+	return
+}
+
+func (t RFC3339Time) Unix() int64 {
+	return time.Time(t).Unix()
+}
+
+func (t RFC3339Time) ToTime() time.Time {
+	return time.Time(t)
+}
+func (t RFC3339Time) String() string {
+	return time.Time(t).String()
+}
