@@ -1,9 +1,16 @@
 package objects
 
-//easyjson:json
+import (
+	json "encoding/json"
+	"strconv"
+
+	"github.com/juju/errors"
+	jlexer "github.com/mailru/easyjson/jlexer"
+)
+
 type AssetAmount struct {
 	Asset  GrapheneID `json:"asset_id"`
-	Amount UInt64     `json:"amount"`
+	Amount uint64     `json:"amount"`
 }
 
 //Add adds two asset amounts. They must refer to the same Asset type.
@@ -34,4 +41,24 @@ func (p *AssetAmount) Subtract(other AssetAmount) *AssetAmount {
 	}
 
 	return p
+}
+
+func (p *AssetAmount) UnmarshalEasyJSON(j *jlexer.Lexer) {
+	var res map[string]interface{}
+	if err := json.Unmarshal(j.Data, &res); err != nil {
+		panic(errors.Annotate(err, "unmarshal AssetAmount").Error())
+	}
+
+	p.Asset = *NewGrapheneID(ObjectID(res["asset_id"].(string)))
+
+	if am, ok := res["amount"].(string); ok {
+		amount, err := strconv.ParseUint(am, 10, 64)
+		if err != nil {
+			panic(errors.Annotate(err, "parse AssetAmount [amount]").Error())
+		}
+
+		p.Amount = amount
+	} else {
+		p.Amount = uint64(res["amount"].(float64))
+	}
 }

@@ -96,9 +96,9 @@ func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects1(in *jlexer.Lexer, 
 		}
 		switch key {
 		case "base":
-			(out.Base).UnmarshalEasyJSON(in)
+			easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(in, &out.Base)
 		case "quote":
-			(out.Quote).UnmarshalEasyJSON(in)
+			easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(in, &out.Quote)
 		default:
 			in.SkipRecursive()
 		}
@@ -118,13 +118,13 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects1(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"base\":")
-	(in.Base).MarshalEasyJSON(out)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(out, in.Base)
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"quote\":")
-	(in.Quote).MarshalEasyJSON(out)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(out, in.Quote)
 	out.RawByte('}')
 }
 
@@ -151,168 +151,7 @@ func (v *Price) UnmarshalJSON(data []byte) error {
 func (v *Price) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects1(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(in *jlexer.Lexer, out *Authority) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "weight_threshold":
-			out.WeightThreshold = int64(in.Int64())
-		case "account_auths":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.AccountAuths).UnmarshalJSON(data))
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(out *jwriter.Writer, in Authority) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"weight_threshold\":")
-	out.Int64(int64(in.WeightThreshold))
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"account_auths\":")
-	if in.AccountAuths == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-		out.RawString(`null`)
-	} else {
-		out.RawByte('{')
-		v1First := true
-		for v1Name, v1Value := range in.AccountAuths {
-			if !v1First {
-				out.RawByte(',')
-			}
-			v1First = false
-			out.String(string(v1Name))
-			out.RawByte(':')
-			out.Int64(int64(v1Value))
-		}
-		out.RawByte('}')
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v Authority) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Authority) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *Authority) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Authority) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(l, v)
-}
-func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects3(in *jlexer.Lexer, out *AssetOptions) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "max_supply":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.MaxSupply).UnmarshalJSON(data))
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out *jwriter.Writer, in AssetOptions) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	if !first {
-		out.RawByte(',')
-	}
-	first = false
-	out.RawString("\"max_supply\":")
-	out.Uint64(uint64(in.MaxSupply))
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v AssetOptions) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v AssetOptions) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *AssetOptions) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects3(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *AssetOptions) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects3(l, v)
-}
-func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(in *jlexer.Lexer, out *AssetAmount) {
+func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects2(in *jlexer.Lexer, out *AssetAmount) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -336,9 +175,7 @@ func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(in *jlexer.Lexer, 
 				in.AddError((out.Asset).UnmarshalJSON(data))
 			}
 		case "amount":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Amount).UnmarshalJSON(data))
-			}
+			out.Amount = uint64(in.Uint64())
 		default:
 			in.SkipRecursive()
 		}
@@ -349,7 +186,7 @@ func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(in *jlexer.Lexer, 
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(out *jwriter.Writer, in AssetAmount) {
+func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects2(out *jwriter.Writer, in AssetAmount) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -358,7 +195,7 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"asset_id\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.Asset)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.Asset)
 	if !first {
 		out.RawByte(',')
 	}
@@ -367,31 +204,7 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(out *jwriter.Write
 	out.Uint64(uint64(in.Amount))
 	out.RawByte('}')
 }
-
-// MarshalJSON supports json.Marshaler interface
-func (v AssetAmount) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v AssetAmount) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *AssetAmount) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *AssetAmount) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(l, v)
-}
-func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects5(in *jlexer.Lexer, out *GrapheneID) {
+func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects3(in *jlexer.Lexer, out *GrapheneID) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -428,7 +241,7 @@ func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects5(in *jlexer.Lexer, 
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out *jwriter.Writer, in GrapheneID) {
+func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out *jwriter.Writer, in GrapheneID) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -457,6 +270,167 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out *jwriter.Write
 	out.RawString("\"Instance\":")
 	out.Int64(int64(in.Instance))
 	out.RawByte('}')
+}
+func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(in *jlexer.Lexer, out *Authority) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "weight_threshold":
+			out.WeightThreshold = int64(in.Int64())
+		case "account_auths":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.AccountAuths).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(out *jwriter.Writer, in Authority) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"weight_threshold\":")
+	out.Int64(int64(in.WeightThreshold))
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"account_auths\":")
+	if in.AccountAuths == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+		out.RawString(`null`)
+	} else {
+		out.RawByte('{')
+		v1First := true
+		for v1Name, v1Value := range in.AccountAuths {
+			if !v1First {
+				out.RawByte(',')
+			}
+			v1First = false
+			out.String(string(v1Name))
+			out.RawByte(':')
+			out.Int64(int64(v1Value))
+		}
+		out.RawByte('}')
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Authority) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Authority) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects4(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Authority) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Authority) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects4(l, v)
+}
+func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects5(in *jlexer.Lexer, out *AssetOptions) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "max_supply":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MaxSupply).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out *jwriter.Writer, in AssetOptions) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	if !first {
+		out.RawByte(',')
+	}
+	first = false
+	out.RawString("\"max_supply\":")
+	out.Uint64(uint64(in.MaxSupply))
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v AssetOptions) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v AssetOptions) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *AssetOptions) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects5(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *AssetOptions) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects5(l, v)
 }
 func easyjsonCce3d1beDecodeGithubComDenkhausBitsharesObjects6(in *jlexer.Lexer, out *Asset) {
 	isTopLevel := in.IsStart()
@@ -534,19 +508,19 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects6(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"issuer\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.Issuer)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.Issuer)
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"dynamic_asset_data_id\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.DynamicAssetDataID)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.DynamicAssetDataID)
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"bitasset_data_id\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.BitassetDataID)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.BitassetDataID)
 	if !first {
 		out.RawByte(',')
 	}
@@ -659,7 +633,7 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects7(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"voting_account\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.VotingAccount)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.VotingAccount)
 	if !first {
 		out.RawByte(',')
 	}
@@ -971,7 +945,7 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects9(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"statistics\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.Statistics)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.Statistics)
 	if !first {
 		out.RawByte(',')
 	}
@@ -1081,19 +1055,19 @@ func easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects9(out *jwriter.Write
 	}
 	first = false
 	out.RawString("\"registrar\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.Registrar)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.Registrar)
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"referrer\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.Referrer)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.Referrer)
 	if !first {
 		out.RawByte(',')
 	}
 	first = false
 	out.RawString("\"lifetime_referrer\":")
-	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects5(out, in.LifetimeReferrer)
+	easyjsonCce3d1beEncodeGithubComDenkhausBitsharesObjects3(out, in.LifetimeReferrer)
 	if !first {
 		out.RawByte(',')
 	}
