@@ -5,10 +5,11 @@ import "fmt"
 type SpaceType int
 type ObjectID string
 
+/*
 type GrapheneObject interface {
 	Id() ObjectID
 	Type() ObjectType
-}
+} */
 
 //AssetType
 type AssetType int

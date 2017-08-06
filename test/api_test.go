@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/stretchr/testify/assert"
@@ -37,8 +38,8 @@ func (suite *BitsharesAPITest) TearDown() {
 
 func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 
-	asset := objects.NewAsset("1.3.0")
-	user := objects.NewAccount("1.2.20067")
+	asset := objects.NewGrapheneID("1.3.0")
+	user := objects.NewGrapheneID("1.2.20067")
 
 	res, err := suite.testAPI.GetAccountBalances(user, asset)
 	if err != nil {
@@ -59,18 +60,18 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 
 	assert.NotNil(suite.T(), res)
 	assert.Len(suite.T(), res, 1)
-	//spew.Dump(res)
+	spew.Dump(res)
 }
 
 func (suite *BitsharesAPITest) Test_ListAssets() {
-	res, err := suite.testAPI.ListAssets("HERO", 1)
+	res, err := suite.testAPI.ListAssets("HERO", 2)
 	if err != nil {
 		suite.T().Error(err)
 	}
 
 	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 1)
-	//spew.Dump(res)
+	assert.Len(suite.T(), res, 2)
+	//	spew.Dump(res)
 }
 
 // In order for 'go test' to run this suite, we need to create

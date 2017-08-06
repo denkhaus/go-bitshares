@@ -1,9 +1,9 @@
 package objects
 
-//easyjson:json
+//go:generate ffjson -force-regenerate $GOFILE
+
 type Account struct {
-	//TODO: GrapheneID doesn't deserialize properly when nested
-	GrapheneID                    `json:"id"`
+	ID                            GrapheneID     `json:"id"`
 	Name                          string         `json:"name"`
 	Statistics                    GrapheneID     `json:"statistics"`
 	MembershipExpirationDate      RFC3339Time    `json:"membership_expiration_date"`
@@ -28,7 +28,7 @@ type Account struct {
 //NewAccount creates a new Account object
 func NewAccount(id ObjectID) *Account {
 	acc := Account{
-		GrapheneID: *NewGrapheneID(id),
+		ID: *NewGrapheneID(id),
 	}
 
 	return &acc

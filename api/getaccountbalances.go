@@ -3,11 +3,11 @@ package api
 import (
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/juju/errors"
-	"github.com/mailru/easyjson"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 //GetAccountBalances retrieves AssetAmount objects by given Account
-func (p *BitsharesApi) GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error) {
+func (p *BitsharesApi) GetAccountBalances(account *objects.GrapheneID, assets ...*objects.GrapheneID) ([]objects.AssetAmount, error) {
 	assetIDs := []interface{}{"1.3.0"}
 	for _, asset := range assets {
 		assetIDs = append(assetIDs, asset.Id())
@@ -22,7 +22,7 @@ func (p *BitsharesApi) GetAccountBalances(account objects.GrapheneObject, assets
 	ret := make([]objects.AssetAmount, len(data))
 
 	for idx, a := range data {
-		if err := easyjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal AssetAmount")
 		}
 	}

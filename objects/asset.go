@@ -1,9 +1,8 @@
 package objects
 
-//easyjson:json
+//go:generate ffjson -force-regenerate $GOFILE
 type Asset struct {
-	//TODO: GrapheneID doesn't deserialize properly when nested
-	GrapheneID         `json:"id"`
+	ID                 GrapheneID   `json:"id"`
 	Symbol             string       `json:"symbol"`
 	Precision          int          `json:"precision"`
 	Issuer             GrapheneID   `json:"issuer"`
@@ -15,7 +14,7 @@ type Asset struct {
 //NewAsset creates a new Asset object
 func NewAsset(id ObjectID) *Asset {
 	asset := Asset{
-		GrapheneID: *NewGrapheneID(id),
+		ID: *NewGrapheneID(id),
 	}
 
 	return &asset

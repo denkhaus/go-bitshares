@@ -1,10 +1,9 @@
 package api
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/juju/errors"
-	"github.com/mailru/easyjson"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 const (
@@ -27,12 +26,12 @@ func (p *BitsharesApi) ListAssets(lowerBoundSymbol string, limit int) ([]objects
 	if err != nil {
 		return nil, errors.Annotate(err, "list_assets")
 	}
-	spew.Dump(resp)
+	//spew.Dump(resp)
 	data := resp.([]interface{})
 	ret := make([]objects.Asset, len(data))
 
 	for idx, a := range data {
-		if err := easyjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal Asset")
 		}
 	}

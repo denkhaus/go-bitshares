@@ -1,13 +1,14 @@
 package api
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/juju/errors"
-	"github.com/mailru/easyjson"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
-//Get a list of accounts by ID.
-func (p *BitsharesApi) GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error) {
+//GetAccounts returns a list of accounts by ID.
+func (p *BitsharesApi) GetAccounts(accountIDs ...*objects.GrapheneID) ([]objects.Account, error) {
 	params := []interface{}{}
 	for _, ai := range accountIDs {
 		params = append(params, ai.Id())
@@ -18,11 +19,12 @@ func (p *BitsharesApi) GetAccounts(accountIDs ...objects.GrapheneObject) ([]obje
 		return nil, errors.Annotate(err, "get_accounts")
 	}
 
+	spew.Dump(resp)
 	data := resp.([]interface{})
 	ret := make([]objects.Account, len(data))
 
 	for idx, acct := range data {
-		if err := easyjson.Unmarshal(toBytes(acct), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(toBytes(acct), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal Account")
 		}
 	}
