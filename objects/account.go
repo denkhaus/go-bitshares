@@ -19,6 +19,7 @@ type Account struct {
 	Registrar                     GrapheneID     `json:"registrar"`
 	Referrer                      GrapheneID     `json:"referrer"`
 	LifetimeReferrer              GrapheneID     `json:"lifetime_referrer"`
+	CashbackVB                    GrapheneID     `json:"cashback_vb"`
 	Owner                         Authority      `json:"owner"`
 	Active                        Authority      `json:"active"`
 	OwnerSpecialAuthority         []interface{}  `json:"owner_special_authority"`

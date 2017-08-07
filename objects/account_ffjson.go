@@ -143,6 +143,12 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	if err != nil {
 		return err
 	}
+	/* Struct fall back. type=objects.GrapheneID kind=struct */
+	buf.WriteString(`,"cashback_vb":`)
+	err = buf.Encode(&j.CashbackVB)
+	if err != nil {
+		return err
+	}
 	/* Struct fall back. type=objects.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
 	err = buf.Encode(&j.Owner)
@@ -229,6 +235,8 @@ const (
 
 	ffjtAccountLifetimeReferrer
 
+	ffjtAccountCashbackVB
+
 	ffjtAccountOwner
 
 	ffjtAccountActive
@@ -269,6 +277,8 @@ var ffjKeyAccountRegistrar = []byte("registrar")
 var ffjKeyAccountReferrer = []byte("referrer")
 
 var ffjKeyAccountLifetimeReferrer = []byte("lifetime_referrer")
+
+var ffjKeyAccountCashbackVB = []byte("cashback_vb")
 
 var ffjKeyAccountOwner = []byte("owner")
 
@@ -361,6 +371,14 @@ mainparse:
 
 					} else if bytes.Equal(ffjKeyAccountBlacklistedAccounts, kn) {
 						currentKey = ffjtAccountBlacklistedAccounts
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'c':
+
+					if bytes.Equal(ffjKeyAccountCashbackVB, kn) {
+						currentKey = ffjtAccountCashbackVB
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -494,6 +512,12 @@ mainparse:
 
 				if fflib.SimpleLetterEqualFold(ffjKeyAccountOwner, kn) {
 					currentKey = ffjtAccountOwner
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffjKeyAccountCashbackVB, kn) {
+					currentKey = ffjtAccountCashbackVB
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -658,6 +682,9 @@ mainparse:
 
 				case ffjtAccountLifetimeReferrer:
 					goto handle_LifetimeReferrer
+
+				case ffjtAccountCashbackVB:
+					goto handle_CashbackVB
 
 				case ffjtAccountOwner:
 					goto handle_Owner
@@ -1294,6 +1321,32 @@ handle_LifetimeReferrer:
 		}
 
 		err = j.LifetimeReferrer.UnmarshalJSON(tbuf)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_CashbackVB:
+
+	/* handler: j.CashbackVB type=objects.GrapheneID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			state = fflib.FFParse_after_value
+			goto mainparse
+		}
+
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+
+		err = j.CashbackVB.UnmarshalJSON(tbuf)
 		if err != nil {
 			return fs.WrapErr(err)
 		}

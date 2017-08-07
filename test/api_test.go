@@ -60,6 +60,17 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 
 	assert.NotNil(suite.T(), res)
 	assert.Len(suite.T(), res, 1)
+	//spew.Dump(res)
+}
+
+func (suite *BitsharesAPITest) Test_GetAccountByName() {
+
+	res, err := suite.testAPI.GetAccountByName("stan")
+	if err != nil {
+		suite.T().Error(err)
+	}
+
+	assert.NotNil(suite.T(), res)
 	spew.Dump(res)
 }
 
@@ -71,7 +82,7 @@ func (suite *BitsharesAPITest) Test_ListAssets() {
 
 	assert.NotNil(suite.T(), res)
 	assert.Len(suite.T(), res, 2)
-	//	spew.Dump(res)
+	//spew.Dump(res)
 }
 
 // In order for 'go test' to run this suite, we need to create

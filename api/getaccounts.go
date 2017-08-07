@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
@@ -19,7 +18,7 @@ func (p *BitsharesApi) GetAccounts(accountIDs ...*objects.GrapheneID) ([]objects
 		return nil, errors.Annotate(err, "get_accounts")
 	}
 
-	spew.Dump(resp)
+	//spew.Dump(resp)
 	data := resp.([]interface{})
 	ret := make([]objects.Account, len(data))
 

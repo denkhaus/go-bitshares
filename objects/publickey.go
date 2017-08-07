@@ -6,6 +6,14 @@ type PublicKey struct {
 	key string
 }
 
+func NewPublicKey(key string) *PublicKey {
+	k := PublicKey{
+		key: key,
+	}
+
+	return &k
+}
+
 func (p *PublicKey) UnmarshalJSON(data []byte) error {
 	if data == nil || len(data) == 0 {
 		return nil
