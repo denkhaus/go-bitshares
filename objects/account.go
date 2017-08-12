@@ -2,6 +2,7 @@ package objects
 
 //go:generate ffjson -force-regenerate $GOFILE
 
+//easyjson:json
 type Account struct {
 	ID                            GrapheneID     `json:"id"`
 	Name                          string         `json:"name"`
@@ -11,10 +12,10 @@ type Account struct {
 	LifetimeReferrerFeePercentage int64          `json:"lifetime_referrer_fee_percentage"`
 	ReferrerRewardsPercentage     int64          `json:"referrer_rewards_percentage"`
 	TopNControlFlags              int64          `json:"top_n_control_flags"`
-	WhitelistingAccounts          []string       `json:"whitelisting_accounts"`
-	BlacklistingAccounts          []string       `json:"blacklisting_accounts"`
-	WhitelistedAccounts           []string       `json:"whitelisted_accounts"`
-	BlacklistedAccounts           []string       `json:"blacklisted_accounts"`
+	WhitelistingAccounts          []GrapheneID   `json:"whitelisting_accounts"`
+	BlacklistingAccounts          []GrapheneID   `json:"blacklisting_accounts"`
+	WhitelistedAccounts           []GrapheneID   `json:"whitelisted_accounts"`
+	BlacklistedAccounts           []GrapheneID   `json:"blacklisted_accounts"`
 	Options                       AccountOptions `json:"options"`
 	Registrar                     GrapheneID     `json:"registrar"`
 	Referrer                      GrapheneID     `json:"referrer"`

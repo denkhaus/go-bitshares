@@ -3,8 +3,8 @@ package test
 import (
 	"log"
 	"testing"
+	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/stretchr/testify/assert"
@@ -65,13 +65,27 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 
 func (suite *BitsharesAPITest) Test_GetAccountByName() {
 
-	res, err := suite.testAPI.GetAccountByName("stan")
+	res, err := suite.testAPI.GetAccountByName("openledger")
 	if err != nil {
 		suite.T().Error(err)
 	}
 
 	assert.NotNil(suite.T(), res)
-	spew.Dump(res)
+	//spew.Dump(res)
+}
+
+func (suite *BitsharesAPITest) Test_GetTradeHistory() {
+
+	dtTo := time.Now().UTC()
+	dtFrom := dtTo.Add(-time.Hour)
+
+	res, err := suite.testAPI.GetTradeHistory("CNY", "BTS", dtTo, dtFrom, 50)
+	if err != nil {
+		suite.T().Error(err)
+	}
+
+	assert.NotNil(suite.T(), res)
+	//spew.Dump(res)
 }
 
 func (suite *BitsharesAPITest) Test_ListAssets() {

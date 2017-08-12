@@ -1,6 +1,7 @@
 package objects
 
 //go:generate ffjson -force-regenerate $GOFILE
+
 type Asset struct {
 	ID                 GrapheneID   `json:"id"`
 	Symbol             string       `json:"symbol"`

@@ -47,7 +47,7 @@ func (p *AssetAmount) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &res); err != nil {
 		return errors.Annotate(err, "unmarshal AssetAmount")
 	}
-	//	spew.Dump(j.Data)
+
 	p.Asset = *NewGrapheneID(ObjectID(res["asset_id"].(string)))
 
 	if am, ok := res["amount"].(string); ok {
