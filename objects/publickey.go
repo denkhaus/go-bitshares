@@ -1,6 +1,6 @@
 package objects
 
-import "strconv"
+import "github.com/denkhaus/bitshares/util"
 
 type PublicKey struct {
 	key string
@@ -21,7 +21,7 @@ func (p *PublicKey) UnmarshalJSON(data []byte) error {
 
 	str := string(data)
 	if len(str) > 0 && str != "null" {
-		key, err := strconv.Unquote(str)
+		key, err := util.SafeUnquote(str)
 		if err != nil {
 			return err
 		}

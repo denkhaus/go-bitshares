@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/denkhaus/bitshares/objects"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -31,7 +32,7 @@ func (p *BitsharesApi) ListAssets(lowerBoundSymbol string, limit int) ([]objects
 	ret := make([]objects.Asset, len(data))
 
 	for idx, a := range data {
-		if err := ffjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal Asset")
 		}
 	}

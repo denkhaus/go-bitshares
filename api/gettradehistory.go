@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/objects"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -28,7 +29,7 @@ func (p *BitsharesApi) GetTradeHistory(base, quote string, toTime, fromTime time
 	ret := make([]objects.MarketTrade, len(data))
 
 	for idx, a := range data {
-		if err := ffjson.Unmarshal(toBytes(a), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal MarketTrade")
 		}
 	}

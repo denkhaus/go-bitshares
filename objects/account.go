@@ -1,8 +1,9 @@
 package objects
 
+import "github.com/juju/errors"
+
 //go:generate ffjson -force-regenerate $GOFILE
 
-//easyjson:json
 type Account struct {
 	ID                            GrapheneID     `json:"id"`
 	Name                          string         `json:"name"`
@@ -29,8 +30,9 @@ type Account struct {
 
 //NewAccount creates a new Account object
 func NewAccount(id ObjectID) *Account {
-	acc := Account{
-		ID: *NewGrapheneID(id),
+	acc := Account{}
+	if err := acc.ID.FromString(string(id)); err != nil {
+		panic(errors.Annotate(err, "init GrapheneID"))
 	}
 
 	return &acc

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/denkhaus/bitshares/objects"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -15,7 +16,7 @@ func (p *BitsharesApi) GetAccountByName(name string) (*objects.Account, error) {
 
 	//spew.Dump(resp)
 	ret := objects.Account{}
-	if err := ffjson.Unmarshal(toBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Account")
 	}
 

@@ -1,5 +1,7 @@
 package objects
 
+import "github.com/juju/errors"
+
 //go:generate ffjson -force-regenerate $GOFILE
 
 type Asset struct {
@@ -14,9 +16,10 @@ type Asset struct {
 
 //NewAsset creates a new Asset object
 func NewAsset(id ObjectID) *Asset {
-	asset := Asset{
-		ID: *NewGrapheneID(id),
+	ass := Asset{}
+	if err := ass.ID.FromString(string(id)); err != nil {
+		panic(errors.Annotate(err, "init GrapheneID"))
 	}
 
-	return &asset
+	return &ass
 }

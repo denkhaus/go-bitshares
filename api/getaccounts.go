@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/denkhaus/bitshares/objects"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -23,7 +24,7 @@ func (p *BitsharesApi) GetAccounts(accountIDs ...*objects.GrapheneID) ([]objects
 	ret := make([]objects.Account, len(data))
 
 	for idx, acct := range data {
-		if err := ffjson.Unmarshal(toBytes(acct), &ret[idx]); err != nil {
+		if err := ffjson.Unmarshal(util.ToBytes(acct), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal Account")
 		}
 	}

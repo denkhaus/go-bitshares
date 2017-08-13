@@ -15,8 +15,8 @@ const (
 
 type AssetOptions struct {
 	MaxSupply            UInt64        `json:"max_supply"`
-	MaxMarketFee         float64       `json:"max_market_fee"`
-	MarketFeePercent     float64       `json:"market_fee_percent"`
+	MaxMarketFee         UInt64        `json:"max_market_fee"`
+	MarketFeePercent     UInt64        `json:"market_fee_percent"`
 	Flags                int           `json:"flags"`
 	Description          string        `json:"description"`
 	CoreExchangeRate     Price         `json:"core_exchange_rate"`

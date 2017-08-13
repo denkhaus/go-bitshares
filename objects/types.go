@@ -1,43 +1,37 @@
 package objects
 
-import "fmt"
+import (
+	"strconv"
+
+	"github.com/denkhaus/bitshares/util"
+	"github.com/juju/errors"
+)
 
 type SpaceType int
 type ObjectID string
-
-/*
-type GrapheneObject interface {
-	Id() ObjectID
-	Type() ObjectType
-} */
-
-//AssetType
 type AssetType int
 
 const (
-	_ AssetType = iota
-	AssetTypeCoreAsset
+	AssetTypeUndefined AssetType = -1
+	AssetTypeCoreAsset AssetType = iota
 	AssetTypeUIA
 	AssetTypeSmartCoin
 	AssetTypePredictionMarket
 )
 
-//ObjectType
 type ObjectType int
 
 const (
 	SpaceTypeUndefined SpaceType = -1
-	_                  SpaceType = iota
-	SpaceTypeProtocol
+	SpaceTypeProtocol  SpaceType = iota
 	SpaceTypeImplementation
 )
 
 const (
 	ObjectTypeUndefined ObjectType = -1
-	_                   ObjectType = iota
-	ObjectTypeBASE_OBJECT
-	ObjectTypeACCOUNT_OBJECT
-	ObjectTypeASSET_OBJECT
+	ObjectTypeBase      ObjectType = iota
+	ObjectTypeAccount
+	ObjectTypeAsset
 	ObjectTypeFORCE_SETTLEMENT_OBJECT
 	ObjectTypeCOMMITTEE_MEMBER_OBJECT
 	ObjectTypeWITNESS_OBJECT
@@ -53,7 +47,7 @@ const (
 	ObjectTypeGLOBAL_PROPERTY_OBJECT
 	ObjectTypeDYNAMIC_GLOBAL_PROPERTY_OBJECT
 	ObjectTypeASSET_DYNAMIC_DATA
-	ObjectTypeASSET_BITASSET_DATA
+	ObjectTypeAssetBitAssetData
 	ObjectTypeACCOUNT_BALANCE_OBJECT
 	ObjectTypeACCOUNT_STATISTICS_OBJECT
 	ObjectTypeTRANSACTION_OBJECT
@@ -66,12 +60,12 @@ const (
 	ObjectTypeSPECIAL_AUTHORITY_OBJECT
 )
 
-func (p ObjectType) Space() SpaceType {
+/* func (p ObjectType) Space() SpaceType {
 
 	switch p {
-	case ObjectTypeBASE_OBJECT:
-	case ObjectTypeACCOUNT_OBJECT:
-	case ObjectTypeASSET_OBJECT:
+	case ObjectTypeBase:
+	case ObjectTypeAccount:
+	case ObjectTypeAsset:
 	case ObjectTypeFORCE_SETTLEMENT_OBJECT:
 	case ObjectTypeCOMMITTEE_MEMBER_OBJECT:
 	case ObjectTypeWITNESS_OBJECT:
@@ -89,7 +83,7 @@ func (p ObjectType) Space() SpaceType {
 	case ObjectTypeGLOBAL_PROPERTY_OBJECT:
 	case ObjectTypeDYNAMIC_GLOBAL_PROPERTY_OBJECT:
 	case ObjectTypeASSET_DYNAMIC_DATA:
-	case ObjectTypeASSET_BITASSET_DATA:
+	case ObjectTypeAssetBitAssetData:
 	case ObjectTypeACCOUNT_BALANCE_OBJECT:
 	case ObjectTypeACCOUNT_STATISTICS_OBJECT:
 	case ObjectTypeTRANSACTION_OBJECT:
@@ -110,13 +104,13 @@ func (p ObjectType) Type() int {
 	var typ = 0
 
 	switch p {
-	case ObjectTypeBASE_OBJECT:
+	case ObjectTypeBase:
 		typ = 1
 		break
-	case ObjectTypeACCOUNT_OBJECT:
+	case ObjectTypeAccount:
 		typ = 2
 		break
-	case ObjectTypeASSET_OBJECT:
+	case ObjectTypeAsset:
 		typ = 3
 		break
 	case ObjectTypeFORCE_SETTLEMENT_OBJECT:
@@ -164,7 +158,7 @@ func (p ObjectType) Type() int {
 	case ObjectTypeASSET_DYNAMIC_DATA:
 		typ = 3
 		break
-	case ObjectTypeASSET_BITASSET_DATA:
+	case ObjectTypeAssetBitAssetData:
 		typ = 4
 		break
 	case ObjectTypeACCOUNT_BALANCE_OBJECT:
@@ -200,7 +194,7 @@ func (p ObjectType) Type() int {
 
 	return typ
 }
-
+*/
 //GenericObjectID is used to return the generic object type in the form space.type.0.
 //
 // Not to be confused with {@link GrapheneObject#getObjectId()}, which will return
@@ -208,6 +202,51 @@ func (p ObjectType) Type() int {
 //
 // @return: The generic object type
 //
+/*
 func (p ObjectType) GenericObjectID() string {
 	return fmt.Sprintf("%d.%d.0", p.Space(), p.Type())
+}
+*/
+type UInt64 uint64
+
+func (p *UInt64) UnmarshalJSON(s []byte) error {
+	str := string(s)
+
+	if len(str) > 0 && str != "null" {
+		q, err := util.SafeUnquote(str)
+		if err != nil {
+			return errors.Annotate(err, "parse UInt64 ->[unquote]")
+		}
+
+		*(*uint64)(p), err = strconv.ParseUint(q, 10, 64)
+		if err != nil {
+			return errors.Annotate(err, "parse UInt64 ->[parse]")
+		}
+
+		return nil
+	}
+
+	return errors.Errorf("unable to unmarshal UInt64 from %s", str)
+}
+
+type Float64 float64
+
+func (p *Float64) UnmarshalJSON(s []byte) error {
+	str := string(s)
+
+	if len(str) > 0 && str != "null" {
+		q, err := util.SafeUnquote(str)
+		if err != nil {
+			return errors.Annotate(err, "parse Float64 ->[unquote]")
+		}
+
+		*(*float64)(p), err = strconv.ParseFloat(q, 64)
+		if err != nil {
+			return errors.Annotate(err, "parse Float64 ->[parse]")
+		}
+
+		return nil
+	}
+
+	return errors.Errorf("unable to unmarshal Float64 from %s", str)
 }

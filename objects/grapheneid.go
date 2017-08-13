@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
@@ -12,34 +13,34 @@ const (
 )
 
 type GrapheneID struct {
-	ID         ObjectID
-	SpaceType  SpaceType
-	ObjectType ObjectType
-	Instance   int64
+	id         ObjectID
+	spaceType  SpaceType
+	objectType ObjectType
+	instance   int64
 }
 
 //Id returns the objects ObjectID
 func (p GrapheneID) Id() ObjectID {
-	return p.ID
+	return p.id
 }
 
 //Type returns the objects ObjectType
 func (p GrapheneID) Type() ObjectType {
 	if !p.valid() {
-		if err := p.initFromID(p.ID); err != nil {
+		if err := p.FromString(string(p.id)); err != nil {
 			panic(err.Error())
 		}
 	}
 
-	switch p.SpaceType {
+	switch p.spaceType {
 	case SpaceTypeProtocol:
-		switch p.ObjectType {
+		switch p.objectType {
 		case 1:
-			return ObjectTypeBASE_OBJECT
+			return ObjectTypeBase
 		case 2:
-			return ObjectTypeACCOUNT_OBJECT
+			return ObjectTypeAccount
 		case 3:
-			return ObjectTypeASSET_OBJECT
+			return ObjectTypeAsset
 		case 4:
 			return ObjectTypeFORCE_SETTLEMENT_OBJECT
 		case 5:
@@ -67,7 +68,7 @@ func (p GrapheneID) Type() ObjectType {
 		}
 
 	case SpaceTypeImplementation:
-		switch p.ObjectType {
+		switch p.objectType {
 		case 0:
 			return ObjectTypeGLOBAL_PROPERTY_OBJECT
 		case 1:
@@ -75,7 +76,7 @@ func (p GrapheneID) Type() ObjectType {
 		case 3:
 			return ObjectTypeASSET_DYNAMIC_DATA
 		case 4:
-			return ObjectTypeASSET_BITASSET_DATA
+			return ObjectTypeAssetBitAssetData
 		case 5:
 			return ObjectTypeACCOUNT_BALANCE_OBJECT
 		case 6:
@@ -105,12 +106,12 @@ func (p GrapheneID) Type() ObjectType {
 //NewGrapheneID creates an new GrapheneID object
 func NewGrapheneID(id ObjectID) *GrapheneID {
 	gid := &GrapheneID{
-		ID:        id,
-		SpaceType: SpaceTypeUndefined,
-		Instance:  InstanceUndefined,
+		spaceType:  SpaceTypeUndefined,
+		objectType: ObjectTypeUndefined,
+		instance:   InstanceUndefined,
 	}
 
-	if err := gid.initFromID(gid.ID); err != nil {
+	if err := gid.FromString(string(id)); err != nil {
 		panic(err.Error())
 	}
 
@@ -118,53 +119,52 @@ func NewGrapheneID(id ObjectID) *GrapheneID {
 }
 
 func (p GrapheneID) valid() bool {
-	return p.SpaceType != SpaceTypeUndefined &&
-		p.ObjectType != ObjectTypeUndefined &&
-		p.Instance != InstanceUndefined
+	return p.spaceType != SpaceTypeUndefined &&
+		p.objectType != ObjectTypeUndefined &&
+		p.instance != InstanceUndefined
 }
 
-func (p *GrapheneID) initFromID(id ObjectID) error {
-	parts := strings.Split(string(id), ".")
+func (p *GrapheneID) FromString(in string) error {
+	parts := strings.Split(in, ".")
 
 	if len(parts) == 3 {
-		p.ID = ObjectID(id)
+		p.id = ObjectID(in)
 		space, err := strconv.Atoi(parts[0])
 		if err != nil {
-			return errors.Errorf("unable to parse GrapheneID [space] from %s", id)
+			return errors.Errorf("unable to parse GrapheneID [space] from %s", in)
 		}
 
-		p.SpaceType = SpaceType(space)
+		p.spaceType = SpaceType(space)
 
 		typ, err := strconv.Atoi(parts[1])
 		if err != nil {
-			return errors.Errorf("unable to parse GrapheneID [type] from %s", id)
+			return errors.Errorf("unable to parse GrapheneID [type] from %s", in)
 		}
 
-		p.ObjectType = ObjectType(typ)
+		p.objectType = ObjectType(typ)
 
 		inst, err := strconv.ParseInt(parts[2], 10, 64)
 		if err != nil {
-			return errors.Errorf("unable to parse GrapheneID [instance] from %s", id)
+			return errors.Errorf("unable to parse GrapheneID [instance] from %s", in)
 		}
 
-		p.Instance = inst
+		p.instance = inst
 		return nil
 	}
 
-	return errors.Errorf("unable to parse GrapheneID from %s", id)
+	return errors.Errorf("unable to parse GrapheneID from %s", in)
 }
 
 func (p *GrapheneID) UnmarshalJSON(s []byte) error {
 	str := string(s)
 
 	if len(str) > 0 && str != "null" {
-		q, err := strconv.Unquote(str)
+		q, err := util.SafeUnquote(str)
 		if err != nil {
 			return err
 		}
 
-		p.ID = ObjectID(q)
-		if err := p.initFromID(p.ID); err != nil {
+		if err := p.FromString(q); err != nil {
 			return err
 		}
 

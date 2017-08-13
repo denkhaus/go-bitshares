@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
@@ -17,7 +18,7 @@ func (t *RFC3339Time) UnmarshalJSON(s []byte) error {
 	str := string(s)
 
 	if len(str) > 0 && str != "null" {
-		q, err := strconv.Unquote(str)
+		q, err := util.SafeUnquote(str)
 		if err != nil {
 			return errors.Annotate(err, "unquote")
 		}
@@ -40,6 +41,7 @@ func (t RFC3339Time) Unix() int64 {
 func (t RFC3339Time) ToTime() time.Time {
 	return time.Time(t)
 }
+
 func (t RFC3339Time) String() string {
 	return time.Time(t).String()
 }

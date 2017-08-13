@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-
 	"github.com/denkhaus/bitshares/client"
 	"github.com/juju/errors"
 )
@@ -29,12 +27,4 @@ func New(url string) (*BitsharesApi, error) {
 	}
 
 	return &api, nil
-}
-
-func toBytes(in interface{}) []byte {
-	b, err := json.Marshal(in)
-	if err != nil {
-		panic("toBytes is unable to marshal input")
-	}
-	return b
 }
