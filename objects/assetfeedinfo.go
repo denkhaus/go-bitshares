@@ -1,5 +1,6 @@
 package objects
 
+
 //go:generate ffjson $GOFILE
 
 type AssetFeedInfo struct {

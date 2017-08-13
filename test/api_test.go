@@ -7,7 +7,6 @@ import (
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
-	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -32,6 +31,7 @@ type BitsharesAPITest struct {
 	UserID3         *objects.GrapheneID
 	LimitOrder1     *objects.GrapheneID
 	CallOrder1      *objects.GrapheneID
+	SettleOrder1    *objects.GrapheneID
 }
 
 func (suite *BitsharesAPITest) SetupTest() {
@@ -45,6 +45,7 @@ func (suite *BitsharesAPITest) SetupTest() {
 	suite.BitAssetDataCNY = objects.NewGrapheneID("2.4.13")   //cny bitasset data id
 	suite.LimitOrder1 = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
 	suite.CallOrder1 = objects.NewGrapheneID("1.8.4582")      // random CallOrder ObjectID
+	suite.SettleOrder1 = objects.NewGrapheneID("1.4.1655")    // random SettleOrder ObjectID
 
 	testAPI, err := api.New(testURL)
 	if err != nil {
@@ -89,6 +90,7 @@ func (suite *BitsharesAPITest) Test_GetObjects() {
 		suite.BitAssetDataCNY,
 		suite.LimitOrder1,
 		suite.CallOrder1,
+		suite.SettleOrder1,
 	)
 
 	if err != nil {
@@ -96,7 +98,7 @@ func (suite *BitsharesAPITest) Test_GetObjects() {
 	}
 
 	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 5)
+	assert.Len(suite.T(), res, 6)
 	//util.Dump("objects out", res)
 }
 
@@ -154,7 +156,7 @@ func (suite *BitsharesAPITest) Test_GetSettleOrders() {
 	}
 
 	assert.NotNil(suite.T(), res)
-	util.Dump("settleorders out", res)
+	//util.Dump("settleorders out", res)
 }
 
 func (suite *BitsharesAPITest) Test_ListAssets() {

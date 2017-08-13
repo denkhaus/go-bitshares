@@ -22,7 +22,7 @@ func (p *BitsharesApi) GetCallOrders(assetID *objects.GrapheneID, limit int) ([]
 		return nil, errors.Annotate(err, "get_call_orders")
 	}
 
-	util.Dump("callorders in", resp)
+	//util.Dump("callorders in", resp)
 
 	data := resp.([]interface{})
 	ret := make([]objects.CallOrder, len(data))

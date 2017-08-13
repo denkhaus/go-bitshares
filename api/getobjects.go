@@ -66,6 +66,13 @@ func (p *BitsharesApi) GetObjects(ids ...*objects.GrapheneID) ([]objects.Graphen
 			}
 			ret[idx].Data = cal
 
+		case objects.ObjectTypeFORCE_SETTLEMENT_OBJECT:
+			set := objects.SettleOrder{}
+			if err := ffjson.Unmarshal(b, &set); err != nil {
+				return nil, errors.Annotate(err, "unmarshal SettleOrder")
+			}
+			ret[idx].Data = set
+
 		default:
 			return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", ret[idx].ID.Id())
 		}

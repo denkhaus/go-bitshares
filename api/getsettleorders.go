@@ -22,7 +22,7 @@ func (p *BitsharesApi) GetSettleOrders(assetID *objects.GrapheneID, limit int) (
 		return nil, errors.Annotate(err, "get_settle_orders")
 	}
 
-	util.Dump("settleorders in", resp)
+	//util.Dump("settleorders in", resp)
 
 	data := resp.([]interface{})
 	ret := make([]objects.SettleOrder, len(data))
