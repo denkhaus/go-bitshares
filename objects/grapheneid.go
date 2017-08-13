@@ -42,7 +42,7 @@ func (p GrapheneID) Type() ObjectType {
 		case 3:
 			return ObjectTypeAsset
 		case 4:
-			return ObjectTypeFORCE_SETTLEMENT_OBJECT
+			return ObjectTypeForceSettlement
 		case 5:
 			return ObjectTypeCOMMITTEE_MEMBER_OBJECT
 		case 6:

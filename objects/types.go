@@ -32,7 +32,7 @@ const (
 	ObjectTypeBase      ObjectType = iota
 	ObjectTypeAccount
 	ObjectTypeAsset
-	ObjectTypeFORCE_SETTLEMENT_OBJECT
+	ObjectTypeForceSettlement
 	ObjectTypeCOMMITTEE_MEMBER_OBJECT
 	ObjectTypeWITNESS_OBJECT
 	ObjectTypeLimitOrder
