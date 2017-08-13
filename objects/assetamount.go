@@ -1,15 +1,8 @@
 package objects
 
-import (
-	json "encoding/json"
-	"strconv"
-
-	"github.com/juju/errors"
-)
-
 type AssetAmount struct {
-	Asset  GrapheneID
-	Amount uint64
+	Asset  GrapheneID `json:"asset_id"`
+	Amount UInt64     `json:"amount"`
 }
 
 //Add adds two asset amounts. They must refer to the same Asset type.
@@ -40,26 +33,4 @@ func (p *AssetAmount) Subtract(other AssetAmount) *AssetAmount {
 	}
 
 	return p
-}
-
-func (p *AssetAmount) UnmarshalJSON(data []byte) error {
-	var res map[string]interface{}
-	if err := json.Unmarshal(data, &res); err != nil {
-		return errors.Annotate(err, "unmarshal AssetAmount")
-	}
-
-	p.Asset = *NewGrapheneID(ObjectID(res["asset_id"].(string)))
-
-	if am, ok := res["amount"].(string); ok {
-		amount, err := strconv.ParseUint(am, 10, 64)
-		if err != nil {
-			return errors.Annotate(err, "parse AssetAmount [amount]")
-		}
-
-		p.Amount = amount
-	} else {
-		p.Amount = uint64(res["amount"].(float64))
-	}
-
-	return nil
 }

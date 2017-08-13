@@ -143,7 +143,18 @@ func (suite *BitsharesAPITest) Test_GetCallOrders() {
 	}
 
 	assert.NotNil(suite.T(), res)
-	util.Dump("callorders out", res)
+	//	util.Dump("callorders out", res)
+}
+
+func (suite *BitsharesAPITest) Test_GetSettleOrders() {
+
+	res, err := suite.TestAPI.GetSettleOrders(suite.AssetCNY, 50)
+	if err != nil {
+		suite.T().Error(errors.Annotate(err, "GetSettleOrders"))
+	}
+
+	assert.NotNil(suite.T(), res)
+	util.Dump("settleorders out", res)
 }
 
 func (suite *BitsharesAPITest) Test_ListAssets() {
