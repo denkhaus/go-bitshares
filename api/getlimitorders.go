@@ -22,7 +22,7 @@ func (p *BitsharesApi) GetLimitOrders(base, quote *objects.GrapheneID, limit int
 		return nil, errors.Annotate(err, "get_limit_orders")
 	}
 
-	util.Dump("limitorders in", resp)
+	//util.Dump("limitorders in", resp)
 
 	data := resp.([]interface{})
 	ret := make([]objects.LimitOrder, len(data))

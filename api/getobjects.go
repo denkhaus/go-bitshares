@@ -46,15 +46,28 @@ func (p *BitsharesApi) GetObjects(ids ...*objects.GrapheneID) ([]objects.Graphen
 			ret[idx].Data = acc
 
 		case objects.ObjectTypeAssetBitAssetData:
-
 			bit := objects.BitAssetData{}
 			if err := ffjson.Unmarshal(b, &bit); err != nil {
 				return nil, errors.Annotate(err, "unmarshal BitAssetData")
 			}
 			ret[idx].Data = bit
 
+		case objects.ObjectTypeLimitOrder:
+			lim := objects.LimitOrder{}
+			if err := ffjson.Unmarshal(b, &lim); err != nil {
+				return nil, errors.Annotate(err, "unmarshal LimitOrder")
+			}
+			ret[idx].Data = lim
+
+		case objects.ObjectTypeCallOrder:
+			cal := objects.CallOrder{}
+			if err := ffjson.Unmarshal(b, &cal); err != nil {
+				return nil, errors.Annotate(err, "unmarshal CallOrder")
+			}
+			ret[idx].Data = cal
+
 		default:
-			return nil, errors.New("unable to parse GrapheneObject")
+			return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", ret[idx].ID.Id())
 		}
 	}
 

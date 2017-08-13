@@ -22,28 +22,45 @@ var (
 // returns the current testing context
 type BitsharesAPITest struct {
 	suite.Suite
-	testAPI *api.BitsharesApi
+	TestAPI         *api.BitsharesApi
+	AssetCNY        *objects.GrapheneID
+	AssetBTS        *objects.GrapheneID
+	AssetUSD        *objects.GrapheneID
+	BitAssetDataCNY *objects.GrapheneID
+	UserID1         *objects.GrapheneID
+	UserID2         *objects.GrapheneID
+	UserID3         *objects.GrapheneID
+	LimitOrder1     *objects.GrapheneID
+	CallOrder1      *objects.GrapheneID
 }
 
 func (suite *BitsharesAPITest) SetupTest() {
+
+	suite.UserID1 = objects.NewGrapheneID("1.2.282")          //xeroc user account
+	suite.UserID2 = objects.NewGrapheneID("1.2.253")          //stan user account
+	suite.UserID3 = objects.NewGrapheneID("1.2.0")            //committee-account user account
+	suite.AssetCNY = objects.NewGrapheneID("1.3.113")         //cny asset
+	suite.AssetBTS = objects.NewGrapheneID("1.3.0")           //bts asset
+	suite.AssetUSD = objects.NewGrapheneID("1.3.121")         // usd asset
+	suite.BitAssetDataCNY = objects.NewGrapheneID("2.4.13")   //cny bitasset data id
+	suite.LimitOrder1 = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
+	suite.CallOrder1 = objects.NewGrapheneID("1.8.4582")      // random CallOrder ObjectID
+
 	testAPI, err := api.New(testURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	suite.testAPI = testAPI
+	suite.TestAPI = testAPI
 }
 
 func (suite *BitsharesAPITest) TearDown() {
-	suite.testAPI.Close()
+	suite.TestAPI.Close()
 }
 
 func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 
-	asset := objects.NewGrapheneID("1.3.0")
-	user := objects.NewGrapheneID("1.2.20067")
-
-	res, err := suite.testAPI.GetAccountBalances(user, asset)
+	res, err := suite.TestAPI.GetAccountBalances(suite.UserID2, suite.AssetBTS)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetAccountBalances"))
 	}
@@ -54,8 +71,7 @@ func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 
 func (suite *BitsharesAPITest) Test_GetAccounts() {
 
-	accountID := objects.NewGrapheneID("1.2.0")
-	res, err := suite.testAPI.GetAccounts(accountID)
+	res, err := suite.TestAPI.GetAccounts(suite.UserID3)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetAccounts"))
 	}
@@ -67,23 +83,26 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 
 func (suite *BitsharesAPITest) Test_GetObjects() {
 
-	ID1 := objects.NewGrapheneID("1.2.282") //xeroc user account
-	ID2 := objects.NewGrapheneID("1.3.113") //cny asset
-	ID3 := objects.NewGrapheneID("2.4.13")  //cny bitasset data id
+	res, err := suite.TestAPI.GetObjects(
+		suite.UserID1,
+		suite.AssetCNY,
+		suite.BitAssetDataCNY,
+		suite.LimitOrder1,
+		suite.CallOrder1,
+	)
 
-	res, err := suite.testAPI.GetObjects(ID1, ID2, ID3)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetObjects"))
 	}
 
 	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 3)
+	assert.Len(suite.T(), res, 5)
 	//util.Dump("objects out", res)
 }
 
 func (suite *BitsharesAPITest) Test_GetAccountByName() {
 
-	res, err := suite.testAPI.GetAccountByName("openledger")
+	res, err := suite.TestAPI.GetAccountByName("openledger")
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetAccountByName"))
 	}
@@ -96,7 +115,7 @@ func (suite *BitsharesAPITest) Test_GetTradeHistory() {
 	dtTo := time.Now().UTC()
 	dtFrom := dtTo.Add(-time.Hour)
 
-	res, err := suite.testAPI.GetTradeHistory("CNY", "BTS", dtTo, dtFrom, 50)
+	res, err := suite.TestAPI.GetTradeHistory("CNY", "BTS", dtTo, dtFrom, 50)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetTradeHistory"))
 	}
@@ -107,20 +126,28 @@ func (suite *BitsharesAPITest) Test_GetTradeHistory() {
 
 func (suite *BitsharesAPITest) Test_GetLimitOrders() {
 
-	cny := objects.NewGrapheneID("1.3.113") //cny asset
-	bts := objects.NewGrapheneID("1.3.0")   //bts asset
-
-	res, err := suite.testAPI.GetLimitOrders(cny, bts, 50)
+	res, err := suite.TestAPI.GetLimitOrders(suite.AssetCNY, suite.AssetBTS, 50)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "GetLimitOrders"))
 	}
 
 	assert.NotNil(suite.T(), res)
-	util.Dump("limitorders out", res)
+	//util.Dump("limitorders out", res)
+}
+
+func (suite *BitsharesAPITest) Test_GetCallOrders() {
+
+	res, err := suite.TestAPI.GetCallOrders(suite.AssetUSD, 50)
+	if err != nil {
+		suite.T().Error(errors.Annotate(err, "GetCallOrders"))
+	}
+
+	assert.NotNil(suite.T(), res)
+	util.Dump("callorders out", res)
 }
 
 func (suite *BitsharesAPITest) Test_ListAssets() {
-	res, err := suite.testAPI.ListAssets("HERO", 2)
+	res, err := suite.TestAPI.ListAssets("HERO", 2)
 	if err != nil {
 		suite.T().Error(errors.Annotate(err, "ListAssets"))
 	}

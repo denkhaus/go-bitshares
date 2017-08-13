@@ -1,6 +1,6 @@
 package objects
 
-//go:generate ffjson -force-regenerate $GOFILE
+//go:generate ffjson $GOFILE
 
 type AssetFeedInfo struct {
 	MaintenanceCollateralRatio UInt64 `json:"maintenance_collateral_ratio"`

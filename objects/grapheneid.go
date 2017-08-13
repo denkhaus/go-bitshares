@@ -48,9 +48,9 @@ func (p GrapheneID) Type() ObjectType {
 		case 6:
 			return ObjectTypeWITNESS_OBJECT
 		case 7:
-			return ObjectTypeLIMIT_ORDER_OBJECT
+			return ObjectTypeLimitOrder
 		case 8:
-			return ObjectTypeCALL_ORDER_OBJECT
+			return ObjectTypeCallOrder
 		case 9:
 			return ObjectTypeCUSTOM_OBJECT
 		case 10:

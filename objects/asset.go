@@ -2,7 +2,7 @@ package objects
 
 import "github.com/juju/errors"
 
-//go:generate ffjson -force-regenerate $GOFILE
+//go:generate ffjson $GOFILE
 
 type Asset struct {
 	ID                 GrapheneID   `json:"id"`

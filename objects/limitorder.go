@@ -1,6 +1,6 @@
 package objects
 
-//go:generate ffjson -force-regenerate $GOFILE
+//go:generate ffjson $GOFILE
 
 type LimitOrder struct {
 	ID          GrapheneID  `json:"id"`
