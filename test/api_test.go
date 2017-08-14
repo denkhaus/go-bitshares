@@ -73,6 +73,7 @@ func (suite *BitsharesAPITest) Test_SetSubscribeCallback() {
 
 }
 
+<<<<<<< HEAD
 func (suite *BitsharesAPITest) Test_GetChainID() {
 
 	res, err := suite.TestAPI.GetChainID()
@@ -83,6 +84,8 @@ func (suite *BitsharesAPITest) Test_GetChainID() {
 	assert.Equal(suite.T(), res, suite.ChainIDBitShares)
 }
 
+=======
+>>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 
 	res, err := suite.TestAPI.GetAccountBalances(suite.UserID2, suite.AssetBTS)
