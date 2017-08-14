@@ -7,7 +7,6 @@ import (
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
-	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -21,21 +20,22 @@ var (
 // returns the current testing context
 type BitsharesAPITest struct {
 	suite.Suite
-	TestAPI         *api.BitsharesApi
-	AssetCNY        *objects.GrapheneID
-	AssetBTS        *objects.GrapheneID
-	AssetUSD        *objects.GrapheneID
-	BitAssetDataCNY *objects.GrapheneID
-	UserID1         *objects.GrapheneID
-	UserID2         *objects.GrapheneID
-	UserID3         *objects.GrapheneID
-	LimitOrder1     *objects.GrapheneID
-	CallOrder1      *objects.GrapheneID
-	SettleOrder1    *objects.GrapheneID
+	TestAPI          *api.BitsharesApi
+	AssetCNY         *objects.GrapheneID
+	AssetBTS         *objects.GrapheneID
+	AssetUSD         *objects.GrapheneID
+	BitAssetDataCNY  *objects.GrapheneID
+	UserID1          *objects.GrapheneID
+	UserID2          *objects.GrapheneID
+	UserID3          *objects.GrapheneID
+	LimitOrder1      *objects.GrapheneID
+	CallOrder1       *objects.GrapheneID
+	SettleOrder1     *objects.GrapheneID
+	ChainIDBitShares string
 }
 
 func (suite *BitsharesAPITest) SetupTest() {
-
+	suite.ChainIDBitShares = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
 	suite.UserID1 = objects.NewGrapheneID("1.2.282")          //xeroc user account
 	suite.UserID2 = objects.NewGrapheneID("1.2.253")          //stan user account
 	suite.UserID3 = objects.NewGrapheneID("1.2.0")            //committee-account user account
@@ -59,11 +59,35 @@ func (suite *BitsharesAPITest) TearDown() {
 	suite.TestAPI.Close()
 }
 
+func (suite *BitsharesAPITest) Test_SetSubscribeCallback() {
+
+	/* databaseID, err := suite.TestAPI.DatabaseID()
+	if err != nil {
+		suite.Fail(err.Error(), "SetSubscribeCallback:GetDatabaseID")
+	}
+
+	err = suite.TestAPI.SetSubscribeCallback(databaseID)
+	if err != nil {
+		suite.Fail(err.Error(), "SetSubscribeCallback:SetSubscribeCallback")
+	} */
+
+}
+
+func (suite *BitsharesAPITest) Test_GetChainID() {
+
+	res, err := suite.TestAPI.GetChainID()
+	if err != nil {
+		suite.Fail(err.Error(), "GetChainID")
+	}
+
+	assert.Equal(suite.T(), res, suite.ChainIDBitShares)
+}
+
 func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 
 	res, err := suite.TestAPI.GetAccountBalances(suite.UserID2, suite.AssetBTS)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetAccountBalances"))
+		suite.Fail(err.Error(), "GetAccountBalances")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -74,7 +98,7 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 
 	res, err := suite.TestAPI.GetAccounts(suite.UserID3)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetAccounts"))
+		suite.Fail(err.Error(), "GetAccounts")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -94,7 +118,7 @@ func (suite *BitsharesAPITest) Test_GetObjects() {
 	)
 
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetObjects"))
+		suite.Fail(err.Error(), "GetObjects")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -106,7 +130,7 @@ func (suite *BitsharesAPITest) Test_GetAccountByName() {
 
 	res, err := suite.TestAPI.GetAccountByName("openledger")
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetAccountByName"))
+		suite.Fail(err.Error(), "GetAccountByName")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -119,7 +143,7 @@ func (suite *BitsharesAPITest) Test_GetTradeHistory() {
 
 	res, err := suite.TestAPI.GetTradeHistory("CNY", "BTS", dtTo, dtFrom, 50)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetTradeHistory"))
+		suite.Fail(err.Error(), "GetTradeHistory")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -130,7 +154,7 @@ func (suite *BitsharesAPITest) Test_GetLimitOrders() {
 
 	res, err := suite.TestAPI.GetLimitOrders(suite.AssetCNY, suite.AssetBTS, 50)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetLimitOrders"))
+		suite.Fail(err.Error(), "GetLimitOrders")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -141,7 +165,7 @@ func (suite *BitsharesAPITest) Test_GetCallOrders() {
 
 	res, err := suite.TestAPI.GetCallOrders(suite.AssetUSD, 50)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetCallOrders"))
+		suite.Fail(err.Error(), "GetCallOrders")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -152,7 +176,7 @@ func (suite *BitsharesAPITest) Test_GetSettleOrders() {
 
 	res, err := suite.TestAPI.GetSettleOrders(suite.AssetCNY, 50)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "GetSettleOrders"))
+		suite.Fail(err.Error(), "GetSettleOrders")
 	}
 
 	assert.NotNil(suite.T(), res)
@@ -162,7 +186,7 @@ func (suite *BitsharesAPITest) Test_GetSettleOrders() {
 func (suite *BitsharesAPITest) Test_ListAssets() {
 	res, err := suite.TestAPI.ListAssets("HERO", 2)
 	if err != nil {
-		suite.T().Error(errors.Annotate(err, "ListAssets"))
+		suite.Fail(err.Error(), "ListAssets")
 	}
 
 	assert.NotNil(suite.T(), res)
