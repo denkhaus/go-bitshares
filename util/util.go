@@ -33,6 +33,7 @@ func SafeUnquote(in string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		return q, nil
 	}
 

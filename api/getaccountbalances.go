@@ -7,14 +7,11 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
-//GetAccountBalances retrieves AssetAmount objects by given Account
-func (p *BitsharesApi) GetAccountBalances(account *objects.GrapheneID, assets ...*objects.GrapheneID) ([]objects.AssetAmount, error) {
-	assetIDs := []interface{}{"1.3.0"}
-	for _, asset := range assets {
-		assetIDs = append(assetIDs, asset.Id())
-	}
+//GetAccountBalances retrieves AssetAmount objects by given AccountID
+func (p *BitsharesApi) GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error) {
 
-	resp, err := p.client.CallApi(0, "get_account_balances", account.Id(), assetIDs)
+	ids := objects.GrapheneObjects(assets).ToObjectIDs()
+	resp, err := p.client.CallApi(0, "get_account_balances", account.Id(), ids)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_account_balances")
 	}

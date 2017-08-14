@@ -12,7 +12,7 @@ const (
 )
 
 //GetLimitOrders returns a slice of LimitOrder objects.
-func (p *BitsharesApi) GetLimitOrders(base, quote *objects.GrapheneID, limit int) ([]objects.LimitOrder, error) {
+func (p *BitsharesApi) GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error) {
 	if limit > GetLimitOrdersLimit {
 		limit = GetLimitOrdersLimit
 	}

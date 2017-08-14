@@ -207,6 +207,7 @@ func (p ObjectType) GenericObjectID() string {
 	return fmt.Sprintf("%d.%d.0", p.Space(), p.Type())
 }
 */
+
 type UInt64 uint64
 
 func (p *UInt64) UnmarshalJSON(s []byte) error {

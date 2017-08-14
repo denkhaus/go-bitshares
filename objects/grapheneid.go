@@ -12,6 +12,21 @@ const (
 	InstanceUndefined int64 = -1
 )
 
+type GrapheneObject interface {
+	Id() ObjectID
+	Type() ObjectType
+}
+
+type GrapheneObjects []GrapheneObject
+
+func (p GrapheneObjects) ToObjectIDs() []ObjectID {
+	ids := []ObjectID{}
+	for _, o := range p {
+		ids = append(ids, o.Id())
+	}
+	return ids
+}
+
 type GrapheneID struct {
 	id         ObjectID
 	spaceType  SpaceType
@@ -28,7 +43,7 @@ func (p GrapheneID) Id() ObjectID {
 func (p GrapheneID) Type() ObjectType {
 	if !p.valid() {
 		if err := p.FromString(string(p.id)); err != nil {
-			panic(err.Error())
+			panic(errors.Annotate(err, "from string").Error())
 		}
 	}
 
@@ -118,10 +133,27 @@ func NewGrapheneID(id ObjectID) *GrapheneID {
 	return gid
 }
 
+func (p GrapheneID) String() string {
+	return string(p.Id())
+}
+
 func (p GrapheneID) valid() bool {
 	return p.spaceType != SpaceTypeUndefined &&
 		p.objectType != ObjectTypeUndefined &&
 		p.instance != InstanceUndefined
+}
+
+func (p *GrapheneID) FromRawData(in interface{}) error {
+	o, ok := in.(map[string]interface{})
+	if !ok {
+		return errors.New("input is not map[string]interface{}")
+	}
+
+	if id, ok := o["id"]; ok {
+		return p.FromString(id.(string))
+	}
+
+	return errors.New("input is no graphene object")
 }
 
 func (p *GrapheneID) FromString(in string) error {
@@ -161,11 +193,11 @@ func (p *GrapheneID) UnmarshalJSON(s []byte) error {
 	if len(str) > 0 && str != "null" {
 		q, err := util.SafeUnquote(str)
 		if err != nil {
-			return err
+			return errors.Annotate(err, "safe unquote")
 		}
 
 		if err := p.FromString(q); err != nil {
-			return err
+			return errors.Annotate(err, "from string")
 		}
 
 		return nil

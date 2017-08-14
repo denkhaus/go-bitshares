@@ -12,7 +12,7 @@ const (
 )
 
 //GetSettleOrders returns a slice of SettleOrder objects.
-func (p *BitsharesApi) GetSettleOrders(assetID *objects.GrapheneID, limit int) ([]objects.SettleOrder, error) {
+func (p *BitsharesApi) GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error) {
 	if limit > GetSettleOrdersLimit {
 		limit = GetSettleOrdersLimit
 	}
