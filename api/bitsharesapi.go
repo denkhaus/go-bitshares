@@ -16,10 +16,7 @@ var (
 
 type BitsharesApi struct {
 	client        *client.WSClient
-<<<<<<< HEAD
 	chainConfig   *ChainConfig
-=======
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	username      string
 	password      string
 	databaseApiID int
@@ -34,11 +31,7 @@ func (p *BitsharesApi) getApiID(identifier string) (int, error) {
 		return InvalidApiID, errors.Annotate(err, identifier)
 	}
 
-<<<<<<< HEAD
 	//util.Dump(identifier+" in", resp)
-=======
-	util.Dump(identifier+" in", resp)
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	return int(resp.(float64)), nil
 }
 
@@ -83,34 +76,21 @@ func (p *BitsharesApi) initialize() (err error) {
 
 	p.databaseApiID, err = p.getApiID("database")
 	if err != nil {
-<<<<<<< HEAD
 		return errors.Annotate(err, "get database API ID")
-=======
-		return errors.Annotate(err, "get database API Id")
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	}
 
 	p.historyApiID, err = p.getApiID("history")
 	if err != nil {
-<<<<<<< HEAD
 		return errors.Annotate(err, "get history API ID")
-=======
-		return errors.Annotate(err, "get history API Id")
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	}
 
 	p.networkApiID, err = p.getApiID("network_broadcast")
 	if err != nil {
-<<<<<<< HEAD
 		return errors.Annotate(err, "get network API ID")
-=======
-		return errors.Annotate(err, "get network API Id")
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	}
 
 	p.cryptoApiID, err = p.getApiID("crypto")
 	if err != nil {
-<<<<<<< HEAD
 		return errors.Annotate(err, "get crypto API ID")
 	}
 
@@ -125,11 +105,6 @@ func (p *BitsharesApi) initialize() (err error) {
 	}
 
 	//util.Dump("chain config", p.chainConfig)
-=======
-		return errors.Annotate(err, "get network API Id")
-	}
-
->>>>>>> 90972d81a2199b7398b4ac4858bba2c236601463
 	return nil
 }
 
