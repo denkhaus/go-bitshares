@@ -5,10 +5,10 @@ import (
 )
 
 //GetChainID returns the ID of the chain we are connected to.
-func (p *BitsharesApi) GetChainID() (string, error) {
-	if err := p.ensureInitialized(); err != nil {
+func (p *bitsharesAPI) GetChainID() (string, error) {
+	/* if err := p.ensureInitialized(); err != nil {
 		return "", errors.Annotate(err, "ensure initialized")
-	}
+	} */
 
 	resp, err := p.client.CallApi(p.databaseApiID, "get_chain_id", EmptyParams)
 	if err != nil {

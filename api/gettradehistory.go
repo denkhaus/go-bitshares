@@ -14,7 +14,7 @@ const (
 )
 
 //GetTradeHistory returns MarketTrade object.
-func (p *BitsharesApi) GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error) {
+func (p *bitsharesAPI) GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error) {
 	if limit > GetTradeHistoryLimit {
 		limit = GetTradeHistoryLimit
 	}

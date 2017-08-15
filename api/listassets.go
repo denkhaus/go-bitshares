@@ -16,7 +16,7 @@ const (
 //lowerBoundSymbol: Lower bound of symbol names to retrieve
 //limit: Maximum number of assets to fetch, if the constant AssetsListAll
 //is passed, all existing assets will be retrieved.
-func (p *BitsharesApi) ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error) {
+func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error) {
 
 	lim := limit
 	if limit > AssetsMaxBatchSize || limit == AssetsListAll {

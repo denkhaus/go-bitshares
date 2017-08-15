@@ -8,7 +8,7 @@ import (
 )
 
 //GetAccounts returns a list of accounts by ID.
-func (p *BitsharesApi) GetAccounts(accounts ...objects.GrapheneObject) ([]objects.Account, error) {
+func (p *bitsharesAPI) GetAccounts(accounts ...objects.GrapheneObject) ([]objects.Account, error) {
 
 	ids := objects.GrapheneObjects(accounts).ToObjectIDs()
 	resp, err := p.client.CallApi(0, "get_accounts", ids)

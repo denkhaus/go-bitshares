@@ -12,7 +12,7 @@ const (
 )
 
 //GetCallOrders returns a slice of CallOrder objects.
-func (p *BitsharesApi) GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error) {
+func (p *bitsharesAPI) GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error) {
 	if limit > GetCallOrdersLimit {
 		limit = GetCallOrdersLimit
 	}

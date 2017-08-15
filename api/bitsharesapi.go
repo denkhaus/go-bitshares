@@ -1,8 +1,10 @@
 package api
 
 import (
-	"github.com/denkhaus/bitshares/client"
-	"github.com/denkhaus/bitshares/util"
+	"time"
+
+	"github.com/denkhaus/bitshares/objects"
+	"github.com/denkhaus/bitshares/rpc"
 	"github.com/juju/errors"
 )
 
@@ -14,8 +16,26 @@ var (
 	EmptyParams = []interface{}{}
 )
 
-type BitsharesApi struct {
-	client        *client.WSClient
+type BitsharesAPI interface {
+	Close() error
+	Connect() error
+	SetCredentials(username, password string)
+	Call(apiID int, method string, args ...interface{}) (interface{}, error)
+	SetSubscribeCallback(notifyID int, clearFilter bool) error
+	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
+	GetAccountByName(name string) (*objects.Account, error)
+	GetAccounts(accounts ...objects.GrapheneObject) ([]objects.Account, error)
+	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
+	GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error)
+	GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error)
+	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
+	GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
+	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
+	GetChainID() (string, error)
+}
+
+type bitsharesAPI struct {
+	client        rpc.WebsocketClient
 	chainConfig   *ChainConfig
 	username      string
 	password      string
@@ -25,7 +45,7 @@ type BitsharesApi struct {
 	networkApiID  int
 }
 
-func (p *BitsharesApi) getApiID(identifier string) (int, error) {
+func (p *bitsharesAPI) getApiID(identifier string) (int, error) {
 	resp, err := p.client.CallApi(1, identifier, EmptyParams)
 	if err != nil {
 		return InvalidApiID, errors.Annotate(err, identifier)
@@ -35,7 +55,7 @@ func (p *BitsharesApi) getApiID(identifier string) (int, error) {
 	return int(resp.(float64)), nil
 }
 
-func (p *BitsharesApi) login() (bool, error) {
+func (p *bitsharesAPI) login() (bool, error) {
 	resp, err := p.client.CallApi(1, "login", p.username, p.password)
 	if err != nil {
 		return false, errors.Annotate(err, "login")
@@ -45,28 +65,31 @@ func (p *BitsharesApi) login() (bool, error) {
 	return resp.(bool), nil
 }
 
-func (p *BitsharesApi) ensureInitialized() error {
-	if !p.isInitialized() {
-		return p.initialize()
+func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
+
+	// returns nil
+	_, err := p.client.CallApi(p.databaseApiID, "set_subscribe_callback", notifyID, clearFilter)
+	if err != nil {
+		return errors.Annotate(err, "set_subscribe_callback")
 	}
 
 	return nil
 }
 
-func (p *BitsharesApi) isInitialized() bool {
-	if p.client != nil {
-		if p.databaseApiID != InvalidApiID &&
-			p.networkApiID != InvalidApiID &&
-			p.cryptoApiID != InvalidApiID &&
-			p.historyApiID != InvalidApiID {
-			return true
-		}
-	}
-
-	return false
+func (p *bitsharesAPI) Call(apiID int, method string, args ...interface{}) (interface{}, error) {
+	return p.client.CallApi(apiID, method, args...)
 }
 
-func (p *BitsharesApi) initialize() (err error) {
+func (p *bitsharesAPI) SetCredentials(username, password string) {
+	p.username = username
+	p.password = password
+}
+
+func (p *bitsharesAPI) Connect() (err error) {
+	if err := p.client.Connect(); err != nil {
+		return errors.Annotate(err, "connect")
+	}
+
 	if ok, err := p.login(); err != nil || !ok {
 		if err != nil {
 			return errors.Annotate(err, "login")
@@ -104,43 +127,23 @@ func (p *BitsharesApi) initialize() (err error) {
 		return errors.Annotate(err, "get chain config")
 	}
 
-	//util.Dump("chain config", p.chainConfig)
 	return nil
 }
 
-func (p *BitsharesApi) SetSubscribeCallback(identifier int, clearFilter bool) error {
-	if err := p.ensureInitialized(); err != nil {
-		return errors.Annotate(err, "ensure initialized")
-	}
-
-	resp, err := p.client.CallApi(p.databaseApiID, "set_subscribe_callback", identifier, clearFilter)
-	if err != nil {
-		return errors.Annotate(err, "set_subscribe_callback")
-	}
-
-	util.Dump("set_subscribe_callback in", resp)
-	return nil
-}
-
-func (p *BitsharesApi) SetCredentials(username, password string) {
-	p.username = username
-	p.password = password
-}
-
-func (p *BitsharesApi) Close() {
+func (p *bitsharesAPI) Close() error {
+	var err error
 	if p.client != nil {
-		p.client.Close()
+		err = p.client.Close()
 		p.client = nil
 	}
+
+	return err
 }
 
-func New(url string) (*BitsharesApi, error) {
-	client, err := client.NewWebsocketClient(url)
-	if err != nil {
-		return nil, errors.Annotate(err, "new websocket client")
-	}
+func New(address string) BitsharesAPI {
+	client := rpc.NewWebsocketClient(address)
 
-	api := BitsharesApi{
+	api := bitsharesAPI{
 		client:        client,
 		databaseApiID: InvalidApiID,
 		historyApiID:  InvalidApiID,
@@ -148,5 +151,5 @@ func New(url string) (*BitsharesApi, error) {
 		cryptoApiID:   InvalidApiID,
 	}
 
-	return &api, nil
+	return &api
 }

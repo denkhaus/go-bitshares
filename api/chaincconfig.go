@@ -37,7 +37,7 @@ var (
 	}
 )
 
-func (p *BitsharesApi) GetChainConfig(chainID string) (*ChainConfig, error) {
+func (p *bitsharesAPI) GetChainConfig(chainID string) (*ChainConfig, error) {
 	for _, cnf := range knownNetworks {
 		if cnf["chain_id"] == chainID {
 			return &cnf, nil

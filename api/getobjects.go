@@ -8,7 +8,7 @@ import (
 )
 
 //GetObjects returns a list of Graphene Objects by ID.
-func (p *BitsharesApi) GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error) {
+func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error) {
 
 	params := objects.GrapheneObjects(ids).ToObjectIDs()
 	resp, err := p.client.CallApi(0, "get_objects", params)

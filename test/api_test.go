@@ -1,7 +1,6 @@
 package test
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -18,9 +17,9 @@ var (
 // Define the suite, and absorb the built-in basic suite
 // functionality from testify - including a T() method which
 // returns the current testing context
-type BitsharesAPITest struct {
+type bitsharesAPITest struct {
 	suite.Suite
-	TestAPI          *api.BitsharesApi
+	TestAPI          api.BitsharesAPI
 	AssetCNY         *objects.GrapheneID
 	AssetBTS         *objects.GrapheneID
 	AssetUSD         *objects.GrapheneID
@@ -34,7 +33,7 @@ type BitsharesAPITest struct {
 	ChainIDBitShares string
 }
 
-func (suite *BitsharesAPITest) SetupTest() {
+func (suite *bitsharesAPITest) SetupTest() {
 	suite.ChainIDBitShares = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
 	suite.UserID1 = objects.NewGrapheneID("1.2.282")          //xeroc user account
 	suite.UserID2 = objects.NewGrapheneID("1.2.253")          //stan user account
@@ -47,33 +46,19 @@ func (suite *BitsharesAPITest) SetupTest() {
 	suite.CallOrder1 = objects.NewGrapheneID("1.8.4582")      // random CallOrder ObjectID
 	suite.SettleOrder1 = objects.NewGrapheneID("1.4.1655")    // random SettleOrder ObjectID
 
-	testAPI, err := api.New(testURL)
-	if err != nil {
-		log.Fatal(err)
+	api := api.New(testURL)
+	if err := api.Connect(); err != nil {
+		suite.Fail(err.Error(), "Connect")
 	}
 
-	suite.TestAPI = testAPI
+	suite.TestAPI = api
 }
 
-func (suite *BitsharesAPITest) TearDown() {
+func (suite *bitsharesAPITest) TearDown() {
 	suite.TestAPI.Close()
 }
 
-func (suite *BitsharesAPITest) Test_SetSubscribeCallback() {
-
-	/* databaseID, err := suite.TestAPI.DatabaseID()
-	if err != nil {
-		suite.Fail(err.Error(), "SetSubscribeCallback:GetDatabaseID")
-	}
-
-	err = suite.TestAPI.SetSubscribeCallback(databaseID)
-	if err != nil {
-		suite.Fail(err.Error(), "SetSubscribeCallback:SetSubscribeCallback")
-	} */
-
-}
-
-func (suite *BitsharesAPITest) Test_GetChainID() {
+func (suite *bitsharesAPITest) Test_GetChainID() {
 
 	res, err := suite.TestAPI.GetChainID()
 	if err != nil {
@@ -83,7 +68,7 @@ func (suite *BitsharesAPITest) Test_GetChainID() {
 	assert.Equal(suite.T(), res, suite.ChainIDBitShares)
 }
 
-func (suite *BitsharesAPITest) Test_GetAccountBalances() {
+func (suite *bitsharesAPITest) Test_GetAccountBalances() {
 
 	res, err := suite.TestAPI.GetAccountBalances(suite.UserID2, suite.AssetBTS)
 	if err != nil {
@@ -94,7 +79,7 @@ func (suite *BitsharesAPITest) Test_GetAccountBalances() {
 	//spew.Dump(res)
 }
 
-func (suite *BitsharesAPITest) Test_GetAccounts() {
+func (suite *bitsharesAPITest) Test_GetAccounts() {
 
 	res, err := suite.TestAPI.GetAccounts(suite.UserID3)
 	if err != nil {
@@ -106,7 +91,7 @@ func (suite *BitsharesAPITest) Test_GetAccounts() {
 	//spew.Dump(res)
 }
 
-func (suite *BitsharesAPITest) Test_GetObjects() {
+func (suite *bitsharesAPITest) Test_GetObjects() {
 
 	res, err := suite.TestAPI.GetObjects(
 		suite.UserID1,
@@ -126,7 +111,7 @@ func (suite *BitsharesAPITest) Test_GetObjects() {
 	//util.Dump("objects out", res)
 }
 
-func (suite *BitsharesAPITest) Test_GetAccountByName() {
+func (suite *bitsharesAPITest) Test_GetAccountByName() {
 
 	res, err := suite.TestAPI.GetAccountByName("openledger")
 	if err != nil {
@@ -137,7 +122,7 @@ func (suite *BitsharesAPITest) Test_GetAccountByName() {
 	//util.Dump("accounts out", res)
 }
 
-func (suite *BitsharesAPITest) Test_GetTradeHistory() {
+func (suite *bitsharesAPITest) Test_GetTradeHistory() {
 	dtTo := time.Now().UTC()
 	dtFrom := dtTo.Add(-time.Hour)
 
@@ -150,7 +135,7 @@ func (suite *BitsharesAPITest) Test_GetTradeHistory() {
 	//util.Dump("markettrades out", res)
 }
 
-func (suite *BitsharesAPITest) Test_GetLimitOrders() {
+func (suite *bitsharesAPITest) Test_GetLimitOrders() {
 
 	res, err := suite.TestAPI.GetLimitOrders(suite.AssetCNY, suite.AssetBTS, 50)
 	if err != nil {
@@ -161,7 +146,7 @@ func (suite *BitsharesAPITest) Test_GetLimitOrders() {
 	//util.Dump("limitorders out", res)
 }
 
-func (suite *BitsharesAPITest) Test_GetCallOrders() {
+func (suite *bitsharesAPITest) Test_GetCallOrders() {
 
 	res, err := suite.TestAPI.GetCallOrders(suite.AssetUSD, 50)
 	if err != nil {
@@ -172,7 +157,7 @@ func (suite *BitsharesAPITest) Test_GetCallOrders() {
 	//	util.Dump("callorders out", res)
 }
 
-func (suite *BitsharesAPITest) Test_GetSettleOrders() {
+func (suite *bitsharesAPITest) Test_GetSettleOrders() {
 
 	res, err := suite.TestAPI.GetSettleOrders(suite.AssetCNY, 50)
 	if err != nil {
@@ -183,7 +168,7 @@ func (suite *BitsharesAPITest) Test_GetSettleOrders() {
 	//util.Dump("settleorders out", res)
 }
 
-func (suite *BitsharesAPITest) Test_ListAssets() {
+func (suite *bitsharesAPITest) Test_ListAssets() {
 	res, err := suite.TestAPI.ListAssets("HERO", 2)
 	if err != nil {
 		suite.Fail(err.Error(), "ListAssets")
@@ -197,7 +182,7 @@ func (suite *BitsharesAPITest) Test_ListAssets() {
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func TestBitsharesAPI(t *testing.T) {
-	testSuite := new(BitsharesAPITest)
+	testSuite := new(bitsharesAPITest)
 	suite.Run(t, testSuite)
 	testSuite.TearDown()
 }

@@ -8,7 +8,7 @@ import (
 )
 
 //GetAccountBalances retrieves AssetAmount objects by given AccountID
-func (p *BitsharesApi) GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error) {
+func (p *bitsharesAPI) GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error) {
 
 	ids := objects.GrapheneObjects(assets).ToObjectIDs()
 	resp, err := p.client.CallApi(0, "get_account_balances", account.Id(), ids)
