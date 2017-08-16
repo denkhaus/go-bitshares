@@ -55,7 +55,9 @@ func (suite *bitsharesAPITest) SetupTest() {
 }
 
 func (suite *bitsharesAPITest) TearDown() {
-	suite.TestAPI.Close()
+	if err := suite.TestAPI.Close(); err != nil {
+		suite.Fail(err.Error(), "Close")
+	}
 }
 
 func (suite *bitsharesAPITest) Test_GetChainID() {
