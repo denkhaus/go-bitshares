@@ -19,7 +19,7 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote string, toTime, fromTime time
 		limit = GetTradeHistoryLimit
 	}
 
-	resp, err := p.client.CallApi(0, "get_trade_history", base, quote, toTime, fromTime, limit)
+	resp, err := p.client.CallAPI(0, "get_trade_history", base, quote, toTime, fromTime, limit)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_trade_history")
 	}

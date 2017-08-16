@@ -9,7 +9,7 @@ import (
 
 //GetAccountByName returns a Account object by username.
 func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
-	resp, err := p.client.CallApi(0, "get_account_by_name", name)
+	resp, err := p.client.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_account_by_name")
 	}

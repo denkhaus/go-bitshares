@@ -11,7 +11,7 @@ import (
 func (p *bitsharesAPI) GetAccounts(accounts ...objects.GrapheneObject) ([]objects.Account, error) {
 
 	ids := objects.GrapheneObjects(accounts).ToObjectIDs()
-	resp, err := p.client.CallApi(0, "get_accounts", ids)
+	resp, err := p.client.CallAPI(0, "get_accounts", ids)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_accounts")
 	}

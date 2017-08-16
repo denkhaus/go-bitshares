@@ -10,7 +10,7 @@ func (p *bitsharesAPI) GetChainID() (string, error) {
 		return "", errors.Annotate(err, "ensure initialized")
 	} */
 
-	resp, err := p.client.CallApi(p.databaseApiID, "get_chain_id", EmptyParams)
+	resp, err := p.client.CallAPI(p.databaseApiID, "get_chain_id", EmptyParams)
 	if err != nil {
 		return "", errors.Annotate(err, "get_chain_id")
 	}

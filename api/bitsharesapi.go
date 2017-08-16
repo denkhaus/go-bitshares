@@ -20,7 +20,8 @@ type BitsharesAPI interface {
 	Close() error
 	Connect() error
 	SetCredentials(username, password string)
-	Call(apiID int, method string, args ...interface{}) (interface{}, error)
+	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
+	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
 	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
 	GetAccountByName(name string) (*objects.Account, error)
@@ -46,7 +47,7 @@ type bitsharesAPI struct {
 }
 
 func (p *bitsharesAPI) getApiID(identifier string) (int, error) {
-	resp, err := p.client.CallApi(1, identifier, EmptyParams)
+	resp, err := p.client.CallAPI(1, identifier, EmptyParams)
 	if err != nil {
 		return InvalidApiID, errors.Annotate(err, identifier)
 	}
@@ -56,7 +57,7 @@ func (p *bitsharesAPI) getApiID(identifier string) (int, error) {
 }
 
 func (p *bitsharesAPI) login() (bool, error) {
-	resp, err := p.client.CallApi(1, "login", p.username, p.password)
+	resp, err := p.client.CallAPI(1, "login", p.username, p.password)
 	if err != nil {
 		return false, errors.Annotate(err, "login")
 	}
@@ -67,8 +68,8 @@ func (p *bitsharesAPI) login() (bool, error) {
 
 func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
 
-	// returns nil
-	_, err := p.client.CallApi(p.databaseApiID, "set_subscribe_callback", notifyID, clearFilter)
+	// returns nil if successfull
+	_, err := p.client.CallAPI(p.databaseApiID, "set_subscribe_callback", notifyID, clearFilter)
 	if err != nil {
 		return errors.Annotate(err, "set_subscribe_callback")
 	}
@@ -76,10 +77,15 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 	return nil
 }
 
-func (p *bitsharesAPI) Call(apiID int, method string, args ...interface{}) (interface{}, error) {
-	return p.client.CallApi(apiID, method, args...)
+func (p *bitsharesAPI) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+	return p.client.CallAPI(apiID, method, args...)
 }
 
+func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
+	return p.client.OnNotify(subscriberID, notifyFn)
+}
+
+//SetCredentials defines username and password for login.
 func (p *bitsharesAPI) SetCredentials(username, password string) {
 	p.username = username
 	p.password = password
@@ -130,6 +136,7 @@ func (p *bitsharesAPI) Connect() (err error) {
 	return nil
 }
 
+//Close() shuts the api down and closes the underlying connection.
 func (p *bitsharesAPI) Close() error {
 	var err error
 	if p.client != nil {
@@ -140,8 +147,9 @@ func (p *bitsharesAPI) Close() error {
 	return err
 }
 
-func New(address string) BitsharesAPI {
-	client := rpc.NewWebsocketClient(address)
+//New creates a new BitsharesAPI interface.
+func New(websocketURL string) BitsharesAPI {
+	client := rpc.NewWebsocketClient(websocketURL)
 
 	api := bitsharesAPI{
 		client:        client,

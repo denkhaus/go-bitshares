@@ -23,7 +23,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]objects
 		lim = AssetsMaxBatchSize
 	}
 
-	resp, err := p.client.CallApi(0, "list_assets", lowerBoundSymbol, lim)
+	resp, err := p.client.CallAPI(0, "list_assets", lowerBoundSymbol, lim)
 	if err != nil {
 		return nil, errors.Annotate(err, "list_assets")
 	}

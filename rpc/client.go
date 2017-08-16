@@ -14,48 +14,13 @@ import (
 
 var ErrShutdown = errors.New("connection is shut down")
 
-type WebsocketClient interface {
-	OnError(fn func(error))
-	Call(method string, args interface{}) (*RPCCall, error)
-	CallApi(apiID int, method string, args ...interface{}) (interface{}, error)
-	Close() error
-	Connect() error
-}
-
-type RPCCall struct {
-	Method  string
-	Request RPCRequest
-	Reply   interface{}
-	Error   error
-	Done    chan *RPCCall
-}
-
-func (call *RPCCall) done() {
-	select {
-	case call.Done <- call:
-		// ok
-	default:
-		log.Println("rpc: discarding Call reply due to insufficient Done chan capacity")
-	}
-}
-
-type RPCRequest struct {
-	Method string      `json:"method"`
-	Params interface{} `json:"params"`
-	ID     uint64      `json:"id"`
-}
-
-type RPCResponse struct {
-	ID     uint64      `json:"id"`
-	Result interface{} `json:"result"`
-	Error  interface{} `json:"error"`
-}
-
 type websocketClient struct {
+	*json.Decoder
+	*json.Encoder
 	conn      *websocket.Conn
 	url       string
-	dec       *json.Decoder
-	enc       *json.Encoder
+	resp      RPCResponse
+	notify    RPCNotify
 	onError   func(error)
 	errors    chan error
 	done      chan struct{}
@@ -84,8 +49,8 @@ func (p *websocketClient) Connect() error {
 		return errors.Annotate(err, "dial")
 	}
 
-	p.dec = json.NewDecoder(conn)
-	p.enc = json.NewEncoder(conn)
+	p.Decoder = json.NewDecoder(conn)
+	p.Encoder = json.NewEncoder(conn)
 	p.conn = conn
 
 	go p.monitor()
@@ -116,7 +81,7 @@ func (p *websocketClient) monitor() {
 			if p.onError != nil {
 				p.onError(err)
 			} else {
-				log.Println("rpc error:  ", err)
+				log.Println("rpc error: ", err)
 			}
 		case <-p.done:
 			break
@@ -132,15 +97,16 @@ func (p *websocketClient) handleCustomData(data map[string]interface{}) error {
 func (p *websocketClient) receive() {
 
 	for {
+		//TODO: need a more efficient way to distinguish between RPCResponse and RPCNotify data
 		var data map[string]interface{}
-		if err := p.dec.Decode(&data); err != nil {
+		if err := p.Decode(&data); err != nil {
 			p.errors <- errors.Annotate(err, "decode in")
 			break
 		}
 
-		var resp RPCResponse
 		if isRPCResponse(data) {
-			err := mapstructure.Decode(data, &resp)
+			p.resp.reset()
+			err := mapstructure.Decode(data, &p.resp)
 			if err != nil {
 				p.errors <- errors.Annotate(err, "decode response")
 				break
@@ -148,17 +114,20 @@ func (p *websocketClient) receive() {
 
 			//	util.Dump(">", resp)
 
-			if call, ok := p.pending[resp.ID]; ok {
-				call.Reply = resp.Result
+			if call, ok := p.pending[p.resp.ID]; ok {
+				p.mutex.Lock()
+				delete(p.pending, p.resp.ID)
+				p.mutex.Unlock()
 
-				if resp.Error != nil {
-					call.Error = formatError(resp.Error)
+				call.Reply = p.resp.Result
+				if p.resp.Error != nil {
+					call.Error = formatError(p.resp.Error)
 				}
 
 				call.done()
-				delete(p.pending, resp.ID)
 			} else {
-				log.Println("unhandled response:", resp)
+				p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
+				continue
 			}
 		} else {
 			if err := p.handleCustomData(data); err != nil {
@@ -168,8 +137,7 @@ func (p *websocketClient) receive() {
 		}
 	}
 
-	// Terminate pending calls.
-
+	// Terminate pending calls
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
@@ -178,14 +146,18 @@ func (p *websocketClient) receive() {
 		call.Error = ErrShutdown
 		call.done()
 	}
+}
 
+func (p *websocketClient) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
+
+	return nil
 }
 
 func (p *websocketClient) OnError(fn func(error)) {
 	p.onError = fn
 }
 
-func (p *websocketClient) CallApi(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *websocketClient) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	param := []interface{}{
 		apiID,
 		method,
@@ -222,7 +194,7 @@ func (p *websocketClient) Call(method string, args interface{}) (*RPCCall, error
 
 	//util.Dump(">", call.Request)
 
-	if err := p.enc.Encode(call.Request); err != nil {
+	if err := p.Encode(call.Request); err != nil {
 		p.mutex.Lock()
 		delete(p.pending, call.Request.ID)
 		p.mutex.Unlock()

@@ -17,7 +17,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID objects.GrapheneObject, limit int) 
 		limit = GetCallOrdersLimit
 	}
 
-	resp, err := p.client.CallApi(0, "get_call_orders", assetID.Id(), limit)
+	resp, err := p.client.CallAPI(0, "get_call_orders", assetID.Id(), limit)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_call_orders")
 	}

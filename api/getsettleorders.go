@@ -17,7 +17,7 @@ func (p *bitsharesAPI) GetSettleOrders(assetID objects.GrapheneObject, limit int
 		limit = GetSettleOrdersLimit
 	}
 
-	resp, err := p.client.CallApi(0, "get_settle_orders", assetID.Id(), limit)
+	resp, err := p.client.CallAPI(0, "get_settle_orders", assetID.Id(), limit)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_settle_orders")
 	}

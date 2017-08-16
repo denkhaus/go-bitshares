@@ -11,7 +11,7 @@ import (
 func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error) {
 
 	params := objects.GrapheneObjects(ids).ToObjectIDs()
-	resp, err := p.client.CallApi(0, "get_objects", params)
+	resp, err := p.client.CallAPI(0, "get_objects", params)
 	if err != nil {
 		return nil, errors.Annotate(err, "get_objects")
 	}
