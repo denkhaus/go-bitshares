@@ -50,8 +50,8 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 	timeout := time.Tick(d)
 	test := time.Tick(500 * time.Millisecond)
 	check := make(chan struct{}, 1)
-	done := make(chan struct{}, 1)
 	defer close(check)
+	done := make(chan struct{}, 1)
 	defer close(done)
 
 	go func() {
@@ -62,6 +62,7 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 			case <-test:
 				if testFn() {
 					check <- struct{}{}
+					return
 				}
 			}
 		}
@@ -70,7 +71,6 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 	for {
 		select {
 		case <-check:
-			done <- struct{}{}
 			return true
 		case <-timeout:
 			done <- struct{}{}
@@ -78,21 +78,3 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 		}
 	}
 }
-
-//WaitForCondition is a testify Condition for timeout based testing
-/* func WaitForCondition(d time.Duration, fn func() bool) bool {
-	check := time.Tick(500 * time.Millisecond)
-	timeout := time.Tick(d)
-
-	for {
-		select {
-		case <-check:
-			if fn() {
-				return true
-			}
-		case <-timeout:
-			return false
-		}
-	}
-}
-*/
