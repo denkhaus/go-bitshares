@@ -19,16 +19,24 @@ var (
 type BitsharesAPI interface {
 	Close() error
 	Connect() error
+	DatabaseApiID() int
+	CryptoApiID() int
+	HistoryApiID() int
+	NetworkApiID() int
 	SetCredentials(username, password string)
+	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
+	CancelAllSubscriptions() error
+	SubscribeToMarket(notifyID int, base objects.GrapheneObject, quote objects.GrapheneObject) error
+	UnsubscribeFromMarket(base objects.GrapheneObject, quote objects.GrapheneObject) error
 	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
 	GetAccountByName(name string) (*objects.Account, error)
-	GetAccounts(accounts ...objects.GrapheneObject) ([]objects.Account, error)
+	GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error)
 	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
 	GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error)
-	GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error)
+	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
 	GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
 	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
@@ -44,6 +52,22 @@ type bitsharesAPI struct {
 	historyApiID  int
 	cryptoApiID   int
 	networkApiID  int
+}
+
+func (p *bitsharesAPI) DatabaseApiID() int {
+	return p.databaseApiID
+}
+
+func (p *bitsharesAPI) NetworkApiID() int {
+	return p.networkApiID
+}
+
+func (p *bitsharesAPI) HistoryApiID() int {
+	return p.historyApiID
+}
+
+func (p *bitsharesAPI) CryptoApiID() int {
+	return p.cryptoApiID
 }
 
 func (p *bitsharesAPI) getApiID(identifier string) (int, error) {
@@ -77,12 +101,27 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 	return nil
 }
 
+func (p *bitsharesAPI) CancelAllSubscriptions() error {
+
+	// returns nil
+	_, err := p.client.CallAPI(p.databaseApiID, "cancel_all_subscriptions", EmptyParams)
+	if err != nil {
+		return errors.Annotate(err, "cancel_all_subscriptions")
+	}
+	
+	return nil
+}
+
 func (p *bitsharesAPI) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	return p.client.CallAPI(apiID, method, args...)
 }
 
 func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
 	return p.client.OnNotify(subscriberID, notifyFn)
+}
+
+func (p *bitsharesAPI) OnError(errorFn func(err error)) {
+	p.client.OnError(errorFn)
 }
 
 //SetCredentials defines username and password for login.
@@ -148,8 +187,8 @@ func (p *bitsharesAPI) Close() error {
 }
 
 //New creates a new BitsharesAPI interface.
-func New(websocketURL string) BitsharesAPI {
-	client := rpc.NewWebsocketClient(websocketURL)
+func New(endpointURL string) BitsharesAPI {
+	client := rpc.NewWebsocketClient(endpointURL)
 
 	api := bitsharesAPI{
 		client:        client,

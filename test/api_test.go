@@ -6,7 +6,6 @@ import (
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -51,6 +50,10 @@ func (suite *bitsharesAPITest) SetupTest() {
 		suite.Fail(err.Error(), "Connect")
 	}
 
+	api.OnError(func(err error) {
+		suite.Fail(err.Error(), "OnError")
+	})
+
 	suite.TestAPI = api
 }
 
@@ -67,7 +70,7 @@ func (suite *bitsharesAPITest) Test_GetChainID() {
 		suite.Fail(err.Error(), "GetChainID")
 	}
 
-	assert.Equal(suite.T(), res, suite.ChainIDBitShares)
+	suite.Equal(res, suite.ChainIDBitShares)
 }
 
 func (suite *bitsharesAPITest) Test_GetAccountBalances() {
@@ -77,7 +80,7 @@ func (suite *bitsharesAPITest) Test_GetAccountBalances() {
 		suite.Fail(err.Error(), "GetAccountBalances")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//spew.Dump(res)
 }
 
@@ -88,8 +91,8 @@ func (suite *bitsharesAPITest) Test_GetAccounts() {
 		suite.Fail(err.Error(), "GetAccounts")
 	}
 
-	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 1)
+	suite.NotNil(res)
+	suite.Len(res, 1)
 	//spew.Dump(res)
 }
 
@@ -108,8 +111,8 @@ func (suite *bitsharesAPITest) Test_GetObjects() {
 		suite.Fail(err.Error(), "GetObjects")
 	}
 
-	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 6)
+	suite.NotNil(res)
+	suite.Len(res, 6)
 	//util.Dump("objects out", res)
 }
 
@@ -120,7 +123,7 @@ func (suite *bitsharesAPITest) Test_GetAccountByName() {
 		suite.Fail(err.Error(), "GetAccountByName")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//util.Dump("accounts out", res)
 }
 
@@ -133,7 +136,7 @@ func (suite *bitsharesAPITest) Test_GetTradeHistory() {
 		suite.Fail(err.Error(), "GetTradeHistory")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//util.Dump("markettrades out", res)
 }
 
@@ -144,7 +147,7 @@ func (suite *bitsharesAPITest) Test_GetLimitOrders() {
 		suite.Fail(err.Error(), "GetLimitOrders")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//util.Dump("limitorders out", res)
 }
 
@@ -155,7 +158,7 @@ func (suite *bitsharesAPITest) Test_GetCallOrders() {
 		suite.Fail(err.Error(), "GetCallOrders")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//	util.Dump("callorders out", res)
 }
 
@@ -166,7 +169,7 @@ func (suite *bitsharesAPITest) Test_GetSettleOrders() {
 		suite.Fail(err.Error(), "GetSettleOrders")
 	}
 
-	assert.NotNil(suite.T(), res)
+	suite.NotNil(res)
 	//util.Dump("settleorders out", res)
 }
 
@@ -176,13 +179,11 @@ func (suite *bitsharesAPITest) Test_ListAssets() {
 		suite.Fail(err.Error(), "ListAssets")
 	}
 
-	assert.NotNil(suite.T(), res)
-	assert.Len(suite.T(), res, 2)
+	suite.NotNil(res)
+	suite.Len(res, 2)
 	//util.Dump("assets out", res)
 }
 
-// In order for 'go test' to run this suite, we need to create
-// a normal test function and pass our suite to suite.Run
 func TestBitsharesAPI(t *testing.T) {
 	testSuite := new(bitsharesAPITest)
 	suite.Run(t, testSuite)

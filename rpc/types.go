@@ -2,9 +2,12 @@ package rpc
 
 import "log"
 
+type NotifyFunc func(msg interface{}) error
+type ErrorFunc func(error)
+
 type WebsocketClient interface {
-	OnError(fn func(error))
-	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
+	OnError(fn ErrorFunc)
+	OnNotify(subscriberID int, fn NotifyFunc) error
 	Call(method string, args interface{}) (*RPCCall, error)
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
@@ -40,6 +43,17 @@ type RPCResponse struct {
 	Error  interface{} `json:"error"`
 }
 
+func (p RPCResponse) Is(in interface{}) bool {
+	if data, ok := in.(map[string]interface{}); ok {
+		if _, ok := data["id"]; ok {
+			if _, ok := data["result"]; ok {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (p *RPCResponse) reset() {
 	p.ID = 0
 	p.Error = nil
@@ -49,6 +63,17 @@ func (p *RPCResponse) reset() {
 type RPCNotify struct {
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
+}
+
+func (p RPCNotify) Is(in interface{}) bool {
+	if data, ok := in.(map[string]interface{}); ok {
+		if _, ok := data["method"]; ok {
+			if _, ok := data["params"]; ok {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (p *RPCNotify) reset() {

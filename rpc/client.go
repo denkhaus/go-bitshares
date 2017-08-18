@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
-	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/net/websocket"
@@ -14,36 +14,39 @@ import (
 
 var ErrShutdown = errors.New("connection is shut down")
 
-type websocketClient struct {
+type wsClient struct {
 	*json.Decoder
 	*json.Encoder
-	conn      *websocket.Conn
-	url       string
-	resp      RPCResponse
-	notify    RPCNotify
-	onError   func(error)
-	errors    chan error
-	done      chan struct{}
-	closing   bool
-	shutdown  bool
-	mutex     sync.Mutex // protects the following
-	currentID uint64
-	pending   map[uint64]*RPCCall
+	conn        *websocket.Conn
+	url         string
+	resp        RPCResponse // unmarshal target
+	notify      RPCNotify   // unmarshal target
+	onError     ErrorFunc
+	errors      chan error
+	done        chan struct{}
+	closing     bool
+	shutdown    bool
+	currentID   uint64
+	mutex       sync.Mutex // protects the following
+	pending     map[uint64]*RPCCall
+	mutexNotify sync.Mutex // protects the following
+	notifyFns   map[int]NotifyFunc
 }
 
-func NewWebsocketClient(url string) WebsocketClient {
-	cli := websocketClient{
+func NewWebsocketClient(endpointURL string) WebsocketClient {
+	cli := wsClient{
 		pending:   make(map[uint64]*RPCCall),
 		errors:    make(chan error, 10),
+		notifyFns: make(map[int]NotifyFunc),
 		done:      make(chan struct{}, 1),
 		currentID: 1,
-		url:       url,
+		url:       endpointURL,
 	}
 
 	return &cli
 }
 
-func (p *websocketClient) Connect() error {
+func (p *wsClient) Connect() error {
 	conn, err := websocket.Dial(p.url, "", "http://localhost/")
 	if err != nil {
 		return errors.Annotate(err, "dial")
@@ -59,7 +62,7 @@ func (p *websocketClient) Connect() error {
 	return nil
 }
 
-func (p *websocketClient) Close() error {
+func (p *wsClient) Close() error {
 	if p.conn != nil {
 		p.closing = true
 		if err := p.conn.Close(); err != nil {
@@ -74,7 +77,7 @@ func (p *websocketClient) Close() error {
 	return nil
 }
 
-func (p *websocketClient) monitor() {
+func (p *wsClient) monitor() {
 	for {
 		select {
 		case err := <-p.errors:
@@ -89,48 +92,78 @@ func (p *websocketClient) monitor() {
 	}
 }
 
-func (p *websocketClient) handleCustomData(data map[string]interface{}) error {
-	util.Dump("custom >", data)
+func (p *wsClient) handleCustomData(data map[string]interface{}) error {
+	//	util.Dump("custom data >", data)
+
+	switch {
+	case p.notify.Is(data):
+		p.notify.reset()
+		err := mapstructure.Decode(data, &p.notify)
+		if err != nil {
+			return errors.Annotate(err, "decode notify")
+		}
+
+		params := p.notify.Params.([]interface{})
+		subscriberID := int(params[0].(float64))
+
+		var fn NotifyFunc
+		p.mutexNotify.Lock()
+		fn = p.notifyFns[subscriberID]
+		p.mutexNotify.Unlock()
+
+		if fn != nil {
+			if err := fn(params[1]); err != nil {
+				return errors.Annotate(err, "handle notify")
+			}
+		}
+	default:
+		return errors.Errorf("unhandled custom data: %v", data)
+	}
+
 	return nil
 }
 
-func (p *websocketClient) receive() {
+func (p *wsClient) receive() {
 
+loop:
 	for {
-		//TODO: need a more efficient way to distinguish between RPCResponse and RPCNotify data
-		var data map[string]interface{}
-		if err := p.Decode(&data); err != nil {
-			p.errors <- errors.Annotate(err, "decode in")
-			break
-		}
-
-		if isRPCResponse(data) {
-			p.resp.reset()
-			err := mapstructure.Decode(data, &p.resp)
-			if err != nil {
-				p.errors <- errors.Annotate(err, "decode response")
+		select {
+		case <-p.done:
+			break loop
+		default:
+			//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
+			var data map[string]interface{}
+			if err := p.Decode(&data); err != nil {
+				p.errors <- errors.Annotate(err, "decode in")
 				break
 			}
 
-			//	util.Dump(">", resp)
-
-			if call, ok := p.pending[p.resp.ID]; ok {
-				p.mutex.Lock()
-				delete(p.pending, p.resp.ID)
-				p.mutex.Unlock()
-
-				call.Reply = p.resp.Result
-				if p.resp.Error != nil {
-					call.Error = formatError(p.resp.Error)
+			if p.resp.Is(data) {
+				p.resp.reset()
+				err := mapstructure.Decode(data, &p.resp)
+				if err != nil {
+					p.errors <- errors.Annotate(err, "decode response")
+					break
 				}
 
-				call.done()
-			} else {
-				p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
-				continue
-			}
-		} else {
-			if err := p.handleCustomData(data); err != nil {
+				//	util.Dump(">", p.resp)
+
+				if call, ok := p.pending[p.resp.ID]; ok {
+					p.mutex.Lock()
+					delete(p.pending, p.resp.ID)
+					p.mutex.Unlock()
+
+					call.Reply = p.resp.Result
+					if p.resp.Error != nil {
+						call.Error = formatError(p.resp.Error)
+					}
+
+					call.done()
+				} else {
+					p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
+					continue
+				}
+			} else if err := p.handleCustomData(data); err != nil {
 				p.errors <- errors.Annotate(err, "handle custom data")
 				continue
 			}
@@ -148,16 +181,23 @@ func (p *websocketClient) receive() {
 	}
 }
 
-func (p *websocketClient) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
+func (p *wsClient) OnNotify(subscriberID int, fn NotifyFunc) error {
+	if _, ok := p.notifyFns[subscriberID]; ok {
+		return errors.Errorf("a notify hook for subscriberID %d is already defined", subscriberID)
+	}
+
+	p.mutexNotify.Lock()
+	p.notifyFns[subscriberID] = fn
+	p.mutexNotify.Unlock()
 
 	return nil
 }
 
-func (p *websocketClient) OnError(fn func(error)) {
+func (p *wsClient) OnError(fn ErrorFunc) {
 	p.onError = fn
 }
 
-func (p *websocketClient) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	param := []interface{}{
 		apiID,
 		method,
@@ -173,7 +213,7 @@ func (p *websocketClient) CallAPI(apiID int, method string, args ...interface{})
 	return call.Reply, call.Error
 }
 
-func (p *websocketClient) Call(method string, args interface{}) (*RPCCall, error) {
+func (p *wsClient) Call(method string, args interface{}) (*RPCCall, error) {
 	if p.shutdown || p.closing {
 		return nil, ErrShutdown
 	}
@@ -193,6 +233,10 @@ func (p *websocketClient) Call(method string, args interface{}) (*RPCCall, error
 	p.mutex.Unlock()
 
 	//util.Dump(">", call.Request)
+
+	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
+		return nil, errors.Annotate(err, "set write deadline")
+	}
 
 	if err := p.Encode(call.Request); err != nil {
 		p.mutex.Lock()
@@ -216,13 +260,4 @@ func formatError(err interface{}) error {
 	}
 
 	return fmt.Errorf("server error: %s", e)
-}
-
-func isRPCResponse(data map[string]interface{}) bool {
-	if _, ok := data["id"]; ok {
-		if _, ok := data["result"]; ok {
-			return true
-		}
-	}
-	return false
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -39,3 +40,59 @@ func SafeUnquote(in string) (string, error) {
 
 	return in, nil
 }
+
+//WaitForCondition is a testify Condition for timeout based testing
+func WaitForCondition(d time.Duration, testFn func() bool) bool {
+	if d < time.Second {
+		panic("WaitForCondition: test duration to small")
+	}
+
+	timeout := time.Tick(d)
+	test := time.Tick(500 * time.Millisecond)
+	check := make(chan struct{}, 1)
+	done := make(chan struct{}, 1)
+	defer close(check)
+	defer close(done)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-test:
+				if testFn() {
+					check <- struct{}{}
+				}
+			}
+		}
+	}()
+
+	for {
+		select {
+		case <-check:
+			done <- struct{}{}
+			return true
+		case <-timeout:
+			done <- struct{}{}
+			return false
+		}
+	}
+}
+
+//WaitForCondition is a testify Condition for timeout based testing
+/* func WaitForCondition(d time.Duration, fn func() bool) bool {
+	check := time.Tick(500 * time.Millisecond)
+	timeout := time.Tick(d)
+
+	for {
+		select {
+		case <-check:
+			if fn() {
+				return true
+			}
+		case <-timeout:
+			return false
+		}
+	}
+}
+*/
