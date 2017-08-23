@@ -1,7 +1,7 @@
 package objects
 
 // TODO: rename
-const (
+/* const (
 	AssetFlagCHARGE_MARKET_FEE    = 0x01
 	AssetFlagWHITE_LIST           = 0x02
 	AssetFlagOVERRIDE_AUTHORITY   = 0x04
@@ -12,7 +12,7 @@ const (
 	AssetFlagWITNESS_FED_ASSET    = 0x80
 	AssetFlagCOMITEE_FED_ASSET    = 0x100
 )
-
+*/
 type AssetOptions struct {
 	MaxSupply            UInt64        `json:"max_supply"`
 	MaxMarketFee         UInt64        `json:"max_market_fee"`
@@ -25,5 +25,5 @@ type AssetOptions struct {
 	WhitelistAuthorities []interface{} `json:"whitelist_authorities"`
 	BlacklistMarkets     []interface{} `json:"blacklist_markets"`
 	WhitelistMarkets     []interface{} `json:"whitelist_markets"`
-	Extensions           []interface{} `json:"extensions"`
+	Extensions           Extensions    `json:"extensions"`
 }

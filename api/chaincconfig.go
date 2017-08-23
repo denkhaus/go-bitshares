@@ -1,7 +1,5 @@
 package api
 
-type ChainConfig map[string]interface{}
-
 var (
 	knownNetworks = []ChainConfig{
 		ChainConfig{
@@ -36,6 +34,15 @@ var (
 		},
 	}
 )
+
+type ChainConfig map[string]interface{}
+
+func (p ChainConfig) Id() string {
+	if id, ok := p["chain_id"]; ok {
+		return id.(string)
+	}
+	return ""
+}
 
 func (p *bitsharesAPI) GetChainConfig(chainID string) (*ChainConfig, error) {
 	for _, cnf := range knownNetworks {

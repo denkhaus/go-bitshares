@@ -1,14 +1,16 @@
 package objects
 
 import (
+	"encoding/json"
 	"strconv"
+	"time"
 
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
-type SpaceType int
 type ObjectID string
+
 type AssetType int
 
 const (
@@ -19,13 +21,64 @@ const (
 	AssetTypePredictionMarket
 )
 
-type ObjectType int
+type SpaceType Int32
 
 const (
 	SpaceTypeUndefined SpaceType = -1
 	SpaceTypeProtocol  SpaceType = iota
 	SpaceTypeImplementation
 )
+
+type OperationType Int8
+
+const (
+	OperationTypeTransfer OperationType = iota
+	OperationTypeLimitOrderCreate
+	OperationTypeLimitOrderCancel
+	OperationTypeCALL_ORDER_UPDATE_OPERATION
+	OperationTypeFILL_ORDER_OPERATION
+	OperationTypeACCOUNT_CREATE_OPERATION
+	OperationTypeACCOUNT_UPDATE_OPERATION
+	OperationTypeACCOUNT_WHITELIST_OPERATION
+	OperationTypeACCOUNT_UPGRADE_OPERATION
+	OperationTypeACCOUNT_TRANSFER_OPERATION
+	OperationTypeASSET_CREATE_OPERATION
+	OperationTypeASSET_UPDATE_OPERATION
+	OperationTypeASSET_UPDATE_BITASSET_OPERATION
+	OperationTypeASSET_UPDATE_FEED_PRODUCERS_OPERATION
+	OperationTypeASSET_ISSUE_OPERATION
+	OperationTypeASSET_RESERVE_OPERATION
+	OperationTypeASSET_FUND_FEE_POOL_OPERATION
+	OperationTypeASSET_SETTLE_OPERATION
+	OperationTypeASSET_GLOBAL_SETTLE_OPERATION
+	OperationTypeASSET_PUBLISH_FEED_OPERATION
+	OperationTypeWITNESS_CREATE_OPERATION
+	OperationTypeWITNESS_UPDATE_OPERATION
+	OperationTypePROPOSAL_CREATE_OPERATION
+	OperationTypePROPOSAL_UPDATE_OPERATION
+	OperationTypePROPOSAL_DELETE_OPERATION
+	OperationTypeWITHDRAW_PERMISSION_CREATE_OPERATION
+	OperationTypeWITHDRAW_PERMISSION_UPDATE_OPERATION
+	OperationTypeWITHDRAW_PERMISSION_CLAIM_OPERATION
+	OperationTypeWITHDRAW_PERMISSION_DELETE_OPERATION
+	OperationTypeCOMMITTEE_MEMBER_CREATE_OPERATION
+	OperationTypeCOMMITTEE_MEMBER_UPDATE_OPERATION
+	OperationTypeCOMMITTEE_MEMBER_UPDATE_GLOBAL_PARAMETERS_OPERATION
+	OperationTypeVESTING_BALANCE_CREATE_OPERATION
+	OperationTypeVESTING_BALANCE_WITHDRAW_OPERATION
+	OperationTypeWORKER_CREATE_OPERATION
+	OperationTypeCUSTOM_OPERATION
+	OperationTypeASSERT_OPERATION
+	OperationTypeBALANCE_CLAIM_OPERATION
+	OperationTypeOVERRIDE_TRANSFER_OPERATION
+	OperationTypeTRANSFER_TO_BLIND_OPERATION
+	OperationTypeBLIND_TRANSFER_OPERATION
+	OperationTypeTRANSFER_FROM_BLIND_OPERATION
+	OperationTypeASSET_SETTLE_CANCEL_OPERATION
+	OperationTypeASSET_CLAIM_FEES_OPERATION
+)
+
+type ObjectType Int32
 
 const (
 	ObjectTypeUndefined ObjectType = -1
@@ -60,194 +113,221 @@ const (
 	ObjectTypeSPECIAL_AUTHORITY_OBJECT
 )
 
-/* func (p ObjectType) Space() SpaceType {
-
-	switch p {
-	case ObjectTypeBase:
-	case ObjectTypeAccount:
-	case ObjectTypeAsset:
-	case ObjectTypeFORCE_SETTLEMENT_OBJECT:
-	case ObjectTypeCOMMITTEE_MEMBER_OBJECT:
-	case ObjectTypeWITNESS_OBJECT:
-	case ObjectTypeLIMIT_ORDER_OBJECT:
-	case ObjectTypeCALL_ORDER_OBJECT:
-	case ObjectTypeCUSTOM_OBJECT:
-	case ObjectTypePROPOSAL_OBJECT:
-	case ObjectTypeOPERATION_HISTORY_OBJECT:
-	case ObjectTypeWITHDRAW_PERMISSION_OBJECT:
-	case ObjectTypeVESTING_BALANCE_OBJECT:
-	case ObjectTypeWORKER_OBJECT:
-	case ObjectTypeBALANCE_OBJECT:
-		return SpaceTypeProtocol
-
-	case ObjectTypeGLOBAL_PROPERTY_OBJECT:
-	case ObjectTypeDYNAMIC_GLOBAL_PROPERTY_OBJECT:
-	case ObjectTypeASSET_DYNAMIC_DATA:
-	case ObjectTypeAssetBitAssetData:
-	case ObjectTypeACCOUNT_BALANCE_OBJECT:
-	case ObjectTypeACCOUNT_STATISTICS_OBJECT:
-	case ObjectTypeTRANSACTION_OBJECT:
-	case ObjectTypeBLOCK_SUMMARY_OBJECT:
-	case ObjectTypeACCOUNT_TRANSACTION_HISTORY_OBJECT:
-	case ObjectTypeBLINDED_BALANCE_OBJECT:
-	case ObjectTypeCHAIN_PROPERTY_OBJECT:
-	case ObjectTypeWITNESS_SCHEDULE_OBJECT:
-	case ObjectTypeBUDGET_RECORD_OBJECT:
-	case ObjectTypeSPECIAL_AUTHORITY_OBJECT:
-		return SpaceTypeImplementation
+func unmarshalUInt(data []byte) (uint64, error) {
+	if len(data) == 0 {
+		return 0, errors.New("unmarshalUInt: empty input")
 	}
 
-	return SpaceTypeUndefined
-}
+	var (
+		res uint64
+		err error
+		len = len(data)
+	)
 
-func (p ObjectType) Type() int {
-	var typ = 0
-
-	switch p {
-	case ObjectTypeBase:
-		typ = 1
-		break
-	case ObjectTypeAccount:
-		typ = 2
-		break
-	case ObjectTypeAsset:
-		typ = 3
-		break
-	case ObjectTypeFORCE_SETTLEMENT_OBJECT:
-		typ = 4
-		break
-	case ObjectTypeCOMMITTEE_MEMBER_OBJECT:
-		typ = 5
-		break
-	case ObjectTypeWITNESS_OBJECT:
-		typ = 6
-		break
-	case ObjectTypeLIMIT_ORDER_OBJECT:
-		typ = 7
-		break
-	case ObjectTypeCALL_ORDER_OBJECT:
-		typ = 8
-		break
-	case ObjectTypeCUSTOM_OBJECT:
-		typ = 9
-		break
-	case ObjectTypePROPOSAL_OBJECT:
-		typ = 10
-		break
-	case ObjectTypeOPERATION_HISTORY_OBJECT:
-		typ = 11
-		break
-	case ObjectTypeWITHDRAW_PERMISSION_OBJECT:
-		typ = 12
-		break
-	case ObjectTypeVESTING_BALANCE_OBJECT:
-		typ = 13
-		break
-	case ObjectTypeWORKER_OBJECT:
-		typ = 14
-		break
-	case ObjectTypeBALANCE_OBJECT:
-		typ = 15
-		break
-	case ObjectTypeGLOBAL_PROPERTY_OBJECT:
-		typ = 0
-		break
-	case ObjectTypeDYNAMIC_GLOBAL_PROPERTY_OBJECT:
-		typ = 1
-		break
-	case ObjectTypeASSET_DYNAMIC_DATA:
-		typ = 3
-		break
-	case ObjectTypeAssetBitAssetData:
-		typ = 4
-		break
-	case ObjectTypeACCOUNT_BALANCE_OBJECT:
-		typ = 5
-		break
-	case ObjectTypeACCOUNT_STATISTICS_OBJECT:
-		typ = 6
-		break
-	case ObjectTypeTRANSACTION_OBJECT:
-		typ = 7
-		break
-	case ObjectTypeBLOCK_SUMMARY_OBJECT:
-		typ = 8
-		break
-	case ObjectTypeACCOUNT_TRANSACTION_HISTORY_OBJECT:
-		typ = 9
-		break
-	case ObjectTypeBLINDED_BALANCE_OBJECT:
-		typ = 10
-		break
-	case ObjectTypeCHAIN_PROPERTY_OBJECT:
-		typ = 11
-		break
-	case ObjectTypeWITNESS_SCHEDULE_OBJECT:
-		typ = 12
-		break
-	case ObjectTypeBUDGET_RECORD_OBJECT:
-		typ = 13
-		break
-	case ObjectTypeSPECIAL_AUTHORITY_OBJECT:
-		typ = 14
+	if data[0] == '"' && data[len-1] == '"' {
+		data := data[1 : len-1]
+		res, err = strconv.ParseUint(string(data), 10, 64)
+		if err != nil {
+			return 0, errors.Errorf("unmarshalUInt: unable to parse input %v", data)
+		}
+	} else if err := json.Unmarshal(data, &res); err != nil {
+		return 0, errors.Errorf("unmarshalUInt: unable to unmarshal input %v", data)
 	}
 
-	return typ
+	return res, nil
 }
-*/
-//GenericObjectID is used to return the generic object type in the form space.type.0.
-//
-// Not to be confused with {@link GrapheneObject#getObjectId()}, which will return
-// the full object id in the form space.type.id.
-//
-// @return: The generic object type
-//
-/*
-func (p ObjectType) GenericObjectID() string {
-	return fmt.Sprintf("%d.%d.0", p.Space(), p.Type())
+
+func unmarshalInt(data []byte) (int64, error) {
+	if len(data) == 0 {
+		return 0, errors.New("unmarshalInt: empty input")
+	}
+
+	var (
+		res int64
+		err error
+		len = len(data)
+	)
+
+	if data[0] == '"' && data[len-1] == '"' {
+		data := data[1 : len-1]
+		res, err = strconv.ParseInt(string(data), 10, 64)
+		if err != nil {
+			return 0, errors.Errorf("unmarshalInt: unable to parse input %v", data)
+		}
+	} else if err := json.Unmarshal(data, &res); err != nil {
+		return 0, errors.Errorf("unmarshalInt: unable to unmarshal input %v", data)
+	}
+
+	return res, nil
 }
-*/
+
+type UInt uint
+
+func (num *UInt) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalUInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = UInt(v)
+	return nil
+}
+
+func (num UInt) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(uint(num))
+}
+
+type UInt8 uint8
+
+func (num *UInt8) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalUInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = UInt8(v)
+	return nil
+}
+
+func (num UInt8) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(uint8(num))
+}
+
+type UInt16 uint16
+
+func (num *UInt16) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalUInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = UInt16(v)
+	return nil
+}
+
+func (num UInt16) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(uint16(num))
+}
+
+type UInt32 uint32
+
+func (num *UInt32) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalUInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = UInt32(v)
+	return nil
+}
+
+func (num UInt32) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(uint32(num))
+}
 
 type UInt64 uint64
 
-func (p *UInt64) UnmarshalJSON(s []byte) error {
-	str := string(s)
-
-	if len(str) > 0 && str != "null" {
-		q, err := util.SafeUnquote(str)
-		if err != nil {
-			return errors.Annotate(err, "parse UInt64 ->[unquote]")
-		}
-
-		*(*uint64)(p), err = strconv.ParseUint(q, 10, 64)
-		if err != nil {
-			return errors.Annotate(err, "parse UInt64 ->[parse]")
-		}
-
-		return nil
+func (num *UInt64) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalUInt(data)
+	if err != nil {
+		return err
 	}
 
-	return errors.Errorf("unable to unmarshal UInt64 from %s", str)
+	*num = UInt64(v)
+	return nil
 }
 
-type Float64 float64
+func (num UInt64) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(uint64(num))
+}
 
-func (p *Float64) UnmarshalJSON(s []byte) error {
-	str := string(s)
+type Int8 int8
 
-	if len(str) > 0 && str != "null" {
-		q, err := util.SafeUnquote(str)
-		if err != nil {
-			return errors.Annotate(err, "parse Float64 ->[unquote]")
-		}
-
-		*(*float64)(p), err = strconv.ParseFloat(q, 64)
-		if err != nil {
-			return errors.Annotate(err, "parse Float64 ->[parse]")
-		}
-
-		return nil
+func (num *Int8) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalInt(data)
+	if err != nil {
+		return err
 	}
 
-	return errors.Errorf("unable to unmarshal Float64 from %s", str)
+	*num = Int8(v)
+	return nil
+}
+
+func (num Int8) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(int8(num))
+}
+
+type Int16 int16
+
+func (num *Int16) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = Int16(v)
+	return nil
+}
+
+func (num Int16) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(int16(num))
+}
+
+type Int32 int32
+
+func (num *Int32) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = Int32(v)
+	return nil
+}
+
+func (num Int32) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(int32(num))
+}
+
+type Int64 int64
+
+func (num *Int64) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalInt(data)
+	if err != nil {
+		return err
+	}
+
+	*num = Int64(v)
+	return nil
+}
+
+func (num Int64) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(int64(num))
+}
+
+const TimeFormat = `"2006-01-02T15:04:05"`
+
+type Time struct {
+	time.Time
+}
+
+func (t Time) MarshalJSON() ([]byte, error) {
+	return []byte(t.Time.Format(TimeFormat)), nil
+}
+
+func (t *Time) UnmarshalJSON(data []byte) error {
+	parsed, err := time.ParseInLocation(TimeFormat, string(data), time.UTC)
+	if err != nil {
+		return err
+	}
+	t.Time = parsed
+	return nil
+}
+
+func (t Time) Marshal(enc *util.TypeEncoder) error {
+	return enc.Encode(uint32(t.Time.Unix()))
+}
+
+func (t Time) Add(dur time.Duration) Time {
+	return Time{t.Time.Add(dur)}
 }

@@ -1,5 +1,10 @@
 package objects
 
+import (
+	"github.com/denkhaus/bitshares/util"
+	"github.com/juju/errors"
+)
+
 type AssetAmount struct {
 	Asset  GrapheneID `json:"asset_id"`
 	Amount UInt64     `json:"amount"`
@@ -33,4 +38,18 @@ func (p *AssetAmount) Subtract(other AssetAmount) *AssetAmount {
 	}
 
 	return p
+}
+
+//implements Operation interface
+func (p AssetAmount) Marshal(enc *util.TypeEncoder) error {
+
+	if err := enc.Encode(p.Amount); err != nil {
+		return errors.Annotate(err, "encode amount")
+	}
+
+	if err := enc.Encode(p.Asset); err != nil {
+		return errors.Annotate(err, "encode asset")
+	}
+
+	return nil
 }

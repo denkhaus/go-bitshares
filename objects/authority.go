@@ -10,7 +10,7 @@ type Authority struct {
 	WeightThreshold int64           `json:"weight_threshold"`
 	AccountAuths    MapAccountAuths `json:"account_auths"`
 	KeyAuths        MapKeyAuths     `json:"key_auths"`
-	Extensions      []Extension     `json:"extensions"`
+	Extensions      Extensions      `json:"extensions"`
 }
 
 type MapAccountAuths map[GrapheneID]int64

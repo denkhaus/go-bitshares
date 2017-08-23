@@ -34,19 +34,29 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`{"id":`)
-	err = buf.Encode(&j.ID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"name":`)
 	fflib.WriteJsonString(buf, string(j.Name))
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"statistics":`)
-	err = buf.Encode(&j.Statistics)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Statistics.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"membership_expiration_date":`)
 
@@ -74,10 +84,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=objects.GrapheneID kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -91,10 +106,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=objects.GrapheneID kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -108,10 +128,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=objects.GrapheneID kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -125,10 +150,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=objects.GrapheneID kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -141,29 +171,49 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	if err != nil {
 		return err
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"registrar":`)
-	err = buf.Encode(&j.Registrar)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Registrar.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"referrer":`)
-	err = buf.Encode(&j.Referrer)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Referrer.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"lifetime_referrer":`)
-	err = buf.Encode(&j.LifetimeReferrer)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.LifetimeReferrer.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"cashback_vb":`)
-	err = buf.Encode(&j.CashbackVB)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.CashbackVB.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	/* Struct fall back. type=objects.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
@@ -808,7 +858,7 @@ handle_Statistics:
 
 handle_MembershipExpirationDate:
 
-	/* handler: j.MembershipExpirationDate type=objects.RFC3339Time kind=struct quoted=false*/
+	/* handler: j.MembershipExpirationDate type=objects.Time kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

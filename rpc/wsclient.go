@@ -2,11 +2,13 @@ package rpc
 
 import (
 	"encoding/json"
+
 	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/net/websocket"
@@ -19,8 +21,8 @@ type wsClient struct {
 	*json.Encoder
 	conn        *websocket.Conn
 	url         string
-	resp        RPCResponse // unmarshal target
-	notify      RPCNotify   // unmarshal target
+	resp        rpcResponse // unmarshal target
+	notify      rpcNotify   // unmarshal target
 	onError     ErrorFunc
 	errors      chan error
 	done        chan struct{}
@@ -81,11 +83,14 @@ func (p *wsClient) monitor() {
 	for {
 		select {
 		case err := <-p.errors:
-			if p.onError != nil {
-				p.onError(err)
-			} else {
-				log.Println("rpc error: ", err)
+			if err != nil {
+				if p.onError != nil {
+					p.onError(err)
+				} else {
+					log.Println("rpc error: ", err)
+				}
 			}
+
 		case <-p.done:
 			break
 		}
@@ -134,6 +139,7 @@ loop:
 			//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
 			var data map[string]interface{}
 			if err := p.Decode(&data); err != nil {
+				util.Dump("err1", err)
 				p.errors <- errors.Annotate(err, "decode in")
 				break
 			}
@@ -142,11 +148,12 @@ loop:
 				p.resp.reset()
 				err := mapstructure.Decode(data, &p.resp)
 				if err != nil {
+					util.Dump("err2", err)
 					p.errors <- errors.Annotate(err, "decode response")
 					break
 				}
 
-				//	util.Dump(">", p.resp)
+				//util.Dump(">", p.resp)
 
 				if call, ok := p.pending[p.resp.ID]; ok {
 					p.mutex.Lock()
@@ -164,6 +171,7 @@ loop:
 					continue
 				}
 			} else if err := p.handleCustomData(data); err != nil {
+				util.Dump("err3", err)
 				p.errors <- errors.Annotate(err, "handle custom data")
 				continue
 			}
@@ -219,7 +227,7 @@ func (p *wsClient) Call(method string, args interface{}) (*RPCCall, error) {
 	}
 
 	call := &RPCCall{
-		Request: RPCRequest{
+		Request: rpcRequest{
 			Method: method,
 			Params: args,
 			ID:     p.currentID,
@@ -232,7 +240,7 @@ func (p *wsClient) Call(method string, args interface{}) (*RPCCall, error) {
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
 
-	//util.Dump(">", call.Request)
+	//util.DumpJSON("rpc >", call.Request)
 
 	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return nil, errors.Annotate(err, "set write deadline")
@@ -250,14 +258,10 @@ func (p *wsClient) Call(method string, args interface{}) (*RPCCall, error) {
 }
 
 func formatError(err interface{}) error {
-	e, ok := err.(string)
-	if !ok {
-		return fmt.Errorf("invalid error %v", err)
+	if e, ok := err.(map[string]interface{}); ok {
+		out, _ := json.MarshalIndent(e, "", " ")
+		return fmt.Errorf("server error: %s", out)
 	}
 
-	if e == "" {
-		e = "unspecified"
-	}
-
-	return fmt.Errorf("server error: %s", e)
+	return fmt.Errorf("server error: %s", err)
 }

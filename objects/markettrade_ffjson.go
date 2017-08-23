@@ -239,7 +239,7 @@ mainparse:
 
 handle_DateTime:
 
-	/* handler: j.DateTime type=objects.RFC3339Time kind=struct quoted=false*/
+	/* handler: j.DateTime type=objects.Time kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

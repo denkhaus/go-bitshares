@@ -34,17 +34,27 @@ func (j *LimitOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`{"id":`)
-	err = buf.Encode(&j.ID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"seller":`)
-	err = buf.Encode(&j.Seller)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Seller.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"expiration":`)
 
@@ -347,7 +357,7 @@ handle_Seller:
 
 handle_Expiration:
 
-	/* handler: j.Expiration type=objects.RFC3339Time kind=struct quoted=false*/
+	/* handler: j.Expiration type=objects.Time kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 )
 
 const (
-	InstanceUndefined int64 = -1
+	InstanceUndefined Int64 = -1
 )
 
 type GrapheneObject interface {
@@ -31,7 +32,20 @@ type GrapheneID struct {
 	id         ObjectID
 	spaceType  SpaceType
 	objectType ObjectType
-	instance   int64
+	instance   Int64
+}
+
+//implements TypeMarshaller interface
+func (p GrapheneID) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(p.instance)); err != nil {
+		return errors.Annotate(err, "encode GrapheneID instance")
+	}
+
+	return nil
+}
+
+func (p GrapheneID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.id)
 }
 
 //Id returns the objects ObjectID
@@ -156,6 +170,10 @@ func (p *GrapheneID) FromRawData(in interface{}) error {
 	return errors.New("input is no graphene object")
 }
 
+func (p *GrapheneID) FromObjectID(in ObjectID) error {
+	return p.FromString(string(in))
+}
+
 func (p *GrapheneID) FromString(in string) error {
 	parts := strings.Split(in, ".")
 
@@ -180,7 +198,7 @@ func (p *GrapheneID) FromString(in string) error {
 			return errors.Errorf("unable to parse GrapheneID [instance] from %s", in)
 		}
 
-		p.instance = inst
+		p.instance = Int64(inst)
 		return nil
 	}
 

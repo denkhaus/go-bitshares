@@ -2,7 +2,7 @@ package objects
 
 type BitAssetData struct {
 	ID                       GrapheneID          `json:"id"`
-	MembershipExpirationDate RFC3339Time         `json:"current_feed_publication_time"`
+	MembershipExpirationDate Time                `json:"current_feed_publication_time"`
 	IsPredictionMarket       bool                `json:"is_prediction_market"`
 	SettlementPrice          Price               `json:"settlement_price"`
 	Feeds                    []AssetFeed         `json:"feeds"`

@@ -34,33 +34,53 @@ func (j *Asset) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`{"id":`)
-	err = buf.Encode(&j.ID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"symbol":`)
 	fflib.WriteJsonString(buf, string(j.Symbol))
 	buf.WriteString(`,"precision":`)
 	fflib.FormatBits2(buf, uint64(j.Precision), 10, j.Precision < 0)
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"issuer":`)
-	err = buf.Encode(&j.Issuer)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Issuer.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"dynamic_asset_data_id":`)
-	err = buf.Encode(&j.DynamicAssetDataID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.DynamicAssetDataID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"bitasset_data_id":`)
-	err = buf.Encode(&j.BitassetDataID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.BitassetDataID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	/* Struct fall back. type=objects.AssetOptions kind=struct */
 	buf.WriteString(`,"options":`)

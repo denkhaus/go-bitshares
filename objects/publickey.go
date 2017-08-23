@@ -1,6 +1,9 @@
 package objects
 
-import "github.com/denkhaus/bitshares/util"
+import (
+	"github.com/denkhaus/bitshares/util"
+	"github.com/juju/errors"
+)
 
 type PublicKey struct {
 	key string
@@ -23,7 +26,7 @@ func (p *PublicKey) UnmarshalJSON(data []byte) error {
 	if len(str) > 0 && str != "null" {
 		key, err := util.SafeUnquote(str)
 		if err != nil {
-			return err
+			return errors.Annotate(err, "unquote")
 		}
 		p.key = key
 	}

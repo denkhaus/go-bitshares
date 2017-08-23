@@ -34,17 +34,27 @@ func (j *SettleOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`{"id":`)
-	err = buf.Encode(&j.ID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"owner":`)
-	err = buf.Encode(&j.Owner)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Owner.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"settlement_date":`)
 
@@ -304,7 +314,7 @@ handle_Owner:
 
 handle_SettlementDate:
 
-	/* handler: j.SettlementDate type=objects.RFC3339Time kind=struct quoted=false*/
+	/* handler: j.SettlementDate type=objects.Time kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

@@ -34,17 +34,27 @@ func (j *CallOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`{"id":`)
-	err = buf.Encode(&j.ID)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=objects.GrapheneID kind=struct */
 	buf.WriteString(`,"borrower":`)
-	err = buf.Encode(&j.Borrower)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.Borrower.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"collateral":`)
 	fflib.FormatBits2(buf, uint64(j.Collateral), 10, false)

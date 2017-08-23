@@ -8,7 +8,7 @@ type Account struct {
 	ID                            GrapheneID     `json:"id"`
 	Name                          string         `json:"name"`
 	Statistics                    GrapheneID     `json:"statistics"`
-	MembershipExpirationDate      RFC3339Time    `json:"membership_expiration_date"`
+	MembershipExpirationDate      Time           `json:"membership_expiration_date"`
 	NetworkFeePercentage          int64          `json:"network_fee_percentage"`
 	LifetimeReferrerFeePercentage int64          `json:"lifetime_referrer_fee_percentage"`
 	ReferrerRewardsPercentage     int64          `json:"referrer_rewards_percentage"`

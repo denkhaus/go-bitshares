@@ -16,7 +16,7 @@ type WebsocketClient interface {
 
 type RPCCall struct {
 	Method  string
-	Request RPCRequest
+	Request rpcRequest
 	Reply   interface{}
 	Error   error
 	Done    chan *RPCCall
@@ -31,22 +31,38 @@ func (call *RPCCall) done() {
 	}
 }
 
-type RPCRequest struct {
+type rpcRequest struct {
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
 	ID     uint64      `json:"id"`
 }
 
-type RPCResponse struct {
+func (p *rpcRequest) reset() {
+	p.ID = 0
+	p.Params = nil
+	p.Method = ""
+}
+
+//wallet API uses string id ???
+type rpcResponseString struct {
+	ID     string      `json:"id"`
+	Result interface{} `json:"result"`
+	Error  interface{} `json:"error"`
+}
+
+type rpcResponse struct {
 	ID     uint64      `json:"id"`
 	Result interface{} `json:"result"`
 	Error  interface{} `json:"error"`
 }
 
-func (p RPCResponse) Is(in interface{}) bool {
+func (p rpcResponse) Is(in interface{}) bool {
 	if data, ok := in.(map[string]interface{}); ok {
 		if _, ok := data["id"]; ok {
 			if _, ok := data["result"]; ok {
+				return true
+			}
+			if _, ok := data["error"]; ok {
 				return true
 			}
 		}
@@ -54,18 +70,18 @@ func (p RPCResponse) Is(in interface{}) bool {
 	return false
 }
 
-func (p *RPCResponse) reset() {
+func (p *rpcResponse) reset() {
 	p.ID = 0
 	p.Error = nil
 	p.Result = nil
 }
 
-type RPCNotify struct {
+type rpcNotify struct {
 	Method string      `json:"method"`
 	Params interface{} `json:"params"`
 }
 
-func (p RPCNotify) Is(in interface{}) bool {
+func (p rpcNotify) Is(in interface{}) bool {
 	if data, ok := in.(map[string]interface{}); ok {
 		if _, ok := data["method"]; ok {
 			if _, ok := data["params"]; ok {
@@ -76,7 +92,7 @@ func (p RPCNotify) Is(in interface{}) bool {
 	return false
 }
 
-func (p *RPCNotify) reset() {
+func (p *rpcNotify) reset() {
 	p.Method = ""
 	p.Params = nil
 }

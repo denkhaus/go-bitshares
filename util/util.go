@@ -1,8 +1,10 @@
 package util
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -11,15 +13,22 @@ import (
 )
 
 func ToBytes(in interface{}) []byte {
-	if i, ok := in.(string); ok {
-		return []byte(i)
-	}
-
 	b, err := json.Marshal(in)
 	if err != nil {
 		panic("toBytes is unable to marshal input")
 	}
 	return b
+}
+
+func DumpJSON(descr string, in interface{}) {
+	fmt.Printf("%s ------------------------- json dump start ---------------------------------------\n", descr)
+	out, err := json.MarshalIndent(in, "", "  ")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	os.Stdout.Write(out)
+	fmt.Printf("\n%s ------------------------- json dump end ---------------------------------------\n\n", descr)
 }
 
 func Dump(descr string, in interface{}) {
@@ -47,11 +56,12 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 		panic("WaitForCondition: test duration to small")
 	}
 
-	timeout := time.Tick(d)
 	test := time.Tick(500 * time.Millisecond)
+	timeout := time.Tick(d)
+
 	check := make(chan struct{}, 1)
-	defer close(check)
 	done := make(chan struct{}, 1)
+	defer close(check)
 	defer close(done)
 
 	go func() {
@@ -77,4 +87,10 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 			return false
 		}
 	}
+}
+
+func RandomizeBytes(in []byte) []byte {
+	bs := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bs, uint64(time.Now().Unix()))
+	return append(in, bs...)
 }
