@@ -161,6 +161,30 @@ func unmarshalInt(data []byte) (int64, error) {
 	return res, nil
 }
 
+func unmarshalFloat(data []byte) (float64, error) {
+	if len(data) == 0 {
+		return 0, errors.New("unmarshalFloat: empty input")
+	}
+
+	var (
+		res float64
+		err error
+		len = len(data)
+	)
+
+	if data[0] == '"' && data[len-1] == '"' {
+		data := data[1 : len-1]
+		res, err = strconv.ParseFloat(string(data), 64)
+		if err != nil {
+			return 0, errors.Errorf("unmarshalFloat: unable to parse input %v", data)
+		}
+	} else if err := json.Unmarshal(data, &res); err != nil {
+		return 0, errors.Errorf("unmarshalFloat: unable to unmarshal input %v", data)
+	}
+
+	return res, nil
+}
+
 type UInt uint
 
 func (num *UInt) UnmarshalJSON(data []byte) error {
@@ -303,6 +327,38 @@ func (num *Int64) UnmarshalJSON(data []byte) error {
 
 func (num Int64) Marshal(enc *util.TypeEncoder) error {
 	return enc.EncodeNumber(int64(num))
+}
+
+type Float32 float32
+
+func (num *Float32) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalFloat(data)
+	if err != nil {
+		return err
+	}
+
+	*num = Float32(v)
+	return nil
+}
+
+func (num Float32) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(float32(num))
+}
+
+type Float64 float64
+
+func (num *Float64) UnmarshalJSON(data []byte) error {
+	v, err := unmarshalFloat(data)
+	if err != nil {
+		return err
+	}
+
+	*num = Float64(v)
+	return nil
+}
+
+func (num Float64) Marshal(enc *util.TypeEncoder) error {
+	return enc.EncodeNumber(float64(num))
 }
 
 const TimeFormat = `"2006-01-02T15:04:05"`

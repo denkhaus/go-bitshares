@@ -44,13 +44,13 @@ func (j *MarketTrade) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	buf.WriteString(`,"price":"`)
+	buf.WriteString(`,"price":`)
 	fflib.AppendFloat(buf, float64(j.Price), 'g', -1, 64)
-	buf.WriteString(`","amount":"`)
+	buf.WriteString(`,"amount":`)
 	fflib.AppendFloat(buf, float64(j.Amount), 'g', -1, 64)
-	buf.WriteString(`","value":"`)
+	buf.WriteString(`,"value":`)
 	fflib.AppendFloat(buf, float64(j.Value), 'g', -1, 64)
-	buf.WriteString(`"}`)
+	buf.WriteByte('}')
 	return nil
 }
 
@@ -265,29 +265,25 @@ handle_DateTime:
 
 handle_Price:
 
-	/* handler: j.Price type=float64 kind=float64 quoted=true*/
+	/* handler: j.Price type=objects.Float64 kind=float64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_double && tok != fflib.FFTok_integer && tok != fflib.FFTok_null && tok != fflib.FFTok_string {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for float64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
-		} else {
-
-			tval, err := fflib.ParseFloat(fs.Output.Bytes(), 64)
-
-			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			j.Price = float64(tval)
-
+			state = fflib.FFParse_after_value
+			goto mainparse
 		}
+
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+
+		err = j.Price.UnmarshalJSON(tbuf)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -295,29 +291,25 @@ handle_Price:
 
 handle_Amount:
 
-	/* handler: j.Amount type=float64 kind=float64 quoted=true*/
+	/* handler: j.Amount type=objects.Float64 kind=float64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_double && tok != fflib.FFTok_integer && tok != fflib.FFTok_null && tok != fflib.FFTok_string {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for float64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
-		} else {
-
-			tval, err := fflib.ParseFloat(fs.Output.Bytes(), 64)
-
-			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			j.Amount = float64(tval)
-
+			state = fflib.FFParse_after_value
+			goto mainparse
 		}
+
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+
+		err = j.Amount.UnmarshalJSON(tbuf)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -325,29 +317,25 @@ handle_Amount:
 
 handle_Value:
 
-	/* handler: j.Value type=float64 kind=float64 quoted=true*/
+	/* handler: j.Value type=objects.Float64 kind=float64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_double && tok != fflib.FFTok_integer && tok != fflib.FFTok_null && tok != fflib.FFTok_string {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for float64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
-		} else {
-
-			tval, err := fflib.ParseFloat(fs.Output.Bytes(), 64)
-
-			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			j.Value = float64(tval)
-
+			state = fflib.FFParse_after_value
+			goto mainparse
 		}
+
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+
+		err = j.Value.UnmarshalJSON(tbuf)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

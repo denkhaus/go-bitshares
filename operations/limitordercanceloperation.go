@@ -49,11 +49,11 @@ func (p LimitOrderCancelOperation) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-func NewLimitOrderCancelOperation(order objects.GrapheneObject) *LimitOrderCancelOperation {
+func NewLimitOrderCancelOperation(order objects.GrapheneID) *LimitOrderCancelOperation {
 	op := LimitOrderCancelOperation{
 		Extensions: objects.Extensions{},
+		Order:      order,
 	}
 
-	op.Order.FromObjectID(order.Id())
 	return &op
 }

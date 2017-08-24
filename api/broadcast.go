@@ -18,15 +18,26 @@ func (p *bitsharesAPI) Broadcast(privKeys [][]byte, feeAsset objects.GrapheneObj
 		return "", errors.Annotate(err, "ApplyFees")
 	}
 
-	prop, err := p.GetDynamicGlobalProperties()
+	props, err := p.GetDynamicGlobalProperties()
 	if err != nil {
 		return "", errors.Annotate(err, "GetDynamicGlobalProperties")
 	}
 
-	tx := objects.NewTransaction()
+	tx, err := objects.NewTransactionWithBlockData(props)
+	if err != nil {
+		return "", errors.Annotate(err, "NewTransaction")
+	}
+
 	tx.Operations = operations
 
-	if err := tx.Sign(privKeys, prop, p.chainConfig.Id()); err != nil {
+	pubKeys, err := p.GetPotentialSignatures(tx)
+	if err != nil {
+		return "", errors.Annotate(err, "GetPotentialSignatures")
+	}
+
+	util.DumpJSON("potential pubkeys >", pubKeys)
+
+	if err := tx.Sign(privKeys, p.chainConfig.Id()); err != nil {
 		return "", errors.Annotate(err, "Sign")
 	}
 

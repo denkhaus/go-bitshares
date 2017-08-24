@@ -4,7 +4,7 @@ package objects
 
 type MarketTrade struct {
 	DateTime Time    `json:"date"`
-	Price    float64 `json:"price,string"`
-	Amount   float64 `json:"amount,string"`
-	Value    float64 `json:"value,string"`
+	Price    Float64 `json:"price"`
+	Amount   Float64 `json:"amount"`
+	Value    Float64 `json:"value"`
 }

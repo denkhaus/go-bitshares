@@ -68,6 +68,10 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 		return p.EncodeNumber(v)
 	case uint64:
 		return p.EncodeNumber(v)
+	case float32:
+		return p.EncodeNumber(v)
+	case float64:
+		return p.EncodeNumber(v)
 	case string:
 		return p.EncodeString(v)
 	case []byte:

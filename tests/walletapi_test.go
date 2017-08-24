@@ -97,7 +97,7 @@ func (suite *walletAPITest) Test_GetLimitOrders() {
 func (suite *walletAPITest) Test_CancelOrder() {
 
 	op := operations.NewLimitOrderCancelOperation(
-		objects.NewGrapheneID("1.7.69314"),
+		*objects.NewGrapheneID("1.7.69314"),
 	)
 	op.FeePayingAccount = *TestAccount1ID
 
@@ -106,7 +106,7 @@ func (suite *walletAPITest) Test_CancelOrder() {
 		suite.Fail(err.Error(), "decode wif key")
 	}
 
-	_, err = suite.TestAPI.Broadcast([][]byte{priv}, *AssetTEST, op)
+	_, err = suite.TestAPI.Broadcast([][]byte{priv}, AssetTEST, op)
 	if err != nil {
 		suite.Fail(err.Error(), "broadcast")
 	}

@@ -105,7 +105,6 @@ func (suite *commonTest) Test_GetDynamicGlobalProperties() {
 }
 
 func (suite *commonTest) Test_GetAccountByName() {
-
 	res, err := suite.TestAPI.GetAccountByName("openledger")
 	if err != nil {
 		suite.Fail(err.Error(), "GetAccountByName")

@@ -2,10 +2,9 @@ package objects
 
 import (
 	"bytes"
+	"time"
 
 	"encoding/hex"
-
-	"time"
 
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/util"
@@ -18,7 +17,7 @@ type Signature string
 type Signatures []Signature
 
 const (
-	TransactionExpirationTime = 30
+	TxExpirationDefault = 30 * time.Second
 )
 
 type Transaction struct {
@@ -57,18 +56,7 @@ func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 }
 
 //Sign signes a Transaction with the given private keys
-func (p *Transaction) Sign(privKeys [][]byte, props *DynamicGlobalProperties, chainID string) error {
-
-	//set Block data
-	prefix, err := props.RefBlockPrefix()
-	if err != nil {
-		return errors.Annotate(err, "RefBlockPrefix")
-	}
-
-	p.RefBlockPrefix = prefix
-	p.RefBlockNum = props.RefBlockNum()
-	p.Expiration = props.Time.Add(30 * time.Second)
-
+func (p *Transaction) Sign(privKeys [][]byte, chainID string) error {
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)
 
@@ -99,10 +87,34 @@ func (p *Transaction) Sign(privKeys [][]byte, props *DynamicGlobalProperties, ch
 	return nil
 }
 
+//AdjustExpiration extends expiration by given duration.
+func (p *Transaction) AdjustExpiration(dur time.Duration) {
+	p.Expiration = p.Expiration.Add(dur)
+}
+
+//NewTransactionWithBlockData creates a new Transaction and initialises
+//relevant Blockdata fields and expiration.
+func NewTransactionWithBlockData(props *DynamicGlobalProperties) (*Transaction, error) {
+	prefix, err := props.RefBlockPrefix()
+	if err != nil {
+		return nil, errors.Annotate(err, "RefBlockPrefix")
+	}
+
+	tx := Transaction{
+		Extensions:     Extensions{},
+		Signatures:     Signatures{},
+		RefBlockNum:    props.RefBlockNum(),
+		Expiration:     props.Time.Add(TxExpirationDefault),
+		RefBlockPrefix: prefix,
+	}
+	return &tx, nil
+}
+
 //NewTransaction creates a new Transaction
 func NewTransaction() *Transaction {
 	tx := Transaction{
-		Extensions: []Extension{},
+		Extensions: Extensions{},
+		Signatures: Signatures{},
 	}
 	return &tx
 }

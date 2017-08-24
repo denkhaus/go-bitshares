@@ -53,15 +53,15 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 	}
 
 	op := operations.NewLimitOrderCancelOperation(
-		objects.NewGrapheneID("1.7.69314"),
+		*objects.NewGrapheneID("1.7.69314"),
 	)
 
-	op.Order.FromString("1.7.123")
-	op.FeePayingAccount.FromString("1.2.456")
+	op.Order = *objects.NewGrapheneID("1.7.123")
+	op.FeePayingAccount = *objects.NewGrapheneID("1.2.456")
 	op.Fee = objects.AssetAmount{
 		Amount: 1000,
+		Asset:  *objects.NewGrapheneID("1.3.789"),
 	}
-	op.Fee.Asset.FromString("1.3.789")
 
 	tx.Operations = append(tx.Operations, op)
 	if err := enc.Encode(tx); err != nil {
@@ -70,7 +70,6 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 
 	res := hex.EncodeToString(buf.Bytes())
 	suite.Equal("2b02d5dc3200e540b9430102e8030000000000009506c8037b000000", res)
-
 }
 
 func TestOperations(t *testing.T) {

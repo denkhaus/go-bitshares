@@ -45,7 +45,6 @@ func (p Operations) Marshal(enc *util.TypeEncoder) error {
 
 func (p Operations) MarshalJSON() ([]byte, error) {
 	env := make([]OperationEnvelope, len(p))
-
 	for idx, op := range p {
 		env[idx] = OperationEnvelope{
 			Type:      op.Type(),

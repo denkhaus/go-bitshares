@@ -168,6 +168,30 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *objects.Transaction) (string, er
 	return resp.(string), nil
 }
 
+//GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.
+//This call can be used by wallets to filter their set of public keys to just the relevant subset prior to calling
+//GetRequiredSignatures to get the minimum subset.
+func (p *bitsharesAPI) GetPotentialSignatures(tx *objects.Transaction) ([]objects.PublicKey, error) {
+
+	resp, err := p.wsClient.CallAPI(p.DatabaseApiID(), "get_potential_signatures", tx)
+	if err != nil {
+		return nil, err
+	}
+
+	util.Dump("get_potential_signatures <", resp)
+
+	data := resp.([]interface{})
+	ret := make([]objects.PublicKey, len(data))
+
+	for idx, acct := range data {
+		if err := ffjson.Unmarshal(util.ToBytes(acct), &ret[idx]); err != nil {
+			return nil, errors.Annotate(err, "unmarshal PublicKey")
+		}
+	}
+
+	return ret, nil
+}
+
 //GetBlock returns a Block by block number.
 func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_block", number)
@@ -209,7 +233,6 @@ func (p *bitsharesAPI) GetAccounts(accounts ...objects.GrapheneObject) ([]object
 		return nil, err // errors.Annotate(err, "get_accounts")
 	}
 
-	//spew.Dump(resp)
 	data := resp.([]interface{})
 	ret := make([]objects.Account, len(data))
 
