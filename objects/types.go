@@ -21,7 +21,7 @@ const (
 	AssetTypePredictionMarket
 )
 
-type SpaceType Int32
+type SpaceType Int8
 
 const (
 	SpaceTypeUndefined SpaceType = -1
@@ -78,7 +78,7 @@ const (
 	OperationTypeASSET_CLAIM_FEES_OPERATION
 )
 
-type ObjectType Int32
+type ObjectType Int8
 
 const (
 	ObjectTypeUndefined ObjectType = -1
@@ -86,31 +86,31 @@ const (
 	ObjectTypeAccount
 	ObjectTypeAsset
 	ObjectTypeForceSettlement
-	ObjectTypeCOMMITTEE_MEMBER_OBJECT
-	ObjectTypeWITNESS_OBJECT
+	ObjectTypeCommiteeMember
+	ObjectTypeWitness
 	ObjectTypeLimitOrder
 	ObjectTypeCallOrder
-	ObjectTypeCUSTOM_OBJECT
-	ObjectTypePROPOSAL_OBJECT
-	ObjectTypeOPERATION_HISTORY_OBJECT
-	ObjectTypeWITHDRAW_PERMISSION_OBJECT
-	ObjectTypeVESTING_BALANCE_OBJECT
-	ObjectTypeWORKER_OBJECT
-	ObjectTypeBALANCE_OBJECT
-	ObjectTypeGLOBAL_PROPERTY_OBJECT
-	ObjectTypeDYNAMIC_GLOBAL_PROPERTY_OBJECT
-	ObjectTypeASSET_DYNAMIC_DATA
+	ObjectTypeCustom
+	ObjectTypeProposal
+	ObjectTypeOperationHistory
+	ObjectTypeWithdrawPermission
+	ObjectTypeVestingBalance
+	ObjectTypeWorker
+	ObjectTypeBalance
+	ObjectTypeGlobalProperty
+	ObjectTypeDynamicGlobalProperty
+	ObjectTypeAssetDynamicData
 	ObjectTypeAssetBitAssetData
-	ObjectTypeACCOUNT_BALANCE_OBJECT
-	ObjectTypeACCOUNT_STATISTICS_OBJECT
-	ObjectTypeTRANSACTION_OBJECT
-	ObjectTypeBLOCK_SUMMARY_OBJECT
-	ObjectTypeACCOUNT_TRANSACTION_HISTORY_OBJECT
-	ObjectTypeBLINDED_BALANCE_OBJECT
-	ObjectTypeCHAIN_PROPERTY_OBJECT
-	ObjectTypeWITNESS_SCHEDULE_OBJECT
-	ObjectTypeBUDGET_RECORD_OBJECT
-	ObjectTypeSPECIAL_AUTHORITY_OBJECT
+	ObjectTypeAccountBalance
+	ObjectTypeAccountStatistics
+	ObjectTypeTransaction
+	ObjectTypeBlockSummary
+	ObjectTypeAccountTransactionHistory
+	ObjectTypeBlindedBalance
+	ObjectTypeChainProperty
+	ObjectTypeWitnessSchedule
+	ObjectTypeBudgetRecord
+	ObjectTypeSpecialAuthority
 )
 
 func unmarshalUInt(data []byte) (uint64, error) {
