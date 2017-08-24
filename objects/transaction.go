@@ -30,10 +30,6 @@ type Transaction struct {
 	Signatures     Signatures `json:"signatures"`
 }
 
-func (p *Transaction) ApplyFees(fees []AssetAmount) error {
-	return p.Operations.ApplyFees(fees)
-}
-
 //implements TypeMarshaller interface
 func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 
@@ -64,15 +60,14 @@ func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 func (p *Transaction) Sign(privKeys [][]byte, props *DynamicGlobalProperties, chainID string) error {
 
 	//set Block data
-	p.Expiration = props.Time.Add(30 * time.Second)
-	p.RefBlockNum = props.RefBlockNum()
-
 	prefix, err := props.RefBlockPrefix()
 	if err != nil {
 		return errors.Annotate(err, "RefBlockPrefix")
 	}
 
 	p.RefBlockPrefix = prefix
+	p.RefBlockNum = props.RefBlockNum()
+	p.Expiration = props.Time.Add(30 * time.Second)
 
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)

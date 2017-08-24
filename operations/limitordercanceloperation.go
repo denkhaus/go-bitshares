@@ -1,5 +1,7 @@
 package operations
 
+//go:generate ffjson $GOFILE
+
 import (
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/denkhaus/bitshares/util"

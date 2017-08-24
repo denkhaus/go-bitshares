@@ -34,4 +34,12 @@ var (
 	TestAccount2PubKey   = "TEST5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP"
 	TestAccount2PrivKey  = "5KRZv3ZmkcE71K9KwEKG6pV6pyufkMQgCJrCu8xKLf2y7R7J8YK"
 	TestAccount2ID       = objects.NewGrapheneID("1.2.3496")
+
+	TestAccount3UserName      = "bs-test"
+	TestAccount3Password      = "denkhaus-test"
+	TestAccount3PubKeyActive  = "BTS5shffTjVoT4J8Zrj3f2mQJw4UVKrnbx5FWYhVgov45EpBf2NYi"
+	TestAccount3PrivKeyActive = "5JTge2oTwFqfNPhUrrm6upheByG2VXvaXBAqWdDUvK2CsygMG3Z"
+	TestAccount3PubKeyOwner   = "BTS56fy8qpkLzNoguGMPgPNkkznxnx2woEg1qPq7E6gF2SeGSRyK5"
+	TestAccount3PrivKeyOwner  = "5JqmjeakPoTz3ComQ7Jgg11jHxywfkJHZPhMJoBomZLrZSfRAvr"
+	TestAccount3ID            = objects.NewGrapheneID("1.2.391614")
 )

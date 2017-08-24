@@ -58,3 +58,11 @@ func (p TransferOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 	return nil
 }
+
+//NewTransferOperation creates a new TransferOperation
+func NewTransferOperation() *TransferOperation {
+	tx := TransferOperation{
+		Extensions: objects.Extensions{},
+	}
+	return &tx
+}
