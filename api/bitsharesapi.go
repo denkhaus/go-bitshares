@@ -48,23 +48,24 @@ type BitsharesAPI interface {
 	GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error)
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
-	Broadcast(privKeys [][]byte, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
+	Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
 	GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
 	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
 	GetChainID() (string, error)
 
 	//wallet API
-	Transfer(from, to objects.GrapheneObject, amount objects.AssetAmount) (interface{}, error)
-	/* 	Lock() error
-	   	Unlock(password string) error
-	   	IsLocked() (bool, error)
-	   	Buy(buyerAccount string, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.SignedTransaction, error)
-	   	Sell(sellerAccount string, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.SignedTransaction, error)
-	*/
+	//Transfer(from, to objects.GrapheneObject, amount objects.AssetAmount) (interface{}, error)
+	ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error)
+	//Lock() error
+	//Unlock(password string) error
+	//IsLocked() (bool, error)
+	Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
+	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
 }
 
 type bitsharesAPI struct {
 	wsClient       rpc.WebsocketClient
+	rpcClient      rpc.RPCClient
 	chainConfig    *ChainConfig
 	username       string
 	password       string
@@ -199,7 +200,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 		return nil, err // errors.Annotate(err, "get_block")
 	}
 
-	//util.Dump("get_block <", resp)
+	util.Dump("get_block <", resp)
 	ret := objects.Block{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Block")
@@ -208,7 +209,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 	return &ret, nil
 }
 
-//GetAccountByName returns a Account object by username.
+//GetAccountByName returns a Account object by username.ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error)
 func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
@@ -470,51 +471,119 @@ func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{},
 
 		b := util.ToBytes(obj)
 
-		switch id.Type() {
-		case objects.ObjectTypeAsset:
-			ass := objects.Asset{}
-			if err := ffjson.Unmarshal(b, &ass); err != nil {
-				return nil, errors.Annotate(err, "unmarshal Asset")
-			}
-			ret[idx] = ass
+		switch id.Space() {
+		case objects.SpaceTypeProtocol:
+			switch id.Type() {
+			case objects.ObjectTypeAsset:
+				ass := objects.Asset{}
+				if err := ffjson.Unmarshal(b, &ass); err != nil {
+					return nil, errors.Annotate(err, "unmarshal Asset")
+				}
+				ret[idx] = ass
 
-		case objects.ObjectTypeAccount:
-			acc := objects.Account{}
-			if err := ffjson.Unmarshal(b, &acc); err != nil {
-				return nil, errors.Annotate(err, "unmarshal Account")
-			}
-			ret[idx] = acc
+			case objects.ObjectTypeAccount:
+				acc := objects.Account{}
+				if err := ffjson.Unmarshal(b, &acc); err != nil {
+					return nil, errors.Annotate(err, "unmarshal Account")
+				}
+				ret[idx] = acc
 
-		case objects.ObjectTypeAssetBitAssetData:
-			bit := objects.BitAssetData{}
-			if err := ffjson.Unmarshal(b, &bit); err != nil {
-				return nil, errors.Annotate(err, "unmarshal BitAssetData")
-			}
-			ret[idx] = bit
+			case objects.ObjectTypeForceSettlement:
+				set := objects.SettleOrder{}
+				if err := ffjson.Unmarshal(b, &set); err != nil {
+					return nil, errors.Annotate(err, "unmarshal SettleOrder")
+				}
+				ret[idx] = set
 
-		case objects.ObjectTypeLimitOrder:
-			lim := objects.LimitOrder{}
-			if err := ffjson.Unmarshal(b, &lim); err != nil {
-				return nil, errors.Annotate(err, "unmarshal LimitOrder")
-			}
-			ret[idx] = lim
+			case objects.ObjectTypeLimitOrder:
+				lim := objects.LimitOrder{}
+				if err := ffjson.Unmarshal(b, &lim); err != nil {
+					return nil, errors.Annotate(err, "unmarshal LimitOrder")
+				}
+				ret[idx] = lim
 
-		case objects.ObjectTypeCallOrder:
-			cal := objects.CallOrder{}
-			if err := ffjson.Unmarshal(b, &cal); err != nil {
-				return nil, errors.Annotate(err, "unmarshal CallOrder")
+			case objects.ObjectTypeCallOrder:
+				cal := objects.CallOrder{}
+				if err := ffjson.Unmarshal(b, &cal); err != nil {
+					return nil, errors.Annotate(err, "unmarshal CallOrder")
+				}
+				ret[idx] = cal
+			default:
+				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
-			ret[idx] = cal
+		case objects.SpaceTypeImplementation:
+			switch id.Type() {
+			case objects.ObjectTypeAssetBitAssetData:
+				bit := objects.BitAssetData{}
+				if err := ffjson.Unmarshal(b, &bit); err != nil {
+					return nil, errors.Annotate(err, "unmarshal BitAssetData")
+				}
+				ret[idx] = bit
 
-		case objects.ObjectTypeForceSettlement:
-			set := objects.SettleOrder{}
-			if err := ffjson.Unmarshal(b, &set); err != nil {
-				return nil, errors.Annotate(err, "unmarshal SettleOrder")
+			default:
+				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
-			ret[idx] = set
+		}
+	}
 
-		default:
-			return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
+	return ret, nil
+}
+
+//Buy places a limit order attempting to buy one asset with another.
+// This API call abstracts away some of the details of the sell_asset call to be more user friendly.
+//All orders placed with buy never timeout and will not be killed if they cannot be filled immediately.
+//If you wish for one of these parameters to be different, then sell_asset should be used instead.
+func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
+
+	resp, err := p.rpcClient.CallAPI("buy", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
+	if err != nil {
+		return nil, err
+	}
+
+	util.Dump("buy >", resp)
+
+	ret := objects.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+}
+
+//Sell places a limit order attempting to sell one asset for another.
+//This API call abstracts away some of the details of the sell_asset call to be more user friendly.
+//All orders placed with sell never timeout and will not be killed if they cannot be filled immediately.
+//If you wish for one of these parameters to be different, then sell_asset should be used instead.
+func (p *bitsharesAPI) Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
+
+	resp, err := p.rpcClient.CallAPI("sell", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := objects.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+}
+
+func (p *bitsharesAPI) ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error) {
+
+	resp, err := p.rpcClient.CallAPI("list_account_balances", account.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	//util.Dump("list_account_balances >", resp)
+
+	data := resp.([]interface{})
+	ret := make([]objects.AssetAmount, len(data))
+
+	for idx, a := range data {
+		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
+			return nil, errors.Annotate(err, "unmarshal AssetAmount")
 		}
 	}
 
@@ -542,6 +611,10 @@ func (p *bitsharesAPI) SetCredentials(username, password string) {
 func (p *bitsharesAPI) Connect() (err error) {
 	if err := p.wsClient.Connect(); err != nil {
 		return errors.Annotate(err, "ws connect")
+	}
+
+	if err := p.rpcClient.Connect(); err != nil {
+		return errors.Annotate(err, "rpc connect")
 	}
 
 	if ok, err := p.login(); err != nil || !ok {
@@ -586,9 +659,17 @@ func (p *bitsharesAPI) Connect() (err error) {
 
 //Close() shuts down the api and closes underlying clients.
 func (p *bitsharesAPI) Close() error {
+
+	if p.rpcClient != nil {
+		if err := p.rpcClient.Close(); err != nil {
+			return errors.Annotate(err, "close rpc client")
+		}
+		p.rpcClient = nil
+	}
+
 	if p.wsClient != nil {
 		if err := p.wsClient.Close(); err != nil {
-			return errors.Annotate(err, "close websocket client")
+			return errors.Annotate(err, "close ws client")
 		}
 		p.wsClient = nil
 	}
@@ -597,9 +678,10 @@ func (p *bitsharesAPI) Close() error {
 }
 
 //New creates a new BitsharesAPI interface.
-func New(wsEndpointURL string) BitsharesAPI {
+func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	api := bitsharesAPI{
 		wsClient:       rpc.NewWebsocketClient(wsEndpointURL),
+		rpcClient:      rpc.NewRPCClient(rpcEndpointURL),
 		databaseApiID:  InvalidApiID,
 		historyApiID:   InvalidApiID,
 		broadcastApiID: InvalidApiID,

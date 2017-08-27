@@ -33,7 +33,7 @@ type subscribeTest struct {
 
 func (suite *subscribeTest) SetupTest() {
 
-	api := api.New(wsFullApiUrl)
+	api := api.New(wsFullApiUrl, rpcApiUrl)
 	if err := api.Connect(); err != nil {
 		suite.Fail(err.Error(), "Connect")
 	}

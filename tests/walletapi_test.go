@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
-	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/objects"
 	"github.com/denkhaus/bitshares/operations"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +16,7 @@ type walletAPITest struct {
 
 func (suite *walletAPITest) SetupTest() {
 
-	api := api.New(wsTestApiUrl)
+	api := api.New(wsTestApiUrl, rpcApiUrl)
 
 	if err := api.Connect(); err != nil {
 		suite.Fail(err.Error(), "Connect")
@@ -36,17 +35,16 @@ func (suite *walletAPITest) TearDown() {
 	}
 }
 
-/*
-func (suite *walletAPITest) Test_ListAssets() {
-	res, err := suite.TestAPI.ListAssets("PEGF", 50)
-	if err != nil {
-		suite.Fail(err.Error(), "ListAssets")
-	}
+// func (suite *walletAPITest) Test_ListAssets() {
+// 	res, err := suite.TestAPI.ListAssets("PEG.FAKEUSD", 2)
+// 	if err != nil {
+// 		suite.Fail(err.Error(), "ListAssets")
+// 	}
 
-	suite.NotNil(res)
-	suite.Len(res, 2)
-	util.Dump("assets >", res)
-} */
+// 	suite.NotNil(res)
+// 	suite.Len(res, 2)
+// 	util.Dump("assets >", res)
+// }
 
 /* func (suite *walletAPITest) Test_GetBlock() {
 	res, err := suite.TestAPI.GetBlock(10454132)
@@ -56,8 +54,17 @@ func (suite *walletAPITest) Test_ListAssets() {
 
 	suite.NotNil(res)
 	util.Dump("get_block >", res)
+} */
+
+func (suite *walletAPITest) Test_ChainConfig() {
+	res, err := suite.TestAPI.GetChainID()
+	if err != nil {
+		suite.Fail(err.Error(), "GetChainID")
+	}
+
+	suite.Equal(ChainIDBitSharesTest, res)
 }
-*/
+
 /*
 func (suite *walletAPITest) Test_Buy() {
 
@@ -73,7 +80,7 @@ func (suite *walletAPITest) Test_Buy() {
 /*
 func (suite *walletAPITest) Test_GetAccountByName() {
 
-	res, err := suite.TestAPI.GetAccountByName("denk-baum")
+	res, err := suite.TestAPI.GetAccountByName("denk-haus")
 	if err != nil {
 		suite.Fail(err.Error(), "GetAccountByName")
 	}
@@ -81,10 +88,10 @@ func (suite *walletAPITest) Test_GetAccountByName() {
 	suite.NotNil(res)
 	util.Dump("accounts >", res)
 } */
-/*
-func (suite *walletAPITest) Test_GetLimitOrders() {
 
-	res, err := suite.TestAPI.GetLimitOrders(AssetTEST, AssetBTS, 50)
+/* func (suite *walletAPITest) Test_GetLimitOrders() {
+
+	res, err := suite.TestAPI.GetLimitOrders(AssetTEST, AssetPEGFAKEUSD, 50)
 	if err != nil {
 		suite.Fail(err.Error(), "GetLimitOrders")
 	}
@@ -101,12 +108,7 @@ func (suite *walletAPITest) Test_CancelOrder() {
 	)
 	op.FeePayingAccount = *TestAccount1ID
 
-	priv, err := crypto.Decode(TestAccount1PrivKeyOwner)
-	if err != nil {
-		suite.Fail(err.Error(), "decode wif key")
-	}
-
-	_, err = suite.TestAPI.Broadcast([][]byte{priv}, AssetTEST, op)
+	_, err := suite.TestAPI.Broadcast([]string{TestAccount1PrivKeyActive}, AssetTEST, op)
 	if err != nil {
 		suite.Fail(err.Error(), "broadcast")
 	}

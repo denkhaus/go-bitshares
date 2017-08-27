@@ -5,21 +5,24 @@ import "github.com/denkhaus/bitshares/objects"
 const (
 	wsFullApiUrl = "wss://bitshares.openledger.info/ws"
 	wsTestApiUrl = "wss://node.testnet.bitshares.eu/ws"
+	rpcApiUrl    = "http://localhost:8095"
 )
 
 var (
-	ChainIDBitShares = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
-	UserID1          = objects.NewGrapheneID("1.2.282")      //xeroc user account
-	UserID2          = objects.NewGrapheneID("1.2.253")      //stan user account
-	UserID3          = objects.NewGrapheneID("1.2.0")        //committee-account user account
-	AssetCNY         = objects.NewGrapheneID("1.3.113")      //cny asset
-	AssetBTS         = objects.NewGrapheneID("1.3.0")        //bts asset
-	AssetUSD         = objects.NewGrapheneID("1.3.121")      // usd asset
-	AssetTEST        = objects.NewGrapheneID("1.3.0")        // test asset
-	BitAssetDataCNY  = objects.NewGrapheneID("2.4.13")       //cny bitasset data id
-	LimitOrder1      = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
-	CallOrder1       = objects.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
-	SettleOrder1     = objects.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
+	ChainIDBitSharesFull = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
+	ChainIDBitSharesTest = "39f5e2ede1f8bc1a3a54a7914414e3779e33193f1f5693510e73cb7a87617447"
+	UserID1              = objects.NewGrapheneID("1.2.282")      //xeroc user account
+	UserID2              = objects.NewGrapheneID("1.2.253")      //stan user account
+	UserID3              = objects.NewGrapheneID("1.2.0")        //committee-account user account
+	AssetCNY             = objects.NewGrapheneID("1.3.113")      //cny asset
+	AssetBTS             = objects.NewGrapheneID("1.3.0")        //bts asset
+	AssetUSD             = objects.NewGrapheneID("1.3.121")      // usd asset
+	AssetTEST            = objects.NewGrapheneID("1.3.0")        // test asset
+	AssetPEGFAKEUSD      = objects.NewGrapheneID("1.3.22")       // test asset
+	BitAssetDataCNY      = objects.NewGrapheneID("2.4.13")       //cny bitasset data id
+	LimitOrder1          = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
+	CallOrder1           = objects.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
+	SettleOrder1         = objects.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
 
 	TestAccount1UserName      = "denk-haus"
 	TestAccount1Password      = "denkhaus-testnet"
@@ -27,6 +30,7 @@ var (
 	TestAccount1PrivKeyActive = "5Hx8KiHLnc3pDLkwe2jujkTTJev72n3Qx7xtyaRNBsJDuejzh9u"
 	TestAccount1PubKeyOwner   = "TEST5yXqEBShUgcVm7Mve8Fg4RzQ2ftPpmo77aMbz884eX9aeGVvwD"
 	TestAccount1PrivKeyOwner  = "5JyuWmopuyxFyvM9xm8fxXyujzfVnsg9cvE6z3pcib5NW1Av4rP"
+	TestAccount1PrivKeyMemo   = "TEST5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk"
 	TestAccount1ID            = objects.NewGrapheneID("1.2.3464")
 
 	TestAccount2UserName = "denk-baum"

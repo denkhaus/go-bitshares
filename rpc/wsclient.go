@@ -135,46 +135,47 @@ loop:
 		select {
 		case <-p.done:
 			break loop
-		default:
-			//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
-			var data map[string]interface{}
-			if err := p.Decode(&data); err != nil {
-				util.Dump("err1", err)
-				p.errors <- errors.Annotate(err, "decode in")
+		default:			
+		}
+
+		//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
+		var data map[string]interface{}
+		if err := p.Decode(&data); err != nil {
+			util.Dump("err1", err)
+			p.errors <- errors.Annotate(err, "decode in")
+			break
+		}
+
+		if p.resp.Is(data) {
+			p.resp.reset()
+			err := mapstructure.Decode(data, &p.resp)
+			if err != nil {
+				util.Dump("err2", err)
+				p.errors <- errors.Annotate(err, "decode response")
 				break
 			}
 
-			if p.resp.Is(data) {
-				p.resp.reset()
-				err := mapstructure.Decode(data, &p.resp)
-				if err != nil {
-					util.Dump("err2", err)
-					p.errors <- errors.Annotate(err, "decode response")
-					break
+			//util.Dump(">", p.resp)
+
+			if call, ok := p.pending[p.resp.ID]; ok {
+				p.mutex.Lock()
+				delete(p.pending, p.resp.ID)
+				p.mutex.Unlock()
+
+				call.Reply = p.resp.Result
+				if p.resp.Error != nil {
+					call.Error = formatError(p.resp.Error)
 				}
 
-				//util.Dump(">", p.resp)
-
-				if call, ok := p.pending[p.resp.ID]; ok {
-					p.mutex.Lock()
-					delete(p.pending, p.resp.ID)
-					p.mutex.Unlock()
-
-					call.Reply = p.resp.Result
-					if p.resp.Error != nil {
-						call.Error = formatError(p.resp.Error)
-					}
-
-					call.done()
-				} else {
-					p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
-					continue
-				}
-			} else if err := p.handleCustomData(data); err != nil {
-				util.Dump("err3", err)
-				p.errors <- errors.Annotate(err, "handle custom data")
+				call.done()
+			} else {
+				p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
 				continue
 			}
+		} else if err := p.handleCustomData(data); err != nil {
+			util.Dump("err3", err)
+			p.errors <- errors.Annotate(err, "handle custom data")
+			continue
 		}
 	}
 

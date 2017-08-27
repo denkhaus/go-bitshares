@@ -6,7 +6,7 @@ import (
 	"github.com/juju/errors"
 )
 
-func (p *bitsharesAPI) Broadcast(privKeys [][]byte, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error) {
+func (p *bitsharesAPI) Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error) {
 
 	operations := objects.Operations(ops)
 	fees, err := p.GetRequiredFees(operations, feeAsset)
@@ -37,7 +37,7 @@ func (p *bitsharesAPI) Broadcast(privKeys [][]byte, feeAsset objects.GrapheneObj
 
 	util.DumpJSON("potential pubkeys >", pubKeys)
 
-	if err := tx.Sign(privKeys, p.chainConfig.Id()); err != nil {
+	if err := tx.Sign(wifKeys, p.chainConfig.Id()); err != nil {
 		return "", errors.Annotate(err, "Sign")
 	}
 

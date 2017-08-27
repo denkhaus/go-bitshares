@@ -2,6 +2,7 @@ package objects
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"encoding/hex"
@@ -56,7 +57,7 @@ func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 }
 
 //Sign signes a Transaction with the given private keys
-func (p *Transaction) Sign(privKeys [][]byte, chainID string) error {
+func (p *Transaction) Sign(wifKeys []string, chainID string) error {
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)
 
@@ -74,18 +75,49 @@ func (p *Transaction) Sign(privKeys [][]byte, chainID string) error {
 	}
 
 	data := buf.Bytes()
-	p.Signatures = make([]Signature, len(privKeys))
 
-	for idx, key := range privKeys {
-		sig, err := crypto.Sign(key, data)
+	p.Signatures = make([]Signature, len(wifKeys))
+	for idx, wif := range wifKeys {
+
+		key, err := crypto.GetPrivateKey(wif)
+		if err != nil {
+			return errors.Annotate(err, "GetPrivateKey")
+		}
+
+		sig, err := crypto.Sign(data, key)
 		if err != nil {
 			return errors.Annotate(err, "Sign")
 		}
-		p.Signatures[idx] = Signature(hex.EncodeToString(sig))
+
+		fmt.Print("canonical:", sig.IsCanonical())
+		p.Signatures[idx] = Signature(sig.ToHex())
 	}
 
 	return nil
 }
+
+// for idx, wif := range privKeys {
+
+// 	key, err := crypto.GetPrivateKey(wif)
+// 	if err != nil {
+// 		return errors.Annotate(err, "GetPrivateKey")
+// 	}
+
+// 	for {
+// 		sig, err := btcec.SignCompact(btcec.S256(), key, data, true)
+// 		if err != nil {
+// 			return errors.Annotate(err, "SignCompact")
+// 		}
+
+// 		if isCanonical(sig) {
+// 			fmt.Print("canonical:", hex.EncodeToString(sig))
+// 			p.Signatures[idx] = Signature(hex.EncodeToString(sig))
+// 			break
+// 		} else {
+// 			fmt.Print("not canonical:", hex.EncodeToString(sig))
+// 		}
+// 	}
+// }
 
 //AdjustExpiration extends expiration by given duration.
 func (p *Transaction) AdjustExpiration(dur time.Duration) {

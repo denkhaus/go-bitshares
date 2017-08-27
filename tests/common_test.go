@@ -15,7 +15,7 @@ type commonTest struct {
 
 func (suite *commonTest) SetupTest() {
 
-	api := api.New(wsFullApiUrl)
+	api := api.New(wsFullApiUrl, rpcApiUrl)
 	if err := api.Connect(); err != nil {
 		suite.Fail(err.Error(), "Connect")
 	}
@@ -40,7 +40,7 @@ func (suite *commonTest) Test_GetChainID() {
 		suite.Fail(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(res, ChainIDBitShares)
+	suite.Equal(res, ChainIDBitSharesFull)
 }
 
 func (suite *commonTest) Test_GetAccountBalances() {

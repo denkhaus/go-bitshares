@@ -10,7 +10,6 @@ type Extensions []Extension
 
 //implements TypeMarshaller interface
 func (p Extensions) Marshal(enc *util.TypeEncoder) error {
-
 	if err := enc.Encode([]byte{0, 0, 0}); err != nil {
 		return err
 	}

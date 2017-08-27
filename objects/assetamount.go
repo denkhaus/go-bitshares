@@ -1,6 +1,8 @@
 package objects
 
 import (
+	"math"
+
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
@@ -8,6 +10,10 @@ import (
 type AssetAmount struct {
 	Asset  GrapheneID `json:"asset_id"`
 	Amount UInt64     `json:"amount"`
+}
+
+func (p *AssetAmount) Rate(prec int) float64 {
+	return float64(p.Amount) / math.Pow(10, float64(prec))
 }
 
 //Add adds two asset amounts. They must refer to the same Asset type.

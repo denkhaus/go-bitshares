@@ -81,36 +81,36 @@ const (
 type ObjectType Int8
 
 const (
-	ObjectTypeUndefined ObjectType = -1
-	ObjectTypeBase      ObjectType = iota
-	ObjectTypeAccount
-	ObjectTypeAsset
-	ObjectTypeForceSettlement
-	ObjectTypeCommiteeMember
-	ObjectTypeWitness
-	ObjectTypeLimitOrder
-	ObjectTypeCallOrder
-	ObjectTypeCustom
-	ObjectTypeProposal
-	ObjectTypeOperationHistory
-	ObjectTypeWithdrawPermission
-	ObjectTypeVestingBalance
-	ObjectTypeWorker
-	ObjectTypeBalance
-	ObjectTypeGlobalProperty
-	ObjectTypeDynamicGlobalProperty
-	ObjectTypeAssetDynamicData
-	ObjectTypeAssetBitAssetData
-	ObjectTypeAccountBalance
-	ObjectTypeAccountStatistics
-	ObjectTypeTransaction
-	ObjectTypeBlockSummary
-	ObjectTypeAccountTransactionHistory
-	ObjectTypeBlindedBalance
-	ObjectTypeChainProperty
-	ObjectTypeWitnessSchedule
-	ObjectTypeBudgetRecord
-	ObjectTypeSpecialAuthority
+	ObjectTypeUndefined                 ObjectType = -1
+	ObjectTypeBase                      ObjectType = 1
+	ObjectTypeAccount                   ObjectType = 2
+	ObjectTypeAsset                     ObjectType = 3
+	ObjectTypeForceSettlement           ObjectType = 4
+	ObjectTypeCommiteeMember            ObjectType = 5
+	ObjectTypeWitness                   ObjectType = 6
+	ObjectTypeLimitOrder                ObjectType = 7
+	ObjectTypeCallOrder                 ObjectType = 8
+	ObjectTypeCustom                    ObjectType = 9
+	ObjectTypeProposal                  ObjectType = 10
+	ObjectTypeOperationHistory          ObjectType = 11
+	ObjectTypeWithdrawPermission        ObjectType = 12
+	ObjectTypeVestingBalance            ObjectType = 13
+	ObjectTypeWorker                    ObjectType = 14
+	ObjectTypeBalance                   ObjectType = 15
+	ObjectTypeGlobalProperty            ObjectType = 1
+	ObjectTypeDynamicGlobalProperty     ObjectType = 2
+	ObjectTypeAssetDynamicData          ObjectType = 3
+	ObjectTypeAssetBitAssetData         ObjectType = 4
+	ObjectTypeAccountBalance            ObjectType = 5
+	ObjectTypeAccountStatistics         ObjectType = 6
+	ObjectTypeTransaction               ObjectType = 7
+	ObjectTypeBlockSummary              ObjectType = 8
+	ObjectTypeAccountTransactionHistory ObjectType = 9
+	ObjectTypeBlindedBalance            ObjectType = 10
+	ObjectTypeChainProperty             ObjectType = 11
+	ObjectTypeWitnessSchedule           ObjectType = 12
+	ObjectTypeBudgetRecord              ObjectType = 13
+	ObjectTypeSpecialAuthority          ObjectType = 14
 )
 
 func unmarshalUInt(data []byte) (uint64, error) {

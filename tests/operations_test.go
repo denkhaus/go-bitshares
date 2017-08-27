@@ -20,7 +20,7 @@ type operationsAPITest struct {
 
 func (suite *operationsAPITest) SetupTest() {
 
-	api := api.New(wsTestApiUrl)
+	api := api.New(wsTestApiUrl, rpcApiUrl)
 
 	if err := api.Connect(); err != nil {
 		suite.Fail(err.Error(), "Connect")

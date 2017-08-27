@@ -13,6 +13,7 @@ type GrapheneObject interface {
 	util.TypeMarshaller
 	Id() ObjectID
 	Type() ObjectType
+	Valid() bool
 }
 
 type GrapheneObjects []GrapheneObject
@@ -71,12 +72,22 @@ func (p GrapheneID) Id() ObjectID {
 
 //Type returns the objects ObjectType
 func (p GrapheneID) Type() ObjectType {
-	if !p.valid() {
+	if !p.Valid() {
 		if err := p.FromString(string(p.id)); err != nil {
 			panic(errors.Annotate(err, "from string").Error())
 		}
 	}
 	return p.objectType
+}
+
+//Space returns the objects SpaceType
+func (p GrapheneID) Space() SpaceType {
+	if !p.Valid() {
+		if err := p.FromString(string(p.id)); err != nil {
+			panic(errors.Annotate(err, "from string").Error())
+		}
+	}
+	return p.spaceType
 }
 
 //NewGrapheneID creates an new GrapheneID object
@@ -97,8 +108,9 @@ func (p GrapheneID) String() string {
 	return string(p.Id())
 }
 
-func (p GrapheneID) valid() bool {
-	return p.spaceType != SpaceTypeUndefined &&
+func (p GrapheneID) Valid() bool {
+	return p.id != "" &&
+		p.spaceType != SpaceTypeUndefined &&
 		p.objectType != ObjectTypeUndefined
 }
 

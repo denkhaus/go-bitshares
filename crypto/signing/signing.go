@@ -9,12 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-// #cgo LDFLAGS: -lsecp256k1 -std=c99
+// #cgo LDFLAGS: -lsecp256k1
 // #include <stdlib.h>
 // #include "signing.h"
 import "C"
 
-func Sign(privKeys [][]byte, msg []byte) ([]string, error) {
+func Sign(privKeys [][]byte, msg []byte) ([][]byte, error) {
 
 	sum256 := sha256.Sum256(msg)
 	digest := sum256[:]
@@ -54,12 +54,12 @@ func Sign(privKeys [][]byte, msg []byte) ([]string, error) {
 	}
 
 	// Set the signature array in the transaction.
-	sigsHex := make([]string, 0, len(sigs))
-	for _, sig := range sigs {
-		sigsHex = append(sigsHex, hex.EncodeToString(sig))
-	}
+	// sigsHex := make([]string, 0, len(sigs))
+	// for _, sig := range sigs {
+	// 	sigsHex = append(sigsHex, hex.EncodeToString(sig))
+	// }
 
-	return sigsHex, nil
+	return sigs, nil
 }
 
 func Verify(pubKeys [][]byte, sigs []string, data []byte) (bool, error) {
