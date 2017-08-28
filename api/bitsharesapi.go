@@ -45,7 +45,7 @@ type BitsharesAPI interface {
 	GetAccountByName(name string) (*objects.Account, error)
 	GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error)
 	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
-	GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error)
+	GetLimitOrders(base, quote objects.GrapheneObject, limit int) (objects.LimitOrders, error)
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
 	Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
@@ -318,7 +318,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]objects
 func (p *bitsharesAPI) GetRequiredFees(ops objects.Operations, feeAsset objects.GrapheneObject) ([]objects.AssetAmount, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Types(), feeAsset.Id())
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_required_fees")
+		return nil, err
 	}
 
 	//util.Dump("get_required_fees <", resp)
@@ -336,20 +336,20 @@ func (p *bitsharesAPI) GetRequiredFees(ops objects.Operations, feeAsset objects.
 }
 
 //GetLimitOrders returns a slice of LimitOrder objects.
-func (p *bitsharesAPI) GetLimitOrders(base, quote objects.GrapheneObject, limit int) ([]objects.LimitOrder, error) {
+func (p *bitsharesAPI) GetLimitOrders(base, quote objects.GrapheneObject, limit int) (objects.LimitOrders, error) {
 	if limit > GetLimitOrdersLimit {
 		limit = GetLimitOrdersLimit
 	}
 
 	resp, err := p.wsClient.CallAPI(0, "get_limit_orders", base.Id(), quote.Id(), limit)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_limit_orders")
+		return nil, err
 	}
 
 	//util.Dump("limitorders <", resp)
 
 	data := resp.([]interface{})
-	ret := make([]objects.LimitOrder, len(data))
+	ret := make(objects.LimitOrders, len(data))
 
 	for idx, a := range data {
 		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {

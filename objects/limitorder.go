@@ -2,6 +2,8 @@ package objects
 
 //go:generate ffjson $GOFILE
 
+type LimitOrders []LimitOrder
+
 type LimitOrder struct {
 	ID          GrapheneID `json:"id"`
 	Seller      GrapheneID `json:"seller"`

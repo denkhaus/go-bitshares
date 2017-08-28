@@ -65,6 +65,10 @@ func (p *GrapheneID) UnmarshalJSON(s []byte) error {
 	return errors.Errorf("unable to unmarshal GrapheneID from %s", str)
 }
 
+func (p GrapheneID) Equals(o GrapheneObject) bool {
+	return p.id == o.Id()
+}
+
 //Id returns the objects ObjectID
 func (p GrapheneID) Id() ObjectID {
 	return p.id
