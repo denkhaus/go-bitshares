@@ -5,8 +5,8 @@ type Price struct {
 	Quote AssetAmount `json:"quote"`
 }
 
-func (p Price) Rate(precBase, precQuote float64) float64 {
-	return p.Base.Rate(precBase) / p.Quote.Rate(precQuote)
+func (p Price) Rate(precBase, precQuote float64) Rate {
+	return Rate(p.Base.Rate(precBase) / p.Quote.Rate(precQuote))
 }
 
 func (p Price) Valid() bool {

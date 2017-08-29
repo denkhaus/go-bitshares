@@ -113,6 +113,16 @@ const (
 	ObjectTypeSpecialAuthority          ObjectType = 14
 )
 
+type Rate float64
+
+func (p Rate) Inverse() Rate {
+	return 1 / p
+}
+
+func (p Rate) Value() float64 {
+	return float64(p)
+}
+
 func unmarshalUInt(data []byte) (uint64, error) {
 	if len(data) == 0 {
 		return 0, errors.New("unmarshalUInt: empty input")

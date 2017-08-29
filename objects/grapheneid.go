@@ -13,6 +13,7 @@ type GrapheneObject interface {
 	util.TypeMarshaller
 	Id() ObjectID
 	Type() ObjectType
+	Equals(id GrapheneObject) bool
 	Valid() bool
 }
 
