@@ -8,7 +8,7 @@ import (
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
-	"github.com/denkhaus/bitshares/operations"
+
 	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/suite"
 )
@@ -52,7 +52,7 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 		suite.Fail(err.Error(), "Unmarshal time")
 	}
 
-	op := operations.NewLimitOrderCancelOperation(
+	op := objects.NewLimitOrderCancelOperation(
 		*objects.NewGrapheneID("1.7.69314"),
 	)
 

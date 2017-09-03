@@ -66,6 +66,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 	if err != nil {
 		return nil, errors.Annotate(err, "do request")
 	}
+
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&p.res); err != nil {
@@ -81,36 +82,6 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 	return p.res.Result, nil
 }
 
-/* func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, error) {
-	message, err := json.EncodeClientRequest(method, args)
-	if err != nil {
-		return nil, errors.Annotate(err, "EncodeClientRequest")
-	}
-
-	req, err := http.NewRequest("POST", p.endpointURL, bytes.NewBuffer(message))
-	if err != nil {
-		return nil, errors.Annotate(err, "NewRequest")
-	}
-
-	req.Header.Set("Content-Type", "application/json;charset=utf-8")
-	req.Header.Add("Accept", "application/json")
-
-	resp, err := p.Do(req)
-	if err != nil {
-		return nil, errors.Annotate(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	util.Dump("rpc resp", resp.Body)
-
-	var result interface{}
-	if err := json.DecodeClientResponse(resp.Body, &result); err != nil {
-		return nil, errors.Annotate(err, "DecodeClientResponse")
-	}
-
-	return result, nil
-}
-*/
 //NewRPCClient creates a RPC Client
 func NewRPCClient(rpcEndpointURL string) RPCClient {
 	cli := rpcClient{

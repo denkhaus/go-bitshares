@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -93,4 +94,13 @@ func RandomizeBytes(in []byte) []byte {
 	bs := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bs, uint64(time.Now().Unix()))
 	return append(in, bs...)
+}
+
+func round(num float64) int {
+	return int(num + math.Copysign(0.5, num))
+}
+
+func toFixed(num float64, precision int) float64 {
+	output := math.Pow(10, float64(precision))
+	return float64(round(num*output)) / output
 }

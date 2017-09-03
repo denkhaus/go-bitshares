@@ -1,0 +1,13 @@
+{
+  "chain_id": "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8",
+  "my_accounts": [],
+  "cipher_keys": "",
+  "extra_keys": [],
+  "pending_account_registrations": [],
+  "pending_witness_registrations": [],
+  "labeled_keys": [],
+  "blind_receipts": [],
+  "ws_server": "wss://bitshares.openledger.info/ws",
+  "ws_user": "",
+  "ws_password": ""
+}

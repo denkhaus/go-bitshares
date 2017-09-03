@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/denkhaus/bitshares/objects"
@@ -49,7 +50,7 @@ type BitsharesAPI interface {
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
 	Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
-	GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
+	GetTradeHistory(base, quote objects.GrapheneObject, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
 	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
 	GetChainID() (string, error)
 
@@ -59,8 +60,11 @@ type BitsharesAPI interface {
 	//Lock() error
 	//Unlock(password string) error
 	//IsLocked() (bool, error)
-	Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
-	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
+	Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
+	BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
+	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
+	SellEx(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
+	SellAsset(account objects.GrapheneObject, amountToSell string, symbolToSell objects.GrapheneObject, minToReceive string, symbolToReceive objects.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*objects.Transaction, error)
 }
 
 type bitsharesAPI struct {
@@ -200,7 +204,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 		return nil, err // errors.Annotate(err, "get_block")
 	}
 
-	util.Dump("get_block <", resp)
+	//util.Dump("get_block <", resp)
 	ret := objects.Block{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Block")
@@ -411,17 +415,16 @@ func (p *bitsharesAPI) GetCallOrders(assetID objects.GrapheneObject, limit int) 
 }
 
 //GetTradeHistory returns MarketTrade object.
-func (p *bitsharesAPI) GetTradeHistory(base, quote string, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error) {
+func (p *bitsharesAPI) GetTradeHistory(base, quote objects.GrapheneObject, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error) {
 	if limit > GetTradeHistoryLimit {
 		limit = GetTradeHistoryLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(0, "get_trade_history", base, quote, toTime, fromTime, limit)
+	resp, err := p.wsClient.CallAPI(0, "get_trade_history", base.Id(), quote.Id(), toTime, fromTime, limit)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_trade_history")
+		return nil, err
 	}
 
-	//spew.Dump(resp)
 	data := resp.([]interface{})
 	ret := make([]objects.MarketTrade, len(data))
 
@@ -529,11 +532,23 @@ func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{},
 	return ret, nil
 }
 
-//Buy places a limit order attempting to buy one asset with another.
-// This API call abstracts away some of the details of the SellAsset call to be more user friendly.
-//All orders placed with buy never timeout and will not be killed if they cannot be filled immediately.
-//If you wish for one of these parameters to be different, then SellAsset should be used instead.
-func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
+// Place a limit order attempting to buy one asset with another.
+//
+// This API call abstracts away some of the details of the sell_asset call to be more
+// user friendly. All orders placed with buy never timeout and will not be killed if they
+// cannot be filled immediately. If you wish for one of these parameters to be different,
+// then sell_asset should be used instead.
+//
+// @param buyer_account The account buying the asset for another asset.
+// @param base The name or id of the asset to buy.
+// @param quote The name or id of the assest being offered as payment.
+// @param rate The rate in base:quote at which you want to buy.
+// @param amount the amount of base you want to buy.
+// @param broadcast true to broadcast the transaction on the network.
+// @param The signed transaction selling the funds.
+//
+func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject,
+	rate string, amount string, broadcast bool) (*objects.Transaction, error) {
 
 	resp, err := p.rpcClient.CallAPI("buy", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
 	if err != nil {
@@ -550,16 +565,70 @@ func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.G
 	return &ret, nil
 }
 
-//Sell places a limit order attempting to sell one asset for another.
-//This API call abstracts away some of the details of the sell_asset call to be more user friendly.
-//All orders placed with sell never timeout and will not be killed if they cannot be filled immediately.
-//If you wish for one of these parameters to be different, then sell_asset should be used instead.
-func (p *bitsharesAPI) Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
-
+//Place a limit order attempting to sell one asset for another.
+//
+// This API call abstracts away some of the details of the sell_asset call to be more
+// user friendly. All orders placed with sell never timeout and will not be killed if they
+// cannot be filled immediately. If you wish for one of these parameters to be different,
+// then sell_asset should be used instead.
+//
+// @param seller_account the account providing the asset being sold, and which will
+//                       receive the processed of the sale.
+// @param base The name or id of the asset to sell.
+// @param quote The name or id of the asset to recieve.
+// @param rate The rate in base:quote at which you want to sell.
+// @param amount The amount of base you want to sell.
+// @param broadcast true to broadcast the transaction on the network.
+// @returns The signed transaction selling the funds.
+//
+func (p *bitsharesAPI) Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject,
+	rate string, amount string, broadcast bool) (*objects.Transaction, error) {
 	resp, err := p.rpcClient.CallAPI("sell", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
 	if err != nil {
 		return nil, err
 	}
+
+	ret := objects.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+}
+
+func (p *bitsharesAPI) BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
+	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
+
+	minToReceive := fmt.Sprintf("%f", amount)
+	amountToSell := fmt.Sprintf("%f", rate*amount)
+
+	return p.SellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
+}
+
+func (p *bitsharesAPI) SellEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
+	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
+
+	amountToSell := fmt.Sprintf("%f", amount)
+	minToReceive := fmt.Sprintf("%f", rate*amount)
+
+	return p.SellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
+}
+
+func (p *bitsharesAPI) SellAsset(account objects.GrapheneObject,
+	amountToSell string, symbolToSell objects.GrapheneObject,
+	minToReceive string, symbolToReceive objects.GrapheneObject,
+	timeout uint32, fillOrKill bool, broadcast bool) (*objects.Transaction, error) {
+
+	resp, err := p.rpcClient.CallAPI("sell_asset", account.Id(),
+		amountToSell, symbolToSell.Id(),
+		minToReceive, symbolToReceive.Id(),
+		timeout, fillOrKill, broadcast,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	//util.Dump("sell_asset >", resp)
 
 	ret := objects.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {

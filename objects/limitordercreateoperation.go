@@ -1,9 +1,8 @@
-package operations
+package objects
 
 //go:generate ffjson $GOFILE
 
 import (
-	"github.com/denkhaus/bitshares/objects"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
@@ -14,23 +13,23 @@ import (
 //If either the selling asset or the receiving asset is white list restricted, the order will only be created if the seller is on the white list of the restricted asset type.
 //Market orders are matched in the order they are included in the block chain.
 type LimitOrderCreateOperation struct {
-	Seller       objects.GrapheneID  `json:"seller"`
-	Fee          objects.AssetAmount `json:"fee"`
-	AmountToSell objects.AssetAmount `json:"amount_to_sell"`
-	MinToReceive objects.AssetAmount `json:"min_to_receive"`
-	Expiration   objects.Time        `json:"expiration"`
-	FillOrKill   bool                `json:"fill_or_kill"`
-	Extensions   objects.Extensions  `json:"extensions"`
+	Seller       GrapheneID  `json:"seller"`
+	Fee          AssetAmount `json:"fee"`
+	AmountToSell AssetAmount `json:"amount_to_sell"`
+	MinToReceive AssetAmount `json:"min_to_receive"`
+	Expiration   Time        `json:"expiration"`
+	FillOrKill   bool        `json:"fill_or_kill"`
+	Extensions   Extensions  `json:"extensions"`
 }
 
 //implements Operation interface
-func (p *LimitOrderCreateOperation) ApplyFee(fee objects.AssetAmount) {
+func (p *LimitOrderCreateOperation) ApplyFee(fee AssetAmount) {
 	p.Fee = fee
 }
 
 //implements Operation interface
-func (p LimitOrderCreateOperation) Type() objects.OperationType {
-	return objects.OperationTypeLimitOrderCreate
+func (p LimitOrderCreateOperation) Type() OperationType {
+	return OperationTypeLimitOrderCreate
 }
 
 //implements Operation interface
@@ -44,7 +43,7 @@ func (p LimitOrderCreateOperation) Marshal(enc *util.TypeEncoder) error {
 
 func NewLimitOrderCreateOperation() *LimitOrderCreateOperation {
 	op := LimitOrderCreateOperation{
-		Extensions: objects.Extensions{},
+		Extensions: Extensions{},
 	}
 
 	return &op

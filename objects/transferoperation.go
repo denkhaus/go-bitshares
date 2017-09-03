@@ -1,30 +1,29 @@
-package operations
+package objects
 
 //go:generate ffjson $GOFILE
 
 import (
-	"github.com/denkhaus/bitshares/objects"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
 type TransferOperation struct {
-	From       objects.GrapheneID  `json:"from"`
-	To         objects.GrapheneID  `json:"to"`
-	Amount     objects.AssetAmount `json:"amount"`
-	Fee        objects.AssetAmount `json:"fee"`
-	Memo       objects.Memo        `json:"memo"`
-	Extensions objects.Extensions  `json:"extensions"`
+	From       GrapheneID  `json:"from"`
+	To         GrapheneID  `json:"to"`
+	Amount     AssetAmount `json:"amount"`
+	Fee        AssetAmount `json:"fee"`
+	Memo       Memo        `json:"memo"`
+	Extensions Extensions  `json:"extensions"`
 }
 
 //implements Operation interface
-func (p *TransferOperation) ApplyFee(fee objects.AssetAmount) {
+func (p *TransferOperation) ApplyFee(fee AssetAmount) {
 	p.Fee = fee
 }
 
 //implements Operation interface
-func (p TransferOperation) Type() objects.OperationType {
-	return objects.OperationTypeTransfer
+func (p TransferOperation) Type() OperationType {
+	return OperationTypeTransfer
 }
 
 //implements Operation interface
@@ -62,7 +61,7 @@ func (p TransferOperation) Marshal(enc *util.TypeEncoder) error {
 //NewTransferOperation creates a new TransferOperation
 func NewTransferOperation() *TransferOperation {
 	tx := TransferOperation{
-		Extensions: objects.Extensions{},
+		Extensions: Extensions{},
 	}
 	return &tx
 }

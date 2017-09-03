@@ -5,7 +5,6 @@ import (
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/objects"
-	"github.com/denkhaus/bitshares/operations"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -103,7 +102,7 @@ func (suite *walletAPITest) Test_GetAccountByName() {
 
 func (suite *walletAPITest) Test_CancelOrder() {
 
-	op := operations.NewLimitOrderCancelOperation(
+	op := objects.NewLimitOrderCancelOperation(
 		*objects.NewGrapheneID("1.7.69314"),
 	)
 	op.FeePayingAccount = *TestAccount1ID

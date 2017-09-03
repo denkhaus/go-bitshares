@@ -1,28 +1,27 @@
-package operations
+package objects
 
 //go:generate ffjson $GOFILE
 
 import (
-	"github.com/denkhaus/bitshares/objects"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
 type LimitOrderCancelOperation struct {
-	FeePayingAccount objects.GrapheneID  `json:"fee_paying_account"`
-	Order            objects.GrapheneID  `json:"order"`
-	Fee              objects.AssetAmount `json:"fee"`
-	Extensions       objects.Extensions  `json:"extensions"`
+	FeePayingAccount GrapheneID  `json:"fee_paying_account"`
+	Order            GrapheneID  `json:"order"`
+	Fee              AssetAmount `json:"fee"`
+	Extensions       Extensions  `json:"extensions"`
 }
 
 //implements Operation interface
-func (p *LimitOrderCancelOperation) ApplyFee(fee objects.AssetAmount) {
+func (p *LimitOrderCancelOperation) ApplyFee(fee AssetAmount) {
 	p.Fee = fee
 }
 
 //implements Operation interface
-func (p LimitOrderCancelOperation) Type() objects.OperationType {
-	return objects.OperationTypeLimitOrderCancel
+func (p LimitOrderCancelOperation) Type() OperationType {
+	return OperationTypeLimitOrderCancel
 }
 
 //implements Operation interface
@@ -49,9 +48,9 @@ func (p LimitOrderCancelOperation) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-func NewLimitOrderCancelOperation(order objects.GrapheneID) *LimitOrderCancelOperation {
+func NewLimitOrderCancelOperation(order GrapheneID) *LimitOrderCancelOperation {
 	op := LimitOrderCancelOperation{
-		Extensions: objects.Extensions{},
+		Extensions: Extensions{},
 		Order:      order,
 	}
 
