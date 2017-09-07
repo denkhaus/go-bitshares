@@ -11,18 +11,32 @@ const (
 var (
 	ChainIDBitSharesFull = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
 	ChainIDBitSharesTest = "39f5e2ede1f8bc1a3a54a7914414e3779e33193f1f5693510e73cb7a87617447"
-	UserID1              = objects.NewGrapheneID("1.2.282")      //xeroc user account
-	UserID2              = objects.NewGrapheneID("1.2.253")      //stan user account
-	UserID3              = objects.NewGrapheneID("1.2.0")        //committee-account user account
-	AssetCNY             = objects.NewGrapheneID("1.3.113")      //cny asset
-	AssetBTS             = objects.NewGrapheneID("1.3.0")        //bts asset
-	AssetUSD             = objects.NewGrapheneID("1.3.121")      // usd asset
-	AssetTEST            = objects.NewGrapheneID("1.3.0")        // test asset
-	AssetPEGFAKEUSD      = objects.NewGrapheneID("1.3.22")       // test asset
-	BitAssetDataCNY      = objects.NewGrapheneID("2.4.13")       //cny bitasset data id
-	LimitOrder1          = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
-	CallOrder1           = objects.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
-	SettleOrder1         = objects.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
+	UserID1              = objects.NewGrapheneID("1.2.282") //xeroc user account
+	UserID2              = objects.NewGrapheneID("1.2.253") //stan user account
+	UserID3              = objects.NewGrapheneID("1.2.0")   //committee-account user account
+	AssetCNY             = objects.NewGrapheneID("1.3.113") //cny asset
+	AssetBTS             = objects.NewGrapheneID("1.3.0")   //bts asset
+	AssetUSD             = objects.NewGrapheneID("1.3.121") // usd asset
+	AssetTEST            = objects.NewGrapheneID("1.3.0")   // test asset
+	AssetPEGFAKEUSD      = objects.NewGrapheneID("1.3.22")  // test asset
+	AssetBTC             = objects.NewGrapheneID("1.3.103")
+	AssetSILVER          = objects.NewGrapheneID("1.3.105")
+	AssetGOLD            = objects.NewGrapheneID("1.3.106")
+	AssetEUR             = objects.NewGrapheneID("1.3.120")
+	AssetOBITS           = objects.NewGrapheneID("1.3.562")
+	AssetOpenETH         = objects.NewGrapheneID("1.3.850")
+	AssetOpenLTC         = objects.NewGrapheneID("1.3.859")
+	AssetOpenBTC         = objects.NewGrapheneID("1.3.861")
+	AssetOpenSTEEM       = objects.NewGrapheneID("1.3.973")
+	AssetOpenUSDT        = objects.NewGrapheneID("1.3.1042")
+	AssetYOYOW           = objects.NewGrapheneID("1.3.1093")
+	AssetRUBEL           = objects.NewGrapheneID("1.3.1325")
+	AssetHERO            = objects.NewGrapheneID("1.3.1362")
+
+	BitAssetDataCNY = objects.NewGrapheneID("2.4.13")       //cny bitasset data id
+	LimitOrder1     = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
+	CallOrder1      = objects.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
+	SettleOrder1    = objects.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
 
 	TestAccount1UserName      = "denk-haus"
 	TestAccount1Password      = "denkhaus-testnet"

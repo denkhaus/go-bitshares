@@ -38,6 +38,7 @@ type BitsharesAPI interface {
 	CallWebsocketAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
 	CancelAllSubscriptions() error
+	CancelOrder(orderID objects.GrapheneObject, broadcast bool) (*objects.Transaction, error)
 	GetBlock(number uint64) (*objects.Block, error)
 	GetDynamicGlobalProperties() (*objects.DynamicGlobalProperties, error)
 	SubscribeToMarket(notifyID int, base objects.GrapheneObject, quote objects.GrapheneObject) error
@@ -441,7 +442,7 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote objects.GrapheneObject, toTim
 func (p *bitsharesAPI) GetChainID() (string, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseApiID, "get_chain_id", EmptyParams)
 	if err != nil {
-		return "", err // errors.Annotate(err, "get_chain_id")
+		return "", err
 	}
 
 	//util.Dump("get_chain_id <", resp)
@@ -450,11 +451,10 @@ func (p *bitsharesAPI) GetChainID() (string, error) {
 
 //GetObjects returns a list of Graphene Objects by ID.
 func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{}, error) {
-
 	params := objects.GrapheneObjects(ids).ToObjectIDs()
 	resp, err := p.wsClient.CallAPI(0, "get_objects", params)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_objects")
+		return nil, err
 	}
 
 	//	util.Dump("get_objects <", resp)
@@ -596,9 +596,24 @@ func (p *bitsharesAPI) Sell(account objects.GrapheneObject, base, quote objects.
 	return &ret, nil
 }
 
+func (p *bitsharesAPI) CancelOrder(orderID objects.GrapheneObject, broadcast bool) (*objects.Transaction, error) {
+	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.Id(), broadcast)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := objects.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+}
+
 func (p *bitsharesAPI) BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
 
+	//TODO: use proper precision, avoid rounding
 	minToReceive := fmt.Sprintf("%f", amount)
 	amountToSell := fmt.Sprintf("%f", rate*amount)
 
@@ -608,6 +623,7 @@ func (p *bitsharesAPI) BuyEx(account objects.GrapheneObject, base, quote objects
 func (p *bitsharesAPI) SellEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
 
+	//TODO: use proper precision, avoid rounding
 	amountToSell := fmt.Sprintf("%f", amount)
 	minToReceive := fmt.Sprintf("%f", rate*amount)
 

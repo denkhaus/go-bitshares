@@ -2,13 +2,13 @@ package rpc
 
 import (
 	"encoding/json"
+	"net"
 
 	"fmt"
 	"log"
 	"sync"
 	"time"
 
-	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/net/websocket"
@@ -25,10 +25,10 @@ type wsClient struct {
 	notify      rpcNotify   // unmarshal target
 	onError     ErrorFunc
 	errors      chan error
-	done        chan struct{}
 	closing     bool
 	shutdown    bool
 	currentID   uint64
+	wg          sync.WaitGroup
 	mutex       sync.Mutex // protects the following
 	pending     map[uint64]*RPCCall
 	mutexNotify sync.Mutex // protects the following
@@ -40,7 +40,6 @@ func NewWebsocketClient(endpointURL string) WebsocketClient {
 		pending:   make(map[uint64]*RPCCall),
 		errors:    make(chan error, 10),
 		notifyFns: make(map[int]NotifyFunc),
-		done:      make(chan struct{}, 1),
 		currentID: 1,
 		url:       endpointURL,
 	}
@@ -71,7 +70,7 @@ func (p *wsClient) Close() error {
 			return errors.Annotate(err, "close connection")
 		}
 
-		p.done <- struct{}{}
+		p.wg.Wait()
 		close(p.errors)
 		p.conn = nil
 	}
@@ -80,7 +79,10 @@ func (p *wsClient) Close() error {
 }
 
 func (p *wsClient) monitor() {
-	for {
+	p.wg.Add(1)
+	defer p.wg.Done()
+
+	for !p.shutdown {
 		select {
 		case err := <-p.errors:
 			if err != nil {
@@ -90,9 +92,7 @@ func (p *wsClient) monitor() {
 					log.Println("rpc error: ", err)
 				}
 			}
-
-		case <-p.done:
-			break
+		default:
 		}
 	}
 }
@@ -129,30 +129,30 @@ func (p *wsClient) handleCustomData(data map[string]interface{}) error {
 }
 
 func (p *wsClient) receive() {
+	p.wg.Add(1)
+	defer p.wg.Done()
 
-loop:
-	for {
-		select {
-		case <-p.done:
-			break loop
-		default:			
-		}
-
+	for !p.closing {
 		//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
 		var data map[string]interface{}
 		if err := p.Decode(&data); err != nil {
-			util.Dump("err1", err)
+			if e, ok := err.(*net.OpError); ok {
+				if e.Err.Error() == "use of closed network connection" {
+					// end loop without notification
+					break
+				}
+			}
+
 			p.errors <- errors.Annotate(err, "decode in")
-			break
+			continue
 		}
 
 		if p.resp.Is(data) {
 			p.resp.reset()
 			err := mapstructure.Decode(data, &p.resp)
 			if err != nil {
-				util.Dump("err2", err)
 				p.errors <- errors.Annotate(err, "decode response")
-				break
+				continue
 			}
 
 			//util.Dump(">", p.resp)
@@ -173,7 +173,6 @@ loop:
 				continue
 			}
 		} else if err := p.handleCustomData(data); err != nil {
-			util.Dump("err3", err)
 			p.errors <- errors.Annotate(err, "handle custom data")
 			continue
 		}

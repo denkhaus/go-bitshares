@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -116,15 +117,15 @@ func (suite *commonTest) Test_GetAccountByName() {
 
 func (suite *commonTest) Test_GetTradeHistory() {
 	dtTo := time.Now().UTC()
-	dtFrom := dtTo.Add(-time.Hour)
+	dtFrom := dtTo.Add(-time.Hour * 10)
 
-	res, err := suite.TestAPI.GetTradeHistory("CNY", "BTS", dtTo, dtFrom, 50)
+	res, err := suite.TestAPI.GetTradeHistory(AssetOpenLTC, AssetBTS, dtTo, dtFrom, 50)
 	if err != nil {
 		suite.Fail(err.Error(), "GetTradeHistory")
 	}
 
 	suite.NotNil(res)
-	//util.Dump("markettrades >", res)
+	util.Dump("markettrades >", res)
 }
 
 func (suite *commonTest) Test_GetLimitOrders() {
