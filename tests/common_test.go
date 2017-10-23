@@ -117,9 +117,10 @@ func (suite *commonTest) Test_GetAccountByName() {
 
 func (suite *commonTest) Test_GetTradeHistory() {
 	dtTo := time.Now().UTC()
-	dtFrom := dtTo.Add(-time.Hour * 24)
 
+	dtFrom := dtTo.Add(-time.Hour * 24)
 	res, err := suite.TestAPI.GetTradeHistory(AssetBTS, AssetHERO, dtTo, dtFrom, 50)
+
 	if err != nil {
 		suite.Fail(err.Error(), "GetTradeHistory")
 	}
