@@ -8,8 +8,7 @@ clean_ffjson_base:
 	@rm operations/*_ffjson_expose.go ||:
 
 clean_ffjson_gen:
-	@rm objects/*_ffjson.go ||:
-	@rm operations/*_ffjson.go ||:
+	@rm objects/*_ffjson.go ||:	
 
 generate: clean_ffjson_base	
 	-go generate ./...

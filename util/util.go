@@ -6,19 +6,14 @@ import (
 	"fmt"
 	"math"
 	"os"
-<<<<<<< HEAD
+
 	"path"
-=======
->>>>>>> 65ff4533ecaacfd494b95dec6cef179afb6c9bdb
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-<<<<<<< HEAD
 	"github.com/mitchellh/go-homedir"
-=======
->>>>>>> 65ff4533ecaacfd494b95dec6cef179afb6c9bdb
 )
 
 func ToBytes(in interface{}) []byte {

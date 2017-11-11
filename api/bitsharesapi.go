@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/denkhaus/bitshares/objects"
@@ -58,9 +57,9 @@ type BitsharesAPI interface {
 	//wallet API
 	//Transfer(from, to objects.GrapheneObject, amount objects.AssetAmount) (interface{}, error)
 	ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error)
-	//Lock() error
-	//Unlock(password string) error
-	//IsLocked() (bool, error)
+	WalletLock() error
+	WalletUnlock(password string) error
+	WalletIsLocked() (bool, error)
 	Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
 	BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
 	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
@@ -117,44 +116,40 @@ func (p *bitsharesAPI) login() (bool, error) {
 }
 
 func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
-
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseApiID, "set_subscribe_callback", notifyID, clearFilter)
 	if err != nil {
-		return err // errors.Annotate(err, "set_subscribe_callback")
+		return err
 	}
 
 	return nil
 }
 
 func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base objects.GrapheneObject, quote objects.GrapheneObject) error {
-
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseApiID, "subscribe_to_market", notifyID, base.Id(), quote.Id())
 	if err != nil {
-		return err // errors.Annotate(err, "subscribe_to_market")
+		return err
 	}
 
 	return nil
 }
 
 func (p *bitsharesAPI) UnsubscribeFromMarket(base objects.GrapheneObject, quote objects.GrapheneObject) error {
-
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseApiID, "unsubscribe_from_market", base.Id(), quote.Id())
 	if err != nil {
-		return err // errors.Annotate(err, "unsubscribe_from_market")
+		return err
 	}
 
 	return nil
 }
 
 func (p *bitsharesAPI) CancelAllSubscriptions() error {
-
 	// returns nil
 	_, err := p.wsClient.CallAPI(p.databaseApiID, "cancel_all_subscriptions", EmptyParams)
 	if err != nil {
-		return err // errors.Annotate(err, "cancel_all_subscriptions")
+		return err
 	}
 
 	return nil
@@ -167,7 +162,7 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *objects.Transaction) (string, er
 
 	resp, err := p.wsClient.CallAPI(p.BroadcastApiID(), "broadcast_transaction", tx)
 	if err != nil {
-		return "", err //errors.Annotate(err, "broadcast_transaction")
+		return "", err
 	}
 
 	util.Dump("broadcast_transaction <", resp)
@@ -291,9 +286,8 @@ func (p *bitsharesAPI) GetAccountBalances(account objects.GrapheneObject, assets
 }
 
 //ListAssets retrieves assets
-//lowerBoundSymbol: Lower bound of symbol names to retrieve
-//limit: Maximum number of assets to fetch, if the constant AssetsListAll
-//is passed, all existing assets will be retrieved.
+//@param lowerBoundSymbol: Lower bound of symbol names to retrieve
+//@param limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
 func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error) {
 
 	lim := limit
@@ -532,70 +526,6 @@ func (p *bitsharesAPI) GetObjects(ids ...objects.GrapheneObject) ([]interface{},
 	return ret, nil
 }
 
-// Place a limit order attempting to buy one asset with another.
-//
-// This API call abstracts away some of the details of the sell_asset call to be more
-// user friendly. All orders placed with buy never timeout and will not be killed if they
-// cannot be filled immediately. If you wish for one of these parameters to be different,
-// then sell_asset should be used instead.
-//
-// @param buyer_account The account buying the asset for another asset.
-// @param base The name or id of the asset to buy.
-// @param quote The name or id of the assest being offered as payment.
-// @param rate The rate in base:quote at which you want to buy.
-// @param amount the amount of base you want to buy.
-// @param broadcast true to broadcast the transaction on the network.
-// @param The signed transaction selling the funds.
-//
-func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject,
-	rate string, amount string, broadcast bool) (*objects.Transaction, error) {
-
-	resp, err := p.rpcClient.CallAPI("buy", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
-	if err != nil {
-		return nil, err
-	}
-
-	util.Dump("buy >", resp)
-
-	ret := objects.Transaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
-	}
-
-	return &ret, nil
-}
-
-//Place a limit order attempting to sell one asset for another.
-//
-// This API call abstracts away some of the details of the sell_asset call to be more
-// user friendly. All orders placed with sell never timeout and will not be killed if they
-// cannot be filled immediately. If you wish for one of these parameters to be different,
-// then sell_asset should be used instead.
-//
-// @param seller_account the account providing the asset being sold, and which will
-//                       receive the processed of the sale.
-// @param base The name or id of the asset to sell.
-// @param quote The name or id of the asset to recieve.
-// @param rate The rate in base:quote at which you want to sell.
-// @param amount The amount of base you want to sell.
-// @param broadcast true to broadcast the transaction on the network.
-// @returns The signed transaction selling the funds.
-//
-func (p *bitsharesAPI) Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject,
-	rate string, amount string, broadcast bool) (*objects.Transaction, error) {
-	resp, err := p.rpcClient.CallAPI("sell", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
-	if err != nil {
-		return nil, err
-	}
-
-	ret := objects.Transaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
-	}
-
-	return &ret, nil
-}
-
 func (p *bitsharesAPI) CancelOrder(orderID objects.GrapheneObject, broadcast bool) (*objects.Transaction, error) {
 	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.Id(), broadcast)
 	if err != nil {
@@ -608,71 +538,6 @@ func (p *bitsharesAPI) CancelOrder(orderID objects.GrapheneObject, broadcast boo
 	}
 
 	return &ret, nil
-}
-
-func (p *bitsharesAPI) BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
-	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
-
-	//TODO: use proper precision, avoid rounding
-	minToReceive := fmt.Sprintf("%f", amount)
-	amountToSell := fmt.Sprintf("%f", rate*amount)
-
-	return p.SellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
-}
-
-func (p *bitsharesAPI) SellEx(account objects.GrapheneObject, base, quote objects.GrapheneObject,
-	rate float64, amount float64, broadcast bool) (*objects.Transaction, error) {
-
-	//TODO: use proper precision, avoid rounding
-	amountToSell := fmt.Sprintf("%f", amount)
-	minToReceive := fmt.Sprintf("%f", rate*amount)
-
-	return p.SellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
-}
-
-func (p *bitsharesAPI) SellAsset(account objects.GrapheneObject,
-	amountToSell string, symbolToSell objects.GrapheneObject,
-	minToReceive string, symbolToReceive objects.GrapheneObject,
-	timeout uint32, fillOrKill bool, broadcast bool) (*objects.Transaction, error) {
-
-	resp, err := p.rpcClient.CallAPI("sell_asset", account.Id(),
-		amountToSell, symbolToSell.Id(),
-		minToReceive, symbolToReceive.Id(),
-		timeout, fillOrKill, broadcast,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	//util.Dump("sell_asset >", resp)
-
-	ret := objects.Transaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
-	}
-
-	return &ret, nil
-}
-
-func (p *bitsharesAPI) ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error) {
-
-	resp, err := p.rpcClient.CallAPI("list_account_balances", account.Id())
-	if err != nil {
-		return nil, err
-	}
-
-	//util.Dump("list_account_balances >", resp)
-
-	data := resp.([]interface{})
-	ret := make([]objects.AssetAmount, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal AssetAmount")
-		}
-	}
-
-	return ret, nil
 }
 
 func (p *bitsharesAPI) CallWebsocketAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
