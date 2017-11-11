@@ -18,14 +18,12 @@ func (p *bitsharesAPI) WalletLock() error {
 // unlock the wallet
 func (p *bitsharesAPI) WalletUnlock(password string) error {
 	_, err := p.rpcClient.CallAPI("unlock", password)
-
 	return err
 }
 
-// Check if wallet is locked.
+// check if wallet is locked.
 func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 	resp, err := p.rpcClient.CallAPI("is_locked", EmptyParams)
-
 	return resp.(bool), err
 }
 
@@ -62,7 +60,7 @@ func (p *bitsharesAPI) Buy(account objects.GrapheneObject, base, quote objects.G
 	return &ret, nil
 }
 
-//Place a limit order attempting to sell one asset for another.
+// Place a limit order attempting to sell one asset for another.
 //
 // This API call abstracts away some of the details of the sell_asset call to be more
 // user friendly. All orders placed with sell never timeout and will not be killed if they
@@ -136,7 +134,8 @@ func (p *bitsharesAPI) SellAsset(account objects.GrapheneObject,
 	return &ret, nil
 }
 
-//Borrow an asset or update the debt/collateral ratio for the loan.
+// Borrow an asset or update the debt/collateral ratio for the loan.
+//
 // @param account: the id of the account associated with the transaction.
 // @param amountToBorrow: the amount of the asset being borrowed. Make this value negative to pay back debt.
 // @param symbolToBorrow: the symbol or id of the asset being borrowed.
