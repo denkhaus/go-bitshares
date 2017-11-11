@@ -45,6 +45,7 @@ type BitsharesAPI interface {
 	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
 	GetAccountByName(name string) (*objects.Account, error)
 	GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error)
+	GetMarginPositions(accountID objects.GrapheneObject) ([]objects.CallOrder, error)
 	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
 	GetLimitOrders(base, quote objects.GrapheneObject, limit int) (objects.LimitOrders, error)
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
@@ -392,10 +393,31 @@ func (p *bitsharesAPI) GetCallOrders(assetID objects.GrapheneObject, limit int) 
 
 	resp, err := p.wsClient.CallAPI(0, "get_call_orders", assetID.Id(), limit)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_call_orders")
+		return nil, err
 	}
 
 	//util.Dump("callorders in", resp)
+
+	data := resp.([]interface{})
+	ret := make([]objects.CallOrder, len(data))
+
+	for idx, a := range data {
+		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
+			return nil, errors.Annotate(err, "unmarshal CallOrder")
+		}
+	}
+
+	return ret, nil
+}
+
+//GetMarginPositions returns a slice of CallOrder objects for the specified account.
+func (p *bitsharesAPI) GetMarginPositions(accountID objects.GrapheneObject) ([]objects.CallOrder, error) {
+	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.Id())
+	if err != nil {
+		return nil, err
+	}
+
+	//util.Dump("marginpositions in", resp)
 
 	data := resp.([]interface{})
 	ret := make([]objects.CallOrder, len(data))

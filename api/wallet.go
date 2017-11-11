@@ -136,6 +136,34 @@ func (p *bitsharesAPI) SellAsset(account objects.GrapheneObject,
 	return &ret, nil
 }
 
+//Borrow an asset or update the debt/collateral ratio for the loan.
+// @param account: the id of the account associated with the transaction.
+// @param amountToBorrow: the amount of the asset being borrowed. Make this value negative to pay back debt.
+// @param symbolToBorrow: the symbol or id of the asset being borrowed.
+// @param amountOfCollateral: the amount of the backing asset to add to your collateral position. Make this negative to claim back some of your collateral. The backing asset is defined in the bitasset_options for the asset being borrowed.
+// @param broadcast: true to broadcast the transaction on the network
+func (p *bitsharesAPI) BorrowAsset(account objects.GrapheneObject,
+	amountToBorrow string, symbolToBorrow objects.GrapheneObject,
+	amountOfCollateral string, broadcast bool) (*objects.Transaction, error) {
+
+	resp, err := p.rpcClient.CallAPI("borrow_asset", account.Id(),
+		amountToBorrow, symbolToBorrow.Id(),
+		amountOfCollateral, broadcast,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	//util.Dump("borrow_asset >", resp)
+
+	ret := objects.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+}
+
 func (p *bitsharesAPI) ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error) {
 
 	resp, err := p.rpcClient.CallAPI("list_account_balances", account.Id())

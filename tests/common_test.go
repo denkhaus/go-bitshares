@@ -126,7 +126,7 @@ func (suite *commonTest) Test_GetTradeHistory() {
 	}
 
 	suite.NotNil(res)
-	util.Dump("markettrades >", res)
+	//util.Dump("markettrades >", res)
 }
 
 func (suite *commonTest) Test_GetLimitOrders() {
@@ -141,7 +141,6 @@ func (suite *commonTest) Test_GetLimitOrders() {
 }
 
 func (suite *commonTest) Test_GetCallOrders() {
-
 	res, err := suite.TestAPI.GetCallOrders(AssetUSD, 50)
 	if err != nil {
 		suite.Fail(err.Error(), "GetCallOrders")
@@ -151,8 +150,17 @@ func (suite *commonTest) Test_GetCallOrders() {
 	//	util.Dump("callorders >", res)
 }
 
-func (suite *commonTest) Test_GetSettleOrders() {
+func (suite *commonTest) Test_GetMarginPositions() {
+	res, err := suite.TestAPI.GetMarginPositions(UserID2)
+	if err != nil {
+		suite.Fail(err.Error(), "GetMArginPositions")
+	}
 
+	suite.NotNil(res)
+	util.Dump("marginpositions >", res)
+}
+
+func (suite *commonTest) Test_GetSettleOrders() {
 	res, err := suite.TestAPI.GetSettleOrders(AssetCNY, 50)
 	if err != nil {
 		suite.Fail(err.Error(), "GetSettleOrders")

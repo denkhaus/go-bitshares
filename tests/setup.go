@@ -33,7 +33,7 @@ var (
 	AssetRUBEL           = objects.NewGrapheneID("1.3.1325")
 	AssetHERO            = objects.NewGrapheneID("1.3.1362")
 
-	BitAssetDataCNY = objects.NewGrapheneID("2.4.13")       //cny bitasset data id
+	BitAssetDataCNY = objects.NewGrapheneID("2.4.13")       // cny bitasset data id
 	LimitOrder1     = objects.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
 	CallOrder1      = objects.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
 	SettleOrder1    = objects.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
