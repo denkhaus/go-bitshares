@@ -48,10 +48,19 @@ func (suite *commonTest) Test_GetAccountBalances() {
 
 	res, err := suite.TestAPI.GetAccountBalances(UserID2, AssetBTS)
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccountBalances")
+		suite.Fail(err.Error(), "GetAccountBalances 1")
 	}
 
 	suite.NotNil(res)
+	util.Dump("balance bts >", res)
+
+	res, err = suite.TestAPI.GetAccountBalances(UserID2)
+	if err != nil {
+		suite.Fail(err.Error(), "GetAccountBalances 2")
+	}
+
+	suite.NotNil(res)
+	util.Dump("balances all >", res)
 }
 
 func (suite *commonTest) Test_GetAccounts() {
@@ -153,11 +162,11 @@ func (suite *commonTest) Test_GetCallOrders() {
 func (suite *commonTest) Test_GetMarginPositions() {
 	res, err := suite.TestAPI.GetMarginPositions(UserID2)
 	if err != nil {
-		suite.Fail(err.Error(), "GetMArginPositions")
+		suite.Fail(err.Error(), "GetMarginPositions")
 	}
 
 	suite.NotNil(res)
-	util.Dump("marginpositions >", res)
+	//util.Dump("marginpositions >", res)
 }
 
 func (suite *commonTest) Test_GetSettleOrders() {
