@@ -11,14 +11,15 @@ const (
 var (
 	ChainIDBitSharesFull = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
 	ChainIDBitSharesTest = "39f5e2ede1f8bc1a3a54a7914414e3779e33193f1f5693510e73cb7a87617447"
-	UserID1              = objects.NewGrapheneID("1.2.282") //xeroc user account
-	UserID2              = objects.NewGrapheneID("1.2.253") //stan user account
-	UserID3              = objects.NewGrapheneID("1.2.0")   //committee-account user account
-	AssetCNY             = objects.NewGrapheneID("1.3.113") //cny asset
-	AssetBTS             = objects.NewGrapheneID("1.3.0")   //bts asset
-	AssetUSD             = objects.NewGrapheneID("1.3.121") // usd asset
-	AssetTEST            = objects.NewGrapheneID("1.3.0")   // test asset
-	AssetPEGFAKEUSD      = objects.NewGrapheneID("1.3.22")  // test asset
+	UserID1              = objects.NewGrapheneID("1.2.282")  //xeroc user account
+	UserID2              = objects.NewGrapheneID("1.2.253")  //stan user account
+	UserID3              = objects.NewGrapheneID("1.2.0")    //committee-account user account
+	UserID4              = objects.NewGrapheneID("1.2.1751") //denkhaus user account
+	AssetCNY             = objects.NewGrapheneID("1.3.113")  //cny asset
+	AssetBTS             = objects.NewGrapheneID("1.3.0")    //bts asset
+	AssetUSD             = objects.NewGrapheneID("1.3.121")  // usd asset
+	AssetTEST            = objects.NewGrapheneID("1.3.0")    // test asset
+	AssetPEGFAKEUSD      = objects.NewGrapheneID("1.3.22")   // test asset
 	AssetBTC             = objects.NewGrapheneID("1.3.103")
 	AssetSILVER          = objects.NewGrapheneID("1.3.105")
 	AssetGOLD            = objects.NewGrapheneID("1.3.106")

@@ -252,7 +252,7 @@ func (p *bitsharesAPI) GetDynamicGlobalProperties() (*objects.DynamicGlobalPrope
 
 	resp, err := p.wsClient.CallAPI(0, "get_dynamic_global_properties", EmptyParams)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_dynamic_global_properties")
+		return nil, err
 	}
 
 	//util.Dump("get_dynamic_global_properties <", resp)
@@ -271,7 +271,7 @@ func (p *bitsharesAPI) GetAccountBalances(account objects.GrapheneObject, assets
 	ids := objects.GrapheneObjects(assets).ToObjectIDs()
 	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.Id(), ids)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_account_balances")
+		return nil, err
 	}
 
 	data := resp.([]interface{})
