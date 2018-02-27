@@ -210,14 +210,14 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 	return &ret, nil
 }
 
-//GetAccountByName returns a Account object by username.ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error)
+//GetAccountByName returns a Account object by username
 func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
 		return nil, err // errors.Annotate(err, "get_account_by_name")
 	}
 
-	//spew.Dump(resp)
+	//util.Dump("get_account_by_name <", resp)
 	ret := objects.Account{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Account")
