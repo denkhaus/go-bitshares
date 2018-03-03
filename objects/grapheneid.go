@@ -70,6 +70,10 @@ func (p GrapheneID) Equals(o GrapheneObject) bool {
 	return p.id == o.Id()
 }
 
+func (p GrapheneID) EqualsID(o ObjectID) bool {
+	return p.id == o
+}
+
 //Id returns the objects ObjectID
 func (p GrapheneID) Id() ObjectID {
 	return p.id
