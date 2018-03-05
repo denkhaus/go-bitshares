@@ -61,6 +61,7 @@ type BitsharesAPI interface {
 	WalletLock() error
 	WalletUnlock(password string) error
 	WalletIsLocked() (bool, error)
+	BorrowAsset(account objects.GrapheneObject, amountToBorrow string, symbolToBorrow objects.GrapheneObject, amountOfCollateral string, broadcast bool) (*objects.Transaction, error)
 	Buy(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
 	BuyEx(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
 	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
