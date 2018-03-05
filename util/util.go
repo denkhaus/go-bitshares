@@ -110,7 +110,13 @@ func ToFixedRounded(num float64, precision int) float64 {
 
 func ToFixed(num float64, precision int) float64 {
 	output := math.Pow(10, float64(precision))
-	return float64(num*output) / output
+	return float64(int(num*output)) / output
+}
+
+func ToPrecisionString(value float64, precision int) string {
+	val := ToFixed(value, precision)
+	ft := fmt.Sprintf("%%.%df", precision)
+	return fmt.Sprintf(ft, val)
 }
 
 func JoinHome(p string) (string, error) {
