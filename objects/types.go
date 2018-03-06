@@ -35,7 +35,7 @@ const (
 	OperationTypeTransfer OperationType = iota
 	OperationTypeLimitOrderCreate
 	OperationTypeLimitOrderCancel
-	OperationTypeCALL_ORDER_UPDATE_OPERATION
+	OperationTypeCallOrderUpdate
 	OperationTypeFILL_ORDER_OPERATION
 	OperationTypeACCOUNT_CREATE_OPERATION
 	OperationTypeACCOUNT_UPDATE_OPERATION

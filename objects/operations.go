@@ -104,6 +104,12 @@ func (p *Operations) UnmarshalJSON(data []byte) error {
 				return errors.Annotate(err, "unmarshal LimitOrderCancelOperation")
 			}
 
+		case OperationTypeCallOrderUpdate:
+			ops[idx] = &CallOrderUpdateOperation{}
+			if err := ffjson.Unmarshal(util.ToBytes(env.Operation), ops[idx]); err != nil {
+				return errors.Annotate(err, "unmarshal CallOrderUpdateOperation")
+			}
+
 		default:
 			return errors.Errorf("Operation type %d not yet supported", env.Type)
 		}

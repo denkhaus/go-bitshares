@@ -9,7 +9,7 @@ import (
 
 type AssetAmount struct {
 	Asset  GrapheneID `json:"asset_id"`
-	Amount UInt64     `json:"amount"`
+	Amount Int64      `json:"amount"`
 }
 
 func (p *AssetAmount) Rate(prec float64) float64 {

@@ -335,18 +335,17 @@ handle_From:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.From.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.From.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -361,18 +360,17 @@ handle_To:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.To.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.To.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}

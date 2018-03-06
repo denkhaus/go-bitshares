@@ -244,18 +244,17 @@ handle_DateTime:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.DateTime.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.DateTime.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -270,18 +269,17 @@ handle_Price:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Price.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Price.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -296,18 +294,17 @@ handle_Amount:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Amount.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Amount.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -322,18 +319,17 @@ handle_Value:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Value.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Value.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
