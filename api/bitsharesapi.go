@@ -50,7 +50,7 @@ type BitsharesAPI interface {
 	GetLimitOrders(base, quote objects.GrapheneObject, limit int) (objects.LimitOrders, error)
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
-	Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
+	//Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
 	GetTradeHistory(base, quote objects.GrapheneObject, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
 	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
 	GetChainID() (string, error)
