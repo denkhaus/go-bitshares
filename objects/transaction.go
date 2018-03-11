@@ -1,13 +1,8 @@
 package objects
 
 import (
-	"bytes"
-	"fmt"
 	"time"
 
-	"encoding/hex"
-
-	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
@@ -51,46 +46,6 @@ func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 
 	if err := enc.Encode(p.Extensions); err != nil {
 		return errors.Annotate(err, "encode Extension")
-	}
-
-	return nil
-}
-
-//Sign signes a Transaction with the given private keys
-func (p *Transaction) Sign(wifKeys []string, chainID string) error {
-	var buf bytes.Buffer
-	enc := util.NewTypeEncoder(&buf)
-
-	rawChainID, err := hex.DecodeString(chainID)
-	if err != nil {
-		return errors.Annotatef(err, "decode chainID: %v", chainID)
-	}
-
-	if err := enc.Encode(rawChainID); err != nil {
-		return errors.Annotate(err, "encode chainID")
-	}
-
-	if err := enc.Encode(p); err != nil {
-		return errors.Annotate(err, "encode transaction")
-	}
-
-	data := buf.Bytes()
-
-	p.Signatures = make([]Signature, len(wifKeys))
-	for idx, wif := range wifKeys {
-
-		key, err := crypto.GetPrivateKey(wif)
-		if err != nil {
-			return errors.Annotate(err, "GetPrivateKey")
-		}
-
-		sig, err := crypto.Sign(data, key)
-		if err != nil {
-			return errors.Annotate(err, "Sign")
-		}
-
-		fmt.Print("canonical:", sig.IsCanonical())
-		p.Signatures[idx] = Signature(sig.ToHex())
 	}
 
 	return nil

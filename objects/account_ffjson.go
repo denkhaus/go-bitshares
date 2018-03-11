@@ -785,18 +785,17 @@ handle_ID:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.ID.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.ID.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -837,18 +836,17 @@ handle_Statistics:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Statistics.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Statistics.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -863,18 +861,17 @@ handle_MembershipExpirationDate:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.MembershipExpirationDate.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.MembershipExpirationDate.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -1050,18 +1047,17 @@ handle_WhitelistingAccounts:
 				{
 					if tok == fflib.FFTok_null {
 
-						state = fflib.FFParse_after_value
-						goto mainparse
-					}
+					} else {
 
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 
-					err = tmpJWhitelistingAccounts.UnmarshalJSON(tbuf)
-					if err != nil {
-						return fs.WrapErr(err)
+						err = tmpJWhitelistingAccounts.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
 					state = fflib.FFParse_after_value
 				}
@@ -1124,18 +1120,17 @@ handle_BlacklistingAccounts:
 				{
 					if tok == fflib.FFTok_null {
 
-						state = fflib.FFParse_after_value
-						goto mainparse
-					}
+					} else {
 
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 
-					err = tmpJBlacklistingAccounts.UnmarshalJSON(tbuf)
-					if err != nil {
-						return fs.WrapErr(err)
+						err = tmpJBlacklistingAccounts.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
 					state = fflib.FFParse_after_value
 				}
@@ -1198,18 +1193,17 @@ handle_WhitelistedAccounts:
 				{
 					if tok == fflib.FFTok_null {
 
-						state = fflib.FFParse_after_value
-						goto mainparse
-					}
+					} else {
 
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 
-					err = tmpJWhitelistedAccounts.UnmarshalJSON(tbuf)
-					if err != nil {
-						return fs.WrapErr(err)
+						err = tmpJWhitelistedAccounts.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
 					state = fflib.FFParse_after_value
 				}
@@ -1272,18 +1266,17 @@ handle_BlacklistedAccounts:
 				{
 					if tok == fflib.FFTok_null {
 
-						state = fflib.FFParse_after_value
-						goto mainparse
-					}
+					} else {
 
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 
-					err = tmpJBlacklistedAccounts.UnmarshalJSON(tbuf)
-					if err != nil {
-						return fs.WrapErr(err)
+						err = tmpJBlacklistedAccounts.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
 					state = fflib.FFParse_after_value
 				}
@@ -1325,18 +1318,17 @@ handle_Registrar:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Registrar.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Registrar.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -1351,18 +1343,17 @@ handle_Referrer:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.Referrer.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.Referrer.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -1377,18 +1368,17 @@ handle_LifetimeReferrer:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.LifetimeReferrer.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.LifetimeReferrer.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
@@ -1403,18 +1393,17 @@ handle_CashbackVB:
 	{
 		if tok == fflib.FFTok_null {
 
-			state = fflib.FFParse_after_value
-			goto mainparse
-		}
+		} else {
 
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-		err = j.CashbackVB.UnmarshalJSON(tbuf)
-		if err != nil {
-			return fs.WrapErr(err)
+			err = j.CashbackVB.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
 		state = fflib.FFParse_after_value
 	}
