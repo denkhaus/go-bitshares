@@ -44,6 +44,8 @@ type BitsharesAPI interface {
 	UnsubscribeFromMarket(base objects.GrapheneObject, quote objects.GrapheneObject) error
 	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
 	GetAccountByName(name string) (*objects.Account, error)
+	// AccountHistory
+	GetAccountHistory(acc objects.GrapheneObject) (interface{}, error) // AccountHistory
 	GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error)
 	GetMarginPositions(accountID objects.GrapheneObject) ([]objects.CallOrder, error)
 	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
@@ -225,6 +227,91 @@ func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
 	}
 
 	return &ret, nil
+}
+
+// GetAccountHistory returns MarketTrade object.
+/* get_account_history(account_id_type account,
+operation_history_id_type stop = operation_history_id_type (),
+unsigned limit = 100,
+operation_history_id_type start = operation_history_id_type ()) const
+
+account: The account whose history should be queried
+stop: ID of the earliest operation to retrieve
+limit: Maximum number of operations to retrieve (must not exceed 100)
+start: ID of the most recent operation to retrieve
+
+def history(
+        self, first=0,
+        last=0, limit=-1,
+        only_ops=[], exclude_ops=[]
+    ):
+        """ Returns a generator for individual account transactions. The
+            latest operation will be first. This call can be used in a
+            ``for`` loop.
+            :param int first: sequence number of the first
+                transaction to return (*optional*)
+            :param int last: sequence number of the last
+                transaction to return (*optional*)
+            :param int limit: limit number of transactions to
+                return (*optional*)
+            :param array only_ops: Limit generator by these
+                operations (*optional*)
+            :param array exclude_ops: Exclude thse operations from
+                generator (*optional*)
+        """
+        from bitsharesbase.operations import getOperationNameForId
+        _limit = 100
+        cnt = 0
+
+        if first < 0:
+            first = 0
+
+        while True:
+            # RPC call
+            txs = self.bitshares.rpc.get_account_history(
+                self["id"],
+                "1.11.{}".format(last),
+                _limit,
+                "1.11.{}".format(first - 1),
+                api="history"
+            )
+            for i in txs:
+                if exclude_ops and getOperationNameForId(
+                    i["op"][0]
+                ) in exclude_ops:
+                    continue
+                if not only_ops or getOperationNameForId(
+                    i["op"][0]
+                ) in only_ops:
+                    cnt += 1
+                    yield i
+                    if limit >= 0 and cnt >= limit:
+                        return
+
+            if not txs:
+                log.info("No more history returned from API node")
+                break
+            if len(txs) < _limit:
+                log.info("Less than {} have been returned.".format(_limit))
+                break
+first = int(txs[-1]["id"].split(".")[2])
+
+*/
+func (p *bitsharesAPI) GetAccountHistory(acc objects.GrapheneObject) (interface{}, error) {
+	apid := p.HistoryApiID()
+	resp, err := p.wsClient.CallAPI(apid, "get_account_history", acc, "1.11.0", 100, "1.11.-1")
+	if err != nil {
+		return nil, err
+	}
+	// txs = self.bitshares.rpc.get_account_history(
+	// 	self["id"],
+	// 	"1.11.{}".format(last),
+	// 	_limit,
+	// 	"1.11.{}".format(first - 1),
+	// 	api="history"
+	// )
+	data := resp.([]interface{})
+	return data, nil
 }
 
 //GetAccounts returns a list of accounts by ID.
@@ -442,16 +529,13 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote objects.GrapheneObject, toTim
 	if err != nil {
 		return nil, err
 	}
-
 	data := resp.([]interface{})
 	ret := make([]objects.MarketTrade, len(data))
-
 	for idx, a := range data {
 		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
 			return nil, errors.Annotate(err, "unmarshal MarketTrade")
 		}
 	}
-
 	return ret, nil
 }
 
@@ -660,6 +744,5 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		broadcastApiID: InvalidApiID,
 		cryptoApiID:    InvalidApiID,
 	}
-
 	return &api
 }
