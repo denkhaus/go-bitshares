@@ -3,7 +3,8 @@ package tests
 import "github.com/denkhaus/bitshares/objects"
 
 const (
-	wsFullApiUrl = "wss://bitshares.openledger.info/ws"
+	wsFullApiUrl = "wss://node.market.rudex.org"
+	//wsFullApiUrl = "wss://bitshares.openledger.info/ws"
 	wsTestApiUrl = "wss://node.testnet.bitshares.eu/ws"
 	rpcApiUrl    = "http://localhost:8095"
 )

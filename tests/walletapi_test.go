@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
-	"github.com/denkhaus/bitshares/objects"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -98,7 +97,7 @@ func (suite *walletAPITest) Test_GetAccountByName() {
 	suite.NotNil(res)
 	util.Dump("limitorders >", res)
 }
-*/
+
 
 func (suite *walletAPITest) Test_CancelOrder() {
 
@@ -113,7 +112,7 @@ func (suite *walletAPITest) Test_CancelOrder() {
 	}
 
 }
-
+*/
 /* func (suite *walletAPITest) Test_Transfer() {
 
 	am := objects.AssetAmount{

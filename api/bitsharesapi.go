@@ -11,13 +11,14 @@ import (
 )
 
 const (
-	InvalidApiID         = -1
-	AssetsListAll        = -1
-	AssetsMaxBatchSize   = 100
-	GetCallOrdersLimit   = 100
-	GetLimitOrdersLimit  = 100
-	GetSettleOrdersLimit = 100
-	GetTradeHistoryLimit = 100
+	InvalidApiID           = -1
+	AssetsListAll          = -1
+	AssetsMaxBatchSize     = 100
+	GetCallOrdersLimit     = 100
+	GetLimitOrdersLimit    = 100
+	GetSettleOrdersLimit   = 100
+	GetTradeHistoryLimit   = 100
+	GetAccountHistoryLimit = 100
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 )
 
 type BitsharesAPI interface {
+	//Websocket API functions
 	Close() error
 	Connect() error
 	DatabaseApiID() int
@@ -44,21 +46,18 @@ type BitsharesAPI interface {
 	UnsubscribeFromMarket(base objects.GrapheneObject, quote objects.GrapheneObject) error
 	GetAccountBalances(account objects.GrapheneObject, assets ...objects.GrapheneObject) ([]objects.AssetAmount, error)
 	GetAccountByName(name string) (*objects.Account, error)
-	// AccountHistory
-	GetAccountHistory(acc objects.GrapheneObject) (interface{}, error) // AccountHistory
+	GetAccountHistory(account objects.GrapheneObject, stop objects.GrapheneObject, limit int, start objects.GrapheneObject) ([]objects.OperationHistory, error)
 	GetAccounts(accountIDs ...objects.GrapheneObject) ([]objects.Account, error)
 	GetMarginPositions(accountID objects.GrapheneObject) ([]objects.CallOrder, error)
 	GetCallOrders(assetID objects.GrapheneObject, limit int) ([]objects.CallOrder, error)
 	GetLimitOrders(base, quote objects.GrapheneObject, limit int) (objects.LimitOrders, error)
 	GetObjects(objectIDs ...objects.GrapheneObject) ([]interface{}, error)
 	GetSettleOrders(assetID objects.GrapheneObject, limit int) ([]objects.SettleOrder, error)
-	//Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error)
 	GetTradeHistory(base, quote objects.GrapheneObject, toTime, fromTime time.Time, limit int) ([]objects.MarketTrade, error)
 	ListAssets(lowerBoundSymbol string, limit int) ([]objects.Asset, error)
 	GetChainID() (string, error)
 
-	//wallet API
-	//Transfer(from, to objects.GrapheneObject, amount objects.AssetAmount) (interface{}, error)
+	//Wallet API functions
 	ListAccountBalances(account objects.GrapheneObject) ([]objects.AssetAmount, error)
 	WalletLock() error
 	WalletUnlock(password string) error
@@ -129,6 +128,7 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 	return nil
 }
 
+// AccountHistory
 func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base objects.GrapheneObject, quote objects.GrapheneObject) error {
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseApiID, "subscribe_to_market", notifyID, base.Id(), quote.Id())
@@ -217,7 +217,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*objects.Block, error) {
 func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_account_by_name")
+		return nil, err
 	}
 
 	//util.Dump("get_account_by_name <", resp)
@@ -229,89 +229,30 @@ func (p *bitsharesAPI) GetAccountByName(name string) (*objects.Account, error) {
 	return &ret, nil
 }
 
-// GetAccountHistory returns MarketTrade object.
-/* get_account_history(account_id_type account,
-operation_history_id_type stop = operation_history_id_type (),
-unsigned limit = 100,
-operation_history_id_type start = operation_history_id_type ()) const
+// GetAccountHistory returns OperationHistory object(s).
+// account: The account whose history should be queried
+// stop: ID of the earliest operation to retrieve
+// limit: Maximum number of operations to retrieve (must not exceed 100)
+// start: ID of the most recent operation to retrieve
+func (p *bitsharesAPI) GetAccountHistory(account objects.GrapheneObject, stop objects.GrapheneObject, limit int, start objects.GrapheneObject) ([]objects.OperationHistory, error) {
+	if limit > GetAccountHistoryLimit {
+		limit = GetAccountHistoryLimit
+	}
 
-account: The account whose history should be queried
-stop: ID of the earliest operation to retrieve
-limit: Maximum number of operations to retrieve (must not exceed 100)
-start: ID of the most recent operation to retrieve
-
-def history(
-        self, first=0,
-        last=0, limit=-1,
-        only_ops=[], exclude_ops=[]
-    ):
-        """ Returns a generator for individual account transactions. The
-            latest operation will be first. This call can be used in a
-            ``for`` loop.
-            :param int first: sequence number of the first
-                transaction to return (*optional*)
-            :param int last: sequence number of the last
-                transaction to return (*optional*)
-            :param int limit: limit number of transactions to
-                return (*optional*)
-            :param array only_ops: Limit generator by these
-                operations (*optional*)
-            :param array exclude_ops: Exclude thse operations from
-                generator (*optional*)
-        """
-        from bitsharesbase.operations import getOperationNameForId
-        _limit = 100
-        cnt = 0
-
-        if first < 0:
-            first = 0
-
-        while True:
-            # RPC call
-            txs = self.bitshares.rpc.get_account_history(
-                self["id"],
-                "1.11.{}".format(last),
-                _limit,
-                "1.11.{}".format(first - 1),
-                api="history"
-            )
-            for i in txs:
-                if exclude_ops and getOperationNameForId(
-                    i["op"][0]
-                ) in exclude_ops:
-                    continue
-                if not only_ops or getOperationNameForId(
-                    i["op"][0]
-                ) in only_ops:
-                    cnt += 1
-                    yield i
-                    if limit >= 0 and cnt >= limit:
-                        return
-
-            if not txs:
-                log.info("No more history returned from API node")
-                break
-            if len(txs) < _limit:
-                log.info("Less than {} have been returned.".format(_limit))
-                break
-first = int(txs[-1]["id"].split(".")[2])
-
-*/
-func (p *bitsharesAPI) GetAccountHistory(acc objects.GrapheneObject) (interface{}, error) {
-	apid := p.HistoryApiID()
-	resp, err := p.wsClient.CallAPI(apid, "get_account_history", acc, "1.11.0", 100, "1.11.-1")
+	resp, err := p.wsClient.CallAPI(p.HistoryApiID(), "get_account_history", account.Id(), stop.Id(), limit, start.Id())
 	if err != nil {
 		return nil, err
 	}
-	// txs = self.bitshares.rpc.get_account_history(
-	// 	self["id"],
-	// 	"1.11.{}".format(last),
-	// 	_limit,
-	// 	"1.11.{}".format(first - 1),
-	// 	api="history"
-	// )
+
 	data := resp.([]interface{})
-	return data, nil
+	ret := make([]objects.OperationHistory, len(data))
+	for idx, hist := range data {
+		if err := ffjson.Unmarshal(util.ToBytes(hist), &ret[idx]); err != nil {
+			return nil, errors.Annotate(err, "unmarshal History")
+		}
+	}
+
+	return ret, nil
 }
 
 //GetAccounts returns a list of accounts by ID.
@@ -320,7 +261,7 @@ func (p *bitsharesAPI) GetAccounts(accounts ...objects.GrapheneObject) ([]object
 	ids := objects.GrapheneObjects(accounts).ToObjectIDs()
 	resp, err := p.wsClient.CallAPI(0, "get_accounts", ids)
 	if err != nil {
-		return nil, err // errors.Annotate(err, "get_accounts")
+		return nil, err
 	}
 
 	data := resp.([]interface{})

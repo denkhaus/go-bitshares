@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
-	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/bitshares/objects"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -15,7 +15,6 @@ type commonTest struct {
 }
 
 func (suite *commonTest) SetupTest() {
-
 	api := api.New(wsFullApiUrl, rpcApiUrl)
 	if err := api.Connect(); err != nil {
 		suite.Fail(err.Error(), "Connect")
@@ -52,7 +51,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 	}
 
 	suite.NotNil(res)
-	util.Dump("balance bts >", res)
+	//util.Dump("balance bts >", res)
 
 	res, err = suite.TestAPI.GetAccountBalances(UserID2)
 	if err != nil {
@@ -60,7 +59,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 	}
 
 	suite.NotNil(res)
-	util.Dump("balances all >", res)
+	//util.Dump("balances all >", res)
 }
 
 func (suite *commonTest) Test_GetAccounts() {
@@ -188,6 +187,21 @@ func (suite *commonTest) Test_ListAssets() {
 	suite.NotNil(res)
 	suite.Len(res, 2)
 	//util.Dump("assets >", res)
+}
+
+func (suite *commonTest) Test_GetAccountHistory() {
+
+	user := objects.NewGrapheneID("1.2.96393")
+	start := objects.NewGrapheneID("1.11.187698971")
+	stop := objects.NewGrapheneID("1.11.187658388")
+
+	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
+	if err != nil {
+		suite.Fail(err.Error(), "GetAccountHistory")
+	}
+
+	suite.NotNil(res)
+	//util.Dump("history >", res)
 }
 
 func TestCommon(t *testing.T) {

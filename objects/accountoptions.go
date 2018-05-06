@@ -5,6 +5,6 @@ type AccountOptions struct {
 	VotingAccount GrapheneID `json:"voting_account"`
 	NumWitness    int        `json:"num_witness"`
 	NumComittee   int        `json:"num_comittee"`
-	Votes         []Vote     `json:"votes"`
+	Votes         Votes      `json:"votes"`
 	Extensions    Extensions `json:"extensions"`
 }

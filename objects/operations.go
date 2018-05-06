@@ -15,9 +15,12 @@ type Operation interface {
 	Type() OperationType
 }
 
+type OperationResult interface {
+}
+
 type OperationEnvelope struct {
 	Type      OperationType
-	Operation interface{}
+	Operation Operation
 }
 
 func (p OperationEnvelope) MarshalJSON() ([]byte, error) {
@@ -41,8 +44,51 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "Unmarshal OperationType")
 	}
 
-	if err := json.Unmarshal(raw[1], &p.Operation); err != nil {
-		return errors.Annotate(err, "Unmarshal Operation")
+	switch p.Type {
+	case OperationTypeLimitOrderCreate:
+		p.Operation = &LimitOrderCreateOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal LimitOrderCreateOperation")
+		}
+
+	case OperationTypeTransfer:
+		p.Operation = &TransferOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal TransferOperation")
+		}
+
+	case OperationTypeLimitOrderCancel:
+		p.Operation = &LimitOrderCancelOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal LimitOrderCancelOperation")
+		}
+
+	case OperationTypeCallOrderUpdate:
+		p.Operation = &CallOrderUpdateOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal CallOrderUpdateOperation")
+		}
+
+	case OperationTypeAccountCreate:
+		p.Operation = &AccountCreateOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal AccountCreateOperation")
+		}
+
+	case OperationTypeFillOrder:
+		p.Operation = &FillOrderOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal FillOrderOperation")
+		}
+
+	case OperationTypeAssetUpdate:
+		p.Operation = &AssetUpdateOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal AssetUpdateOperation")
+		}
+
+	default:
+		return errors.Errorf("Operation type %d not yet supported", p.Type)
 	}
 
 	return nil
@@ -85,34 +131,7 @@ func (p *Operations) UnmarshalJSON(data []byte) error {
 
 	ops := make(Operations, len(envs))
 	for idx, env := range envs {
-		switch env.Type {
-		case OperationTypeLimitOrderCreate:
-			ops[idx] = &LimitOrderCreateOperation{}
-			if err := ffjson.Unmarshal(util.ToBytes(env.Operation), ops[idx]); err != nil {
-				return errors.Annotate(err, "unmarshal LimitOrderCreateOperation")
-			}
-
-		case OperationTypeTransfer:
-			ops[idx] = &TransferOperation{}
-			if err := ffjson.Unmarshal(util.ToBytes(env.Operation), ops[idx]); err != nil {
-				return errors.Annotate(err, "unmarshal TransferOperation")
-			}
-
-		case OperationTypeLimitOrderCancel:
-			ops[idx] = &LimitOrderCancelOperation{}
-			if err := ffjson.Unmarshal(util.ToBytes(env.Operation), ops[idx]); err != nil {
-				return errors.Annotate(err, "unmarshal LimitOrderCancelOperation")
-			}
-
-		case OperationTypeCallOrderUpdate:
-			ops[idx] = &CallOrderUpdateOperation{}
-			if err := ffjson.Unmarshal(util.ToBytes(env.Operation), ops[idx]); err != nil {
-				return errors.Annotate(err, "unmarshal CallOrderUpdateOperation")
-			}
-
-		default:
-			return errors.Errorf("Operation type %d not yet supported", env.Type)
-		}
+		ops[idx] = env.Operation.(Operation)
 	}
 
 	*p = ops

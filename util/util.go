@@ -19,9 +19,18 @@ import (
 func ToBytes(in interface{}) []byte {
 	b, err := json.Marshal(in)
 	if err != nil {
-		panic("toBytes is unable to marshal input")
+		panic("ToBytes: unable to marshal input")
 	}
 	return b
+}
+
+func DumpUnmarshaled(descr string, in []byte) {
+	var res interface{}
+	if err := json.Unmarshal(in, &res); err != nil {
+		panic("DumpUnmarshaled: unable to unmarshal input")
+	}
+
+	Dump(descr, res)
 }
 
 func DumpJSON(descr string, in interface{}) {

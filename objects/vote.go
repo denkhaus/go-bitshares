@@ -7,6 +7,8 @@ import (
 	"github.com/juju/errors"
 )
 
+type Votes []Vote
+
 type Vote struct {
 	typ      uint8
 	instance uint32
