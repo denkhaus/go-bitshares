@@ -87,6 +87,18 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 			return errors.Annotate(err, "unmarshal AssetUpdateOperation")
 		}
 
+	case OperationTypeAssetIssue:
+		p.Operation = &AssetIssueOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal AssetIssueOperation")
+		}
+
+	case OperationTypeAssetPublishFeed:
+		p.Operation = &AssetPublishFeedOperation{}
+		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
+			return errors.Annotate(err, "unmarshal AssetPublishFeedOperation")
+		}
+
 	default:
 		return errors.Errorf("Operation type %d not yet supported", p.Type)
 	}

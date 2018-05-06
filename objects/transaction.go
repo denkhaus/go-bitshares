@@ -16,6 +16,8 @@ const (
 	TxExpirationDefault = 30 * time.Second
 )
 
+type Transactions []Transaction
+
 type Transaction struct {
 	RefBlockNum    UInt16     `json:"ref_block_num"`
 	RefBlockPrefix UInt32     `json:"ref_block_prefix"`

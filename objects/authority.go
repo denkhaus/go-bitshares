@@ -7,11 +7,11 @@ import (
 )
 
 type Authority struct {
-	WeightThreshold UInt64          `json:"weight_threshold"`
-	AccountAuths    MapAccountAuths `json:"account_auths"`
-	KeyAuths        MapKeyAuths     `json:"key_auths"`
-	AddressAuths    MapAddressAuths `json:"address_auths"`
-	Extensions      Extensions      `json:"extensions"`
+	WeightThreshold UInt64          `json:"weight_threshold,omitempty"`
+	AccountAuths    MapAccountAuths `json:"account_auths,omitempty"`
+	KeyAuths        MapKeyAuths     `json:"key_auths,omitempty"`
+	AddressAuths    MapAddressAuths `json:"address_auths,omitempty"`
+	Extensions      Extensions      `json:"extensions,omitempty"`
 }
 
 type MapAccountAuths map[GrapheneID]int64
