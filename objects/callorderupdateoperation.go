@@ -26,6 +26,7 @@ func (p CallOrderUpdateOperation) Type() OperationType {
 }
 
 //implements Operation interface
+//order checked!
 func (p CallOrderUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -39,12 +40,12 @@ func (p CallOrderUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode funding account")
 	}
 
-	if err := enc.Encode(p.DeltaDebt); err != nil {
-		return errors.Annotate(err, "encode delta debt")
-	}
-
 	if err := enc.Encode(p.DeltaCollateral); err != nil {
 		return errors.Annotate(err, "encode delta collateral")
+	}
+
+	if err := enc.Encode(p.DeltaDebt); err != nil {
+		return errors.Annotate(err, "encode delta debt")
 	}
 
 	if err := enc.Encode(p.Extensions); err != nil {

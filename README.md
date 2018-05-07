@@ -1,6 +1,7 @@
 # bitshares
 
-A Bitshares API consuming a RPC connection to your local `cli_wallet` and  a websocket connection to an active full node. Look for example code in the tests folder. This is work in progress and may have breaking changes as development goes on. Use it on your own risk. 
+A Bitshares API consuming a RPC connection to your local `cli_wallet` and  a websocket connection to an active full node. 
+Look for example code in the tests folder. This is work in progress and may have breaking changes as development goes on. Use it on your own risk. 
 
 
 ## install
@@ -8,7 +9,7 @@ A Bitshares API consuming a RPC connection to your local `cli_wallet` and  a web
 go get -u github.com/denkhaus/bitshares
 ```
 
-This API uses [ffjson](https://github.com/pquerna/ffjson). In order to use this code you must generate the required static `MarshalJSON` and `UnmarshalJSON` functions for all API-structures with
+This API uses [ffjson](https://github.com/pquerna/ffjson). If you change this code you have to regenerate the required static `MarshalJSON` and `UnmarshalJSON` functions for all API-structures with
 
 ```
 make generate
@@ -38,6 +39,15 @@ if err != nil {
 log.Printf("balances: %v", res)
 
 ```
+
+## todo
+- add missing operations
+- explore extension marshalling
+- sign transactions by websocket api
+
+## note
+
+Some operation tests may fail for now cause extensions marshalling is questionable.
 
 
 Have fun and feel free to contribute.

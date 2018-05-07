@@ -14,15 +14,29 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/mitchellh/go-homedir"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 func ToBytes(in interface{}) []byte {
-	b, err := json.Marshal(in)
+	b, err := ffjson.Marshal(in)
 	if err != nil {
 		panic("ToBytes: unable to marshal input")
 	}
 	return b
 }
+
+// func ToJSON(in interface{}) []byte {
+// 	b, err := ffjson.Marshal(in)
+// 	if err != nil {
+// 		panic("ToJSONBytes: unable to marshal input")
+// 	}
+
+// 	b, err := ffjson.Unmarshal(in)
+// 	if err != nil {
+// 		panic("ToBytes: unable to marshal input")
+// 	}
+// 	return b
+// }
 
 func DumpUnmarshaled(descr string, in []byte) {
 	var res interface{}

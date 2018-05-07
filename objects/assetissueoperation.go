@@ -58,7 +58,7 @@ func (p AssetIssueOperation) Marshal(enc *util.TypeEncoder) error {
 //NewAssetIssueOperation creates a new AssetIssueOperation
 func NewAssetIssueOperation() *AssetIssueOperation {
 	tx := AssetIssueOperation{
-		//	Extensions: Extensions{},
+		Extensions: Extensions{},
 	}
 	return &tx
 }

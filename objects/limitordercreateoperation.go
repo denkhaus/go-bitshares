@@ -33,9 +33,38 @@ func (p LimitOrderCreateOperation) Type() OperationType {
 }
 
 //implements Operation interface
+// order checked!
 func (p LimitOrderCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation type")
+	}
+
+	if err := enc.Encode(p.Fee); err != nil {
+		return errors.Annotate(err, "encode fee")
+	}
+
+	if err := enc.Encode(p.Seller); err != nil {
+		return errors.Annotate(err, "encode seller")
+	}
+
+	if err := enc.Encode(p.AmountToSell); err != nil {
+		return errors.Annotate(err, "encode amount to sell")
+	}
+
+	if err := enc.Encode(p.MinToReceive); err != nil {
+		return errors.Annotate(err, "encode min to receive")
+	}
+
+	if err := enc.Encode(p.Expiration); err != nil {
+		return errors.Annotate(err, "encode expiration")
+	}
+
+	if err := enc.Encode(p.FillOrKill); err != nil {
+		return errors.Annotate(err, "encode fill or kill")
+	}
+
+	if err := enc.Encode(p.Extensions); err != nil {
+		return errors.Annotate(err, "encode extensions")
 	}
 
 	return nil

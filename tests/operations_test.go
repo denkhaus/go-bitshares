@@ -13,13 +13,14 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+//Note: operation tests may fail for now cause extensions marshalling is questionable.
 type operationsAPITest struct {
 	suite.Suite
 	TestAPI api.BitsharesAPI
+	RefTx   *objects.Transaction
 }
 
 func (suite *operationsAPITest) SetupTest() {
-
 	api := api.New(wsTestApiUrl, rpcApiUrl)
 
 	if err := api.Connect(); err != nil {
@@ -31,6 +32,16 @@ func (suite *operationsAPITest) SetupTest() {
 	})
 
 	suite.TestAPI = api
+
+	tx := objects.NewTransaction()
+	tx.RefBlockNum = 34294
+	tx.RefBlockPrefix = 3707022213
+
+	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
+		suite.Fail(err.Error(), "Unmarshal expiration")
+	}
+
+	suite.RefTx = tx
 }
 
 func (suite *operationsAPITest) TearDown() {
@@ -39,16 +50,77 @@ func (suite *operationsAPITest) TearDown() {
 	}
 }
 
-func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
+func (suite *operationsAPITest) Test_SerializeTransaction() {
+	hex, err := suite.TestAPI.SerializeTransaction(suite.RefTx)
+	if err != nil {
+		suite.Fail(err.Error(), "SerializeTransaction")
+	}
+
+	suite.NotNil(hex)
+	suite.Equal("f68585abf4dce7c80457000000", hex)
+}
+
+func (suite *operationsAPITest) Test_CallOrderUpdateOperation() {
 	time.Sleep(1 * time.Second)
 
-	tx := objects.NewTransaction()
-	tx.RefBlockNum = 555
-	tx.RefBlockPrefix = 3333333
-
-	if err := tx.Expiration.UnmarshalJSON([]byte(`"2006-01-02T15:04:05"`)); err != nil {
-		suite.Fail(err.Error(), "Unmarshal time")
+	op := objects.CallOrderUpdateOperation{
+		Extensions:     objects.Extensions{},
+		FundingAccount: *objects.NewGrapheneID("1.2.29"),
+		DeltaCollateral: objects.AssetAmount{
+			Amount: 100000000,
+			Asset:  *objects.NewGrapheneID("1.3.0"),
+		},
+		DeltaDebt: objects.AssetAmount{
+			Amount: 10000,
+			Asset:  *objects.NewGrapheneID("1.3.22"),
+		},
+		Fee: objects.AssetAmount{
+			Amount: 100,
+			Asset:  *objects.NewGrapheneID("1.3.0"),
+		},
 	}
+
+	suite.RefTx.Operations = objects.Operations{
+		objects.Operation(&op),
+	}
+
+	suite.compareTransaction(suite.RefTx)
+}
+
+func (suite *operationsAPITest) Test_LimitOrderCreateOperation() {
+	time.Sleep(1 * time.Second)
+
+	op := objects.LimitOrderCreateOperation{
+		Extensions: objects.Extensions{},
+		Seller:     *objects.NewGrapheneID("1.2.29"),
+		FillOrKill: false,
+		Fee: objects.AssetAmount{
+			Amount: 100,
+			Asset:  *objects.NewGrapheneID("1.3.0"),
+		},
+		AmountToSell: objects.AssetAmount{
+			Amount: 100000,
+			Asset:  *objects.NewGrapheneID("1.3.0"),
+		},
+		MinToReceive: objects.AssetAmount{
+			Amount: 10000,
+			Asset:  *objects.NewGrapheneID("1.3.105"),
+		},
+	}
+
+	if err := op.Expiration.UnmarshalJSON([]byte(`"2016-05-18T09:22:05"`)); err != nil {
+		suite.Fail(err.Error(), "Unmarshal expiration")
+	}
+
+	suite.RefTx.Operations = objects.Operations{
+		objects.Operation(&op),
+	}
+
+	suite.compareTransaction(suite.RefTx)
+}
+
+func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
+	time.Sleep(1 * time.Second)
 
 	op := objects.LimitOrderCancelOperation{
 		Extensions:       objects.Extensions{},
@@ -60,16 +132,27 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 		},
 	}
 
-	tx.Operations = append(tx.Operations, objects.Operation(&op))
+	suite.RefTx.Operations = objects.Operations{
+		objects.Operation(&op),
+	}
 
+	suite.compareTransaction(suite.RefTx)
+}
+
+func (suite *operationsAPITest) compareTransaction(tx *objects.Transaction) {
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)
 	if err := enc.Encode(tx); err != nil {
 		suite.Fail(err.Error(), "Encode")
 	}
 
-	res := hex.EncodeToString(buf.Bytes())
-	suite.Equal("2b02d5dc3200e540b9430102e8030000000000009506c8037b000000", res)
+	ref, err := suite.TestAPI.SerializeTransaction(suite.RefTx)
+	if err != nil {
+		suite.Fail(err.Error(), "SerializeTransaction")
+	}
+
+	test := hex.EncodeToString(buf.Bytes())
+	suite.Equal(ref, test)
 }
 
 func TestOperations(t *testing.T) {

@@ -24,8 +24,8 @@ func (p LimitOrderCancelOperation) Type() OperationType {
 	return OperationTypeLimitOrderCancel
 }
 
-//TODO: validate encode order!
 //implements Operation interface
+//order checked!
 func (p LimitOrderCancelOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -43,9 +43,9 @@ func (p LimitOrderCancelOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode to")
 	}
 
-	// if err := enc.Encode(p.Extensions); err != nil {
-	// 	return errors.Annotate(err, "encode extensions")
-	// }
+	if err := enc.Encode(p.Extensions); err != nil {
+		return errors.Annotate(err, "encode extensions")
+	}
 
 	return nil
 }

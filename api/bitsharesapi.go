@@ -68,6 +68,7 @@ type BitsharesAPI interface {
 	Sell(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate string, amount string, broadcast bool) (*objects.Transaction, error)
 	SellEx(account objects.GrapheneObject, base, quote objects.GrapheneObject, rate float64, amount float64, broadcast bool) (*objects.Transaction, error)
 	SellAsset(account objects.GrapheneObject, amountToSell string, symbolToSell objects.GrapheneObject, minToReceive string, symbolToReceive objects.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*objects.Transaction, error)
+	SerializeTransaction(tx *objects.Transaction) (string, error)
 }
 
 type bitsharesAPI struct {

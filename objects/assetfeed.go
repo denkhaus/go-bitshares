@@ -33,10 +33,10 @@ func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal AssetFeed [feed time]")
 	}
 
-	//comment this out while generate ffjson logic -> circular dependencies!!
-	if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
-		return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
-	}
+	//comment this out while generate ffjson logic for the first time -> circular dependencies!!
+	// if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
+	// 	return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
+	// }
 
 	return nil
 }

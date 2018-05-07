@@ -76,6 +76,12 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 		return p.EncodeString(v)
 	case []byte:
 		return p.writeBytes(v)
+	case bool:
+		if v {
+			return p.EncodeNumber(uint8(1))
+		} else {
+			return p.EncodeNumber(uint8(0))
+		}
 
 	default:
 		return errors.Errorf("TypeEncoder: unsupported type encountered")
