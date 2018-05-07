@@ -41,8 +41,6 @@ func (suite *operationsAPITest) TearDown() {
 
 func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 	time.Sleep(1 * time.Second)
-	var buf bytes.Buffer
-	enc := util.NewTypeEncoder(&buf)
 
 	tx := objects.NewTransaction()
 	tx.RefBlockNum = 555
@@ -52,18 +50,20 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 		suite.Fail(err.Error(), "Unmarshal time")
 	}
 
-	op := objects.NewLimitOrderCancelOperation(
-		*objects.NewGrapheneID("1.7.69314"),
-	)
-
-	op.Order = *objects.NewGrapheneID("1.7.123")
-	op.FeePayingAccount = *objects.NewGrapheneID("1.2.456")
-	op.Fee = objects.AssetAmount{
-		Amount: 1000,
-		Asset:  *objects.NewGrapheneID("1.3.789"),
+	op := objects.LimitOrderCancelOperation{
+		Extensions:       objects.Extensions{},
+		Order:            *objects.NewGrapheneID("1.7.123"),
+		FeePayingAccount: *objects.NewGrapheneID("1.2.456"),
+		Fee: objects.AssetAmount{
+			Amount: 1000,
+			Asset:  *objects.NewGrapheneID("1.3.789"),
+		},
 	}
 
-	tx.Operations = append(tx.Operations, op)
+	tx.Operations = append(tx.Operations, objects.Operation(&op))
+
+	var buf bytes.Buffer
+	enc := util.NewTypeEncoder(&buf)
 	if err := enc.Encode(tx); err != nil {
 		suite.Fail(err.Error(), "Encode")
 	}
