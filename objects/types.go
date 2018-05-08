@@ -38,44 +38,44 @@ const (
 	OperationTypeCallOrderUpdate
 	OperationTypeFillOrder
 	OperationTypeAccountCreate
-	OperationTypeACCOUNT_UPDATE_OPERATION
-	OperationTypeACCOUNT_WHITELIST_OPERATION
-	OperationTypeACCOUNT_UPGRADE_OPERATION
-	OperationTypeACCOUNT_TRANSFER_OPERATION
-	OperationTypeASSET_CREATE_OPERATION
+	OperationTypeAccountUpdate    ///
+	OperationTypeAccountWhitelist ///
+	OperationTypeAccountUpgrade   ///
+	OperationTypeAccountTransfer  ///
+	OperationTypeAssetCreate      ///
 	OperationTypeAssetUpdate
-	OperationTypeASSET_UPDATE_BITASSET_OPERATION
-	OperationTypeASSET_UPDATE_FEED_PRODUCERS_OPERATION
+	OperationTypeAssetUpdateBitasset      ///
+	OperationTypeAssetUpdateFeedProducers ///
 	OperationTypeAssetIssue
-	OperationTypeASSET_RESERVE_OPERATION
-	OperationTypeASSET_FUND_FEE_POOL_OPERATION
-	OperationTypeASSET_SETTLE_OPERATION
-	OperationTypeASSET_GLOBAL_SETTLE_OPERATION
+	OperationTypeAssetReverse      ///
+	OperationTypeAssetFundFeePool  ///
+	OperationTypeAssetSettle       ///
+	OperationTypeAssetGlobalSettle ///
 	OperationTypeAssetPublishFeed
-	OperationTypeWITNESS_CREATE_OPERATION
-	OperationTypeWITNESS_UPDATE_OPERATION
-	OperationTypePROPOSAL_CREATE_OPERATION
-	OperationTypePROPOSAL_UPDATE_OPERATION
-	OperationTypePROPOSAL_DELETE_OPERATION
-	OperationTypeWITHDRAW_PERMISSION_CREATE_OPERATION
-	OperationTypeWITHDRAW_PERMISSION_UPDATE_OPERATION
-	OperationTypeWITHDRAW_PERMISSION_CLAIM_OPERATION
-	OperationTypeWITHDRAW_PERMISSION_DELETE_OPERATION
-	OperationTypeCOMMITTEE_MEMBER_CREATE_OPERATION
-	OperationTypeCOMMITTEE_MEMBER_UPDATE_OPERATION
-	OperationTypeCOMMITTEE_MEMBER_UPDATE_GLOBAL_PARAMETERS_OPERATION
-	OperationTypeVESTING_BALANCE_CREATE_OPERATION
-	OperationTypeVESTING_BALANCE_WITHDRAW_OPERATION
-	OperationTypeWORKER_CREATE_OPERATION
-	OperationTypeCUSTOM_OPERATION
-	OperationTypeASSERT_OPERATION
-	OperationTypeBALANCE_CLAIM_OPERATION
-	OperationTypeOVERRIDE_TRANSFER_OPERATION
-	OperationTypeTRANSFER_TO_BLIND_OPERATION
-	OperationTypeBLIND_TRANSFER_OPERATION
-	OperationTypeTRANSFER_FROM_BLIND_OPERATION
-	OperationTypeASSET_SETTLE_CANCEL_OPERATION
-	OperationTypeASSET_CLAIM_FEES_OPERATION
+	OperationTypeWitnessCreate                        ///
+	OperationTypeWitnessUpdate                        ///
+	OperationTypeProposalCreate                       ///
+	OperationTypeProposalUpdate                       ///
+	OperationTypeProposalDelete                       ///
+	OperationTypeWithdrawPermissionCreate             ///
+	OperationTypeWithdrawPermissionUpdate             ///
+	OperationTypeWithdrawPermissionClaim              ///
+	OperationTypeWithdrawPermissionDelete             ///
+	OperationTypeCommiteeMemberCreate                 ///
+	OperationTypeCommiteeMemberUpdate                 ///
+	OperationTypeCommiteeMemberUpdateGlobalParameters ///
+	OperationTypeVestingBalanceCreate                 ///
+	OperationTypeVestingBalanceWithdraw               ///
+	OperationTypeWorkerCreate                         ///
+	OperationTypeCustom                               ///
+	OperationTypeAssert                               ///
+	OperationTypeBalanceClaim                         ///
+	OperationTypeOverrideTransfer                     ///
+	OperationTypeTransferToBlind                      ///
+	OperationTypeBlindTransfer                        ///
+	OperationTypeTransferFromBlind                    ///
+	OperationTypeAssetSettleCancel                    ///
+	OperationTypeAssetClaimFees                       ///
 )
 
 type ObjectType Int8
