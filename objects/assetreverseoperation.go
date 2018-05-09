@@ -12,7 +12,7 @@ func init() {
 
 type AssetReverseOperation struct {
 	Payer           GrapheneID  `json:"payer"`
-	AmountToReserve AssetAmount `json:"amount_to_reserve"`
+	AmountToReverse AssetAmount `json:"amount_to_reverse"`
 	Fee             AssetAmount `json:"fee"`
 	Extensions      Extensions  `json:"extensions"`
 }
@@ -42,8 +42,8 @@ func (p AssetReverseOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode payer")
 	}
 
-	if err := enc.Encode(p.AmountToReserve); err != nil {
-		return errors.Annotate(err, "encode amount to reserve")
+	if err := enc.Encode(p.AmountToReverse); err != nil {
+		return errors.Annotate(err, "encode amount to reverse")
 	}
 
 	if err := enc.Encode(p.Extensions); err != nil {
