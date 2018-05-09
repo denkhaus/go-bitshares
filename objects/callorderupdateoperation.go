@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &CallOrderUpdateOperation{}
+	opMap[op.Type()] = op
+}
+
 type CallOrderUpdateOperation struct {
 	DeltaCollateral AssetAmount `json:"delta_collateral"`
 	DeltaDebt       AssetAmount `json:"delta_debt"`

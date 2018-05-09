@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &AssetIssueOperation{}
+	opMap[op.Type()] = op
+}
+
 type AssetIssueOperation struct {
 	Issuer         GrapheneID  `json:"issuer"`
 	IssueToAccount GrapheneID  `json:"issue_to_account"`

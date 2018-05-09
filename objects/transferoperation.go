@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &TransferOperation{}
+	opMap[op.Type()] = op
+}
+
 type TransferOperation struct {
 	From       GrapheneID  `json:"from"`
 	To         GrapheneID  `json:"to"`

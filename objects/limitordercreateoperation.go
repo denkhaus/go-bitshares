@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &LimitOrderCreateOperation{}
+	opMap[op.Type()] = op
+}
+
 //LimitOrderCreateOperation instructs the blockchain to attempt to sell one asset for another.
 //The blockchain will atempt to sell amount_to_sell.asset_id for as much min_to_receive.asset_id as possible.
 //The fee will be paid by the seller’s account. Market fees will apply as specified by the issuer of both the selling asset and the receiving asset as a percentage of the amount exchanged.

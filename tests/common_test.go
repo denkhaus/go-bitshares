@@ -94,7 +94,7 @@ func (suite *commonTest) Test_GetObjects() {
 }
 
 func (suite *commonTest) Test_GetBlock() {
-	res, err := suite.TestAPI.GetBlock(26751857)
+	res, err := suite.TestAPI.GetBlock(1316)
 	if err != nil {
 		suite.Fail(err.Error(), "GetBlock")
 	}

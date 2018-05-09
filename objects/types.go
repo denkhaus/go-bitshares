@@ -47,7 +47,7 @@ const (
 	OperationTypeAssetUpdateBitasset      ///
 	OperationTypeAssetUpdateFeedProducers ///
 	OperationTypeAssetIssue
-	OperationTypeAssetReverse      ///
+	OperationTypeAssetReverse
 	OperationTypeAssetFundFeePool  ///
 	OperationTypeAssetSettle       ///
 	OperationTypeAssetGlobalSettle ///
@@ -69,13 +69,13 @@ const (
 	OperationTypeWorkerCreate                         ///
 	OperationTypeCustom                               ///
 	OperationTypeAssert                               ///
-	OperationTypeBalanceClaim                         ///
-	OperationTypeOverrideTransfer                     ///
-	OperationTypeTransferToBlind                      ///
-	OperationTypeBlindTransfer                        ///
-	OperationTypeTransferFromBlind                    ///
-	OperationTypeAssetSettleCancel                    ///
-	OperationTypeAssetClaimFees                       ///
+	OperationTypeBalanceClaim
+	OperationTypeOverrideTransfer  ///
+	OperationTypeTransferToBlind   ///
+	OperationTypeBlindTransfer     ///
+	OperationTypeTransferFromBlind ///
+	OperationTypeAssetSettleCancel ///
+	OperationTypeAssetClaimFees    ///
 )
 
 type ObjectType Int8

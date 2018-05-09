@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &LimitOrderCancelOperation{}
+	opMap[op.Type()] = op
+}
+
 type LimitOrderCancelOperation struct {
 	FeePayingAccount GrapheneID  `json:"fee_paying_account"`
 	Order            GrapheneID  `json:"order"`

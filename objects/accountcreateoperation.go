@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &AccountCreateOperation{}
+	opMap[op.Type()] = op
+}
+
 type AccountCreateOperation struct {
 	Registrar       GrapheneID  `json:"registrar"`
 	Referrer        GrapheneID  `json:"referrer"`
@@ -77,7 +82,7 @@ func (p AccountCreateOperation) Marshal(enc *util.TypeEncoder) error {
 //NewAccountCreateOperation creates a new AccountCreateOperation
 func NewAccountCreateOperation() *AccountCreateOperation {
 	tx := AccountCreateOperation{
-		//	Extensions: Extensions{},
+	//	Extensions: Extensions{},
 	}
 	return &tx
 }

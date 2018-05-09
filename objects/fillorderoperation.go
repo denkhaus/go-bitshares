@@ -7,6 +7,11 @@ import (
 
 //go:generate ffjson -force-regenerate $GOFILE
 
+func init() {
+	op := &FillOrderOperation{}
+	opMap[op.Type()] = op
+}
+
 type FillOrderOperation struct {
 	OrderID   GrapheneID  `json:"order_id"`
 	AccountID GrapheneID  `json:"account_id"`

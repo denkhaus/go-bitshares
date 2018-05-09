@@ -7,6 +7,11 @@ import (
 	"github.com/juju/errors"
 )
 
+func init() {
+	op := &AssetPublishFeedOperation{}
+	opMap[op.Type()] = op
+}
+
 type AssetPublishFeedOperation struct {
 	Publisher GrapheneID    `json:"publisher"`
 	AssetID   GrapheneID    `json:"asset_id"`
