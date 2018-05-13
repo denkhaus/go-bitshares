@@ -28,8 +28,8 @@ api.OnError(func(err error) {
 	log.Fatal(err)
 })
 
-UserID   := objects.NewGrapheneID("1.2.253") 
-AssetBTS := objects.NewGrapheneID("1.3.0") 
+UserID   := types.NewGrapheneID("1.2.253") 
+AssetBTS := types.NewGrapheneID("1.3.0") 
 
 res, api.GetAccountBalances(UserID, AssetBTS)
 if err != nil {
@@ -42,12 +42,7 @@ log.Printf("balances: %v", res)
 
 ## todo
 - add missing operations
-- explore extension marshalling
 - sign transactions by websocket api
-
-## note
-
-Some operation tests may fail for now cause extensions marshalling is questionable.
 
 
 Have fun and feel free to contribute.

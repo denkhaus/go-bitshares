@@ -2,11 +2,14 @@
 all: generate
 
 clean_ffjson_base: 
-	@rm -rf objects/ffjson-inception* ||:	
-	@rm objects/*_ffjson_expose.go ||:	
+	@rm -rf types/ffjson-inception* ||:	
+	@rm types/*_ffjson_expose.go ||:	
+	@rm -rf operations/ffjson-inception* ||:	
+	@rm operations/*_ffjson_expose.go ||:	
 
 clean_ffjson_gen:
-	@rm objects/*_ffjson.go ||:	
+	@rm types/*_ffjson.go ||:	
+	@rm operations/*_ffjson.go ||:	
 
 generate: clean_ffjson_base	
 	-go generate ./...
@@ -14,12 +17,13 @@ generate: clean_ffjson_base
 generate_new: clean_ffjson_base clean_ffjson_gen		
 	-go generate ./...
 
-#install ffjson
+#install dependencies
 init:
-	go get -u github.com/pquerna/ffjson
+	@go get -u github.com/pquerna/ffjson
+	@go get -u golang.org/x/tools/cmd/stringer
 
 test:
-	go test -v ./tests/
-#go test -v ./tests/common_test.go
-#go test -v ./tests/subscribe_test.go
-# go test -v ./tests/walletapi_test.go
+	go test -v ./...
+
+opsamples:
+	cd gen && go run *.go

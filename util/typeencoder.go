@@ -88,6 +88,23 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 	}
 }
 
+func (p *TypeEncoder) EncodeArrString(v []string) error {
+	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
+		return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", v)
+	}
+
+	for _, val := range v {
+		if err := p.EncodeUVarint(uint64(len(val))); err != nil {
+			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+		}
+		if _, err := io.Copy(p.w, strings.NewReader(val)); err != nil {
+			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+		}
+	}
+
+	return nil
+}
+
 func (p *TypeEncoder) EncodeString(v string) error {
 	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
 		return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", v)
@@ -95,6 +112,27 @@ func (p *TypeEncoder) EncodeString(v string) error {
 
 	return p.writeString(v)
 }
+
+// func (p *TypeEncoder) EncodePubKey(s string) error {
+// 	pkn1 := strings.Join(strings.Split(s, "")[3:], "")
+// 	b58 := base58.Decode(pkn1)
+// 	chs := b58[len(b58)-4:]
+// 	pkn2 := b58[:len(b58)-4]
+// 	chHash := ripemd160.New()
+// 	chHash.Write(pkn2)
+// 	nchs := chHash.Sum(nil)[:4]
+
+// 	if bytes.Equal(chs, nchs) {
+// 		pkn3, _ := btcec.ParsePubKey(pkn2, btcec.S256())
+// 		if _, err := p.w.Write(pkn3.SerializeCompressed()); err != nil {
+// 			return errors.Annotatef(err, "TypeEncoder: failed to write bytes: %v", pkn3.SerializeCompressed())
+// 		}
+
+// 		return nil
+// 	}
+
+// 	return errors.New("Public key is incorrect")
+// }
 
 func (p *TypeEncoder) writeBytes(bs []byte) error {
 	if _, err := p.w.Write(bs); err != nil {
