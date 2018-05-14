@@ -41,10 +41,10 @@ func NewOperationBlob(data map[string]interface{}) *OperationBlob {
 type OpDataStore map[types.OperationType]*OperationBlob
 
 //TODO: save last scanned block and reapply
-func (p *OpDataStore) Init(m data.OperationSampleMap) error {
+func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 	if len(m) == 0 {
 		fmt.Printf("init datastore: no sample data loaded\n")
-		return nil
+		return errors.New("no sample data loaded")
 	}
 
 	for typ, data := range m {
@@ -53,9 +53,16 @@ func (p *OpDataStore) Init(m data.OperationSampleMap) error {
 			return errors.Annotate(err, "FromJSON")
 		}
 
-		blob := NewOperationBlob(opData)
-		if _, err := p.Evaluate(typ, blob, 0); err != nil {
+		ok, err := p.Evaluate(typ, NewOperationBlob(opData), 0)
+		if err != nil {
 			return errors.Annotate(err, "Evaluate")
+		}
+
+		if ok {
+			ch <- GenData{
+				Type: typ,
+				Data: opData,
+			}
 		}
 	}
 
