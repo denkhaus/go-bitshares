@@ -5,13 +5,18 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"reflect"
+	"strconv"
 	"strings"
 
-	"github.com/ChimeraCoder/gojson"
+	"github.com/pquerna/ffjson/ffjson"
+
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/gojson"
 	"github.com/juju/errors"
 	"github.com/stretchr/objx"
 	"gopkg.in/tomb.v2"
@@ -20,12 +25,34 @@ import (
 	_ "github.com/denkhaus/bitshares/gen/samples"
 )
 
+type Unmarshalable interface {
+	UnmarshalJSON(input []byte) error
+}
+
 var (
 	sampleDataTemplate *template.Template
 	samplesDir         = "samples"
 	operationsDir      = "operations"
 	genChan            = make(chan GenData, 40)
 	tb                 = tomb.Tomb{}
+
+	// do not change order here
+	knownTypes = []Unmarshalable{
+		&types.AccountOptions{},
+		&types.Asset{},
+		&types.AssetAmount{},
+		&types.AssetFeed{},
+		&types.AssetOptions{},
+		&types.GrapheneID{},
+		&types.BitAssetDataOptions{},
+		&types.Authority{},
+		&types.Memo{},
+		&types.Price{},
+		&types.PriceFeed{},
+		&types.Votes{},
+		&types.PublicKey{},
+		&types.Account{},
+	}
 )
 
 type GenData struct {
@@ -68,7 +95,7 @@ func main() {
 
 	fmt.Println("loop blocks")
 
-	for {
+	for tb.Alive() {
 		resp, err := api.CallWsAPI(0, "get_block", block)
 		if err != nil {
 			handleError(errors.Annotate(err, "GetBlock"))
@@ -92,7 +119,7 @@ func main() {
 					handleError(errors.Annotate(err, "Evaluate"))
 				}
 
-				if ok {
+				if ok && tb.Alive() {
 					genChan <- GenData{
 						Type: opType,
 						Data: opData,
@@ -107,6 +134,10 @@ func main() {
 
 		block++
 	}
+
+	if err := tb.Err(); err != nil {
+		handleError(errors.Annotate(err, "main"))
+	}
 }
 
 func generate(ch chan GenData) error {
@@ -119,9 +150,10 @@ func generate(ch chan GenData) error {
 			}
 
 			// blocking?
-			// if err := generateOpData(data); err != nil {
-			// 	return errors.Annotate(err, "generateOpData")
-			// }
+			if err := generateOpData(data); err != nil {
+				return errors.Annotate(err, "generateOpData")
+			}
+
 		case <-tb.Dying():
 			return nil
 		default:
@@ -135,15 +167,22 @@ func generateOpData(d GenData) error {
 		return nil
 	}
 
-	buf, err := gojson.Generate(
+	sample, err := strconv.Unquote(sample)
+	if err != nil {
+		return errors.Annotate(err, "Unquote")
+	}
+
+	fmt.Printf("generate struct by sample %+v\n", sample)
+
+	buf, err := gojson.GenerateWithTypeGuessing(
 		strings.NewReader(sample),
 		gojson.ParseJson, d.Type.OperationName(),
-		"operations", []string{"json"},
-		true, true,
+		"operations", []string{"json"}, true, true,
+		guessStructType,
 	)
 
 	if err != nil {
-		return errors.Annotate(err, "Generate")
+		return errors.Annotate(err, "GenerateWithTypeGuessing")
 	}
 
 	fmt.Println("generated struct ", string(buf))
@@ -172,6 +211,11 @@ func generateSampleData(d GenData) error {
 	//update sample map too
 	data.OpSampleMap[d.Type] = sampleData
 
+	// formatted, err := format.Source([]byte(src))
+	// if err != nil {
+	// 	err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
+	// }
+
 	err = sampleDataTemplate.Execute(f, struct {
 		SampleDataOpType  string
 		SampleData        interface{}
@@ -192,9 +236,32 @@ func generateSampleData(d GenData) error {
 func handleError(err error) {
 	fmt.Println("error: ", errors.ErrorStack(err))
 
-	//kill generator goroutine and wait
-	tb.Kill(err)
-	tb.Wait()
+	if tb.Alive() {
+		//kill generator goroutine and wait
+		tb.Kill(err)
+		tb.Wait()
+	}
 
 	os.Exit(1)
+}
+
+func guessStructType(value interface{}, suggestedType string) (string, error) {
+	util.DumpJSON("valueToGuess", value)
+	//	util.DumpJSON("suggestedType", suggestedType)
+
+	for _, typ := range knownTypes {
+		v, err := ffjson.Marshal(value)
+		if err != nil {
+			return "", errors.Annotate(err, "Marshal")
+		}
+
+		if err := typ.UnmarshalJSON(v); err == nil {
+			name := reflect.ValueOf(typ).Type().Name()
+			util.Dump("solved", typ)
+			util.Dump("typeName", name)
+			return name, nil
+		}
+	}
+
+	return suggestedType, nil
 }

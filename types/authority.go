@@ -55,7 +55,7 @@ func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 
 	for _, a := range auths {
 		tk := a.([]interface{})
-		(*p)[PublicKey(tk[0].(string))] = UInt16(tk[1].(float64))
+		(*p)[PublicKey{tk[0].(string)}] = UInt16(tk[1].(float64))
 	}
 
 	return nil
@@ -84,13 +84,13 @@ func (p KeyAuthsMap) Marshal(enc *util.TypeEncoder) error {
 	// copy keys
 	keys := []interface{}{}
 	for k := range p {
-		keys = append(keys, string(k))
+		keys = append(keys, k.String())
 	}
 
 	sort.Sort(keys, sort.StringComparator)
 
 	for _, k := range keys {
-		pub := PublicKey(k.(string))
+		pub := PublicKey{key: k.(string)}
 		if err := enc.Encode(pub); err != nil {
 			return errors.Annotate(err, "encode Key")
 		}

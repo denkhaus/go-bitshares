@@ -18,6 +18,13 @@ import (
 )
 
 var (
+	ErrNotImplemented               = errors.New("not implemented")
+	ErrInvalidInputType             = errors.New("invalid input type")
+	ErrInvalidInputLength           = errors.New("invalid input length")
+	ErrInvalidPublicKeyForThisChain = errors.New("invalid PublicKey for this chain")
+)
+
+var (
 	EmptyBuffer = []byte{}
 	EmptyParams = []interface{}{}
 )

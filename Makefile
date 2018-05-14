@@ -28,9 +28,11 @@ test:
 	go test -v ./...
 
 buildgen:
+	@echo "build btsgen"
 	@go get -u -d ./gen 
 	@go build -o /tmp/btsgen ./gen 
 	@cp /tmp/btsgen $(GOPATH)/bin
 
 opsamples: buildgen
+	@echo "exec btsgen"
 	@cd gen && btsgen

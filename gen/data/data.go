@@ -15,5 +15,6 @@ func GetSampleByType(typ types.OperationType) string {
 	if s, ok := OpSampleMap[typ]; ok {
 		return s
 	}
+
 	return ""
 }

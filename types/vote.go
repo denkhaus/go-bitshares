@@ -13,13 +13,17 @@ import (
 
 type Votes []VoteID
 
+func (p *Votes) UnmarshalJSON(data []byte) error {
+	return ErrNotImplemented
+}
+
 //TODO: define this
 func (p Votes) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
 		return errors.Annotate(err, "encode length")
 	}
 
-	//TODO: remove dublicates
+	//TODO: remove duplicates
 	//copy votes and sort
 	votes := make([]interface{}, len(p))
 	for idx, id := range p {

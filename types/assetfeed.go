@@ -24,7 +24,15 @@ func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal AssetFeed [unmarshal]")
 	}
 
-	d := res.([]interface{})
+	d, ok := res.([]interface{})
+	if !ok {
+		return ErrInvalidInputType
+	}
+
+	if len(d) != 2 {
+		return ErrInvalidInputLength
+	}
+
 	if err := p.ProviderID.UnmarshalJSON(util.ToBytes(d[0])); err != nil {
 		return errors.Annotate(err, "unmarshal AssetFeed [provider id]")
 	}
@@ -34,11 +42,11 @@ func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal AssetFeed [feed time]")
 	}
 
-	//this gives us circular dependencies when we generate ffjson logic for the first time
-	//meanwhile comment this out to generate
-	// if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
-	// 	return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
-	// }
+	//this gives us an error if we generate ffjson logic for the first time
+	//for now comment this out to generate and in again
+	if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
+		return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
+	}
 
 	return nil
 }

@@ -5,8 +5,8 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -70,13 +70,13 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"network_fee_percentage":`)
-	fflib.FormatBits2(buf, uint64(j.NetworkFeePercentage), 10, j.NetworkFeePercentage < 0)
+	fflib.FormatBits2(buf, uint64(j.NetworkFeePercentage), 10, false)
 	buf.WriteString(`,"lifetime_referrer_fee_percentage":`)
-	fflib.FormatBits2(buf, uint64(j.LifetimeReferrerFeePercentage), 10, j.LifetimeReferrerFeePercentage < 0)
+	fflib.FormatBits2(buf, uint64(j.LifetimeReferrerFeePercentage), 10, false)
 	buf.WriteString(`,"referrer_rewards_percentage":`)
-	fflib.FormatBits2(buf, uint64(j.ReferrerRewardsPercentage), 10, j.ReferrerRewardsPercentage < 0)
+	fflib.FormatBits2(buf, uint64(j.ReferrerRewardsPercentage), 10, false)
 	buf.WriteString(`,"top_n_control_flags":`)
-	fflib.FormatBits2(buf, uint64(j.TopNControlFlags), 10, j.TopNControlFlags < 0)
+	fflib.FormatBits2(buf, uint64(j.TopNControlFlags), 10, false)
 	buf.WriteString(`,"whitelisting_accounts":`)
 	if j.WhitelistingAccounts != nil {
 		buf.WriteString(`[`)
@@ -165,11 +165,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
-	/* Struct fall back. type=types.AccountOptions kind=struct */
 	buf.WriteString(`,"options":`)
-	err = buf.Encode(&j.Options)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Options.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"registrar":`)
 
@@ -215,17 +219,25 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
-	err = buf.Encode(&j.Owner)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Owner.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"active":`)
-	err = buf.Encode(&j.Active)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Active.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"owner_special_authority":`)
 	/* Falling back. type=types.SpecialAuthsMap kind=map */
@@ -859,29 +871,24 @@ handle_MembershipExpirationDate:
 
 handle_NetworkFeePercentage:
 
-	/* handler: j.NetworkFeePercentage type=int64 kind=int64 quoted=false*/
+	/* handler: j.NetworkFeePercentage type=types.UInt64 kind=uint64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.NetworkFeePercentage = int64(tval)
-
+			err = j.NetworkFeePercentage.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -889,29 +896,24 @@ handle_NetworkFeePercentage:
 
 handle_LifetimeReferrerFeePercentage:
 
-	/* handler: j.LifetimeReferrerFeePercentage type=int64 kind=int64 quoted=false*/
+	/* handler: j.LifetimeReferrerFeePercentage type=types.UInt64 kind=uint64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.LifetimeReferrerFeePercentage = int64(tval)
-
+			err = j.LifetimeReferrerFeePercentage.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -919,29 +921,24 @@ handle_LifetimeReferrerFeePercentage:
 
 handle_ReferrerRewardsPercentage:
 
-	/* handler: j.ReferrerRewardsPercentage type=int64 kind=int64 quoted=false*/
+	/* handler: j.ReferrerRewardsPercentage type=types.UInt64 kind=uint64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.ReferrerRewardsPercentage = int64(tval)
-
+			err = j.ReferrerRewardsPercentage.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -949,29 +946,24 @@ handle_ReferrerRewardsPercentage:
 
 handle_TopNControlFlags:
 
-	/* handler: j.TopNControlFlags type=int64 kind=int64 quoted=false*/
+	/* handler: j.TopNControlFlags type=types.UInt64 kind=uint64 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.TopNControlFlags = int64(tval)
-
+			err = j.TopNControlFlags.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1274,16 +1266,16 @@ handle_Options:
 	/* handler: j.Options type=types.AccountOptions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AccountOptions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Options)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1394,16 +1386,16 @@ handle_Owner:
 	/* handler: j.Owner type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Owner)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Owner.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1414,16 +1406,16 @@ handle_Active:
 	/* handler: j.Active type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Active)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Active.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

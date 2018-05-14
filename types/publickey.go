@@ -10,7 +10,13 @@ import (
 	"github.com/juju/errors"
 )
 
-type PublicKey string
+type PublicKey struct {
+	key string
+}
+
+func (p PublicKey) String() string {
+	return p.key
+}
 
 func (p *PublicKey) UnmarshalJSON(s []byte) error {
 	str := string(s)
@@ -20,10 +26,15 @@ func (p *PublicKey) UnmarshalJSON(s []byte) error {
 		return errors.Annotate(err, "SafeUnquote")
 	}
 
-	*p = PublicKey(q)
-	return nil
+	cnf := config.CurrentConfig()
+	prefix := cnf.Prefix()
 
-	//return errors.Errorf("unmarshal PublicKey from %s", str)
+	if !strings.HasPrefix(q, prefix) {
+		return ErrInvalidPublicKeyForThisChain
+	}
+
+	p.key = q
+	return nil
 }
 
 func (p PublicKey) Marshal(enc *util.TypeEncoder) error {
@@ -31,14 +42,14 @@ func (p PublicKey) Marshal(enc *util.TypeEncoder) error {
 }
 
 func (p PublicKey) Bytes() []byte {
-	if len(p) == 0 {
+	if len(p.key) == 0 {
 		return EmptyBuffer
 	}
 
-	key := string(p)
 	cnf := config.CurrentConfig()
 	prefix := cnf.Prefix()
 
+	key := p.key
 	if strings.IndexAny(key, prefix) == 0 {
 		key = key[len(prefix):]
 	}
@@ -48,6 +59,6 @@ func (p PublicKey) Bytes() []byte {
 }
 
 func NewPublicKey(key string) *PublicKey {
-	k := PublicKey(key)
+	k := PublicKey{key: key}
 	return &k
 }

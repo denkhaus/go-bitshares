@@ -33,10 +33,18 @@ func (j *Memo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
+	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`{"from":`)
-	fflib.WriteJsonString(buf, string(j.From))
+	err = buf.Encode(&j.From)
+	if err != nil {
+		return err
+	}
+	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`,"to":`)
-	fflib.WriteJsonString(buf, string(j.To))
+	err = buf.Encode(&j.To)
+	if err != nil {
+		return err
+	}
 	buf.WriteString(`,"nonce":`)
 	fflib.FormatBits2(buf, uint64(j.Nonce), 10, false)
 	buf.WriteString(`,"message":`)
@@ -230,7 +238,7 @@ mainparse:
 
 handle_From:
 
-	/* handler: j.From type=types.PublicKey kind=string quoted=false*/
+	/* handler: j.From type=types.PublicKey kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -255,7 +263,7 @@ handle_From:
 
 handle_To:
 
-	/* handler: j.To type=types.PublicKey kind=string quoted=false*/
+	/* handler: j.To type=types.PublicKey kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
