@@ -3,17 +3,18 @@
 
 package samples
 
-import(
-    "github.com/denkhaus/bitshares/gen/data"
-    "github.com/denkhaus/bitshares/types"
+import (
+	"github.com/denkhaus/bitshares/gen/data"
+	"github.com/denkhaus/bitshares/types"
 )
 
-func init(){
-	data.OpSampleMap[types.OperationTypeAccountCreate] = sampleDataAccountCreateOperation
+func init() {
+	data.OpSampleMap[types.OperationTypeAccountCreate] =
+		sampleDataAccountCreateOperation
 }
 
 var sampleDataAccountCreateOperation = `{
-  "active": {
+  "active": { 
     "account_auths": [],
     "address_auths": [],
     "key_auths": [

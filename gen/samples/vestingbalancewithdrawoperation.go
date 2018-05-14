@@ -14,15 +14,15 @@ func init(){
 
 var sampleDataVestingBalanceWithdrawOperation = `{
   "amount": {
-    "amount": 45400000,
+    "amount": 406050000,
     "asset_id": "1.3.0"
   },
   "fee": {
-    "amount": 100000,
+    "amount": 200000,
     "asset_id": "1.3.0"
   },
-  "owner": "1.2.22517",
-  "vesting_balance": "1.13.19"
+  "owner": "1.2.23043",
+  "vesting_balance": "1.13.48"
 }`
 
 //end of file

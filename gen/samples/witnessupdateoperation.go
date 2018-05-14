@@ -14,13 +14,13 @@ func init(){
 
 var sampleDataWitnessUpdateOperation = `{
   "fee": {
-    "amount": 2000000,
+    "amount": 4000000,
     "asset_id": "1.3.0"
   },
-  "new_signing_key": "BTS83K3qNNZBRLWMa6pXcwnfMJqC9J46ZpMFEYDKUDCNy2BgNrWth",
-  "new_url": "https://github.com/abitmore",
-  "witness": "1.6.35",
-  "witness_account": "1.2.35248"
+  "new_signing_key": "BTS6ESZ9926WQiJ7K2FLPetxd6MVhzH8bgj7LX7zmYH3D7XXxc3VE",
+  "new_url": "bitshares.kr",
+  "witness": "1.6.27",
+  "witness_account": "1.2.29205"
 }`
 
 //end of file

@@ -2,6 +2,8 @@ package data
 
 import "github.com/denkhaus/bitshares/types"
 
+type OperationSampleMap map[types.OperationType]string
+
 var (
-	OpSampleMap = make(map[types.OperationType]string)
+	OpSampleMap = make(OperationSampleMap)
 )

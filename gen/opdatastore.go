@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/juju/errors"
 	"github.com/mitchellh/reflectwalk"
 	"github.com/stretchr/objx"
 )
 
+//OperationBlob simply counts fields and child map elements.
+//The more fields, the more telling is the structure.
 type OperationBlob struct {
 	data   map[string]interface{}
 	fields int
@@ -25,7 +28,7 @@ func (p *OperationBlob) MapElem(m, k, v reflect.Value) error {
 }
 
 func (p *OperationBlob) String() string {
-	return fmt.Sprintf("fields: %d", p.fields)
+	return fmt.Sprintf("rank: %d", p.fields)
 }
 
 func NewOperationBlob(data map[string]interface{}) *OperationBlob {
@@ -38,7 +41,7 @@ func NewOperationBlob(data map[string]interface{}) *OperationBlob {
 type OpDataStore map[types.OperationType]*OperationBlob
 
 //TODO: save last scanned block and reapply
-func (p *OpDataStore) Init(m map[types.OperationType]string) error {
+func (p *OpDataStore) Init(m data.OperationSampleMap) error {
 	if len(m) == 0 {
 		fmt.Printf("init datastore: no sample data loaded\n")
 		return nil

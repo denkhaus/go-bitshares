@@ -9,7 +9,8 @@ import(
 )
 
 func init(){
-	data.OpSampleMap[types.{{.SampleDataOpType}}] = {{.SampleDataVarName}}
+	data.OpSampleMap[types.{{.SampleDataOpType}}] = 
+    {{.SampleDataVarName}}
 }
 
 var {{.SampleDataVarName}} = {{.SampleData}}

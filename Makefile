@@ -21,9 +21,16 @@ generate_new: clean_ffjson_base clean_ffjson_gen
 init:
 	@go get -u github.com/pquerna/ffjson
 	@go get -u golang.org/x/tools/cmd/stringer
+	@go get -u github.com/mitchellh/reflectwalk
+	@go get -u github.com/stretchr/objx
 
 test:
 	go test -v ./...
 
-opsamples:
-	cd gen && go run *.go
+buildgen:
+	@go get -u -d ./gen 
+	@go build -o /tmp/btsgen ./gen 
+	@cp /tmp/btsgen $(GOPATH)/bin
+
+opsamples: buildgen
+	@cd gen && btsgen

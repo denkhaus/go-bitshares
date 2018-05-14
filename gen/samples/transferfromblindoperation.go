@@ -14,17 +14,17 @@ func init(){
 
 var sampleDataTransferFromBlindOperation = `{
   "amount": {
-    "amount": 465000000,
+    "amount": 100000,
     "asset_id": "1.3.0"
   },
-  "blinding_factor": "da04e689398f140d5046c41b661fc32c608b3a7ed76763757ddf272ddadd6007",
+  "blinding_factor": "30806481146974b091f415b857aef06c4e7d4468ea95d43c44cee62c5216eb04",
   "fee": {
-    "amount": 500000,
+    "amount": 2000000,
     "asset_id": "1.3.0"
   },
   "inputs": [
     {
-      "commitment": "02012fe0b061da824d45ae2dc370f3a75f41d0a31cf562b324cbb13040e5844abd",
+      "commitment": "02fee663b188f809d8f476eb17757ac7e8f9bf28c694f9007dde1b90d6d3e72afb",
       "owner": {
         "account_auths": [],
         "address_auths": [],
@@ -33,7 +33,7 @@ var sampleDataTransferFromBlindOperation = `{
       }
     }
   ],
-  "to": "1.2.1090"
+  "to": "1.2.35298"
 }`
 
 //end of file

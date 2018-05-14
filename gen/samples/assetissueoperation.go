@@ -14,16 +14,16 @@ func init(){
 
 var sampleDataAssetIssueOperation = `{
   "asset_to_issue": {
-    "amount": 248741508,
-    "asset_id": "1.3.350"
+    "amount": 1000000,
+    "asset_id": "1.3.557"
   },
   "extensions": [],
   "fee": {
-    "amount": 2000097,
+    "amount": 4000194,
     "asset_id": "1.3.0"
   },
-  "issue_to_account": "1.2.8284",
-  "issuer": "1.2.32567"
+  "issue_to_account": "1.2.92002",
+  "issuer": "1.2.91790"
 }`
 
 //end of file
