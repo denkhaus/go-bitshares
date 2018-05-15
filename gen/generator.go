@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/objx"
 	"gopkg.in/tomb.v2"
 
-	// import this because of initialization of data.OpSampleMap
+	// importing this initializes sample data fetching
 	_ "github.com/denkhaus/bitshares/gen/samples"
 )
 
@@ -160,12 +160,12 @@ func generate(ch chan GenData) error {
 }
 
 func generateOpData(d GenData) error {
-	sample := data.GetSampleByType(d.Type)
-	if sample == "" {
-		return nil
+	s, err := data.GetSampleByType(d.Type)
+	if err != nil {
+		return errors.Annotate(err, "GetSampleByType")
 	}
 
-	sample, err := strconv.Unquote(sample)
+	sample, err := strconv.Unquote(s)
 	if err != nil {
 		return errors.Annotate(err, "Unquote")
 	}

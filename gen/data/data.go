@@ -2,19 +2,21 @@ package data
 
 import (
 	"github.com/denkhaus/bitshares/types"
+	"github.com/juju/errors"
 )
 
 type OperationSampleMap map[types.OperationType]string
 
 var (
-	OpSampleMap = make(OperationSampleMap)
+	OpSampleMap              = make(OperationSampleMap)
+	ErrNoSampleDataAvailable = errors.New("no sample data available")
 )
 
 //GetSampleByType returns a Operation data sample by OperationID
-func GetSampleByType(typ types.OperationType) string {
+func GetSampleByType(typ types.OperationType) (string, error) {
 	if s, ok := OpSampleMap[typ]; ok {
-		return s
+		return s, nil
 	}
 
-	return ""
+	return "", ErrNoSampleDataAvailable
 }

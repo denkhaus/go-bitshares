@@ -18,7 +18,7 @@ type TransferOperation struct {
 	To         types.GrapheneID  `json:"to"`
 	Amount     types.AssetAmount `json:"amount"`
 	Fee        types.AssetAmount `json:"fee"`
-	Memo       types.Memo        `json:"memo"`
+	Memo       *types.Memo       `json:"memo,omitempty"`
 	Extensions types.Extensions  `json:"extensions"`
 }
 
@@ -51,8 +51,14 @@ func (p TransferOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode amount")
 	}
 
-	if err := enc.Encode(p.Memo); err != nil {
-		return errors.Annotate(err, "encode memo")
+	if p.Memo != nil {
+		if err := enc.Encode(p.Memo); err != nil {
+			return errors.Annotate(err, "encode memo")
+		}
+	} else {
+		if err := enc.Encode(false); err != nil {
+			return errors.Annotate(err, "encode memo present")
+		}
 	}
 
 	if err := enc.Encode(p.Extensions); err != nil {

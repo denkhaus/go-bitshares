@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -76,17 +77,23 @@ func (j *TransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
-	buf.WriteString(`,"memo":`)
+	buf.WriteByte(',')
+	if j.Memo != nil {
+		if true {
+			buf.WriteString(`"memo":`)
 
-	{
+			{
 
-		err = j.Memo.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+				err = j.Memo.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
 		}
-
 	}
-	buf.WriteString(`,"extensions":`)
+	buf.WriteString(`"extensions":`)
 	if j.Extensions != nil {
 		buf.WriteString(`[`)
 		for i, v := range j.Extensions {
@@ -426,7 +433,13 @@ handle_Memo:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Memo = nil
+
 		} else {
+
+			if j.Memo == nil {
+				j.Memo = new(types.Memo)
+			}
 
 			err = j.Memo.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {

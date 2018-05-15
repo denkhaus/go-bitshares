@@ -49,7 +49,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 	p.req.Params = args
 
 	if err := p.Encode(&p.req); err != nil {
-		return nil, errors.Annotate(err, "encode")
+		return nil, errors.Annotate(err, "Encode")
 	}
 
 	req, err := http.NewRequest("POST", p.endpointURL, p.decBuf)

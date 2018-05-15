@@ -183,7 +183,7 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]type
 }
 
 // SerializeTransaction converts a signed_transaction in JSON form to its binary representation.
-// @param tx	the transaction to serialize
+// @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
 func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, error) {
 	resp, err := p.rpcClient.CallAPI("serialize_transaction", tx)

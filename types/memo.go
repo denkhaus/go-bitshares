@@ -17,6 +17,9 @@ type Memo struct {
 }
 
 func (p Memo) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(byte(0x1)); err != nil {
+		return errors.Annotate(err, "encode lala")
+	}
 
 	if err := enc.Encode(p.From); err != nil {
 		return errors.Annotate(err, "encode from")
@@ -41,26 +44,3 @@ func (p Memo) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-// func NewMemo(wif string, nonce int, message string) *Memo {
-// 	pub := crypto.GetPublicKey(wif)
-
-// 	m := Memo{
-// 		Nonce: nonce,
-// 	}
-
-// 	return &m
-// }
-
-// encrypted_memo = memo.encode_memo(
-// 	account.PrivateKey(wif),
-// 	account.PublicKey(pub, prefix=prefix),
-// 	nonce,
-// 	message
-// )
-// memoStruct = {
-// 	"from": pub,
-// 	"to": pub,
-// 	"nonce": nonce,
-// 	"message": encrypted_memo,
-// }

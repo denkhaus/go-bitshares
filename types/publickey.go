@@ -3,6 +3,8 @@ package types
 import (
 	"strings"
 
+	"github.com/pquerna/ffjson/ffjson"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/denkhaus/bitshares/config"
@@ -35,6 +37,10 @@ func (p *PublicKey) UnmarshalJSON(s []byte) error {
 
 	p.key = q
 	return nil
+}
+
+func (p PublicKey) MarshalJSON() ([]byte, error) {
+	return ffjson.Marshal(p.key)
 }
 
 func (p PublicKey) Marshal(enc *util.TypeEncoder) error {

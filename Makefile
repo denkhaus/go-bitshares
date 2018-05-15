@@ -24,8 +24,12 @@ init:
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx
 
-test:
+test_all:
 	go test -v ./...
+
+test_operations:
+	go test -v ./operations
+
 
 buildgen:
 	@echo "build btsgen"

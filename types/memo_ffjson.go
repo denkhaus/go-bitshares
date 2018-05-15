@@ -33,17 +33,27 @@ func (j *Memo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`{"from":`)
-	err = buf.Encode(&j.From)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.From.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
-	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`,"to":`)
-	err = buf.Encode(&j.To)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.To.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"nonce":`)
 	fflib.FormatBits2(buf, uint64(j.Nonce), 10, false)

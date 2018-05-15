@@ -29,8 +29,6 @@ func (p BalanceClaimOperation) Type() types.OperationType {
 	return types.OperationTypeBalanceClaim
 }
 
-//TODO: validate encode order!
-
 func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -40,20 +38,20 @@ func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode fee")
 	}
 
-	if err := enc.Encode(p.BalanceOwnerKey); err != nil {
-		return errors.Annotate(err, "encode balance owner key")
+	if err := enc.Encode(p.DepositToAccount); err != nil {
+		return errors.Annotate(err, "encode DepositToAccount")
 	}
 
 	if err := enc.Encode(p.BalanceToClaim); err != nil {
-		return errors.Annotate(err, "encode balance to claim")
+		return errors.Annotate(err, "encode BalanceToClaim")
 	}
 
-	if err := enc.Encode(p.DepositToAccount); err != nil {
-		return errors.Annotate(err, "encode deposit to account")
+	if err := enc.Encode(p.BalanceOwnerKey); err != nil {
+		return errors.Annotate(err, "encode BalanceOwnerKey")
 	}
 
 	if err := enc.Encode(p.TotalClaimed); err != nil {
-		return errors.Annotate(err, "encode total claimed")
+		return errors.Annotate(err, "encode TotalClaimed")
 	}
 
 	return nil
