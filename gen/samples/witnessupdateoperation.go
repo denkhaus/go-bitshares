@@ -18,10 +18,10 @@ var sampleDataWitnessUpdateOperation = `{
     "amount": 4000000,
     "asset_id": "1.3.0"
   },
-  "new_signing_key": "BTS6ESZ9926WQiJ7K2FLPetxd6MVhzH8bgj7LX7zmYH3D7XXxc3VE",
-  "new_url": "bitshares.kr",
-  "witness": "1.6.27",
-  "witness_account": "1.2.29205"
+  "new_signing_key": "BTS7V2jfYZEToTjGFndctgTPipMuMcobqzwsd8RQv77c5Vzcexgt6",
+  "new_url": "-",
+  "witness": "1.6.23",
+  "witness_account": "1.2.3284"
 }`
 
 //end of file

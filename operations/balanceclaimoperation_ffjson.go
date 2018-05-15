@@ -44,8 +44,12 @@ func (j *BalanceClaimOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
+	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`,"balance_owner_key":`)
-	fflib.WriteJsonString(buf, string(j.BalanceOwnerKey))
+	err = buf.Encode(&j.BalanceOwnerKey)
+	if err != nil {
+		return err
+	}
 	buf.WriteString(`,"deposit_to_account":`)
 
 	{
@@ -309,7 +313,7 @@ handle_BalanceToClaim:
 
 handle_BalanceOwnerKey:
 
-	/* handler: j.BalanceOwnerKey type=types.PublicKey kind=string quoted=false*/
+	/* handler: j.BalanceOwnerKey type=types.PublicKey kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

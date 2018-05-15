@@ -42,7 +42,7 @@ type KeyAuthsMap map[PublicKey]UInt16
 
 func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 	if data == nil || len(data) == 0 {
-		return nil
+		return ErrInvalidInputLength
 	}
 
 	var res interface{}
@@ -51,11 +51,28 @@ func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 	}
 
 	(*p) = make(map[PublicKey]UInt16)
-	auths := res.([]interface{})
+	auths, ok := res.([]interface{})
+	if !ok {
+		return ErrInvalidInputType
+	}
 
 	for _, a := range auths {
-		tk := a.([]interface{})
-		(*p)[PublicKey{tk[0].(string)}] = UInt16(tk[1].(float64))
+		tk, ok := a.([]interface{})
+		if !ok {
+			return ErrInvalidInputType
+		}
+
+		key, ok := tk[0].(string)
+		if !ok {
+			return ErrInvalidInputType
+		}
+
+		weight, ok := tk[1].(float64)
+		if !ok {
+			return ErrInvalidInputType
+		}
+
+		(*p)[PublicKey{key}] = UInt16(weight)
 	}
 
 	return nil

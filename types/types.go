@@ -56,22 +56,22 @@ const (
 	OperationTypeCallOrderUpdate
 	OperationTypeFillOrder
 	OperationTypeAccountCreate
-	OperationTypeAccountUpdate    ///
-	OperationTypeAccountWhitelist ///
-	OperationTypeAccountUpgrade   ///
-	OperationTypeAccountTransfer  ///
-	OperationTypeAssetCreate      ///
+	OperationTypeAccountUpdate
+	OperationTypeAccountWhitelist
+	OperationTypeAccountUpgrade
+	OperationTypeAccountTransfer ///
+	OperationTypeAssetCreate     ///
 	OperationTypeAssetUpdate
-	OperationTypeAssetUpdateBitasset      ///
+	OperationTypeAssetUpdateBitasset
 	OperationTypeAssetUpdateFeedProducers ///
 	OperationTypeAssetIssue
 	OperationTypeAssetReserve
-	OperationTypeAssetFundFeePool ///
+	OperationTypeAssetFundFeePool
 	OperationTypeAssetSettle
 	OperationTypeAssetGlobalSettle ///
 	OperationTypeAssetPublishFeed
-	OperationTypeWitnessCreate                         ///
-	OperationTypeWitnessUpdate                         ///
+	OperationTypeWitnessCreate ///
+	OperationTypeWitnessUpdate
 	OperationTypeProposalCreate                        ///
 	OperationTypeProposalUpdate                        ///
 	OperationTypeProposalDelete                        ///

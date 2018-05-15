@@ -46,7 +46,7 @@ func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 		fmt.Printf("init datastore: no sample data loaded\n")
 		return errors.New("no sample data loaded")
 	}
-
+	//TODO: fatal error: concurrent map iteration and map write
 	for typ, data := range m {
 		opData, err := objx.FromJSON(data)
 		if err != nil {

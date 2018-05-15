@@ -26,6 +26,19 @@ func ToBytes(in interface{}) []byte {
 	return b
 }
 
+func ToMap(in interface{}) map[string]interface{} {
+	b, err := ffjson.Marshal(in)
+	if err != nil {
+	}
+
+	m := make(map[string]interface{})
+	if err := ffjson.Unmarshal(b, &m); err != nil {
+		panic("ToMap: unable to unmarshal input")
+	}
+
+	return nil
+}
+
 func DumpUnmarshaled(descr string, in []byte) {
 	var res interface{}
 	if err := json.Unmarshal(in, &res); err != nil {
