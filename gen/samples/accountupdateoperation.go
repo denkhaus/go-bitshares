@@ -14,49 +14,37 @@ func init() {
 }
 
 var sampleDataAccountUpdateOperation = `{
-  "account": "1.2.1090",
+  "account": "1.2.115296",
   "active": {
     "account_auths": [],
     "address_auths": [],
     "key_auths": [
       [
-        "BTS7hC5RAxkenTAfaBncgyH4RNJKtkPJURXnuCabqCf7iu5QYL3ZW",
+        "BTS7wPKvv8zNBFWZmBQqPfW5Df9sfBvyS2c24MmJ1mkHjZCaowHNx",
         1
       ]
     ],
     "weight_threshold": 1
   },
-  "extensions": [],
+  "extensions": {},
   "fee": {
-    "amount": 2017871,
+    "amount": 28922,
     "asset_id": "1.3.0"
   },
   "new_options": {
     "extensions": [],
-    "memo_key": "BTS7hC5RAxkenTAfaBncgyH4RNJKtkPJURXnuCabqCf7iu5QYL3ZW",
+    "memo_key": "BTS7wPKvv8zNBFWZmBQqPfW5Df9sfBvyS2c24MmJ1mkHjZCaowHNx",
     "num_committee": 0,
-    "num_witness": 11,
-    "votes": [
-      "1:0",
-      "1:1",
-      "1:2",
-      "1:3",
-      "1:4",
-      "1:5",
-      "1:6",
-      "1:7",
-      "1:8",
-      "1:9",
-      "1:10"
-    ],
-    "voting_account": "1.2.5"
+    "num_witness": 0,
+    "votes": [],
+    "voting_account": "1.2.21106"
   },
   "owner": {
     "account_auths": [],
     "address_auths": [],
     "key_auths": [
       [
-        "BTS7hC5RAxkenTAfaBncgyH4RNJKtkPJURXnuCabqCf7iu5QYL3ZW",
+        "BTS7jp4WPJaVerGJbNC4scaoHSdY7wSemAcdg6HikhNQqvegxYyyM",
         1
       ]
     ],

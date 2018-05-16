@@ -15,11 +15,11 @@ func init() {
 
 type AccountUpdateOperation struct {
 	Account    types.GrapheneID      `json:"account"`
-	Active     *types.Authority      `json:"active"`
-	Extensions types.Extensions      `json:"extensions"`
+	Active     *types.Authority      `json:"active,omitempty"`
+	Extensions types.Extensions      `json:"extensions"` //struct or slice??
 	Fee        types.AssetAmount     `json:"fee"`
 	NewOptions *types.AccountOptions `json:"new_options,omitempty"`
-	Owner      *types.Authority      `json:"owner"`
+	Owner      *types.Authority      `json:"owner,omitempty"`
 }
 
 func (p *AccountUpdateOperation) ApplyFee(fee types.AssetAmount) {

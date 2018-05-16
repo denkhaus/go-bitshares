@@ -96,14 +96,10 @@ func (j *Block) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-
-			{
-
-				err = v.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
-
+			/* Struct fall back. type=types.Transaction kind=struct */
+			err = buf.Encode(&v)
+			if err != nil {
+				return err
 			}
 		}
 		buf.WriteString(`]`)
@@ -539,16 +535,16 @@ handle_Transactions:
 				/* handler: tmpJTransactions type=types.Transaction kind=struct quoted=false*/
 
 				{
-					if tok == fflib.FFTok_null {
-
-					} else {
-
-						err = tmpJTransactions.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-						if err != nil {
-							return err
-						}
+					/* Falling back. type=types.Transaction kind=struct */
+					tbuf, err := fs.CaptureField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
 					}
-					state = fflib.FFParse_after_value
+
+					err = json.Unmarshal(tbuf, &tmpJTransactions)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
 				}
 
 				j.Transactions = append(j.Transactions, tmpJTransactions)

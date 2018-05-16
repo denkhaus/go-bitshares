@@ -8,8 +8,8 @@ clean_ffjson_base:
 	@rm -f operations/*_ffjson_expose.go ||:
 
 clean_ffjson_gen:
-	@rm types/*_ffjson.go ||: 
-	@rm operations/*_ffjson.go ||: 
+	@rm -f types/*_ffjson.go ||: 
+	@rm -rf operations/*_ffjson.go ||: 
 
 generate: clean_ffjson_base	
 	-go generate ./...
@@ -23,6 +23,7 @@ init:
 	@go get -u golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx
+	@go get -u github.com/cespare/reflex
 
 test_all:
 	go test -v ./...
@@ -39,3 +40,9 @@ buildgen:
 opsamples: buildgen
 	@echo "exec btsgen"
 	@cd gen && btsgen
+
+build: generate
+	go build -o /tmp/go-tmpbuild ./operations 
+
+watch:
+	reflex -g 'operations/*.go' make test_operations

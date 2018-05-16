@@ -44,9 +44,9 @@ func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 
 	//this gives us an error if we generate ffjson logic for the first time
 	//for now comment this out to generate and in again
-	if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
-		return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
-	}
+	// if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
+	// 	return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
+	// }
 
 	return nil
 }

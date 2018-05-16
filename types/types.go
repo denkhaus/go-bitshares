@@ -63,7 +63,7 @@ const (
 	OperationTypeAssetCreate
 	OperationTypeAssetUpdate
 	OperationTypeAssetUpdateBitasset
-	OperationTypeAssetUpdateFeedProducers ///
+	OperationTypeAssetUpdateFeedProducers
 	OperationTypeAssetIssue
 	OperationTypeAssetReserve
 	OperationTypeAssetFundFeePool
@@ -88,7 +88,7 @@ const (
 	OperationTypeCustom       ///
 	OperationTypeAssert       ///
 	OperationTypeBalanceClaim
-	OperationTypeOverrideTransfer  ///
+	OperationTypeOverrideTransfer
 	OperationTypeTransferToBlind   ///
 	OperationTypeBlindTransfer     ///
 	OperationTypeTransferFromBlind ///
@@ -452,19 +452,28 @@ func (t Time) IsZero() bool {
 type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
-	str := string(data)
+	//str := string(data)
 
-	q, err := util.SafeUnquote(str)
-	if err != nil {
-		return errors.Annotate(err, "SafeUnquote")
+	// q, err := util.SafeUnquote(str)
+	// if err != nil {
+	// 	return errors.Annotate(err, "SafeUnquote")
+	// }
+
+	// buf, err := hex.DecodeString(q)
+	// if err != nil {
+	// 	return errors.Annotate(err, "DecodeString")
+	// }
+
+	// *p = buf
+	*p = data //[]byte(q)
+	return nil
+}
+
+func (p Buffer) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.String()); err != nil {
+		return errors.Annotate(err, "encode message")
 	}
 
-	buf, err := hex.DecodeString(q)
-	if err != nil {
-		return errors.Annotate(err, "DecodeString")
-	}
-
-	*p = buf
 	return nil
 }
 
@@ -481,5 +490,5 @@ func (p Buffer) Byte() []byte {
 }
 
 func (p Buffer) MarshalJSON() ([]byte, error) {
-	return []byte(string(p)), nil
+	return p, nil //[]byte(fmt.Sprintf(`%s`, p))
 }
