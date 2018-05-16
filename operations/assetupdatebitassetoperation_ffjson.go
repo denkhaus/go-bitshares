@@ -441,7 +441,7 @@ handle_Extensions:
 
 handle_NewOptions:
 
-	/* handler: j.NewOptions type=types.BitAssetDataOptions kind=struct quoted=false*/
+	/* handler: j.NewOptions type=types.BitassetOptions kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

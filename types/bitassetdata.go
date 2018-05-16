@@ -7,7 +7,7 @@ import (
 
 //go:generate ffjson   $GOFILE
 
-type BitAssetDataOptions struct {
+type BitassetOptions struct {
 	FeedLifetimeSec              UInt32     `json:"feed_lifetime_sec"`
 	MinimumFeeds                 UInt8      `json:"minimum_feeds"`
 	ForceSettlementDelaySec      UInt32     `json:"force_settlement_delay_sec"`
@@ -17,7 +17,7 @@ type BitAssetDataOptions struct {
 	Extensions                   Extensions `json:"extensions"`
 }
 
-func (p BitAssetDataOptions) Marshal(enc *util.TypeEncoder) error {
+func (p BitassetOptions) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(p.FeedLifetimeSec); err != nil {
 		return errors.Annotate(err, "encode FeedLifetimeSec")
 	}
@@ -50,13 +50,13 @@ func (p BitAssetDataOptions) Marshal(enc *util.TypeEncoder) error {
 }
 
 type BitAssetData struct {
-	ID                       GrapheneID          `json:"id"`
-	MembershipExpirationDate Time                `json:"current_feed_publication_time"`
-	IsPredictionMarket       bool                `json:"is_prediction_market"`
-	SettlementPrice          Price               `json:"settlement_price"`
-	Feeds                    AssetFeeds          `json:"feeds"`
-	Options                  BitAssetDataOptions `json:"options"`
-	CurrentFeed              PriceFeed           `json:"current_feed"`
-	ForcedSettledVolume      UInt64              `json:"force_settled_volume"`
-	SettlementFund           UInt64              `json:"settlement_fund"`
+	ID                       GrapheneID      `json:"id"`
+	MembershipExpirationDate Time            `json:"current_feed_publication_time"`
+	IsPredictionMarket       bool            `json:"is_prediction_market"`
+	SettlementPrice          Price           `json:"settlement_price"`
+	Feeds                    AssetFeeds      `json:"feeds"`
+	Options                  BitassetOptions `json:"options"`
+	CurrentFeed              PriceFeed       `json:"current_feed"`
+	ForcedSettledVolume      UInt64          `json:"force_settled_volume"`
+	SettlementFund           UInt64          `json:"settlement_fund"`
 }

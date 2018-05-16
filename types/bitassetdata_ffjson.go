@@ -573,7 +573,7 @@ handle_Feeds:
 
 handle_Options:
 
-	/* handler: j.Options type=types.BitAssetDataOptions kind=struct quoted=false*/
+	/* handler: j.Options type=types.BitassetOptions kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -680,7 +680,7 @@ done:
 }
 
 // MarshalJSON marshal bytes to json - template
-func (j *BitAssetDataOptions) MarshalJSON() ([]byte, error) {
+func (j *BitassetOptions) MarshalJSON() ([]byte, error) {
 	var buf fflib.Buffer
 	if j == nil {
 		buf.WriteString("null")
@@ -694,7 +694,7 @@ func (j *BitAssetDataOptions) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalJSONBuf marshal buff to json - template
-func (j *BitAssetDataOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
+func (j *BitassetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	if j == nil {
 		buf.WriteString("null")
 		return nil
@@ -746,48 +746,48 @@ func (j *BitAssetDataOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 }
 
 const (
-	ffjtBitAssetDataOptionsbase = iota
-	ffjtBitAssetDataOptionsnosuchkey
+	ffjtBitassetOptionsbase = iota
+	ffjtBitassetOptionsnosuchkey
 
-	ffjtBitAssetDataOptionsFeedLifetimeSec
+	ffjtBitassetOptionsFeedLifetimeSec
 
-	ffjtBitAssetDataOptionsMinimumFeeds
+	ffjtBitassetOptionsMinimumFeeds
 
-	ffjtBitAssetDataOptionsForceSettlementDelaySec
+	ffjtBitassetOptionsForceSettlementDelaySec
 
-	ffjtBitAssetDataOptionsForceSettlementOffsetPercent
+	ffjtBitassetOptionsForceSettlementOffsetPercent
 
-	ffjtBitAssetDataOptionsMaximumForceSettlementVolume
+	ffjtBitassetOptionsMaximumForceSettlementVolume
 
-	ffjtBitAssetDataOptionsShortBackingAsset
+	ffjtBitassetOptionsShortBackingAsset
 
-	ffjtBitAssetDataOptionsExtensions
+	ffjtBitassetOptionsExtensions
 )
 
-var ffjKeyBitAssetDataOptionsFeedLifetimeSec = []byte("feed_lifetime_sec")
+var ffjKeyBitassetOptionsFeedLifetimeSec = []byte("feed_lifetime_sec")
 
-var ffjKeyBitAssetDataOptionsMinimumFeeds = []byte("minimum_feeds")
+var ffjKeyBitassetOptionsMinimumFeeds = []byte("minimum_feeds")
 
-var ffjKeyBitAssetDataOptionsForceSettlementDelaySec = []byte("force_settlement_delay_sec")
+var ffjKeyBitassetOptionsForceSettlementDelaySec = []byte("force_settlement_delay_sec")
 
-var ffjKeyBitAssetDataOptionsForceSettlementOffsetPercent = []byte("force_settlement_offset_percent")
+var ffjKeyBitassetOptionsForceSettlementOffsetPercent = []byte("force_settlement_offset_percent")
 
-var ffjKeyBitAssetDataOptionsMaximumForceSettlementVolume = []byte("maximum_force_settlement_volume")
+var ffjKeyBitassetOptionsMaximumForceSettlementVolume = []byte("maximum_force_settlement_volume")
 
-var ffjKeyBitAssetDataOptionsShortBackingAsset = []byte("short_backing_asset")
+var ffjKeyBitassetOptionsShortBackingAsset = []byte("short_backing_asset")
 
-var ffjKeyBitAssetDataOptionsExtensions = []byte("extensions")
+var ffjKeyBitassetOptionsExtensions = []byte("extensions")
 
 // UnmarshalJSON umarshall json - template of ffjson
-func (j *BitAssetDataOptions) UnmarshalJSON(input []byte) error {
+func (j *BitassetOptions) UnmarshalJSON(input []byte) error {
 	fs := fflib.NewFFLexer(input)
 	return j.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
 }
 
 // UnmarshalJSONFFLexer fast json unmarshall - template ffjson
-func (j *BitAssetDataOptions) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
+func (j *BitassetOptions) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
 	var err error
-	currentKey := ffjtBitAssetDataOptionsbase
+	currentKey := ffjtBitassetOptionsbase
 	_ = currentKey
 	tok := fflib.FFTok_init
 	wantedTok := fflib.FFTok_init
@@ -833,7 +833,7 @@ mainparse:
 			kn := fs.Output.Bytes()
 			if len(kn) <= 0 {
 				// "" case. hrm.
-				currentKey = ffjtBitAssetDataOptionsnosuchkey
+				currentKey = ffjtBitassetOptionsnosuchkey
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			} else {
@@ -841,96 +841,96 @@ mainparse:
 
 				case 'e':
 
-					if bytes.Equal(ffjKeyBitAssetDataOptionsExtensions, kn) {
-						currentKey = ffjtBitAssetDataOptionsExtensions
+					if bytes.Equal(ffjKeyBitassetOptionsExtensions, kn) {
+						currentKey = ffjtBitassetOptionsExtensions
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyBitAssetDataOptionsFeedLifetimeSec, kn) {
-						currentKey = ffjtBitAssetDataOptionsFeedLifetimeSec
+					if bytes.Equal(ffjKeyBitassetOptionsFeedLifetimeSec, kn) {
+						currentKey = ffjtBitassetOptionsFeedLifetimeSec
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyBitAssetDataOptionsForceSettlementDelaySec, kn) {
-						currentKey = ffjtBitAssetDataOptionsForceSettlementDelaySec
+					} else if bytes.Equal(ffjKeyBitassetOptionsForceSettlementDelaySec, kn) {
+						currentKey = ffjtBitassetOptionsForceSettlementDelaySec
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyBitAssetDataOptionsForceSettlementOffsetPercent, kn) {
-						currentKey = ffjtBitAssetDataOptionsForceSettlementOffsetPercent
+					} else if bytes.Equal(ffjKeyBitassetOptionsForceSettlementOffsetPercent, kn) {
+						currentKey = ffjtBitassetOptionsForceSettlementOffsetPercent
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'm':
 
-					if bytes.Equal(ffjKeyBitAssetDataOptionsMinimumFeeds, kn) {
-						currentKey = ffjtBitAssetDataOptionsMinimumFeeds
+					if bytes.Equal(ffjKeyBitassetOptionsMinimumFeeds, kn) {
+						currentKey = ffjtBitassetOptionsMinimumFeeds
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyBitAssetDataOptionsMaximumForceSettlementVolume, kn) {
-						currentKey = ffjtBitAssetDataOptionsMaximumForceSettlementVolume
+					} else if bytes.Equal(ffjKeyBitassetOptionsMaximumForceSettlementVolume, kn) {
+						currentKey = ffjtBitassetOptionsMaximumForceSettlementVolume
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 's':
 
-					if bytes.Equal(ffjKeyBitAssetDataOptionsShortBackingAsset, kn) {
-						currentKey = ffjtBitAssetDataOptionsShortBackingAsset
+					if bytes.Equal(ffjKeyBitassetOptionsShortBackingAsset, kn) {
+						currentKey = ffjtBitassetOptionsShortBackingAsset
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsExtensions, kn) {
-					currentKey = ffjtBitAssetDataOptionsExtensions
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsExtensions, kn) {
+					currentKey = ffjtBitassetOptionsExtensions
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsShortBackingAsset, kn) {
-					currentKey = ffjtBitAssetDataOptionsShortBackingAsset
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsShortBackingAsset, kn) {
+					currentKey = ffjtBitassetOptionsShortBackingAsset
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsMaximumForceSettlementVolume, kn) {
-					currentKey = ffjtBitAssetDataOptionsMaximumForceSettlementVolume
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsMaximumForceSettlementVolume, kn) {
+					currentKey = ffjtBitassetOptionsMaximumForceSettlementVolume
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsForceSettlementOffsetPercent, kn) {
-					currentKey = ffjtBitAssetDataOptionsForceSettlementOffsetPercent
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsForceSettlementOffsetPercent, kn) {
+					currentKey = ffjtBitassetOptionsForceSettlementOffsetPercent
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsForceSettlementDelaySec, kn) {
-					currentKey = ffjtBitAssetDataOptionsForceSettlementDelaySec
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsForceSettlementDelaySec, kn) {
+					currentKey = ffjtBitassetOptionsForceSettlementDelaySec
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsMinimumFeeds, kn) {
-					currentKey = ffjtBitAssetDataOptionsMinimumFeeds
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsMinimumFeeds, kn) {
+					currentKey = ffjtBitassetOptionsMinimumFeeds
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBitAssetDataOptionsFeedLifetimeSec, kn) {
-					currentKey = ffjtBitAssetDataOptionsFeedLifetimeSec
+				if fflib.EqualFoldRight(ffjKeyBitassetOptionsFeedLifetimeSec, kn) {
+					currentKey = ffjtBitassetOptionsFeedLifetimeSec
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				currentKey = ffjtBitAssetDataOptionsnosuchkey
+				currentKey = ffjtBitassetOptionsnosuchkey
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			}
@@ -947,28 +947,28 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
-				case ffjtBitAssetDataOptionsFeedLifetimeSec:
+				case ffjtBitassetOptionsFeedLifetimeSec:
 					goto handle_FeedLifetimeSec
 
-				case ffjtBitAssetDataOptionsMinimumFeeds:
+				case ffjtBitassetOptionsMinimumFeeds:
 					goto handle_MinimumFeeds
 
-				case ffjtBitAssetDataOptionsForceSettlementDelaySec:
+				case ffjtBitassetOptionsForceSettlementDelaySec:
 					goto handle_ForceSettlementDelaySec
 
-				case ffjtBitAssetDataOptionsForceSettlementOffsetPercent:
+				case ffjtBitassetOptionsForceSettlementOffsetPercent:
 					goto handle_ForceSettlementOffsetPercent
 
-				case ffjtBitAssetDataOptionsMaximumForceSettlementVolume:
+				case ffjtBitassetOptionsMaximumForceSettlementVolume:
 					goto handle_MaximumForceSettlementVolume
 
-				case ffjtBitAssetDataOptionsShortBackingAsset:
+				case ffjtBitassetOptionsShortBackingAsset:
 					goto handle_ShortBackingAsset
 
-				case ffjtBitAssetDataOptionsExtensions:
+				case ffjtBitassetOptionsExtensions:
 					goto handle_Extensions
 
-				case ffjtBitAssetDataOptionsnosuchkey:
+				case ffjtBitassetOptionsnosuchkey:
 					err = fs.SkipField(tok)
 					if err != nil {
 						return fs.WrapErr(err)

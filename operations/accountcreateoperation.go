@@ -35,7 +35,7 @@ func (p AccountCreateOperation) Type() types.OperationType {
 
 func (p AccountCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
-		return errors.Annotate(err, "encode operation id")
+		return errors.Annotate(err, "encode OperationType")
 	}
 
 	if err := enc.Encode(p.Fee); err != nil {

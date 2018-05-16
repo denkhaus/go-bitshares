@@ -26,7 +26,7 @@ var sampleDataAccountUpdateOperation = `{
     ],
     "weight_threshold": 1
   },
-  "extensions": {},
+  "extensions": [],
   "fee": {
     "amount": 2017871,
     "asset_id": "1.3.0"

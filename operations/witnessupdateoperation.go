@@ -31,7 +31,7 @@ func (p WitnessUpdateOperation) Type() types.OperationType {
 
 func (p WitnessUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
-		return errors.Annotate(err, "encode operation id")
+		return errors.Annotate(err, "encode OperationType")
 	}
 
 	if err := enc.Encode(p.Fee); err != nil {

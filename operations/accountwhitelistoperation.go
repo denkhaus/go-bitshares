@@ -32,7 +32,7 @@ func (p AccountWhitelistOperation) Type() types.OperationType {
 //TODO: validate order
 func (p AccountWhitelistOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
-		return errors.Annotate(err, "encode operation id")
+		return errors.Annotate(err, "encode OperationType")
 	}
 
 	if err := enc.Encode(p.Fee); err != nil {

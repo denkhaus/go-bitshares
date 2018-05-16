@@ -2,14 +2,14 @@
 all: generate
 
 clean_ffjson_base: 
-	@rm -rf types/ffjson-inception* ||:	
-	@rm types/*_ffjson_expose.go ||:	
-	@rm -rf operations/ffjson-inception* ||:	
-	@rm operations/*_ffjson_expose.go ||:	
+	@rm -rf types/ffjson-inception* ||:
+	@rm -f types/*_ffjson_expose.go ||:
+	@rm -rf operations/ffjson-inception* ||:
+	@rm -f operations/*_ffjson_expose.go ||:
 
 clean_ffjson_gen:
-	@rm types/*_ffjson.go ||:	
-	@rm operations/*_ffjson.go ||:	
+	@rm types/*_ffjson.go ||: 
+	@rm operations/*_ffjson.go ||: 
 
 generate: clean_ffjson_base	
 	-go generate ./...
@@ -29,7 +29,6 @@ test_all:
 
 test_operations:
 	go test -v ./operations
-
 
 buildgen:
 	@echo "build btsgen"

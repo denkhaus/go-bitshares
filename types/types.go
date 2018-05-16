@@ -60,7 +60,7 @@ const (
 	OperationTypeAccountWhitelist
 	OperationTypeAccountUpgrade
 	OperationTypeAccountTransfer ///
-	OperationTypeAssetCreate     ///
+	OperationTypeAssetCreate
 	OperationTypeAssetUpdate
 	OperationTypeAssetUpdateBitasset
 	OperationTypeAssetUpdateFeedProducers ///
@@ -70,7 +70,7 @@ const (
 	OperationTypeAssetSettle
 	OperationTypeAssetGlobalSettle ///
 	OperationTypeAssetPublishFeed
-	OperationTypeWitnessCreate ///
+	OperationTypeWitnessCreate
 	OperationTypeWitnessUpdate
 	OperationTypeProposalCreate                        ///
 	OperationTypeProposalUpdate                        ///
