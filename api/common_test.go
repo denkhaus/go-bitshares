@@ -17,11 +17,11 @@ type commonTest struct {
 func (suite *commonTest) SetupTest() {
 	api := New(tests.WsFullApiUrl, tests.RpcApiUrl)
 	if err := api.Connect(); err != nil {
-		suite.Fail(err.Error(), "Connect")
+		suite.FailNow(err.Error(), "Connect")
 	}
 
 	api.OnError(func(err error) {
-		suite.Fail(err.Error(), "OnError")
+		suite.FailNow(err.Error(), "OnError")
 	})
 
 	suite.TestAPI = api
@@ -29,7 +29,7 @@ func (suite *commonTest) SetupTest() {
 
 func (suite *commonTest) TearDown() {
 	if err := suite.TestAPI.Close(); err != nil {
-		suite.Fail(err.Error(), "Close")
+		suite.FailNow(err.Error(), "Close")
 	}
 }
 
@@ -37,7 +37,7 @@ func (suite *commonTest) Test_GetChainID() {
 
 	res, err := suite.TestAPI.GetChainID()
 	if err != nil {
-		suite.Fail(err.Error(), "GetChainID")
+		suite.FailNow(err.Error(), "GetChainID")
 	}
 
 	suite.Equal(res, tests.ChainIDBitSharesFull)
@@ -47,7 +47,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 
 	res, err := suite.TestAPI.GetAccountBalances(tests.UserID2, tests.AssetBTS)
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccountBalances 1")
+		suite.FailNow(err.Error(), "GetAccountBalances 1")
 	}
 
 	suite.NotNil(res)
@@ -55,7 +55,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 
 	res, err = suite.TestAPI.GetAccountBalances(tests.UserID2)
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccountBalances 2")
+		suite.FailNow(err.Error(), "GetAccountBalances 2")
 	}
 
 	suite.NotNil(res)
@@ -66,7 +66,7 @@ func (suite *commonTest) Test_GetAccounts() {
 
 	res, err := suite.TestAPI.GetAccounts(tests.UserID3)
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccounts")
+		suite.FailNow(err.Error(), "GetAccounts")
 	}
 
 	suite.NotNil(res)
@@ -85,7 +85,7 @@ func (suite *commonTest) Test_GetObjects() {
 	)
 
 	if err != nil {
-		suite.Fail(err.Error(), "GetObjects")
+		suite.FailNow(err.Error(), "GetObjects")
 	}
 
 	suite.NotNil(res)
@@ -96,7 +96,7 @@ func (suite *commonTest) Test_GetObjects() {
 func (suite *commonTest) Test_GetBlock() {
 	res, err := suite.TestAPI.GetBlock(26867161)
 	if err != nil {
-		suite.Fail(err.Error(), "GetBlock")
+		suite.FailNow(err.Error(), "GetBlock")
 	}
 
 	suite.NotNil(res)
@@ -106,7 +106,7 @@ func (suite *commonTest) Test_GetBlock() {
 func (suite *commonTest) Test_GetDynamicGlobalProperties() {
 	res, err := suite.TestAPI.GetDynamicGlobalProperties()
 	if err != nil {
-		suite.Fail(err.Error(), "GetDynamicGlobalProperties")
+		suite.FailNow(err.Error(), "GetDynamicGlobalProperties")
 	}
 
 	suite.NotNil(res)
@@ -116,7 +116,7 @@ func (suite *commonTest) Test_GetDynamicGlobalProperties() {
 func (suite *commonTest) Test_GetAccountByName() {
 	res, err := suite.TestAPI.GetAccountByName("openledger")
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccountByName")
+		suite.FailNow(err.Error(), "GetAccountByName")
 	}
 
 	suite.NotNil(res)
@@ -130,7 +130,7 @@ func (suite *commonTest) Test_GetTradeHistory() {
 	res, err := suite.TestAPI.GetTradeHistory(tests.AssetBTS, tests.AssetHERO, dtTo, dtFrom, 50)
 
 	if err != nil {
-		suite.Fail(err.Error(), "GetTradeHistory")
+		suite.FailNow(err.Error(), "GetTradeHistory")
 	}
 
 	suite.NotNil(res)
@@ -141,7 +141,7 @@ func (suite *commonTest) Test_GetLimitOrders() {
 
 	res, err := suite.TestAPI.GetLimitOrders(tests.AssetCNY, tests.AssetBTS, 50)
 	if err != nil {
-		suite.Fail(err.Error(), "GetLimitOrders")
+		suite.FailNow(err.Error(), "GetLimitOrders")
 	}
 
 	suite.NotNil(res)
@@ -151,7 +151,7 @@ func (suite *commonTest) Test_GetLimitOrders() {
 func (suite *commonTest) Test_GetCallOrders() {
 	res, err := suite.TestAPI.GetCallOrders(tests.AssetUSD, 50)
 	if err != nil {
-		suite.Fail(err.Error(), "GetCallOrders")
+		suite.FailNow(err.Error(), "GetCallOrders")
 	}
 
 	suite.NotNil(res)
@@ -161,7 +161,7 @@ func (suite *commonTest) Test_GetCallOrders() {
 func (suite *commonTest) Test_GetMarginPositions() {
 	res, err := suite.TestAPI.GetMarginPositions(tests.UserID2)
 	if err != nil {
-		suite.Fail(err.Error(), "GetMarginPositions")
+		suite.FailNow(err.Error(), "GetMarginPositions")
 	}
 
 	suite.NotNil(res)
@@ -171,7 +171,7 @@ func (suite *commonTest) Test_GetMarginPositions() {
 func (suite *commonTest) Test_GetSettleOrders() {
 	res, err := suite.TestAPI.GetSettleOrders(tests.AssetCNY, 50)
 	if err != nil {
-		suite.Fail(err.Error(), "GetSettleOrders")
+		suite.FailNow(err.Error(), "GetSettleOrders")
 	}
 
 	suite.NotNil(res)
@@ -181,7 +181,7 @@ func (suite *commonTest) Test_GetSettleOrders() {
 func (suite *commonTest) Test_ListAssets() {
 	res, err := suite.TestAPI.ListAssets("OPEN.DASH", 2)
 	if err != nil {
-		suite.Fail(err.Error(), "ListAssets")
+		suite.FailNow(err.Error(), "ListAssets")
 	}
 
 	suite.NotNil(res)
@@ -197,7 +197,7 @@ func (suite *commonTest) Test_GetAccountHistory() {
 
 	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
 	if err != nil {
-		suite.Fail(err.Error(), "GetAccountHistory")
+		suite.FailNow(err.Error(), "GetAccountHistory")
 	}
 
 	suite.NotNil(res)

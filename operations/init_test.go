@@ -27,11 +27,11 @@ func (suite *operationsAPITest) SetupTest() {
 	api := api.New(tests.WsFullApiUrl, tests.RpcApiUrl)
 
 	if err := api.Connect(); err != nil {
-		suite.Fail(err.Error(), "Connect")
+		suite.FailNow(err.Error(), "Connect")
 	}
 
 	api.OnError(func(err error) {
-		suite.Fail(err.Error(), "OnError")
+		suite.FailNow(err.Error(), "OnError")
 	})
 
 	suite.TestAPI = api
@@ -41,7 +41,7 @@ func (suite *operationsAPITest) SetupTest() {
 	tx.RefBlockPrefix = 3707022213
 
 	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
-		suite.Fail(err.Error(), "Unmarshal expiration")
+		suite.FailNow(err.Error(), "Unmarshal expiration")
 	}
 
 	suite.RefTx = tx
@@ -49,7 +49,7 @@ func (suite *operationsAPITest) SetupTest() {
 
 func (suite *operationsAPITest) TearDown() {
 	if err := suite.TestAPI.Close(); err != nil {
-		suite.Fail(err.Error(), "Close")
+		suite.FailNow(err.Error(), "Close")
 	}
 }
 
@@ -57,7 +57,7 @@ func (suite *operationsAPITest) Test_SerializeEmptyTransaction() {
 
 	tx := types.NewTransaction()
 	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
-		suite.Fail(err.Error(), "Unmarshal expiration")
+		suite.FailNow(err.Error(), "Unmarshal expiration")
 	}
 
 	suite.compareTransaction(tx)
@@ -66,7 +66,7 @@ func (suite *operationsAPITest) Test_SerializeEmptyTransaction() {
 func (suite *operationsAPITest) Test_SerializeTransaction() {
 	hex, err := suite.TestAPI.SerializeTransaction(suite.RefTx)
 	if err != nil {
-		suite.Fail(err.Error(), "SerializeTransaction")
+		suite.FailNow(err.Error(), "SerializeTransaction")
 	}
 
 	suite.NotNil(hex)
@@ -77,12 +77,12 @@ func (suite *operationsAPITest) compareTransaction(tx *types.Transaction) {
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)
 	if err := enc.Encode(tx); err != nil {
-		suite.Fail(err.Error(), "Encode")
+		suite.FailNow(err.Error(), "Encode")
 	}
 
 	ref, err := suite.TestAPI.SerializeTransaction(tx)
 	if err != nil {
-		suite.Fail(err.Error(), "SerializeTransaction")
+		suite.FailNow(err.Error(), "SerializeTransaction")
 	}
 
 	test := hex.EncodeToString(buf.Bytes())

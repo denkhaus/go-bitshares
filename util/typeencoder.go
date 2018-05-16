@@ -47,6 +47,10 @@ func (p *TypeEncoder) EncodeNumber(v interface{}) error {
 }
 
 func (p *TypeEncoder) Encode(v interface{}) error {
+	if v == nil {
+		return nil
+	}
+
 	if m, ok := v.(TypeMarshaller); ok {
 		return m.Marshal(p)
 	}

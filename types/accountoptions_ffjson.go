@@ -34,11 +34,16 @@ func (j *AccountOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=types.PublicKey kind=struct */
 	buf.WriteString(`{"memo_key":`)
-	err = buf.Encode(&j.MemoKey)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.MemoKey.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"voting_account":`)
 
@@ -422,21 +427,69 @@ handle_Votes:
 	/* handler: j.Votes type=types.Votes kind=slice quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
 
-		} else {
-
-			tbuf, err := fs.CaptureField(tok)
-			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			err = j.Votes.UnmarshalJSON(tbuf)
-			if err != nil {
-				return fs.WrapErr(err)
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Votes", tok))
 			}
 		}
-		state = fflib.FFParse_after_value
+
+		if tok == fflib.FFTok_null {
+			j.Votes = nil
+		} else {
+
+			j.Votes = []VoteID{}
+
+			wantVal := true
+
+			for {
+
+				var tmpJVotes VoteID
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmpJVotes type=types.VoteID kind=struct quoted=false*/
+
+				{
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJVotes.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+					}
+					state = fflib.FFParse_after_value
+				}
+
+				j.Votes = append(j.Votes, tmpJVotes)
+
+				wantVal = false
+			}
+		}
 	}
 
 	state = fflib.FFParse_after_value

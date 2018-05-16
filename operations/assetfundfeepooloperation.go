@@ -29,7 +29,6 @@ func (p AssetFundFeePoolOperation) Type() types.OperationType {
 	return types.OperationTypeAssetFundFeePool
 }
 
-//TODO: validate order
 func (p AssetFundFeePoolOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -39,16 +38,16 @@ func (p AssetFundFeePoolOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode fee")
 	}
 
-	if err := enc.Encode(p.Amount); err != nil {
-		return errors.Annotate(err, "encode amount")
+	if err := enc.Encode(p.FromAccount); err != nil {
+		return errors.Annotate(err, "encode new options")
 	}
 
 	if err := enc.Encode(p.AssetID); err != nil {
 		return errors.Annotate(err, "encode asset id")
 	}
 
-	if err := enc.Encode(p.FromAccount); err != nil {
-		return errors.Annotate(err, "encode new options")
+	if err := enc.Encode(p.Amount); err != nil {
+		return errors.Annotate(err, "encode amount")
 	}
 
 	if err := enc.Encode(p.Extensions); err != nil {

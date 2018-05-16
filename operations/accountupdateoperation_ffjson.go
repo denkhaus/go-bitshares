@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -45,15 +46,19 @@ func (j *AccountUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		buf.Write(obj)
 
 	}
-	buf.WriteString(`,"active":`)
+	if j.Active != nil {
+		buf.WriteString(`,"active":`)
 
-	{
+		{
 
-		err = j.Active.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+			err = j.Active.MarshalJSONBuf(buf)
+			if err != nil {
+				return err
+			}
+
 		}
-
+	} else {
+		buf.WriteString(`,"active":null`)
 	}
 	buf.WriteString(`,"extensions":`)
 	if j.Extensions != nil {
@@ -82,25 +87,35 @@ func (j *AccountUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		}
 
 	}
-	buf.WriteString(`,"new_options":`)
+	buf.WriteByte(',')
+	if j.NewOptions != nil {
+		if true {
+			buf.WriteString(`"new_options":`)
 
-	{
+			{
 
-		err = j.NewOptions.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+				err = j.NewOptions.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
 		}
-
 	}
-	buf.WriteString(`,"owner":`)
+	if j.Owner != nil {
+		buf.WriteString(`"owner":`)
 
-	{
+		{
 
-		err = j.Owner.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+			err = j.Owner.MarshalJSONBuf(buf)
+			if err != nil {
+				return err
+			}
+
 		}
-
+	} else {
+		buf.WriteString(`"owner":null`)
 	}
 	buf.WriteByte('}')
 	return nil
@@ -360,7 +375,13 @@ handle_Active:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Active = nil
+
 		} else {
+
+			if j.Active == nil {
+				j.Active = new(types.Authority)
+			}
 
 			err = j.Active.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
@@ -468,7 +489,13 @@ handle_NewOptions:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.NewOptions = nil
+
 		} else {
+
+			if j.NewOptions == nil {
+				j.NewOptions = new(types.AccountOptions)
+			}
 
 			err = j.NewOptions.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
@@ -488,7 +515,13 @@ handle_Owner:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Owner = nil
+
 		} else {
+
+			if j.Owner == nil {
+				j.Owner = new(types.Authority)
+			}
 
 			err = j.Owner.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {

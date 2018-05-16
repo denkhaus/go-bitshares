@@ -35,13 +35,13 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	_ = obj
 	_ = err
 	buf.WriteString(`{"max_supply":`)
-	fflib.FormatBits2(buf, uint64(j.MaxSupply), 10, false)
+	fflib.FormatBits2(buf, uint64(j.MaxSupply), 10, j.MaxSupply < 0)
 	buf.WriteString(`,"max_market_fee":`)
-	fflib.FormatBits2(buf, uint64(j.MaxMarketFee), 10, false)
+	fflib.FormatBits2(buf, uint64(j.MaxMarketFee), 10, j.MaxMarketFee < 0)
 	buf.WriteString(`,"market_fee_percent":`)
 	fflib.FormatBits2(buf, uint64(j.MarketFeePercent), 10, false)
 	buf.WriteString(`,"flags":`)
-	fflib.FormatBits2(buf, uint64(j.Flags), 10, j.Flags < 0)
+	fflib.FormatBits2(buf, uint64(j.Flags), 10, false)
 	buf.WriteString(`,"description":`)
 	fflib.WriteJsonString(buf, string(j.Description))
 	buf.WriteString(`,"core_exchange_rate":`)
@@ -55,7 +55,7 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"issuer_permissions":`)
-	fflib.FormatBits2(buf, uint64(j.IssuerPermissions), 10, j.IssuerPermissions < 0)
+	fflib.FormatBits2(buf, uint64(j.IssuerPermissions), 10, false)
 	buf.WriteString(`,"blacklist_authorities":`)
 	if j.BlacklistAuthorities != nil {
 		buf.WriteString(`[`)
@@ -63,10 +63,15 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -80,10 +85,15 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -97,10 +107,15 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -114,10 +129,15 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
+
+			{
+
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -486,7 +506,7 @@ mainparse:
 
 handle_MaxSupply:
 
-	/* handler: j.MaxSupply type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.MaxSupply type=types.Int64 kind=int64 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -511,7 +531,7 @@ handle_MaxSupply:
 
 handle_MaxMarketFee:
 
-	/* handler: j.MaxMarketFee type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.MaxMarketFee type=types.Int64 kind=int64 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -536,7 +556,7 @@ handle_MaxMarketFee:
 
 handle_MarketFeePercent:
 
-	/* handler: j.MarketFeePercent type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.MarketFeePercent type=types.UInt16 kind=uint16 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -561,29 +581,24 @@ handle_MarketFeePercent:
 
 handle_Flags:
 
-	/* handler: j.Flags type=int kind=int quoted=false*/
+	/* handler: j.Flags type=types.UInt16 kind=uint16 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.Flags = int(tval)
-
+			err = j.Flags.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -637,29 +652,24 @@ handle_CoreExchangeRate:
 
 handle_IssuerPermissions:
 
-	/* handler: j.IssuerPermissions type=int64 kind=int64 quoted=false*/
+	/* handler: j.IssuerPermissions type=types.UInt16 kind=uint16 quoted=false*/
 
 	{
-		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for int64", tok))
-		}
-	}
-
-	{
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tval, err := fflib.ParseInt(fs.Output.Bytes(), 10, 64)
-
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			j.IssuerPermissions = int64(tval)
-
+			err = j.IssuerPermissions.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -667,13 +677,13 @@ handle_IssuerPermissions:
 
 handle_BlacklistAuthorities:
 
-	/* handler: j.BlacklistAuthorities type=[]interface {} kind=slice quoted=false*/
+	/* handler: j.BlacklistAuthorities type=types.GrapheneIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
 			}
 		}
 
@@ -681,13 +691,13 @@ handle_BlacklistAuthorities:
 			j.BlacklistAuthorities = nil
 		} else {
 
-			j.BlacklistAuthorities = []interface{}{}
+			j.BlacklistAuthorities = []GrapheneID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJBlacklistAuthorities interface{}
+				var tmpJBlacklistAuthorities GrapheneID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -708,19 +718,24 @@ handle_BlacklistAuthorities:
 					wantVal = true
 				}
 
-				/* handler: tmpJBlacklistAuthorities type=interface {} kind=interface quoted=false*/
+				/* handler: tmpJBlacklistAuthorities type=types.GrapheneID kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJBlacklistAuthorities)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJBlacklistAuthorities.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.BlacklistAuthorities = append(j.BlacklistAuthorities, tmpJBlacklistAuthorities)
@@ -735,13 +750,13 @@ handle_BlacklistAuthorities:
 
 handle_WhitelistAuthorities:
 
-	/* handler: j.WhitelistAuthorities type=[]interface {} kind=slice quoted=false*/
+	/* handler: j.WhitelistAuthorities type=types.GrapheneIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
 			}
 		}
 
@@ -749,13 +764,13 @@ handle_WhitelistAuthorities:
 			j.WhitelistAuthorities = nil
 		} else {
 
-			j.WhitelistAuthorities = []interface{}{}
+			j.WhitelistAuthorities = []GrapheneID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJWhitelistAuthorities interface{}
+				var tmpJWhitelistAuthorities GrapheneID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -776,19 +791,24 @@ handle_WhitelistAuthorities:
 					wantVal = true
 				}
 
-				/* handler: tmpJWhitelistAuthorities type=interface {} kind=interface quoted=false*/
+				/* handler: tmpJWhitelistAuthorities type=types.GrapheneID kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJWhitelistAuthorities)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJWhitelistAuthorities.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.WhitelistAuthorities = append(j.WhitelistAuthorities, tmpJWhitelistAuthorities)
@@ -803,13 +823,13 @@ handle_WhitelistAuthorities:
 
 handle_BlacklistMarkets:
 
-	/* handler: j.BlacklistMarkets type=[]interface {} kind=slice quoted=false*/
+	/* handler: j.BlacklistMarkets type=types.GrapheneIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
 			}
 		}
 
@@ -817,13 +837,13 @@ handle_BlacklistMarkets:
 			j.BlacklistMarkets = nil
 		} else {
 
-			j.BlacklistMarkets = []interface{}{}
+			j.BlacklistMarkets = []GrapheneID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJBlacklistMarkets interface{}
+				var tmpJBlacklistMarkets GrapheneID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -844,19 +864,24 @@ handle_BlacklistMarkets:
 					wantVal = true
 				}
 
-				/* handler: tmpJBlacklistMarkets type=interface {} kind=interface quoted=false*/
+				/* handler: tmpJBlacklistMarkets type=types.GrapheneID kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJBlacklistMarkets)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJBlacklistMarkets.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.BlacklistMarkets = append(j.BlacklistMarkets, tmpJBlacklistMarkets)
@@ -871,13 +896,13 @@ handle_BlacklistMarkets:
 
 handle_WhitelistMarkets:
 
-	/* handler: j.WhitelistMarkets type=[]interface {} kind=slice quoted=false*/
+	/* handler: j.WhitelistMarkets type=types.GrapheneIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
 			}
 		}
 
@@ -885,13 +910,13 @@ handle_WhitelistMarkets:
 			j.WhitelistMarkets = nil
 		} else {
 
-			j.WhitelistMarkets = []interface{}{}
+			j.WhitelistMarkets = []GrapheneID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJWhitelistMarkets interface{}
+				var tmpJWhitelistMarkets GrapheneID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -912,19 +937,24 @@ handle_WhitelistMarkets:
 					wantVal = true
 				}
 
-				/* handler: tmpJWhitelistMarkets type=interface {} kind=interface quoted=false*/
+				/* handler: tmpJWhitelistMarkets type=types.GrapheneID kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJWhitelistMarkets)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJWhitelistMarkets.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.WhitelistMarkets = append(j.WhitelistMarkets, tmpJWhitelistMarkets)

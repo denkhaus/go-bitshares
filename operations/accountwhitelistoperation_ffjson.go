@@ -430,7 +430,7 @@ handle_Fee:
 
 handle_NewListing:
 
-	/* handler: j.NewListing type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.NewListing type=types.UInt8 kind=uint8 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

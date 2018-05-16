@@ -5,6 +5,7 @@ package types
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -164,15 +165,11 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
+	/* Struct fall back. type=types.AccountOptions kind=struct */
 	buf.WriteString(`,"options":`)
-
-	{
-
-		err = j.Options.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.Options)
+	if err != nil {
+		return err
 	}
 	buf.WriteString(`,"registrar":`)
 
@@ -1265,16 +1262,16 @@ handle_Options:
 	/* handler: j.Options type=types.AccountOptions kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.AccountOptions kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.Options)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -76,15 +77,19 @@ func (j *AssetIssueOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
-	buf.WriteString(`,"memo":`)
+	if j.Memo != nil {
+		buf.WriteString(`,"memo":`)
 
-	{
+		{
 
-		err = j.Memo.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+			err = j.Memo.MarshalJSONBuf(buf)
+			if err != nil {
+				return err
+			}
+
 		}
-
+	} else {
+		buf.WriteString(`,"memo":null`)
 	}
 	buf.WriteString(`,"extensions":`)
 	if j.Extensions != nil {
@@ -426,7 +431,13 @@ handle_Memo:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Memo = nil
+
 		} else {
+
+			if j.Memo == nil {
+				j.Memo = new(types.Memo)
+			}
 
 			err = j.Memo.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {

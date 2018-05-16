@@ -18,7 +18,7 @@ type AssetIssueOperation struct {
 	IssueToAccount types.GrapheneID  `json:"issue_to_account"`
 	AssetToIssue   types.AssetAmount `json:"asset_to_issue"`
 	Fee            types.AssetAmount `json:"fee"`
-	Memo           types.Memo        `json:"memo"`
+	Memo           *types.Memo       `json:"memo"`
 	Extensions     types.Extensions  `json:"extensions"`
 }
 
@@ -49,6 +49,10 @@ func (p AssetIssueOperation) Marshal(enc *util.TypeEncoder) error {
 
 	if err := enc.Encode(p.IssueToAccount); err != nil {
 		return errors.Annotate(err, "encode issue to account")
+	}
+
+	if err := enc.Encode(p.Memo != nil); err != nil {
+		return errors.Annotate(err, "encode have memo")
 	}
 
 	if err := enc.Encode(p.Memo); err != nil {

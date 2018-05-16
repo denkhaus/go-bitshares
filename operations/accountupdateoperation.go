@@ -14,12 +14,12 @@ func init() {
 }
 
 type AccountUpdateOperation struct {
-	Account    types.GrapheneID     `json:"account"`
-	Active     types.Authority      `json:"active"`
-	Extensions types.Extensions     `json:"extensions"`
-	Fee        types.AssetAmount    `json:"fee"`
-	NewOptions types.AccountOptions `json:"new_options"`
-	Owner      types.Authority      `json:"owner"`
+	Account    types.GrapheneID      `json:"account"`
+	Active     *types.Authority      `json:"active"`
+	Extensions types.Extensions      `json:"extensions"`
+	Fee        types.AssetAmount     `json:"fee"`
+	NewOptions *types.AccountOptions `json:"new_options,omitempty"`
+	Owner      *types.Authority      `json:"owner"`
 }
 
 func (p *AccountUpdateOperation) ApplyFee(fee types.AssetAmount) {
@@ -30,7 +30,6 @@ func (p AccountUpdateOperation) Type() types.OperationType {
 	return types.OperationTypeAccountUpdate
 }
 
-//TODO: validate order
 func (p AccountUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -44,12 +43,24 @@ func (p AccountUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode Account")
 	}
 
+	if err := enc.Encode(p.Owner != nil); err != nil {
+		return errors.Annotate(err, "encode have Owner")
+	}
+
+	if err := enc.Encode(p.Owner); err != nil {
+		return errors.Annotate(err, "encode Owner")
+	}
+
+	if err := enc.Encode(p.Active != nil); err != nil {
+		return errors.Annotate(err, "encode have Active")
+	}
+
 	if err := enc.Encode(p.Active); err != nil {
 		return errors.Annotate(err, "encode Active")
 	}
 
-	if err := enc.Encode(p.Owner); err != nil {
-		return errors.Annotate(err, "encode Active")
+	if err := enc.Encode(p.NewOptions != nil); err != nil {
+		return errors.Annotate(err, "encode have NewOptions")
 	}
 
 	if err := enc.Encode(p.NewOptions); err != nil {

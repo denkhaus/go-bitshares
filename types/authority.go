@@ -252,7 +252,7 @@ func (p AccountAuthsMap) Marshal(enc *util.TypeEncoder) error {
 			return errors.Annotate(err, "encode Key")
 		}
 		if err := enc.Encode(v); err != nil {
-			return errors.Annotate(err, "encode ValueExtension")
+			return errors.Annotate(err, "encode Value")
 		}
 	}
 

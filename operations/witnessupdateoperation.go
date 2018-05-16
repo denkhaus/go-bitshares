@@ -15,7 +15,7 @@ func init() {
 
 type WitnessUpdateOperation struct {
 	Fee            types.AssetAmount `json:"fee"`
-	NewSigningKey  types.PublicKey   `json:"new_signing_key"`
+	NewSigningKey  *types.PublicKey  `json:"new_signing_key"`
 	NewURL         string            `json:"new_url"`
 	Witness        types.GrapheneID  `json:"witness"`
 	WitnessAccount types.GrapheneID  `json:"witness_account"`
@@ -29,7 +29,6 @@ func (p WitnessUpdateOperation) Type() types.OperationType {
 	return types.OperationTypeWitnessUpdate
 }
 
-//TODO: validate order
 func (p WitnessUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -39,20 +38,28 @@ func (p WitnessUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode fee")
 	}
 
-	if err := enc.Encode(p.NewSigningKey); err != nil {
-		return errors.Annotate(err, "encode NewSigningKey")
-	}
-
-	if err := enc.Encode(p.NewURL); err != nil {
-		return errors.Annotate(err, "encode NewURL")
-	}
-
 	if err := enc.Encode(p.Witness); err != nil {
 		return errors.Annotate(err, "encode new options")
 	}
 
 	if err := enc.Encode(p.WitnessAccount); err != nil {
 		return errors.Annotate(err, "encode WitnessAccount")
+	}
+
+	if err := enc.Encode(p.NewURL != ""); err != nil {
+		return errors.Annotate(err, "encode have NewURL")
+	}
+
+	if err := enc.Encode(p.NewURL); err != nil {
+		return errors.Annotate(err, "encode NewURL")
+	}
+
+	if err := enc.Encode(p.NewSigningKey != nil); err != nil {
+		return errors.Annotate(err, "encode have NewSigningKey")
+	}
+
+	if err := enc.Encode(p.NewSigningKey); err != nil {
+		return errors.Annotate(err, "encode NewSigningKey")
 	}
 
 	return nil

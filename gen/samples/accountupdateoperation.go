@@ -3,14 +3,14 @@
 
 package samples
 
-import(
-    "github.com/denkhaus/bitshares/gen/data"
-    "github.com/denkhaus/bitshares/types"
+import (
+	"github.com/denkhaus/bitshares/gen/data"
+	"github.com/denkhaus/bitshares/types"
 )
 
-func init(){
-	data.OpSampleMap[types.OperationTypeAccountUpdate] = 
-    sampleDataAccountUpdateOperation
+func init() {
+	data.OpSampleMap[types.OperationTypeAccountUpdate] =
+		sampleDataAccountUpdateOperation
 }
 
 var sampleDataAccountUpdateOperation = `{
@@ -28,52 +28,26 @@ var sampleDataAccountUpdateOperation = `{
   },
   "extensions": {},
   "fee": {
-    "amount": 4056054,
+    "amount": 2017871,
     "asset_id": "1.3.0"
   },
   "new_options": {
     "extensions": [],
     "memo_key": "BTS7hC5RAxkenTAfaBncgyH4RNJKtkPJURXnuCabqCf7iu5QYL3ZW",
-    "num_committee": 9,
-    "num_witness": 27,
+    "num_committee": 0,
+    "num_witness": 11,
     "votes": [
-      "0:11",
-      "0:13",
-      "0:15",
-      "0:16",
-      "0:17",
-      "0:18",
-      "0:19",
-      "0:20",
-      "0:21",
-      "1:22",
-      "1:23",
-      "1:24",
-      "1:26",
-      "1:27",
-      "1:28",
-      "1:29",
-      "1:30",
-      "1:31",
-      "1:32",
-      "1:33",
-      "1:34",
-      "1:35",
-      "1:37",
-      "1:38",
-      "1:39",
-      "1:40",
-      "1:42",
-      "1:44",
-      "1:45",
-      "1:51",
-      "1:53",
-      "1:54",
-      "1:55",
-      "1:56",
-      "1:57",
-      "1:60",
-      "2:65"
+      "1:0",
+      "1:1",
+      "1:2",
+      "1:3",
+      "1:4",
+      "1:5",
+      "1:6",
+      "1:7",
+      "1:8",
+      "1:9",
+      "1:10"
     ],
     "voting_account": "1.2.5"
   },

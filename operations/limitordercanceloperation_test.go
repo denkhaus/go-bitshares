@@ -23,11 +23,11 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 
 	sample, err := data.GetSampleByType(op.Type())
 	if err != nil {
-		suite.Fail(err.Error(), "GetSampleByType")
+		suite.FailNow(err.Error(), "GetSampleByType")
 	}
 
 	if err := op.UnmarshalJSON([]byte(sample)); err != nil {
-		suite.Fail(err.Error(), "UnmarshalJSON")
+		suite.FailNow(err.Error(), "UnmarshalJSON")
 	}
 
 	suite.RefTx.Operations = types.Operations{

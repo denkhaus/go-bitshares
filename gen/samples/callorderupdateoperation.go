@@ -3,14 +3,14 @@
 
 package samples
 
-import(
-    "github.com/denkhaus/bitshares/gen/data"
-    "github.com/denkhaus/bitshares/types"
+import (
+	"github.com/denkhaus/bitshares/gen/data"
+	"github.com/denkhaus/bitshares/types"
 )
 
-func init(){
-	data.OpSampleMap[types.OperationTypeCallOrderUpdate] = 
-    sampleDataCallOrderUpdateOperation
+func init() {
+	data.OpSampleMap[types.OperationTypeCallOrderUpdate] =
+		sampleDataCallOrderUpdateOperation
 }
 
 var sampleDataCallOrderUpdateOperation = `{

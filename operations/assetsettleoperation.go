@@ -28,7 +28,6 @@ func (p AssetSettleOperation) Type() types.OperationType {
 	return types.OperationTypeAssetSettle
 }
 
-//TODO: define
 func (p AssetSettleOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode operation id")
@@ -36,6 +35,18 @@ func (p AssetSettleOperation) Marshal(enc *util.TypeEncoder) error {
 
 	if err := enc.Encode(p.Fee); err != nil {
 		return errors.Annotate(err, "encode fee")
+	}
+
+	if err := enc.Encode(p.Account); err != nil {
+		return errors.Annotate(err, "encode Account")
+	}
+
+	if err := enc.Encode(p.Amount); err != nil {
+		return errors.Annotate(err, "encode Amount")
+	}
+
+	if err := enc.Encode(p.Extensions); err != nil {
+		return errors.Annotate(err, "encode Extensions")
 	}
 
 	return nil

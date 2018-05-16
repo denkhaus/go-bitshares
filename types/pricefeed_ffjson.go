@@ -243,7 +243,7 @@ mainparse:
 
 handle_MaintenanceCollateralRatio:
 
-	/* handler: j.MaintenanceCollateralRatio type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.MaintenanceCollateralRatio type=types.UInt16 kind=uint16 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -268,7 +268,7 @@ handle_MaintenanceCollateralRatio:
 
 handle_MaximumShortSqueezeRatio:
 
-	/* handler: j.MaximumShortSqueezeRatio type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.MaximumShortSqueezeRatio type=types.UInt16 kind=uint16 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

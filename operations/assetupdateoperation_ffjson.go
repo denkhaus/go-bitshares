@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -83,6 +84,21 @@ func (j *AssetUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
+	if j.NewIssuer != nil {
+		buf.WriteString(`,"new_issuer":`)
+
+		{
+
+			obj, err = j.NewIssuer.MarshalJSON()
+			if err != nil {
+				return err
+			}
+			buf.Write(obj)
+
+		}
+	} else {
+		buf.WriteString(`,"new_issuer":null`)
+	}
 	buf.WriteString(`,"new_options":`)
 
 	{
@@ -109,6 +125,8 @@ const (
 
 	ffjtAssetUpdateOperationExtensions
 
+	ffjtAssetUpdateOperationNewIssuer
+
 	ffjtAssetUpdateOperationNewOptions
 )
 
@@ -119,6 +137,8 @@ var ffjKeyAssetUpdateOperationIssuer = []byte("issuer")
 var ffjKeyAssetUpdateOperationFee = []byte("fee")
 
 var ffjKeyAssetUpdateOperationExtensions = []byte("extensions")
+
+var ffjKeyAssetUpdateOperationNewIssuer = []byte("new_issuer")
 
 var ffjKeyAssetUpdateOperationNewOptions = []byte("new_options")
 
@@ -217,7 +237,12 @@ mainparse:
 
 				case 'n':
 
-					if bytes.Equal(ffjKeyAssetUpdateOperationNewOptions, kn) {
+					if bytes.Equal(ffjKeyAssetUpdateOperationNewIssuer, kn) {
+						currentKey = ffjtAssetUpdateOperationNewIssuer
+						state = fflib.FFParse_want_colon
+						goto mainparse
+
+					} else if bytes.Equal(ffjKeyAssetUpdateOperationNewOptions, kn) {
 						currentKey = ffjtAssetUpdateOperationNewOptions
 						state = fflib.FFParse_want_colon
 						goto mainparse
@@ -227,6 +252,12 @@ mainparse:
 
 				if fflib.EqualFoldRight(ffjKeyAssetUpdateOperationNewOptions, kn) {
 					currentKey = ffjtAssetUpdateOperationNewOptions
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffjKeyAssetUpdateOperationNewIssuer, kn) {
+					currentKey = ffjtAssetUpdateOperationNewIssuer
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -283,6 +314,9 @@ mainparse:
 
 				case ffjtAssetUpdateOperationExtensions:
 					goto handle_Extensions
+
+				case ffjtAssetUpdateOperationNewIssuer:
+					goto handle_NewIssuer
 
 				case ffjtAssetUpdateOperationNewOptions:
 					goto handle_NewOptions
@@ -434,6 +468,37 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_NewIssuer:
+
+	/* handler: j.NewIssuer type=types.GrapheneID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.NewIssuer = nil
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			if j.NewIssuer == nil {
+				j.NewIssuer = new(types.GrapheneID)
+			}
+
+			err = j.NewIssuer.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

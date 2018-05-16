@@ -61,11 +61,11 @@ func (suite *memoTest) Test_SharedSecrets() {
 	for _, tst := range sharedSecrets {
 		priv, err := GetPrivateKey(tst[0].(string))
 		if err != nil {
-			suite.Fail(err.Error(), "GetPrivateKey")
+			suite.FailNow(err.Error(), "GetPrivateKey")
 		}
 		pub, err := GetPublicKey(tst[1].(string))
 		if err != nil {
-			suite.Fail(err.Error(), "GetPublicKey")
+			suite.FailNow(err.Error(), "GetPublicKey")
 		}
 
 		suite.Equal(tst[2], sharedSecret(priv, pub))

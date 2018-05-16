@@ -17,10 +17,6 @@ type Memo struct {
 }
 
 func (p Memo) Marshal(enc *util.TypeEncoder) error {
-	if err := enc.Encode(byte(0x1)); err != nil {
-		return errors.Annotate(err, "encode lala")
-	}
-
 	if err := enc.Encode(p.From); err != nil {
 		return errors.Annotate(err, "encode from")
 	}

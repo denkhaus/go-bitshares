@@ -3,331 +3,440 @@
 
 package samples
 
-import(
-    "github.com/denkhaus/bitshares/gen/data"
-    "github.com/denkhaus/bitshares/types"
+import (
+	"github.com/denkhaus/bitshares/gen/data"
+	"github.com/denkhaus/bitshares/types"
 )
 
-func init(){
-	data.OpSampleMap[types.OperationTypeProposalCreate] = 
-    sampleDataProposalCreateOperation
+func init() {
+	data.OpSampleMap[types.OperationTypeProposalCreate] =
+		sampleDataProposalCreateOperation
 }
 
 var sampleDataProposalCreateOperation = `{
-  "expiration_time": "2015-10-23T19:50:00",
+  "expiration_time": "2016-02-12T19:26:19",
   "extensions": [],
   "fee": {
-    "amount": 4000010,
+    "amount": 4133593,
     "asset_id": "1.3.0"
   },
-  "fee_paying_account": "1.2.90744",
+  "fee_paying_account": "1.2.282",
   "proposed_ops": [
     {
       "op": [
-        31,
+        1,
         {
+          "amount_to_sell": {
+            "amount": 18432276,
+            "asset_id": "1.3.121"
+          },
+          "expiration": "2016-02-18T19:26:01",
+          "extensions": [],
           "fee": {
-            "amount": 4000000,
+            "amount": 1000000,
             "asset_id": "1.3.0"
           },
-          "new_parameters": {
-            "account_fee_scale_bitshifts": 0,
-            "accounts_per_fee_scale": 1000,
-            "allow_non_member_whitelists": false,
-            "block_interval": 3,
-            "cashback_vesting_period_seconds": 7776000,
-            "cashback_vesting_threshold": 10000000,
-            "committee_proposal_review_period": 3600,
-            "count_non_member_votes": true,
-            "current_fees": {
-              "parameters": [
-                [
-                  0,
-                  {
-                    "fee": 2000000,
-                    "price_per_kbyte": 1000000
-                  }
-                ],
-                [
-                  1,
-                  {
-                    "fee": 500000
-                  }
-                ],
-                [
-                  2,
-                  {
-                    "fee": 0
-                  }
-                ],
-                [
-                  3,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  4,
-                  {}
-                ],
-                [
-                  5,
-                  {
-                    "basic_fee": 9500000,
-                    "premium_fee": 200000000,
-                    "price_per_kbyte": 100000
-                  }
-                ],
-                [
-                  6,
-                  {
-                    "fee": 2000000,
-                    "price_per_kbyte": 100000
-                  }
-                ],
-                [
-                  7,
-                  {
-                    "fee": 300000
-                  }
-                ],
-                [
-                  8,
-                  {
-                    "membership_annual_fee": 200000000,
-                    "membership_lifetime_fee": 1000000000
-                  }
-                ],
-                [
-                  9,
-                  {
-                    "fee": 50000000
-                  }
-                ],
-                [
-                  10,
-                  {
-                    "long_symbol": 500000000,
-                    "price_per_kbyte": 10,
-                    "symbol3": "50000000000",
-                    "symbol4": 500000000
-                  }
-                ],
-                [
-                  11,
-                  {
-                    "fee": 50000000,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  12,
-                  {
-                    "fee": 50000000
-                  }
-                ],
-                [
-                  13,
-                  {
-                    "fee": 50000000
-                  }
-                ],
-                [
-                  14,
-                  {
-                    "fee": 2000000,
-                    "price_per_kbyte": 100000
-                  }
-                ],
-                [
-                  15,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  16,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  17,
-                  {
-                    "fee": 10000000
-                  }
-                ],
-                [
-                  18,
-                  {
-                    "fee": 50000000
-                  }
-                ],
-                [
-                  19,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  20,
-                  {
-                    "fee": 500000000
-                  }
-                ],
-                [
-                  21,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  22,
-                  {
-                    "fee": 2000000,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  23,
-                  {
-                    "fee": 100000,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  24,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  25,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  26,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  27,
-                  {
-                    "fee": 0,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  28,
-                  {
-                    "fee": 500000000
-                  }
-                ],
-                [
-                  29,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  30,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  31,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  32,
-                  {
-                    "fee": 500000000
-                  }
-                ],
-                [
-                  33,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  34,
-                  {
-                    "fee": 100000
-                  }
-                ],
-                [
-                  35,
-                  {
-                    "fee": 100000,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  36,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  37,
-                  {}
-                ],
-                [
-                  38,
-                  {
-                    "fee": 500000,
-                    "price_per_kbyte": 10
-                  }
-                ],
-                [
-                  39,
-                  {
-                    "fee": 1000000,
-                    "price_per_output": 1000000
-                  }
-                ],
-                [
-                  41,
-                  {
-                    "fee": 1000000
-                  }
-                ]
-              ],
-              "scale": 20000
-            },
-            "extensions": [],
-            "fee_liquidation_threshold": 10000000,
-            "lifetime_referrer_percent_of_fee": 3000,
-            "maintenance_interval": 3600,
-            "maintenance_skip_slots": 3,
-            "max_authority_depth": 2,
-            "max_predicate_opcode": 1,
-            "maximum_asset_feed_publishers": 10,
-            "maximum_asset_whitelist_authorities": 10,
-            "maximum_authority_membership": 10,
-            "maximum_block_size": 2097152,
-            "maximum_committee_count": 1001,
-            "maximum_proposal_lifetime": 2419200,
-            "maximum_time_until_expiration": 86400,
-            "maximum_transaction_size": 98304,
-            "maximum_witness_count": 1001,
-            "network_percent_of_fee": 2000,
-            "reserve_percent_of_fee": 2000,
-            "witness_pay_per_block": 150000,
-            "worker_budget_per_day": "50000000000"
-          }
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "59218527838",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 18432276,
+            "asset_id": "1.3.121"
+          },
+          "expiration": "2016-02-18T19:26:02",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "60315167242",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 18432276,
+            "asset_id": "1.3.121"
+          },
+          "expiration": "2016-02-18T19:26:04",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "61411806647",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 27320,
+            "asset_id": "1.3.120"
+          },
+          "expiration": "2016-02-18T19:26:04",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 95834248,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 27320,
+            "asset_id": "1.3.120"
+          },
+          "expiration": "2016-02-18T19:26:05",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 97608956,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 27320,
+            "asset_id": "1.3.120"
+          },
+          "expiration": "2016-02-18T19:26:07",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 99383665,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 1015,
+            "asset_id": "1.3.106"
+          },
+          "expiration": "2016-02-18T19:26:07",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 42642180,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 1015,
+            "asset_id": "1.3.106"
+          },
+          "expiration": "2016-02-18T19:26:08",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 43431850,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 1015,
+            "asset_id": "1.3.106"
+          },
+          "expiration": "2016-02-18T19:26:10",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 44221520,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 8240,
+            "asset_id": "1.3.105"
+          },
+          "expiration": "2016-02-18T19:26:10",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 436714336,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 8240,
+            "asset_id": "1.3.105"
+          },
+          "expiration": "2016-02-18T19:26:11",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 444801638,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 8240,
+            "asset_id": "1.3.105"
+          },
+          "expiration": "2016-02-18T19:26:12",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 452888941,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 20986065,
+            "asset_id": "1.3.113"
+          },
+          "expiration": "2016-02-18T19:26:13",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "9641796292",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 20986065,
+            "asset_id": "1.3.113"
+          },
+          "expiration": "2016-02-18T19:26:14",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "9820348076",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 20986065,
+            "asset_id": "1.3.113"
+          },
+          "expiration": "2016-02-18T19:26:15",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": "9998899859",
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 12686400,
+            "asset_id": "1.3.103"
+          },
+          "expiration": "2016-02-18T19:26:16",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 1568937228,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 12686400,
+            "asset_id": "1.3.103"
+          },
+          "expiration": "2016-02-18T19:26:17",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 1597991621,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
+        }
+      ]
+    },
+    {
+      "op": [
+        1,
+        {
+          "amount_to_sell": {
+            "amount": 12686400,
+            "asset_id": "1.3.103"
+          },
+          "expiration": "2016-02-18T19:26:18",
+          "extensions": [],
+          "fee": {
+            "amount": 1000000,
+            "asset_id": "1.3.0"
+          },
+          "fill_or_kill": false,
+          "min_to_receive": {
+            "amount": 1627046014,
+            "asset_id": "1.3.0"
+          },
+          "seller": "1.2.100876"
         }
       ]
     }
-  ],
-  "review_period_seconds": 3600
+  ]
 }`
 
 //end of file

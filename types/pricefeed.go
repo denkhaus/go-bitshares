@@ -8,8 +8,8 @@ import (
 //go:generate ffjson   $GOFILE
 
 type PriceFeed struct {
-	MaintenanceCollateralRatio UInt64 `json:"maintenance_collateral_ratio"`
-	MaximumShortSqueezeRatio   UInt64 `json:"maximum_short_squeeze_ratio"`
+	MaintenanceCollateralRatio UInt16 `json:"maintenance_collateral_ratio"`
+	MaximumShortSqueezeRatio   UInt16 `json:"maximum_short_squeeze_ratio"`
 	SettlementPrice            Price  `json:"settlement_price"`
 	CoreExchangeRate           Price  `json:"core_exchange_rate"`
 }

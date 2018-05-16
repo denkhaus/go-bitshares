@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"html/template"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -48,7 +50,7 @@ var (
 		&types.Memo{},
 		&types.Price{},
 		&types.PriceFeed{},
-		&types.Votes{},
+		//&types.Votes{},
 		&types.Time{},
 		&types.PublicKey{},
 		//&types.Account{},
@@ -91,7 +93,7 @@ func main() {
 	}
 
 	//TODO: save last scanned block and reapply
-	block := uint64(1548202)
+	block := uint64(1)
 
 	fmt.Println("loop blocks")
 
@@ -189,15 +191,6 @@ func generateOpData(d GenData) error {
 
 func generateSampleData(d GenData) error {
 	opName := d.Type.OperationName()
-	fileName := fmt.Sprintf("%s/%s.go", samplesDir, opName)
-	fileName = strings.ToLower(fileName)
-
-	f, err := os.Create(fileName)
-	if err != nil {
-		return errors.Annotate(err, "Evaluate")
-	}
-
-	defer f.Close()
 
 	sampleDataJSON, err := json.MarshalIndent(d.Data, "", "  ")
 	if err != nil {
@@ -209,12 +202,8 @@ func generateSampleData(d GenData) error {
 	//update sample map too
 	data.OpSampleMap[d.Type] = sampleData
 
-	// formatted, err := format.Source([]byte(src))
-	// if err != nil {
-	// 	err = fmt.Errorf("error formatting: %s, was formatting\n%s", err, src)
-	// }
-
-	err = sampleDataTemplate.Execute(f, struct {
+	buf := bytes.NewBuffer(nil)
+	err = sampleDataTemplate.Execute(buf, struct {
 		SampleDataOpType  string
 		SampleData        interface{}
 		SampleDataVarName string
@@ -226,6 +215,16 @@ func generateSampleData(d GenData) error {
 
 	if err != nil {
 		return errors.Annotate(err, "Execute")
+	}
+
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Annotate(err, "Source")
+	}
+
+	fileName := strings.ToLower(fmt.Sprintf("%s/%s.go", samplesDir, opName))
+	if err := ioutil.WriteFile(fileName, formatted, 0622); err != nil {
+		return errors.Annotate(err, "WriteFile")
 	}
 
 	return nil
@@ -289,10 +288,10 @@ func guessStructType(value interface{}, suggestedType string) (string, error) {
 				if bytes.Equal(v, util.ToBytes(typ)) {
 					return "types.Memo", nil
 				}
-			case *types.Votes:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.Votes", nil
-				}
+			// case *types.Votes:
+			// 	if bytes.Equal(v, util.ToBytes(typ)) {
+			// 		return "types.Votes", nil
+			// 	}
 			case *types.Price:
 				if bytes.Equal(v, util.ToBytes(typ)) {
 					return "types.Price", nil

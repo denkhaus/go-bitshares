@@ -34,11 +34,11 @@ type subscribeTest struct {
 func (suite *subscribeTest) SetupTest() {
 	api := New(tests.WsFullApiUrl, tests.RpcApiUrl)
 	if err := api.Connect(); err != nil {
-		suite.Fail(err.Error(), "Connect")
+		suite.FailNow(err.Error(), "Connect")
 	}
 
 	api.OnError(func(err error) {
-		suite.Fail(err.Error(), "OnError")
+		suite.FailNow(err.Error(), "OnError")
 	})
 
 	suite.TestAPI = api
@@ -46,7 +46,7 @@ func (suite *subscribeTest) SetupTest() {
 
 func (suite *subscribeTest) TearDown() {
 	if err := suite.TestAPI.Close(); err != nil {
-		suite.Fail(err.Error(), "Close")
+		suite.FailNow(err.Error(), "Close")
 	}
 }
 
@@ -56,7 +56,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 
 	if err := suite.TestAPI.SubscribeToMarket(SubscribeToMarketSubscriberID,
 		tests.AssetBTS, tests.AssetCNY); err != nil {
-		suite.Fail(err.Error(), "SubscribeToMarket")
+		suite.FailNow(err.Error(), "SubscribeToMarket")
 	}
 
 	bar := pb.StartNew(SubscribeToMarketMsgs).Prefix("wait for data")
@@ -66,7 +66,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 	})
 
 	if err != nil {
-		suite.Fail(err.Error(), "OnNotify")
+		suite.FailNow(err.Error(), "OnNotify")
 	}
 
 	suite.Condition(func() bool {
@@ -79,7 +79,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 
 	fmt.Println("Call UnsubscribeFromMarket")
 	if err := suite.TestAPI.UnsubscribeFromMarket(tests.AssetBTS, tests.AssetCNY); err != nil {
-		suite.Fail(err.Error(), "UnsubscribeFromMarket")
+		suite.FailNow(err.Error(), "UnsubscribeFromMarket")
 	}
 }
 
@@ -88,12 +88,12 @@ func (suite *subscribeTest) Test_SetSubscribeCallback() {
 	fmt.Printf("SetSubscribeCallback: wait %s for %d incoming notifications\n",
 		SetSubscribeCallbackDuration, SetSubscribeCallbackMsgs)
 	if err := suite.TestAPI.SetSubscribeCallback(SetSubscribeCallbackSubscriberID, false); err != nil {
-		suite.Fail(err.Error(), "SetSubscribeCallback")
+		suite.FailNow(err.Error(), "SetSubscribeCallback")
 	}
 
 	_, err := suite.TestAPI.CallWebsocketAPI(suite.TestAPI.DatabaseAPIID(), "get_objects", []interface{}{"2.1.0"})
 	if err != nil {
-		suite.Fail(err.Error(), "CallAPI->get_objects")
+		suite.FailNow(err.Error(), "CallAPI->get_objects")
 	}
 
 	bar := pb.StartNew(SetSubscribeCallbackMsgs).Prefix("wait for data")
@@ -116,7 +116,7 @@ func (suite *subscribeTest) Test_SetSubscribeCallback() {
 
 	fmt.Println("Call CancelAllSubscriptions")
 	if err := suite.TestAPI.CancelAllSubscriptions(); err != nil {
-		suite.Fail(err.Error(), "CancelAllSubscriptions")
+		suite.FailNow(err.Error(), "CancelAllSubscriptions")
 	}
 }
 

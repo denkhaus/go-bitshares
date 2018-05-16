@@ -18,7 +18,7 @@ type AccountWhitelistOperation struct {
 	AuthorizingAccount types.GrapheneID  `json:"authorizing_account"`
 	Extensions         types.Extensions  `json:"extensions"`
 	Fee                types.AssetAmount `json:"fee"`
-	NewListing         types.UInt64      `json:"new_listing"`
+	NewListing         types.UInt8       `json:"new_listing"`
 }
 
 func (p *AccountWhitelistOperation) ApplyFee(fee types.AssetAmount) {
@@ -39,12 +39,12 @@ func (p AccountWhitelistOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode Fee")
 	}
 
-	if err := enc.Encode(p.AccountToList); err != nil {
-		return errors.Annotate(err, "encode AccountToList")
-	}
-
 	if err := enc.Encode(p.AuthorizingAccount); err != nil {
 		return errors.Annotate(err, "encode AuthorizingAccount")
+	}
+
+	if err := enc.Encode(p.AccountToList); err != nil {
+		return errors.Annotate(err, "encode AccountToList")
 	}
 
 	if err := enc.Encode(p.NewListing); err != nil {

@@ -6,6 +6,7 @@ package operations
 import (
 	"bytes"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -43,11 +44,20 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		}
 
 	}
-	/* Struct fall back. type=types.PublicKey kind=struct */
-	buf.WriteString(`,"new_signing_key":`)
-	err = buf.Encode(&j.NewSigningKey)
-	if err != nil {
-		return err
+	if j.NewSigningKey != nil {
+		buf.WriteString(`,"new_signing_key":`)
+
+		{
+
+			obj, err = j.NewSigningKey.MarshalJSON()
+			if err != nil {
+				return err
+			}
+			buf.Write(obj)
+
+		}
+	} else {
+		buf.WriteString(`,"new_signing_key":null`)
 	}
 	buf.WriteString(`,"new_url":`)
 	fflib.WriteJsonString(buf, string(j.NewURL))
@@ -302,11 +312,17 @@ handle_NewSigningKey:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.NewSigningKey = nil
+
 		} else {
 
 			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+
+			if j.NewSigningKey == nil {
+				j.NewSigningKey = new(types.PublicKey)
 			}
 
 			err = j.NewSigningKey.UnmarshalJSON(tbuf)

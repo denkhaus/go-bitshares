@@ -12,11 +12,11 @@ func (suite *operationsAPITest) Test_TransferOperation() {
 
 	sample, err := data.GetSampleByType(op.Type())
 	if err != nil {
-		suite.Fail(err.Error(), "GetSampleByType")
+		suite.FailNow(err.Error(), "GetSampleByType")
 	}
 
 	if err := op.UnmarshalJSON([]byte(sample)); err != nil {
-		suite.Fail(err.Error(), "UnmarshalJSON")
+		suite.FailNow(err.Error(), "UnmarshalJSON")
 	}
 
 	suite.RefTx.Operations = types.Operations{
@@ -35,7 +35,7 @@ func (suite *operationsAPITest) Test_TransferOperation() {
 
 // 	// message, err := hex.DecodeString("abcdef0123456789")
 // 	// if err != nil {
-// 	// 	suite.Fail(err.Error(), "DecodeString")
+// 	// 	suite.FailNow(err.Error(), "DecodeString")
 // 	// }
 
 // 	nonce := types.UInt64(5862723643998573708)

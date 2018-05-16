@@ -13,10 +13,6 @@ import (
 
 type Votes []VoteID
 
-func (p *Votes) UnmarshalJSON(data []byte) error {
-	return ErrNotImplemented
-}
-
 //TODO: define this
 func (p Votes) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
