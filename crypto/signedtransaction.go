@@ -115,7 +115,7 @@ func (tx *SignedTransaction) Sign(privKeys [][]byte, chain *config.ChainConfig) 
 	}
 
 	// Set the signatures in the transaction.
-	si := make([]types.Buffer, 0, len(sigs))
+	si := make([]types.Buffer, len(sigs))
 	for idx, sig := range sigs {
 		si[idx] = types.Buffer(sig)
 	}

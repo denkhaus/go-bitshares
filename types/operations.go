@@ -28,7 +28,7 @@ type OperationEnvelope struct {
 }
 
 func (p OperationEnvelope) MarshalJSON() ([]byte, error) {
-	return json.Marshal([]interface{}{
+	return ffjson.Marshal([]interface{}{
 		p.Type,
 		p.Operation,
 	})
@@ -36,7 +36,7 @@ func (p OperationEnvelope) MarshalJSON() ([]byte, error) {
 
 func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 	raw := make([]json.RawMessage, 2)
-	if err := json.Unmarshal(data, &raw); err != nil {
+	if err := ffjson.Unmarshal(data, &raw); err != nil {
 		return errors.Annotate(err, "unmarshal raw object")
 	}
 
@@ -44,7 +44,7 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 		return errors.Errorf("Invalid operation data: %v", string(data))
 	}
 
-	if err := json.Unmarshal(raw[0], &p.Type); err != nil {
+	if err := ffjson.Unmarshal(raw[0], &p.Type); err != nil {
 		return errors.Annotate(err, "unmarshal OperationType")
 	}
 
@@ -88,12 +88,12 @@ func (p Operations) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(env)
+	return ffjson.Marshal(env)
 }
 
 func (p *Operations) UnmarshalJSON(data []byte) error {
 	var envs []OperationEnvelope
-	if err := json.Unmarshal(data, &envs); err != nil {
+	if err := ffjson.Unmarshal(data, &envs); err != nil {
 		return err
 	}
 

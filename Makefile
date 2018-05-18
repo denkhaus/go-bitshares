@@ -17,8 +17,17 @@ generate: clean_ffjson_base
 generate_new: clean_ffjson_base clean_ffjson_gen		
 	-go generate ./...
 
-#install dependencies
-init:
+
+install_secp256k1:
+	@echo "######################## -> install secp256k1"
+	@rm -rf /tmp/secp256k1
+	git clone https://github.com/bitcoin-core/secp256k1.git /tmp/secp256k1
+	cd /tmp/secp256k1 && ./autogen.sh 
+	cd /tmp/secp256k1 && ./configure --enable-module-recovery
+	cd /tmp/secp256k1 && make && sudo make install
+
+init: install_secp256k1
+	@echo "######################## -> install dependencies"
 	@go get -u github.com/pquerna/ffjson
 	@go get -u golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mitchellh/reflectwalk

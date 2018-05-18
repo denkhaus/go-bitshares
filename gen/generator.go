@@ -93,7 +93,7 @@ func main() {
 	}
 
 	//TODO: save last scanned block and reapply
-	block := uint64(10435987)
+	block := uint64(20435987)
 
 	fmt.Println("loop blocks")
 
