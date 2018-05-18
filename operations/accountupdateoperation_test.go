@@ -5,7 +5,7 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
-func (suite *operationsAPITest) Test_AccountUpdateOperation() {
+func (suite *operationsAPITest) TestAccountUpdateOperation() {
 	op := AccountUpdateOperation{
 		Extensions: types.Extensions{},
 	}

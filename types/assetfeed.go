@@ -37,16 +37,20 @@ func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal AssetFeed [provider id]")
 	}
 
-	feedData := d[1].([]interface{})
+	feedData, ok := d[1].([]interface{})
+	if !ok {
+		return ErrInvalidInputType
+	}
+
 	if err := p.DateTime.UnmarshalJSON(util.ToBytes(feedData[0])); err != nil {
 		return errors.Annotate(err, "unmarshal AssetFeed [feed time]")
 	}
 
 	//this gives us an error if we generate ffjson logic for the first time
 	//for now comment this out to generate and in again
-	// if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
-	// 	return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
-	// }
+	if err := p.FeedInfo.UnmarshalJSON(util.ToBytes(feedData[1])); err != nil {
+		return errors.Annotate(err, "unmarshal AssetFeed [feed info]")
+	}
 
 	return nil
 }

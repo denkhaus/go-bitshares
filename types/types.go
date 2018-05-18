@@ -8,20 +8,23 @@ package types
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 var (
-	ErrNotImplemented               = errors.New("not implemented")
-	ErrInvalidInputType             = errors.New("invalid input type")
-	ErrInvalidInputLength           = errors.New("invalid input length")
-	ErrInvalidPublicKeyForThisChain = errors.New("invalid PublicKey for this chain")
+	ErrNotImplemented             = fmt.Errorf("not implemented")
+	ErrInvalidInputType           = fmt.Errorf("invalid input type")
+	ErrInvalidInputLength         = fmt.Errorf("invalid input length")
+	ErrInvalidPublicKey           = fmt.Errorf("invalid PublicKey")
+	ErrInvalidCurve               = fmt.Errorf("invalid elliptic curve")
+	ErrSharedKeyTooBig            = fmt.Errorf("shared key params are too big")
+	ErrSharedKeyIsPointAtInfinity = fmt.Errorf("shared key is point at infinity")
 )
 
 var (
@@ -29,7 +32,14 @@ var (
 	EmptyParams = []interface{}{}
 )
 
-type AssetType int
+type VestingPolicyType Int8
+
+const (
+	VestingPolicyTypeLinear VestingPolicyType = iota
+	VestingPolicyTypeCCD
+)
+
+type AssetType Int8
 
 const (
 	AssetTypeUndefined AssetType = -1
@@ -187,7 +197,7 @@ func unmarshalUInt(data []byte) (uint64, error) {
 		if err != nil {
 			return 0, errors.Errorf("unmarshalUInt: unable to parse input %v", data)
 		}
-	} else if err := json.Unmarshal(data, &res); err != nil {
+	} else if err := ffjson.Unmarshal(data, &res); err != nil {
 		return 0, errors.Errorf("unmarshalUInt: unable to unmarshal input %v", data)
 	}
 
@@ -211,7 +221,7 @@ func unmarshalInt(data []byte) (int64, error) {
 		if err != nil {
 			return 0, errors.Errorf("unmarshalInt: unable to parse input %v", data)
 		}
-	} else if err := json.Unmarshal(data, &res); err != nil {
+	} else if err := ffjson.Unmarshal(data, &res); err != nil {
 		return 0, errors.Errorf("unmarshalInt: unable to unmarshal input %v", data)
 	}
 
@@ -235,7 +245,7 @@ func unmarshalFloat(data []byte) (float64, error) {
 		if err != nil {
 			return 0, errors.Errorf("unmarshalFloat: unable to parse input %v", data)
 		}
-	} else if err := json.Unmarshal(data, &res); err != nil {
+	} else if err := ffjson.Unmarshal(data, &res); err != nil {
 		return 0, errors.Errorf("unmarshalFloat: unable to unmarshal input %v", data)
 	}
 
@@ -429,11 +439,12 @@ func (t Time) MarshalJSON() ([]byte, error) {
 }
 
 func (t *Time) UnmarshalJSON(data []byte) error {
-	parsed, err := time.ParseInLocation(TimeFormat, string(data), time.UTC)
+	tm, err := time.ParseInLocation(TimeFormat, string(data), time.UTC)
 	if err != nil {
-		return err
+		return errors.Annotate(err, "ParseInLocation")
 	}
-	t.Time = parsed
+
+	t.Time = tm
 	return nil
 }
 
@@ -452,28 +463,19 @@ func (t Time) IsZero() bool {
 type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
-	//str := string(data)
+	str := string(data)
 
-	// q, err := util.SafeUnquote(str)
-	// if err != nil {
-	// 	return errors.Annotate(err, "SafeUnquote")
-	// }
-
-	// buf, err := hex.DecodeString(q)
-	// if err != nil {
-	// 	return errors.Annotate(err, "DecodeString")
-	// }
-
-	// *p = buf
-	*p = data //[]byte(q)
-	return nil
-}
-
-func (p Buffer) Marshal(enc *util.TypeEncoder) error {
-	if err := enc.Encode(p.String()); err != nil {
-		return errors.Annotate(err, "encode message")
+	q, err := util.SafeUnquote(str)
+	if err != nil {
+		return errors.Annotate(err, "SafeUnquote")
 	}
 
+	buf, err := hex.DecodeString(q)
+	if err != nil {
+		return errors.Annotate(err, "DecodeString")
+	}
+
+	*p = buf
 	return nil
 }
 
@@ -490,5 +492,5 @@ func (p Buffer) Byte() []byte {
 }
 
 func (p Buffer) MarshalJSON() ([]byte, error) {
-	return p, nil //[]byte(fmt.Sprintf(`%s`, p))
+	return []byte(string(p)), nil
 }

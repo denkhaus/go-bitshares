@@ -38,7 +38,7 @@ func (p Authority) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type KeyAuthsMap map[PublicKey]UInt16
+type KeyAuthsMap map[string]UInt16
 
 func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 	if data == nil || len(data) == 0 {
@@ -50,7 +50,7 @@ func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal Auths")
 	}
 
-	(*p) = make(map[PublicKey]UInt16)
+	(*p) = make(map[string]UInt16)
 	auths, ok := res.([]interface{})
 	if !ok {
 		return ErrInvalidInputType
@@ -72,7 +72,12 @@ func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 			return ErrInvalidInputType
 		}
 
-		(*p)[PublicKey{key}] = UInt16(weight)
+		pub, err := NewPublicKey(key)
+		if err != nil {
+			return errors.Annotate(err, "NewPublicKey")
+		}
+
+		(*p)[pub.String()] = UInt16(weight)
 	}
 
 	return nil
@@ -101,17 +106,23 @@ func (p KeyAuthsMap) Marshal(enc *util.TypeEncoder) error {
 	// copy keys
 	keys := []interface{}{}
 	for k := range p {
-		keys = append(keys, k.String())
+		keys = append(keys, k)
 	}
 
 	sort.Sort(keys, sort.StringComparator)
 
 	for _, k := range keys {
-		pub := PublicKey{key: k.(string)}
-		if err := enc.Encode(pub); err != nil {
+		key := k.(string)
+		pub, err := NewPublicKey(key)
+		if err != nil {
+			return errors.Annotate(err, "NewPublicKey")
+		}
+
+		if err := pub.Marshal(enc); err != nil {
 			return errors.Annotate(err, "encode Key")
 		}
-		if err := enc.Encode(p[pub]); err != nil {
+
+		if err := enc.Encode(p[key]); err != nil {
 			return errors.Annotate(err, "encode ValueExtension")
 		}
 	}

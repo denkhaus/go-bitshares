@@ -47,7 +47,7 @@ func (suite *operationsAPITest) SetupTest() {
 	suite.RefTx = tx
 }
 
-func (suite *operationsAPITest) TearDown() {
+func (suite *operationsAPITest) TearDownTest() {
 	if err := suite.TestAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close")
 	}
@@ -96,5 +96,4 @@ func (suite *operationsAPITest) compareTransaction(tx *types.Transaction) {
 func TestOperations(t *testing.T) {
 	testSuite := new(operationsAPITest)
 	suite.Run(t, testSuite)
-	testSuite.TearDown()
 }

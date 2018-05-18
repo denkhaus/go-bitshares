@@ -3,6 +3,7 @@ package util
 import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"
+	"golang.org/x/crypto/ripemd160"
 
 	"github.com/juju/errors"
 )
@@ -11,7 +12,7 @@ import (
 func Decode(wif string) ([]byte, error) {
 	w, err := btcutil.DecodeWIF(wif)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to decode WIF")
+		return nil, errors.Annotate(err, "DecodeWIF")
 	}
 
 	return w.PrivKey.Serialize(), nil
@@ -20,7 +21,7 @@ func Decode(wif string) ([]byte, error) {
 func GetPrivateKey(wif string) (*btcec.PrivateKey, error) {
 	w, err := btcutil.DecodeWIF(wif)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to decode WIF")
+		return nil, errors.Annotate(err, "DecodeWIF")
 	}
 
 	return w.PrivKey, nil
@@ -31,8 +32,19 @@ func GetPrivateKey(wif string) (*btcec.PrivateKey, error) {
 func GetPublicKey(wif string) ([]byte, error) {
 	w, err := btcutil.DecodeWIF(wif)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to decode WIF")
+		return nil, errors.Annotate(err, "DecodeWIF")
 	}
 
 	return w.PrivKey.PubKey().SerializeCompressed(), nil
+}
+
+func Ripemd160Checksum(in []byte) ([]byte, error) {
+	h := ripemd160.New()
+
+	if _, err := h.Write(in); err != nil {
+		return nil, errors.Annotate(err, "Write")
+	}
+
+	sum := h.Sum(nil)
+	return sum[:4], nil
 }
