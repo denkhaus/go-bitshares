@@ -11,30 +11,18 @@ import (
 
 // WalletLock locks the wallet
 func (p *bitsharesAPI) WalletLock() error {
-	if p.rpcClient == nil {
-		return types.ErrRPCClientNotInitialized
-	}
-
 	_, err := p.rpcClient.CallAPI("lock", types.EmptyParams)
 	return err
 }
 
 // WalletUnlock unlocks the wallet
 func (p *bitsharesAPI) WalletUnlock(password string) error {
-	if p.rpcClient == nil {
-		return types.ErrRPCClientNotInitialized
-	}
-
 	_, err := p.rpcClient.CallAPI("unlock", password)
 	return err
 }
 
 // WalletIsLocked checks if wallet is locked.
 func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
-	if p.rpcClient == nil {
-		return false, types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
 	return resp.(bool), err
 }
@@ -55,10 +43,6 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 // @returns The error of operation.
 func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate string, amount string, broadcast bool) (*types.Transaction, error) {
-
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
 
 	resp, err := p.rpcClient.CallAPI("buy", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
 	if err != nil {
@@ -91,11 +75,6 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 // @returns The error of operation.
 func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate string, amount string, broadcast bool) (*types.Transaction, error) {
-
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI("sell", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
 	if err != nil {
 		return nil, err
@@ -135,10 +114,6 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject,
 	minToReceive string, symbolToReceive types.GrapheneObject,
 	timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error) {
 
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI("sell_asset", account.Id(),
 		amountToSell, symbolToSell.Id(),
 		minToReceive, symbolToReceive.Id(),
@@ -168,10 +143,6 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject,
 	amountToBorrow string, symbolToBorrow types.GrapheneObject,
 	amountOfCollateral string, broadcast bool) (*types.Transaction, error) {
 
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI("borrow_asset", account.Id(),
 		amountToBorrow, symbolToBorrow.Id(),
 		amountOfCollateral, broadcast,
@@ -191,9 +162,6 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject,
 }
 
 func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]types.AssetAmount, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
 
 	resp, err := p.rpcClient.CallAPI("list_account_balances", account.Id())
 	if err != nil {
@@ -218,10 +186,6 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]type
 // @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
 func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, error) {
-	if p.rpcClient == nil {
-		return "", types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI("serialize_transaction", tx)
 	if err != nil {
 		return "", err

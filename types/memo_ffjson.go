@@ -58,16 +58,7 @@ func (j *Memo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	buf.WriteString(`,"nonce":`)
 	fflib.FormatBits2(buf, uint64(j.Nonce), 10, false)
 	buf.WriteString(`,"message":`)
-
-	{
-
-		obj, err = j.Message.MarshalJSON()
-		if err != nil {
-			return err
-		}
-		buf.Write(obj)
-
-	}
+	fflib.WriteJsonString(buf, string(j.Message))
 	buf.WriteByte('}')
 	return nil
 }
@@ -332,24 +323,25 @@ handle_Nonce:
 
 handle_Message:
 
-	/* handler: j.Message type=types.Buffer kind=slice quoted=false*/
+	/* handler: j.Message type=string kind=string quoted=false*/
 
 	{
+
+		{
+			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+			}
+		}
+
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			tbuf, err := fs.CaptureField(tok)
-			if err != nil {
-				return fs.WrapErr(err)
-			}
+			outBuf := fs.Output.Bytes()
 
-			err = j.Message.UnmarshalJSON(tbuf)
-			if err != nil {
-				return fs.WrapErr(err)
-			}
+			j.Message = string(string(outBuf))
+
 		}
-		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -627,10 +627,8 @@ func (p *bitsharesAPI) Connect() (err error) {
 		return errors.Annotate(err, "ws connect")
 	}
 
-	if p.rpcClient != nil {
-		if err := p.rpcClient.Connect(); err != nil {
-			return errors.Annotate(err, "rpc connect")
-		}
+	if err := p.rpcClient.Connect(); err != nil {
+		return errors.Annotate(err, "rpc connect")
 	}
 
 	if ok, err := p.login(); err != nil || !ok {
@@ -700,22 +698,14 @@ func (p *bitsharesAPI) Close() error {
 }
 
 //New creates a new BitsharesAPI interface.
-//Param wsEndpointURL is mandatory.
-//Param rpcEndpointURL is optional
 func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
-	var rpcClient client.RPCClient
-	if rpcEndpointURL != "" {
-		rpcClient = client.NewRPCClient(rpcEndpointURL)
-	}
-
 	api := bitsharesAPI{
 		wsClient:       client.NewWebsocketClient(wsEndpointURL),
-		rpcClient:      rpcClient,
+		rpcClient:      client.NewRPCClient(rpcEndpointURL),
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,
 		cryptoAPIID:    InvalidApiID,
 	}
-
 	return &api
 }
