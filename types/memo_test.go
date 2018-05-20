@@ -1,14 +1,55 @@
 package types
 
 import (
-	"crypto/ecdsa"
 	"encoding/hex"
 	"testing"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/assert"
 )
+
+var testCases = []map[string]string{
+	{
+		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"message": "688fe6c97f78ad2d3c5a82d9aa61bc23",
+		"nonce":   "16332877645293003478",
+		"plain":   "I am this!",
+		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
+		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+	},
+	{
+		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"message": "db7ab7dfefee3ffa2394ec438601ceff",
+		"nonce":   "16332877645293003478",
+		"plain":   "Hello World",
+		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
+		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+	},
+	{
+		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"message": "01b6616cbd10bdd0743c82c2bd580651f3e852360a739e7d11c45f483871dc45",
+		"nonce":   "16332877645293003478",
+		"plain":   "Daniel Larimer",
+		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
+		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+	},
+	{
+		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"message": "24702af49bc82e06eb74a4acd91b18c389b13a6c9850a0fd3f728f486fe6daf4",
+		"nonce":   "16332877645293003478",
+		"plain":   "Thanks you, sir!",
+		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
+		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+	},
+	{
+		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"message": "1566da5b57e8e0fd9f530a352812a4197b8113df6495efdb246909c6ee1ffea6",
+		"nonce":   "16332877645293003478",
+		"plain":   "äöüß€@$²³",
+		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
+		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+	},
+}
 
 var sharedSecrets = [][]interface{}{
 	[]interface{}{"5JYWCqDpeVrefVaFxJfDc3mzQ67dtsfhU7zcB7AMJYuTH57VsoE", "GPH56EzLTXkis55hBsompVXmSdnayG3afDNFmsCLohPh6rSNzkzhs", "fbb2fef5a3a115887df84c694e8ac5c9bf998c89d0c22438c18fd018f2529460"},
@@ -23,32 +64,6 @@ var sharedSecrets = [][]interface{}{
 	[]interface{}{"5Jg7muALcVxncN32LyGMDK8zut2b1Sw3VJA1xjZE5ght7DRM9ac", "GPH5Vj6uR2iKmrB2DcFyqNzperycD3a32BBYkefzKYCHoGnXemwWS", "60928672da8e9a7dc0f783f2bf8aaf1b206b9bbd85f0a61b638e0b99f5f8ea56"},
 }
 
-// MaxSharedKeyLength returns the maximum length of the shared key the
-// public key can produce.
-func MaxSharedKeyLength(pub *ecdsa.PublicKey) int {
-	return (pub.Curve.Params().BitSize + 7) / 8
-}
-
-func sharedSecret(priv *btcec.PrivateKey, pub *ecdsa.PublicKey, skLen, macLen int) (sk []byte, err error) {
-	if priv.PublicKey.Curve != pub.Curve {
-		return nil, ErrInvalidCurve
-	}
-
-	if skLen+macLen > MaxSharedKeyLength(pub) {
-		return nil, ErrSharedKeyTooBig
-	}
-
-	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, priv.D.Bytes())
-	if x == nil {
-		return nil, ErrSharedKeyIsPointAtInfinity
-	}
-
-	sk = make([]byte, skLen+macLen)
-	skBytes := x.Bytes()
-	copy(sk[len(sk)-len(skBytes):], skBytes)
-	return sk, nil
-}
-
 func Test_SharedSecrets(t *testing.T) {
 	for _, tst := range sharedSecrets {
 		priv, err := util.GetPrivateKey(tst[0].(string))
@@ -61,7 +76,7 @@ func Test_SharedSecrets(t *testing.T) {
 			assert.FailNow(t, err.Error(), "GetPublicKey")
 		}
 
-		sec2, err := sharedSecret(priv, pub.ToECDSA(), 16, 16)
+		sec2, err := util.SharedSecret(priv, pub.ToECDSA(), 16, 16)
 		if err != nil {
 			assert.FailNow(t, err.Error(), "sharedSecret")
 		}
@@ -72,5 +87,94 @@ func Test_SharedSecrets(t *testing.T) {
 		}
 
 		assert.Equal(t, sec1, sec2)
+	}
+}
+
+func Test_MemoDecrypt(t *testing.T) {
+	for _, tst := range testCases {
+
+		from, err := NewPublicKey(tst["from"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "NewPublicKey [from]")
+		}
+
+		to, err := NewPublicKey(tst["to"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "NewPublicKey [to]")
+		}
+
+		var nonce UInt64
+		err = (&nonce).UnmarshalJSON([]byte(tst["nonce"]))
+		if err != nil {
+			assert.FailNow(t, err.Error(), "UnmarshalJSON [nonce]")
+		}
+
+		msg, err := BufferFromString(tst["message"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "BufferFromString")
+		}
+
+		memo := Memo{
+			From:    *from,
+			To:      *to,
+			Message: msg,
+			Nonce:   nonce,
+		}
+
+		priv, err := util.GetPrivateKey(tst["wif"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "GetPrivateKey")
+		}
+
+		m, err := memo.Decrypt(priv)
+		if err != nil {
+			assert.FailNow(t, err.Error(), "Decrypt")
+		}
+
+		assert.Equal(t, m, tst["plain"])
+	}
+}
+
+func Test_MemoEncrypt(t *testing.T) {
+	for _, tst := range testCases {
+
+		from, err := NewPublicKey(tst["from"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "NewPublicKey [from]")
+		}
+
+		to, err := NewPublicKey(tst["to"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "NewPublicKey [to]")
+		}
+
+		var nonce UInt64
+		err = (&nonce).UnmarshalJSON([]byte(tst["nonce"]))
+		if err != nil {
+			assert.FailNow(t, err.Error(), "UnmarshalJSON [nonce]")
+		}
+
+		msg, err := BufferFromString(tst["message"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "BufferFromString")
+		}
+
+		memo := Memo{
+			From:    *from,
+			To:      *to,
+			Message: msg,
+			Nonce:   nonce,
+		}
+
+		priv, err := util.GetPrivateKey(tst["wif"])
+		if err != nil {
+			assert.FailNow(t, err.Error(), "GetPrivateKey")
+		}
+
+		if err := memo.Encrypt(priv, tst["plain"]); err != nil {
+			assert.FailNow(t, err.Error(), "Encrypt")
+		}
+
+		assert.Equal(t, memo.Message.String(), tst["message"])
 	}
 }
