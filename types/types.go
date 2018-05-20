@@ -18,13 +18,12 @@ import (
 )
 
 var (
-	ErrNotImplemented             = fmt.Errorf("not implemented")
-	ErrInvalidInputType           = fmt.Errorf("invalid input type")
-	ErrInvalidInputLength         = fmt.Errorf("invalid input length")
-	ErrInvalidPublicKey           = fmt.Errorf("invalid PublicKey")
-	ErrInvalidCurve               = fmt.Errorf("invalid elliptic curve")
-	ErrSharedKeyTooBig            = fmt.Errorf("shared key params are too big")
-	ErrSharedKeyIsPointAtInfinity = fmt.Errorf("shared key is point at infinity")
+	ErrRPCClientNotInitialized = fmt.Errorf("RPC client is not initialized")
+	ErrNotImplemented          = fmt.Errorf("not implemented")
+	ErrInvalidInputType        = fmt.Errorf("invalid input type")
+	ErrInvalidInputLength      = fmt.Errorf("invalid input length")
+	ErrInvalidPublicKey        = fmt.Errorf("invalid PublicKey")
+	ErrInvalidChecksum         = fmt.Errorf("invalid checksum")
 )
 
 var (
@@ -463,14 +462,12 @@ func (t Time) IsZero() bool {
 type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
-	str := string(data)
-
-	q, err := util.SafeUnquote(str)
-	if err != nil {
-		return errors.Annotate(err, "SafeUnquote")
+	var b string
+	if err := ffjson.Unmarshal(data, &b); err != nil {
+		return errors.Annotate(err, "Unmarshal")
 	}
 
-	buf, err := hex.DecodeString(q)
+	buf, err := hex.DecodeString(b)
 	if err != nil {
 		return errors.Annotate(err, "DecodeString")
 	}
@@ -480,11 +477,17 @@ func (p *Buffer) UnmarshalJSON(data []byte) error {
 }
 
 func (p Buffer) String() string {
-	return string(p)
+	return hex.EncodeToString(p)
 }
 
-func (p Buffer) ToHex() string {
-	return hex.EncodeToString(p)
+func (p *Buffer) FromString(data string) error {
+	buf, err := hex.DecodeString(data)
+	if err != nil {
+		return errors.Annotate(err, "DecodeString")
+	}
+
+	*p = buf
+	return nil
 }
 
 func (p Buffer) Byte() []byte {
@@ -492,5 +495,27 @@ func (p Buffer) Byte() []byte {
 }
 
 func (p Buffer) MarshalJSON() ([]byte, error) {
-	return []byte(string(p)), nil
+	return ffjson.Marshal(p.String())
+}
+
+func (p Buffer) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	if err := enc.Encode(p.Byte()); err != nil {
+		return errors.Annotate(err, "encode bytes")
+	}
+
+	return nil
+}
+
+func BufferFromString(data string) (Buffer, error) {
+	buf, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, errors.Annotate(err, "DecodeString")
+	}
+
+	b := Buffer(buf)
+	return b, nil
 }

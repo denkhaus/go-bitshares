@@ -1,11 +1,20 @@
 package util
 
 import (
+	"crypto/ecdsa"
+	"fmt"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"
 	"golang.org/x/crypto/ripemd160"
 
 	"github.com/juju/errors"
+)
+
+var (
+	ErrInvalidCurve               = fmt.Errorf("invalid elliptic curve")
+	ErrSharedKeyTooBig            = fmt.Errorf("shared key params are too big")
+	ErrSharedKeyIsPointAtInfinity = fmt.Errorf("shared key is point at infinity")
 )
 
 // Decode can be used to turn WIF into a raw private key (32 bytes).
@@ -47,4 +56,30 @@ func Ripemd160Checksum(in []byte) ([]byte, error) {
 
 	sum := h.Sum(nil)
 	return sum[:4], nil
+}
+
+// MaxSharedKeyLength returns the maximum length of the shared key the
+// public key can produce.
+func MaxSharedKeyLength(pub *ecdsa.PublicKey) int {
+	return (pub.Curve.Params().BitSize + 7) / 8
+}
+
+func SharedSecret(priv *btcec.PrivateKey, pub *ecdsa.PublicKey, skLen, macLen int) (sk []byte, err error) {
+	if priv.PublicKey.Curve != pub.Curve {
+		return nil, ErrInvalidCurve
+	}
+
+	if skLen+macLen > MaxSharedKeyLength(pub) {
+		return nil, ErrSharedKeyTooBig
+	}
+
+	x, _ := pub.Curve.ScalarMult(pub.X, pub.Y, priv.D.Bytes())
+	if x == nil {
+		return nil, ErrSharedKeyIsPointAtInfinity
+	}
+
+	sk = make([]byte, skLen+macLen)
+	skBytes := x.Bytes()
+	copy(sk[len(sk)-len(skBytes):], skBytes)
+	return sk, nil
 }
