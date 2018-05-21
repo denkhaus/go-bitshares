@@ -13,6 +13,8 @@ import (
 	"github.com/juju/errors"
 )
 
+type PublicKeys []PublicKey
+
 type PublicKey struct {
 	key      *btcec.PublicKey
 	prefix   string

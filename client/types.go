@@ -7,6 +7,7 @@ type ErrorFunc func(error)
 
 type WebsocketClient interface {
 	OnError(fn ErrorFunc)
+	SetDebug(debug bool)
 	OnNotify(subscriberID int, fn NotifyFunc) error
 	Call(method string, args []interface{}) (*RPCCall, error)
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)

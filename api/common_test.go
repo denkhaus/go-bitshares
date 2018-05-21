@@ -7,6 +7,9 @@ import (
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
+
+	//import operations to initialize types.OperationMap
+	_ "github.com/denkhaus/bitshares/operations"
 )
 
 type commonTest struct {
@@ -27,14 +30,13 @@ func (suite *commonTest) SetupTest() {
 	suite.TestAPI = api
 }
 
-func (suite *commonTest) TearDown() {
+func (suite *commonTest) TearDownTest() {
 	if err := suite.TestAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close")
 	}
 }
 
 func (suite *commonTest) Test_GetChainID() {
-
 	res, err := suite.TestAPI.GetChainID()
 	if err != nil {
 		suite.FailNow(err.Error(), "GetChainID")
@@ -44,7 +46,6 @@ func (suite *commonTest) Test_GetChainID() {
 }
 
 func (suite *commonTest) Test_GetAccountBalances() {
-
 	res, err := suite.TestAPI.GetAccountBalances(tests.UserID2, tests.AssetBTS)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 1")
@@ -63,8 +64,8 @@ func (suite *commonTest) Test_GetAccountBalances() {
 }
 
 func (suite *commonTest) Test_GetAccounts() {
-
-	res, err := suite.TestAPI.GetAccounts(tests.UserID3)
+	suite.TestAPI.SetDebug(false)
+	res, err := suite.TestAPI.GetAccounts(tests.UserID2) //, tests.UserID3, tests.UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccounts")
 	}
@@ -74,7 +75,6 @@ func (suite *commonTest) Test_GetAccounts() {
 }
 
 func (suite *commonTest) Test_GetObjects() {
-
 	res, err := suite.TestAPI.GetObjects(
 		tests.UserID1,
 		tests.AssetCNY,
@@ -82,6 +82,7 @@ func (suite *commonTest) Test_GetObjects() {
 		tests.LimitOrder1,
 		tests.CallOrder1,
 		tests.SettleOrder1,
+		tests.OperationHistory1,
 	)
 
 	if err != nil {
@@ -89,7 +90,7 @@ func (suite *commonTest) Test_GetObjects() {
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 6)
+	suite.Len(res, 7)
 	//util.Dump("objects >", res)
 }
 
@@ -207,5 +208,4 @@ func (suite *commonTest) Test_GetAccountHistory() {
 func TestCommon(t *testing.T) {
 	testSuite := new(commonTest)
 	suite.Run(t, testSuite)
-	testSuite.TearDown()
 }

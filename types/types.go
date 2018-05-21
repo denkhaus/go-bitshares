@@ -31,7 +31,23 @@ var (
 	EmptyParams = []interface{}{}
 )
 
-type VestingPolicyType Int8
+type AccountCreateExtensionsType UInt8
+
+const (
+	AccountCreateExtensionsNullExt AccountCreateExtensionsType = iota
+	AccountCreateExtensionsOwnerSpecial
+	AccountCreateExtensionsActiveSpecial
+	AccountCreateExtensionsBuyback
+)
+
+type SpecialAuthorityType UInt8
+
+const (
+	SpecialAuthorityTypeNoSpecial SpecialAuthorityType = iota
+	SpecialAuthorityTypeTopHolders
+)
+
+type VestingPolicyType UInt8
 
 const (
 	VestingPolicyTypeLinear VestingPolicyType = iota

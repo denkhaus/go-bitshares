@@ -11,6 +11,8 @@ import (
 
 // WalletLock locks the wallet
 func (p *bitsharesAPI) WalletLock() error {
+	defer p.SetDebug(false)
+
 	if p.rpcClient == nil {
 		return types.ErrRPCClientNotInitialized
 	}
@@ -21,6 +23,8 @@ func (p *bitsharesAPI) WalletLock() error {
 
 // WalletUnlock unlocks the wallet
 func (p *bitsharesAPI) WalletUnlock(password string) error {
+	defer p.SetDebug(false)
+
 	if p.rpcClient == nil {
 		return types.ErrRPCClientNotInitialized
 	}
@@ -31,11 +35,16 @@ func (p *bitsharesAPI) WalletUnlock(password string) error {
 
 // WalletIsLocked checks if wallet is locked.
 func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
+	defer p.SetDebug(false)
+
 	if p.rpcClient == nil {
 		return false, types.ErrRPCClientNotInitialized
 	}
 
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
+
+	p.Debug("is_locked <", resp)
+
 	return resp.(bool), err
 }
 
@@ -53,8 +62,8 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject,
-	rate string, amount string, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error) {
+	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
@@ -65,7 +74,7 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 		return nil, err
 	}
 
-	util.Dump("buy >", resp)
+	p.Debug("buy <", resp)
 
 	ret := types.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -89,8 +98,8 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject,
-	rate string, amount string, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error) {
+	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
@@ -101,6 +110,8 @@ func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.Grap
 		return nil, err
 	}
 
+	p.Debug("sell <", resp)
+
 	ret := types.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
@@ -109,9 +120,7 @@ func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.Grap
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
-	rate float64, amount float64, broadcast bool) (*types.Transaction, error) {
-
+func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error) {
 	//TODO: use proper precision, avoid rounding
 	minToReceive := fmt.Sprintf("%f", amount)
 	amountToSell := fmt.Sprintf("%f", rate*amount)
@@ -130,10 +139,9 @@ func (p *bitsharesAPI) SellEx(account types.GrapheneObject, base, quote types.Gr
 }
 
 // SellAsset
-func (p *bitsharesAPI) SellAsset(account types.GrapheneObject,
-	amountToSell string, symbolToSell types.GrapheneObject,
-	minToReceive string, symbolToReceive types.GrapheneObject,
-	timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
+	minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error) {
+	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
@@ -148,7 +156,7 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject,
 		return nil, err
 	}
 
-	//util.Dump("sell_asset >", resp)
+	p.Debug("sell_asset <", resp)
 
 	ret := types.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -164,9 +172,10 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject,
 // @param symbolToBorrow: the symbol or id of the asset being borrowed.
 // @param amountOfCollateral: the amount of the backing asset to add to your collateral position. Make this negative to claim back some of your collateral. The backing asset is defined in the bitasset_options for the asset being borrowed.
 // @param broadcast: true to broadcast the transaction on the network
-func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject,
-	amountToBorrow string, symbolToBorrow types.GrapheneObject,
+func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
 	amountOfCollateral string, broadcast bool) (*types.Transaction, error) {
+
+	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
@@ -180,7 +189,7 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject,
 		return nil, err
 	}
 
-	//util.Dump("borrow_asset >", resp)
+	p.Debug("borrow_asset <", resp)
 
 	ret := types.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -190,7 +199,10 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject,
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]types.AssetAmount, error) {
+func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error) {
+
+	defer p.SetDebug(false)
+
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
 	}
@@ -200,10 +212,10 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]type
 		return nil, err
 	}
 
-	//util.Dump("list_account_balances >", resp)
+	p.Debug("list_account_balances <", resp)
 
 	data := resp.([]interface{})
-	ret := make([]types.AssetAmount, len(data))
+	ret := make(types.AssetAmounts, len(data))
 
 	for idx, a := range data {
 		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
@@ -218,6 +230,8 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) ([]type
 // @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
 func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, error) {
+	defer p.SetDebug(false)
+
 	if p.rpcClient == nil {
 		return "", types.ErrRPCClientNotInitialized
 	}
@@ -227,6 +241,7 @@ func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, erro
 		return "", err
 	}
 
-	//util.Dump("serialize_transaction >", resp)
+	p.Debug("serialize_transaction <", resp)
+
 	return resp.(string), nil
 }

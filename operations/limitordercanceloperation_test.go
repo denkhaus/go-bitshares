@@ -34,5 +34,5 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 		types.Operation(&op),
 	}
 
-	suite.compareTransaction(suite.RefTx)
+	suite.compareTransaction(suite.RefTx, false)
 }

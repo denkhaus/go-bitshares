@@ -9,6 +9,8 @@ import (
 	"github.com/juju/errors"
 )
 
+type AssetAmounts []AssetAmount
+
 type AssetAmount struct {
 	Amount Int64      `json:"amount"`
 	Asset  GrapheneID `json:"asset_id"`

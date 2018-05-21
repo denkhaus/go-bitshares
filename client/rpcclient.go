@@ -2,17 +2,18 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"math/rand"
 	"net/http"
 	"time"
 
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
 
 type RPCClient interface {
 	CallAPI(method string, args ...interface{}) (interface{}, error)
+	SetDebug(debug bool)
 	Close() error
 	Connect() error
 }
@@ -20,27 +21,40 @@ type RPCClient interface {
 type rpcClient struct {
 	*http.Client
 	*ffjson.Encoder
+	*ffjson.Decoder
 
 	decBuf      *bytes.Buffer
 	endpointURL string
 	req         rpcRequest
 	res         rpcResponseString
+	debug       bool
 	timeout     int
 }
 
 func (p *rpcClient) Connect() error {
 	p.Client = &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 3 * time.Second,
 	}
 
 	p.decBuf = new(bytes.Buffer)
 	p.Encoder = ffjson.NewEncoder(p.decBuf)
+	p.Decoder = ffjson.NewDecoder()
 
 	return nil
 }
 
 func (p *rpcClient) Close() error {
 	return nil
+}
+
+func (p *rpcClient) SetDebug(debug bool) {
+	p.debug = debug
+}
+
+func (p rpcClient) Debug(descr string, in interface{}) {
+	if p.debug {
+		util.DumpJSON(descr, in)
+	}
 }
 
 func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, error) {
@@ -51,6 +65,8 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 	if err := p.Encode(&p.req); err != nil {
 		return nil, errors.Annotate(err, "Encode")
 	}
+
+	p.Debug("rpc req >", p.req)
 
 	req, err := http.NewRequest("POST", p.endpointURL, p.decBuf)
 	if err != nil {
@@ -67,15 +83,15 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 
 	defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(&p.res); err != nil {
+	if err := p.DecodeReader(resp.Body, &p.res); err != nil {
 		return nil, errors.Annotate(err, "Decode")
 	}
 
 	if p.res.HasError() {
-		return p.res.Result, errors.Errorf("%v", p.res.Error)
+		return p.res.Result, p.res.Error
 	}
 
-	//util.Dump("rpc resp", resp.Body)
+	p.Debug("rpc resp <", p.res.Result)
 
 	return p.res.Result, nil
 }
@@ -84,6 +100,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 func NewRPCClient(rpcEndpointURL string) RPCClient {
 	cli := rpcClient{
 		endpointURL: rpcEndpointURL,
+		debug:       false,
 	}
 
 	return &cli

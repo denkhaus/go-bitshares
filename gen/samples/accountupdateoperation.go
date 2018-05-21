@@ -26,7 +26,23 @@ var sampleDataAccountUpdateOperation = `{
     ],
     "weight_threshold": 1
   },
-  "extensions": {},
+  "extensions": {  
+    "null_ext": {},
+    "owner_special_authority":[
+        1, 
+        {
+          "asset": "1.3.555",
+          "num_top_holders": 16
+        }
+    ],
+    "active_special_authority":[
+        1, 
+        {
+          "asset": "1.3.333",
+          "num_top_holders": 15
+        }
+    ]
+  },
   "fee": {
     "amount": 28922,
     "asset_id": "1.3.0"

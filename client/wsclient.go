@@ -1,14 +1,13 @@
 package client
 
 import (
-	"encoding/json"
 	"net"
 
-	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"
@@ -34,6 +33,7 @@ type wsClient struct {
 	pending     map[uint64]*RPCCall
 	mutexNotify sync.Mutex // protects the following
 	notifyFns   map[int]NotifyFunc
+	debug       bool
 }
 
 func NewWebsocketClient(endpointURL string) WebsocketClient {
@@ -43,6 +43,7 @@ func NewWebsocketClient(endpointURL string) WebsocketClient {
 		notifyFns: make(map[int]NotifyFunc),
 		currentID: 1,
 		url:       endpointURL,
+		debug:     false,
 	}
 
 	return &cli
@@ -58,7 +59,10 @@ func (p *wsClient) Connect() error {
 	p.Encoder = ffjson.NewEncoder(conn)
 	p.conn = conn
 
+	p.wg.Add(1)
 	go p.monitor()
+
+	p.wg.Add(1)
 	go p.receive()
 
 	return nil
@@ -79,8 +83,17 @@ func (p *wsClient) Close() error {
 	return nil
 }
 
+func (p *wsClient) SetDebug(debug bool) {
+	p.debug = debug
+}
+
+func (p wsClient) Debug(descr string, in interface{}) {
+	if p.debug {
+		util.Dump(descr, in)
+	}
+}
+
 func (p *wsClient) monitor() {
-	p.wg.Add(1)
 	defer p.wg.Done()
 
 	for !p.shutdown {
@@ -99,7 +112,7 @@ func (p *wsClient) monitor() {
 }
 
 func (p *wsClient) handleCustomData(data map[string]interface{}) error {
-	//	util.Dump("custom data >", data)
+	p.Debug("ws notify <", data)
 
 	switch {
 	case p.notify.Is(data):
@@ -130,7 +143,6 @@ func (p *wsClient) handleCustomData(data map[string]interface{}) error {
 }
 
 func (p *wsClient) receive() {
-	p.wg.Add(1)
 	defer p.wg.Done()
 
 	for !p.closing {
@@ -155,7 +167,7 @@ func (p *wsClient) receive() {
 				continue
 			}
 
-			//util.Dump(">", p.resp)
+			p.Debug("ws resp <", data)
 
 			if call, ok := p.pending[p.resp.ID]; ok {
 				p.mutex.Lock()
@@ -240,7 +252,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
 
-	//util.DumpJSON("rpc >", call.Request)
+	p.Debug("ws req >", call.Request)
 
 	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return nil, errors.Annotate(err, "set write deadline")
@@ -255,13 +267,4 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	}
 
 	return call, nil
-}
-
-func formatError(err interface{}) error {
-	if e, ok := err.(map[string]interface{}); ok {
-		out, _ := json.MarshalIndent(e, "", " ")
-		return fmt.Errorf("server error: %s", out)
-	}
-
-	return fmt.Errorf("server error: %s", err)
 }

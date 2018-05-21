@@ -2,6 +2,8 @@ package types
 
 //go:generate ffjson   $GOFILE
 
+type OperationHistories []OperationHistory
+
 type OperationHistory struct {
 	ID         GrapheneID        `json:"id"`
 	BlockNum   UInt32            `json:"block_num"`

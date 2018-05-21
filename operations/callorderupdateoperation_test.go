@@ -40,5 +40,5 @@ func (suite *operationsAPITest) Test_CallOrderUpdateOperation() {
 		types.Operation(&op),
 	}
 
-	suite.compareTransaction(suite.RefTx)
+	suite.compareTransaction(suite.RefTx, false)
 }

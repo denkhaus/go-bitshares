@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -58,23 +57,35 @@ func (j *AccountCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	}
 	buf.WriteString(`,"referrer_percent":`)
 	fflib.FormatBits2(buf, uint64(j.ReferrerPercent), 10, false)
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
-	err = buf.Encode(&j.Owner)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Owner.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"active":`)
-	err = buf.Encode(&j.Active)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Active.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.AssetAmount kind=struct */
 	buf.WriteString(`,"fee":`)
-	err = buf.Encode(&j.Fee)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Fee.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"name":`)
 	fflib.WriteJsonString(buf, string(j.Name))
@@ -82,18 +93,21 @@ func (j *AccountCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 
 	{
 
-		obj, err = j.Extensions.MarshalJSON()
+		err = j.Extensions.MarshalJSONBuf(buf)
 		if err != nil {
 			return err
 		}
-		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.AccountOptions kind=struct */
 	buf.WriteString(`,"options":`)
-	err = buf.Encode(&j.Options)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Options.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteByte('}')
 	return nil
@@ -458,16 +472,16 @@ handle_Owner:
 	/* handler: j.Owner type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Owner)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Owner.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -478,16 +492,16 @@ handle_Active:
 	/* handler: j.Active type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Active)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Active.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -498,16 +512,16 @@ handle_Fee:
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -548,14 +562,9 @@ handle_Extensions:
 
 		} else {
 
-			tbuf, err := fs.CaptureField(tok)
+			err = j.Extensions.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			err = j.Extensions.UnmarshalJSON(tbuf)
-			if err != nil {
-				return fs.WrapErr(err)
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value
@@ -569,16 +578,16 @@ handle_Options:
 	/* handler: j.Options type=types.AccountOptions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AccountOptions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Options)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

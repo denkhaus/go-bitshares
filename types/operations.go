@@ -57,7 +57,8 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 			return errors.Annotatef(err, "unmarshal Operation %s", p.Type)
 		}
 	} else {
-		return errors.Errorf("Operation type %d not yet supported", p.Type)
+		fmt.Printf("Operation type %s not yet supported\n", p.Type)
+		util.DumpUnmarshaled(descr, raw[1])
 	}
 
 	return nil

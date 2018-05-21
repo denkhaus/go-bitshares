@@ -60,7 +60,7 @@ func (suite *operationsAPITest) Test_SerializeEmptyTransaction() {
 		suite.FailNow(err.Error(), "Unmarshal expiration")
 	}
 
-	suite.compareTransaction(tx)
+	suite.compareTransaction(tx, false)
 }
 
 func (suite *operationsAPITest) Test_SerializeTransaction() {
@@ -73,13 +73,14 @@ func (suite *operationsAPITest) Test_SerializeTransaction() {
 	suite.Equal("f68585abf4dce7c80457000000", hex)
 }
 
-func (suite *operationsAPITest) compareTransaction(tx *types.Transaction) {
+func (suite *operationsAPITest) compareTransaction(tx *types.Transaction, debug bool) {
 	var buf bytes.Buffer
 	enc := util.NewTypeEncoder(&buf)
 	if err := enc.Encode(tx); err != nil {
 		suite.FailNow(err.Error(), "Encode")
 	}
 
+	suite.TestAPI.SetDebug(debug)
 	ref, err := suite.TestAPI.SerializeTransaction(tx)
 	if err != nil {
 		suite.FailNow(err.Error(), "SerializeTransaction")

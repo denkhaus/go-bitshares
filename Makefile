@@ -34,11 +34,12 @@ init: install_secp256k1
 	@go get -u github.com/stretchr/objx
 	@go get -u github.com/cespare/reflex
 
-test_all:
-	go test -v ./...
+test_api: 
+	go test -v ./api -run ^TestCommon$
+	go test -v ./api -run ^TestSubscribe$
 
 test_operations:
-	go test -v ./operations
+	go test -v ./operations -run ^TestOperations$
 
 buildgen:
 	@echo "build btsgen"

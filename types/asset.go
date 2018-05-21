@@ -2,6 +2,8 @@ package types
 
 //go:generate ffjson   $GOFILE
 
+type Assets []Asset
+
 type Asset struct {
 	ID                 GrapheneID   `json:"id"`
 	Symbol             string       `json:"symbol"`

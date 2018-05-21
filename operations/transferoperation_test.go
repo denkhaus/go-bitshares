@@ -23,7 +23,7 @@ func (suite *operationsAPITest) Test_TransferOperation() {
 		types.Operation(&op),
 	}
 
-	suite.compareTransaction(suite.RefTx)
+	suite.compareTransaction(suite.RefTx, false)
 }
 
 // func (suite *operationsAPITest) Test_TransferOperation() {
@@ -64,7 +64,7 @@ func (suite *operationsAPITest) Test_TransferOperation() {
 // 		types.Operation(&op),
 // 	}
 
-// 	suite.compareTransaction(suite.RefTx)
+// 	suite.compareTransaction(suite.RefTx, false)
 // }
 
 // func (suite *operationsAPITest) Test_AccountCreateOperation() {
@@ -130,5 +130,5 @@ func (suite *operationsAPITest) Test_TransferOperation() {
 // 		types.Operation(&op),
 // 	}
 
-// 	suite.compareTransaction(suite.RefTx)
+// 	suite.compareTransaction(suite.RefTx, false)
 // }

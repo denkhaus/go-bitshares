@@ -23,7 +23,11 @@ const (
 )
 
 type BitsharesAPI interface {
-	//Websocket API functions
+
+	//Common functions
+	SetDebug(debug bool)
+	Debug(descr string, in interface{})
+	CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
 	Connect() error
 	DatabaseAPIID() int
@@ -33,29 +37,30 @@ type BitsharesAPI interface {
 	SetCredentials(username, password string)
 	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
-	CallWebsocketAPI(apiID int, method string, args ...interface{}) (interface{}, error)
+
+	//Websocket API functions
 	CancelAllSubscriptions() error
 	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error)
-	GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) ([]types.AssetAmount, error)
+	GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error)
 	GetAccountByName(name string) (*types.Account, error)
-	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) ([]types.OperationHistory, error)
-	GetAccounts(accountIDs ...types.GrapheneObject) ([]types.Account, error)
+	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error)
+	GetAccounts(accountIDs ...types.GrapheneObject) (types.Accounts, error)
 	GetBlock(number uint64) (*types.Block, error)
-	GetCallOrders(assetID types.GrapheneObject, limit int) ([]types.CallOrder, error)
+	GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error)
 	GetChainID() (string, error)
 	GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
 	GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error)
-	GetMarginPositions(accountID types.GrapheneObject) ([]types.CallOrder, error)
+	GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error)
 	GetObjects(objectIDs ...types.GrapheneObject) ([]interface{}, error)
-	GetSettleOrders(assetID types.GrapheneObject, limit int) ([]types.SettleOrder, error)
-	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) ([]types.MarketTrade, error)
-	ListAssets(lowerBoundSymbol string, limit int) ([]types.Asset, error)
+	GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error)
+	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
+	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
 	SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error
 	UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error
 
 	//Wallet API functions
-	ListAccountBalances(account types.GrapheneObject) ([]types.AssetAmount, error)
+	ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
 	WalletLock() error
 	WalletUnlock(password string) error
 	WalletIsLocked() (bool, error)
@@ -66,8 +71,6 @@ type BitsharesAPI interface {
 	SellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error)
 	SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error)
 	SerializeTransaction(tx *types.Transaction) (string, error)
-
-	CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 }
 
 type bitsharesAPI struct {
@@ -79,51 +82,37 @@ type bitsharesAPI struct {
 	historyAPIID   int
 	cryptoAPIID    int
 	broadcastAPIID int
-}
-
-func (p *bitsharesAPI) DatabaseAPIID() int {
-	return p.databaseAPIID
-}
-
-func (p *bitsharesAPI) BroadcastAPIID() int {
-	return p.broadcastAPIID
-}
-
-func (p *bitsharesAPI) HistoryAPIID() int {
-	return p.historyAPIID
-}
-
-func (p *bitsharesAPI) CryptoAPIID() int {
-	return p.cryptoAPIID
-}
-
-func (p *bitsharesAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	return p.wsClient.CallAPI(apiID, method, args...)
+	debug          bool
 }
 
 func (p *bitsharesAPI) getApiID(identifier string) (int, error) {
+	defer p.SetDebug(false)
 	resp, err := p.wsClient.CallAPI(1, identifier, types.EmptyParams)
 	if err != nil {
 		return InvalidApiID, errors.Annotate(err, identifier)
 	}
 
-	//util.Dump(identifier+" in", resp)
+	p.Debug("getApiID <", resp)
+
 	return int(resp.(float64)), nil
 }
 
 // login
 func (p *bitsharesAPI) login() (bool, error) {
+	defer p.SetDebug(false)
 	resp, err := p.wsClient.CallAPI(1, "login", p.username, p.password)
 	if err != nil {
 		return false, err
 	}
 
-	//util.Dump("login in", resp)
+	p.Debug("login <", resp)
+
 	return resp.(bool), nil
 }
 
 // SetSubscribeCallback
 func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
+	defer p.SetDebug(false)
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", notifyID, clearFilter)
 	if err != nil {
@@ -135,6 +124,7 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 
 // SubscribeToMarket
 func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
+	defer p.SetDebug(false)
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.Id(), quote.Id())
 	if err != nil {
@@ -146,6 +136,7 @@ func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject
 
 // UnsubscribeFromMarket
 func (p *bitsharesAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error {
+	defer p.SetDebug(false)
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.Id(), quote.Id())
 	if err != nil {
@@ -157,6 +148,7 @@ func (p *bitsharesAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote ty
 
 // CancelAllSubscriptions
 func (p *bitsharesAPI) CancelAllSubscriptions() error {
+	defer p.SetDebug(false)
 	// returns nil
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "cancel_all_subscriptions", types.EmptyParams)
 	if err != nil {
@@ -170,35 +162,33 @@ func (p *bitsharesAPI) CancelAllSubscriptions() error {
 //The transaction will be checked for validity in the local database prior to broadcasting.
 //If it fails to apply locally, an error will be thrown and the transaction will not be broadcast.
 func (p *bitsharesAPI) BroadcastTransaction(tx *types.Transaction) (string, error) {
-
+	defer p.SetDebug(false)
 	resp, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
 	if err != nil {
 		return "", err
 	}
 
-	//util.Dump("broadcast_transaction <", resp)
+	p.Debug("broadcast_transaction <", resp)
+
 	return resp.(string), nil
 }
 
 //GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.
 //This call can be used by wallets to filter their set of public keys to just the relevant subset prior to calling
 //GetRequiredSignatures to get the minimum subset.
-func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) ([]types.PublicKey, error) {
+func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) (types.PublicKeys, error) {
+	defer p.SetDebug(false)
 
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_potential_signatures", tx)
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("get_potential_signatures <", resp)
+	p.Debug("get_potential_signatures <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.PublicKey, len(data))
-
-	for idx, acct := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(acct), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal PublicKey")
-		}
+	ret := types.PublicKeys{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal PublicKeys")
 	}
 
 	return ret, nil
@@ -206,12 +196,14 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) ([]types.Pu
 
 //GetBlock returns a Block by block number.
 func (p *bitsharesAPI) GetBlock(number uint64) (*types.Block, error) {
+	defer p.SetDebug(false)
 	resp, err := p.wsClient.CallAPI(0, "get_block", number)
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("get_block <", resp)
+	p.Debug("get_block <", resp)
+
 	ret := types.Block{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Block")
@@ -222,12 +214,14 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*types.Block, error) {
 
 //GetAccountByName returns a Account object by username
 func (p *bitsharesAPI) GetAccountByName(name string) (*types.Account, error) {
+	defer p.SetDebug(false)
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("get_account_by_name <", resp)
+	p.Debug("get_account_by_name <", resp)
+
 	ret := types.Account{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Account")
@@ -241,7 +235,9 @@ func (p *bitsharesAPI) GetAccountByName(name string) (*types.Account, error) {
 // stop: ID of the earliest operation to retrieve
 // limit: Maximum number of operations to retrieve (must not exceed 100)
 // start: ID of the most recent operation to retrieve
-func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) ([]types.OperationHistory, error) {
+func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error) {
+	defer p.SetDebug(false)
+
 	if limit > GetAccountHistoryLimit {
 		limit = GetAccountHistoryLimit
 	}
@@ -251,22 +247,19 @@ func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop type
 		return nil, err
 	}
 
-	//util.Dump("get_account_history <", resp)
+	p.Debug("get_account_history <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.OperationHistory, len(data))
-
-	for idx, hist := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(hist), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal History")
-		}
+	ret := types.OperationHistories{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Histories")
 	}
 
 	return ret, nil
 }
 
 //GetAccounts returns a list of accounts by ID.
-func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) ([]types.Account, error) {
+func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Accounts, error) {
+	defer p.SetDebug(false)
 
 	ids := types.GrapheneObjects(accounts).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_accounts", ids)
@@ -274,13 +267,11 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) ([]types.Ac
 		return nil, err
 	}
 
-	data := resp.([]interface{})
-	ret := make([]types.Account, len(data))
+	p.Debug("get_accounts <", resp)
 
-	for idx, acct := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(acct), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal Account")
-		}
+	ret := types.Accounts{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Accounts")
 	}
 
 	return ret, nil
@@ -288,13 +279,14 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) ([]types.Ac
 
 //GetDynamicGlobalProperties
 func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
+	defer p.SetDebug(false)
 
 	resp, err := p.wsClient.CallAPI(0, "get_dynamic_global_properties", types.EmptyParams)
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("get_dynamic_global_properties <", resp)
+	p.Debug("get_dynamic_global_properties <", resp)
 
 	var ret types.DynamicGlobalProperties
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -305,7 +297,8 @@ func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalPropert
 }
 
 //GetAccountBalances retrieves AssetAmount objects by given AccountID
-func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) ([]types.AssetAmount, error) {
+func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error) {
+	defer p.SetDebug(false)
 
 	ids := types.GrapheneObjects(assets).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.Id(), ids)
@@ -313,13 +306,11 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 		return nil, err
 	}
 
-	data := resp.([]interface{})
-	ret := make([]types.AssetAmount, len(data))
+	p.Debug("get_account_balances <", resp)
 
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal AssetAmount")
-		}
+	ret := types.AssetAmounts{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
 	return ret, nil
@@ -328,7 +319,9 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 //ListAssets retrieves assets
 //@param lowerBoundSymbol: Lower bound of symbol names to retrieve
 //@param limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
-func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]types.Asset, error) {
+func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error) {
+	defer p.SetDebug(false)
+
 	if limit > AssetsMaxBatchSize || limit == AssetsListAll {
 		limit = AssetsMaxBatchSize
 	}
@@ -338,13 +331,11 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]types.A
 		return nil, err
 	}
 
-	data := resp.([]interface{})
-	ret := make([]types.Asset, len(data))
+	p.Debug("list_assets <", resp)
 
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal Asset")
-		}
+	ret := types.Assets{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Assets")
 	}
 
 	return ret, nil
@@ -352,21 +343,19 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) ([]types.A
 
 //GetRequiredFees calculates the required fee for each operation in the specified asset type.
 //If the asset type does not have a valid core_exchange_rate
-func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) ([]types.AssetAmount, error) {
+func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
+	defer p.SetDebug(false)
+
 	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Types(), feeAsset.Id())
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("get_required_fees <", resp)
+	p.Debug("get_required_fees <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.AssetAmount, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal AssetAmount")
-		}
+	ret := types.AssetAmounts{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
 	return ret, nil
@@ -374,6 +363,8 @@ func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.Grap
 
 //GetLimitOrders returns a slice of LimitOrder types.
 func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error) {
+	defer p.SetDebug(false)
+
 	if limit > GetLimitOrdersLimit {
 		limit = GetLimitOrdersLimit
 	}
@@ -383,22 +374,20 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 		return nil, err
 	}
 
-	//util.Dump("limitorders <", resp)
+	p.Debug("get_limit_orders <", resp)
 
-	data := resp.([]interface{})
-	ret := make(types.LimitOrders, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal LimitOrder")
-		}
+	ret := types.LimitOrders{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal LimitOrders")
 	}
 
 	return ret, nil
 }
 
 //GetSettleOrders returns a slice of SettleOrder types.
-func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) ([]types.SettleOrder, error) {
+func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error) {
+	defer p.SetDebug(false)
+
 	if limit > GetSettleOrdersLimit {
 		limit = GetSettleOrdersLimit
 	}
@@ -408,22 +397,20 @@ func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 		return nil, err
 	}
 
-	//util.Dump("settleorders in", resp)
+	p.Debug("get_settle_orders <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.SettleOrder, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal SettleOrder")
-		}
+	ret := types.SettleOrders{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal SettleOrders")
 	}
 
 	return ret, nil
 }
 
 //GetCallOrders returns a slice of CallOrder types.
-func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) ([]types.CallOrder, error) {
+func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error) {
+	defer p.SetDebug(false)
+
 	if limit > GetCallOrdersLimit {
 		limit = GetCallOrdersLimit
 	}
@@ -433,43 +420,39 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) ([
 		return nil, err
 	}
 
-	//util.Dump("callorders in", resp)
+	p.Debug("get_call_orders <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.CallOrder, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal CallOrder")
-		}
+	ret := types.CallOrders{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal CallOrders")
 	}
 
 	return ret, nil
 }
 
-//GetMarginPositions returns a slice of CallOrder objects for the specified account.
-func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) ([]types.CallOrder, error) {
+//GetMarginPositions returns a slice of CallOrder objects for the debug specified account.
+func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
+	defer p.SetDebug(false)
+
 	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.Id())
 	if err != nil {
 		return nil, err
 	}
 
-	//util.Dump("marginpositions in", resp)
+	p.Debug("get_margin_positions <", resp)
 
-	data := resp.([]interface{})
-	ret := make([]types.CallOrder, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal CallOrder")
-		}
+	ret := types.CallOrders{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal CallOrders")
 	}
 
 	return ret, nil
 }
 
 //GetTradeHistory returns MarketTrade object.
-func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) ([]types.MarketTrade, error) {
+func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error) {
+	defer p.SetDebug(false)
+
 	if limit > GetTradeHistoryLimit {
 		limit = GetTradeHistoryLimit
 	}
@@ -479,37 +462,41 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 		return nil, err
 	}
 
-	data := resp.([]interface{})
-	ret := make([]types.MarketTrade, len(data))
+	p.Debug("get_trade_history <", resp)
 
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal MarketTrade")
-		}
+	ret := types.MarketTrades{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal MarketTrades")
 	}
+
 	return ret, nil
 }
 
 //GetChainID returns the ID of the chain we are connected to.
 func (p *bitsharesAPI) GetChainID() (string, error) {
+	defer p.SetDebug(false)
+
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_chain_id", types.EmptyParams)
 	if err != nil {
 		return "", err
 	}
 
-	//util.Dump("get_chain_id <", resp)
+	p.Debug("get_chain_id <", resp)
+
 	return resp.(string), nil
 }
 
 //GetObjects returns a list of Graphene Objects by ID.
 func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, error) {
+	defer p.SetDebug(false)
+
 	params := types.GrapheneObjects(ids).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_objects", params)
 	if err != nil {
 		return nil, err
 	}
 
-	//	util.Dump("get_objects <", resp)
+	p.Debug("get_objects <", resp)
 
 	data := resp.([]interface{})
 	ret := make([]interface{}, len(data))
@@ -564,6 +551,13 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				}
 				ret[idx] = cal
 
+			case types.ObjectTypeOperationHistory:
+				hist := types.OperationHistory{}
+				if err := ffjson.Unmarshal(b, &hist); err != nil {
+					return nil, errors.Annotate(err, "unmarshal OperationHistory")
+				}
+				ret[idx] = hist
+
 			default:
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
@@ -588,10 +582,14 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 
 // CancelOrder cancels an order given by orderID
 func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error) {
+	defer p.SetDebug(false)
+
 	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.Id(), broadcast)
 	if err != nil {
 		return nil, err
 	}
+
+	p.Debug("cancel_order <", resp)
 
 	ret := types.Transaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -601,7 +599,43 @@ func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) CallWebsocketAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p bitsharesAPI) Debug(descr string, in interface{}) {
+	if p.debug {
+		util.Dump(descr, in)
+	}
+}
+
+func (p *bitsharesAPI) SetDebug(debug bool) {
+	p.debug = debug
+
+	if p.wsClient != nil {
+		p.wsClient.SetDebug(p.debug)
+	}
+
+	if p.rpcClient != nil {
+		p.rpcClient.SetDebug(p.debug)
+	}
+
+}
+
+func (p *bitsharesAPI) DatabaseAPIID() int {
+	return p.databaseAPIID
+}
+
+func (p *bitsharesAPI) BroadcastAPIID() int {
+	return p.broadcastAPIID
+}
+
+func (p *bitsharesAPI) HistoryAPIID() int {
+	return p.historyAPIID
+}
+
+func (p *bitsharesAPI) CryptoAPIID() int {
+	return p.cryptoAPIID
+}
+
+func (p *bitsharesAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+	defer p.SetDebug(false)
 	return p.wsClient.CallAPI(apiID, method, args...)
 }
 
@@ -715,6 +749,7 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,
 		cryptoAPIID:    InvalidApiID,
+		debug:          false,
 	}
 
 	return &api

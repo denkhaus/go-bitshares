@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/binary"
 	"io"
+	"reflect"
 	"strings"
 
 	"github.com/juju/errors"
@@ -43,7 +44,8 @@ func (p *TypeEncoder) EncodeNumber(v interface{}) error {
 }
 
 func (p *TypeEncoder) Encode(v interface{}) error {
-	if v == nil {
+	val := reflect.ValueOf(v)
+	if val.Kind() == reflect.Ptr && val.IsNil() {
 		return nil
 	}
 
@@ -52,8 +54,6 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 	}
 
 	switch v := v.(type) {
-	case int:
-		return p.EncodeNumber(v)
 	case int8:
 		return p.EncodeNumber(v)
 	case int16:

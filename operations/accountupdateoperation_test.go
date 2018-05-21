@@ -5,10 +5,8 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
-func (suite *operationsAPITest) TestAccountUpdateOperation() {
-	op := AccountUpdateOperation{
-		Extensions: types.Extensions{},
-	}
+func (suite *operationsAPITest) Test_AccountUpdateOperation() {
+	op := AccountUpdateOperation{}
 
 	sample, err := data.GetSampleByType(op.Type())
 	if err != nil {
@@ -23,5 +21,5 @@ func (suite *operationsAPITest) TestAccountUpdateOperation() {
 		types.Operation(&op),
 	}
 
-	suite.compareTransaction(suite.RefTx)
+	suite.compareTransaction(suite.RefTx, false)
 }

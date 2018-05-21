@@ -23,5 +23,5 @@ func (suite *operationsAPITest) Test_AssetUpdateFeedProducersOperation() {
 		types.Operation(&op),
 	}
 
-	suite.compareTransaction(suite.RefTx)
+	suite.compareTransaction(suite.RefTx, false)
 }

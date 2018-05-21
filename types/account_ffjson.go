@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -165,11 +164,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
-	/* Struct fall back. type=types.AccountOptions kind=struct */
 	buf.WriteString(`,"options":`)
-	err = buf.Encode(&j.Options)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Options.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"registrar":`)
 
@@ -215,29 +218,47 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
-	err = buf.Encode(&j.Owner)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Owner.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"active":`)
-	err = buf.Encode(&j.Active)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Active.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"owner_special_authority":`)
-	/* Falling back. type=types.SpecialAuthsMap kind=map */
-	err = buf.Encode(j.OwnerSpecialAuthority)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.OwnerSpecialAuthority.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteString(`,"active_special_authority":`)
-	/* Falling back. type=types.SpecialAuthsMap kind=map */
-	err = buf.Encode(j.ActiveSpecialAuthority)
-	if err != nil {
-		return err
+
+	{
+
+		obj, err = j.ActiveSpecialAuthority.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
 	}
 	buf.WriteByte('}')
 	return nil
@@ -1254,16 +1275,16 @@ handle_Options:
 	/* handler: j.Options type=types.AccountOptions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AccountOptions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Options)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1374,16 +1395,16 @@ handle_Owner:
 	/* handler: j.Owner type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Owner)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Owner.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1394,16 +1415,16 @@ handle_Active:
 	/* handler: j.Active type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Active)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Active.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1411,7 +1432,7 @@ handle_Active:
 
 handle_OwnerSpecialAuthority:
 
-	/* handler: j.OwnerSpecialAuthority type=types.SpecialAuthsMap kind=map quoted=false*/
+	/* handler: j.OwnerSpecialAuthority type=types.OwnerSpecialAuthority kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1436,7 +1457,7 @@ handle_OwnerSpecialAuthority:
 
 handle_ActiveSpecialAuthority:
 
-	/* handler: j.ActiveSpecialAuthority type=types.SpecialAuthsMap kind=map quoted=false*/
+	/* handler: j.ActiveSpecialAuthority type=types.ActiveSpecialAuthority kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

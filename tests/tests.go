@@ -35,10 +35,11 @@ var (
 	AssetRUBEL           = types.NewGrapheneID("1.3.1325")
 	AssetHERO            = types.NewGrapheneID("1.3.1362")
 
-	BitAssetDataCNY = types.NewGrapheneID("2.4.13")       // cny bitasset data id
-	LimitOrder1     = types.NewGrapheneID("1.7.22765740") // random LimitOrder ObjectID
-	CallOrder1      = types.NewGrapheneID("1.8.4582")     // random CallOrder ObjectID
-	SettleOrder1    = types.NewGrapheneID("1.4.1655")     // random SettleOrder ObjectID
+	BitAssetDataCNY   = types.NewGrapheneID("2.4.13")         // cny bitasset data id
+	LimitOrder1       = types.NewGrapheneID("1.7.22765740")   // random LimitOrder ObjectID
+	CallOrder1        = types.NewGrapheneID("1.8.4582")       // random CallOrder ObjectID
+	SettleOrder1      = types.NewGrapheneID("1.4.1655")       // random SettleOrder ObjectID
+	OperationHistory1 = types.NewGrapheneID("1.11.187698971") // random OperationHistory ObjectID
 
 	TestAccount1UserName      = "denk-haus"
 	TestAccount1Password      = "denkhaus-testnet"

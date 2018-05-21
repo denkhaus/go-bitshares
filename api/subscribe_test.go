@@ -91,7 +91,7 @@ func (suite *subscribeTest) Test_SetSubscribeCallback() {
 		suite.FailNow(err.Error(), "SetSubscribeCallback")
 	}
 
-	_, err := suite.TestAPI.CallWebsocketAPI(suite.TestAPI.DatabaseAPIID(), "get_objects", []interface{}{"2.1.0"})
+	_, err := suite.TestAPI.CallWsAPI(suite.TestAPI.DatabaseAPIID(), "get_objects", []interface{}{"2.1.0"})
 	if err != nil {
 		suite.FailNow(err.Error(), "CallAPI->get_objects")
 	}

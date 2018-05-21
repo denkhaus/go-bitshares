@@ -139,7 +139,7 @@ func (p *AuthsMap) UnmarshalJSON(data []byte) error {
 
 	var res interface{}
 	if err := ffjson.Unmarshal(data, &res); err != nil {
-		return errors.Annotate(err, "unmarshal Auths")
+		return errors.Annotate(err, "unmarshal AuthsMap")
 	}
 
 	(*p) = make(map[string]UInt16)
@@ -162,7 +162,7 @@ func (p AuthsMap) MarshalJSON() ([]byte, error) {
 
 	buf, err := ffjson.Marshal(ret)
 	if err != nil {
-		return nil, errors.Annotate(err, "Marshal")
+		return nil, errors.Annotate(err, "marshal AuthsMap")
 	}
 
 	return buf, nil
@@ -185,36 +185,6 @@ func (p AuthsMap) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-// (string) (len=5) "owner": (map[string]interface {}) (len=4) {
-// 	(string) (len=13) "account_auths": ([]interface {}) (len=5 cap=8) {
-// 	 ([]interface {}) (len=2 cap=2) {
-// 	  (string) (len=10) "1.2.149047",
-// 	  (float64) 5
-// 	 },
-// 	 ([]interface {}) (len=2 cap=2) {
-// 	  (string) (len=10) "1.2.386568",
-// 	  (float64) 3
-// 	 },
-// 	 ([]interface {}) (len=2 cap=2) {
-// 	  (string) (len=10) "1.2.386686",
-// 	  (float64) 4
-// 	 },
-// 	 ([]interface {}) (len=2 cap=2) {
-// 	  (string) (len=10) "1.2.395052",
-// 	  (float64) 4
-// 	 },
-// 	 ([]interface {}) (len=2 cap=2) {
-// 	  (string) (len=10) "1.2.442608",
-// 	  (float64) 3
-// 	 }
-// 	},
-// 	(string) (len=13) "address_auths": ([]interface {}) {
-// 	},
-// 	(string) (len=9) "key_auths": ([]interface {}) {
-// 	},
-// 	(string) (len=16) "weight_threshold": (float64) 10
-//    }
-
 type AccountAuthsMap map[GrapheneID]UInt16
 
 func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
@@ -224,7 +194,7 @@ func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
 
 	var res interface{}
 	if err := ffjson.Unmarshal(data, &res); err != nil {
-		return errors.Annotate(err, "unmarshal Auths")
+		return errors.Annotate(err, "unmarshal AccountAuthsMap")
 	}
 
 	(*p) = make(map[GrapheneID]UInt16)
@@ -247,7 +217,7 @@ func (p AccountAuthsMap) MarshalJSON() ([]byte, error) {
 
 	buf, err := ffjson.Marshal(ret)
 	if err != nil {
-		return nil, errors.Annotate(err, "Marshal")
+		return nil, errors.Annotate(err, "marshal AccountAuthsMap")
 	}
 
 	return buf, nil
@@ -270,25 +240,118 @@ func (p AccountAuthsMap) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type SpecialAuthsMap map[string]interface{}
+type NoSpecialAuthority map[string]interface{}
 
-func (p *SpecialAuthsMap) UnmarshalJSON(data []byte) error {
-	if data == nil || len(data) == 0 {
-		return nil
+type TopHoldersSpecialAuthority struct {
+	Asset         GrapheneID `json:"asset"`
+	NumTopHolders UInt8      `json:"num_top_holders"`
+}
+
+func (p TopHoldersSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.Asset); err != nil {
+		return errors.Annotate(err, "encode Asset")
 	}
 
-	var res interface{}
-	if err := ffjson.Unmarshal(data, &res); err != nil {
-		return errors.Annotate(err, "unmarshal Auths")
+	if err := enc.Encode(p.NumTopHolders); err != nil {
+		return errors.Annotate(err, "encode NumTopHolders")
 	}
 
-	// (*p) = make(map[string]int64)
-	// auths := res.([]interface{})
+	return nil
+}
 
-	// for _, a := range auths {
-	// 	tk := a.([]interface{})
-	// 	(*p)[tk[0].(string)] = int64(tk[1].(float64))
-	// }
+type OwnerSpecialAuthority struct {
+	SpecialAuth
+}
+
+func (p OwnerSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(uint8(AccountCreateExtensionsOwnerSpecial)); err != nil {
+		return errors.Annotate(err, "encode AccountCreateExtensionsOwnerSpecial")
+	}
+
+	if err := enc.Encode(p.SpecialAuth); err != nil {
+		return errors.Annotate(err, "encode SpecialAuth")
+	}
+
+	return nil
+}
+
+type ActiveSpecialAuthority struct {
+	SpecialAuth
+}
+
+func (p ActiveSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(uint8(AccountCreateExtensionsActiveSpecial)); err != nil {
+		return errors.Annotate(err, "encode AccountCreateExtensionsActiveSpecial")
+	}
+
+	if err := enc.Encode(p.SpecialAuth); err != nil {
+		return errors.Annotate(err, "encode SpecialAuths")
+	}
+
+	return nil
+}
+
+type SpecialAuth struct {
+	typ  SpecialAuthorityType
+	data interface{}
+}
+
+func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
+	d := []interface{}{}
+	if err := ffjson.Unmarshal(data, &d); err != nil {
+		return errors.Annotate(err, "unmarshal SpecialAuthsMap")
+	}
+
+	if len(d) != 2 {
+		return ErrInvalidInputLength
+	}
+
+	t, ok := d[0].(float64)
+	if !ok {
+		return ErrInvalidInputType
+	}
+
+	p.typ = SpecialAuthorityType(t)
+
+	switch p.typ {
+	case SpecialAuthorityTypeNoSpecial:
+		p.data = &NoSpecialAuthority{}
+	case SpecialAuthorityTypeTopHolders:
+		p.data = &TopHoldersSpecialAuthority{}
+	}
+
+	if err := ffjson.Unmarshal(util.ToBytes(d[1]), p.data); err != nil {
+		return errors.Annotate(err, "unmarshal SpecialAuthority")
+	}
+
+	return nil
+}
+
+func (p SpecialAuth) MarshalJSON() ([]byte, error) {
+	ret := []interface{}{p.typ, p.data}
+	buf, err := ffjson.Marshal(ret)
+	if err != nil {
+		return nil, errors.Annotate(err, "marshal SpecialAuthsMap")
+	}
+
+	return buf, nil
+}
+
+func (p SpecialAuth) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(uint8(p.typ)); err != nil {
+		return errors.Annotate(err, "encode Type")
+	}
+
+	switch p.typ {
+	case SpecialAuthorityTypeNoSpecial:
+		if err := enc.Encode(p.data.(*NoSpecialAuthority)); err != nil {
+			return errors.Annotate(err, "encode Data")
+		}
+	case SpecialAuthorityTypeTopHolders:
+		if err := enc.Encode(p.data.(*TopHoldersSpecialAuthority)); err != nil {
+			return errors.Annotate(err, "encode Data")
+		}
+	}
 
 	return nil
 }
