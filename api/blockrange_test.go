@@ -20,7 +20,7 @@ func TestBlockRange(t *testing.T) {
 		assert.FailNow(t, err.Error(), "OnError")
 	})
 
-	block := uint64(26874905)
+	block := uint64(26878298)
 
 	for {
 		fmt.Println("get block: ", block)

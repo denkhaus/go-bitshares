@@ -44,6 +44,10 @@ func (p *TypeEncoder) EncodeNumber(v interface{}) error {
 }
 
 func (p *TypeEncoder) Encode(v interface{}) error {
+	if v == nil {
+		return nil
+	}
+
 	val := reflect.ValueOf(v)
 	if val.Kind() == reflect.Ptr && val.IsNil() {
 		return nil

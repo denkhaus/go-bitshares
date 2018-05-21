@@ -328,13 +328,10 @@ func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
 }
 
 func (p SpecialAuth) MarshalJSON() ([]byte, error) {
-	ret := []interface{}{p.typ, p.data}
-	buf, err := ffjson.Marshal(ret)
-	if err != nil {
-		return nil, errors.Annotate(err, "marshal SpecialAuthsMap")
-	}
-
-	return buf, nil
+	return ffjson.Marshal([]interface{}{
+		p.typ,
+		p.data,
+	})
 }
 
 func (p SpecialAuth) Marshal(enc *util.TypeEncoder) error {

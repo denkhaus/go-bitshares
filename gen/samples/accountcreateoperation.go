@@ -26,25 +26,27 @@ var sampleDataAccountCreateOperation = `{
     "weight_threshold": 1
   },
   "extensions": {
+    "active_special_authority": [
+      1,
+      {
+        "asset": "1.3.333",
+        "num_top_holders": 15
+      }
+    ],
     "buyback_options": {
-        "asset_to_buy": "1.3.127",
-        "asset_to_buy_issuer": "1.2.31",
-        "markets": ["1.3.20"]
+      "asset_to_buy": "1.3.127",
+      "asset_to_buy_issuer": "1.2.31",
+      "markets": [
+        "1.3.20"
+      ]
     },
     "null_ext": {},
-    "owner_special_authority":[
-        1, 
-        {
-          "asset": "1.3.127",
-          "num_top_holders": 10
-        }
-    ],
-    "active_special_authority":[
-        1, 
-        {
-          "asset": "1.3.333",
-          "num_top_holders": 15
-        }
+    "owner_special_authority": [
+      1,
+      {
+        "asset": "1.3.127",
+        "num_top_holders": 10
+      }
     ]
   },
   "fee": {

@@ -26,21 +26,21 @@ var sampleDataAccountUpdateOperation = `{
     ],
     "weight_threshold": 1
   },
-  "extensions": {  
-    "null_ext": {},
-    "owner_special_authority":[
-        1, 
-        {
-          "asset": "1.3.555",
-          "num_top_holders": 16
-        }
+  "extensions": {
+    "active_special_authority": [
+      1,
+      {
+        "asset": "1.3.333",
+        "num_top_holders": 15
+      }
     ],
-    "active_special_authority":[
-        1, 
-        {
-          "asset": "1.3.333",
-          "num_top_holders": 15
-        }
+    "null_ext": {},
+    "owner_special_authority": [
+      1,
+      {
+        "asset": "1.3.555",
+        "num_top_holders": 16
+      }
     ]
   },
   "fee": {

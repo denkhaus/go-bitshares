@@ -39,7 +39,7 @@ var (
 
 	// do not change order here
 	knownTypes = []Unmarshalable{
-		&types.AccountOptions{},
+		//&types.AccountOptions{},
 		// &types.Asset{},
 		&types.AssetAmount{},
 		&types.AssetFeed{},
@@ -47,12 +47,12 @@ var (
 		&types.GrapheneID{},
 		//&types.BitAssetDataOptions{},
 		&types.Authority{},
-		&types.Memo{},
+		//&types.Memo{},
 		&types.Price{},
 		&types.PriceFeed{},
 		//&types.Votes{},
 		&types.Time{},
-		&types.PublicKey{},
+		//&types.PublicKey{},
 		//&types.Account{},
 	}
 )
@@ -255,6 +255,7 @@ func guessStructType(value interface{}, suggestedType string) (string, error) {
 		//make local copy of known type
 		typ := t
 
+		//	util.Dump("data", v)
 		if err := typ.UnmarshalJSON(v); err == nil {
 			// util.Dump("compare-1", typ)
 			// util.Dump("compare-2", value)
@@ -268,10 +269,10 @@ func guessStructType(value interface{}, suggestedType string) (string, error) {
 				if value.(string) == o.String() {
 					return "types.Time", nil
 				}
-			case *types.PublicKey:
-				if value.(string) == o.String() {
-					return "types.PublicKey", nil
-				}
+			// case *types.PublicKey:
+			// 	if value.(string) == o.String() {
+			// 		return "types.PublicKey", nil
+			// 	}
 			case *types.AccountOptions:
 				if bytes.Equal(v, util.ToBytes(typ)) {
 					return "types.AccountOptions", nil

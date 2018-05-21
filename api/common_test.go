@@ -72,6 +72,8 @@ func (suite *commonTest) Test_GetAccounts() {
 
 	suite.NotNil(res)
 	suite.Len(res, 1)
+
+	//util.Dump("get accounts >", res)
 }
 
 func (suite *commonTest) Test_GetObjects() {

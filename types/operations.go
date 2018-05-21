@@ -22,9 +22,38 @@ type Operation interface {
 type OperationResult interface {
 }
 
+type OperationEnvelopeHolder struct {
+	Op OperationEnvelope `json:"op"`
+}
+
+type OperationEnvelopeHolders []OperationEnvelopeHolder
+
+func (p OperationEnvelopeHolders) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	for _, op := range p {
+		if err := enc.Encode(op.Op); err != nil {
+			return errors.Annotate(err, "encode Op")
+		}
+	}
+
+	return nil
+}
+
 type OperationEnvelope struct {
 	Type      OperationType
 	Operation Operation
+}
+
+func (p OperationEnvelope) Marshal(enc *util.TypeEncoder) error {
+	// type is marshaled by operation
+	if err := enc.Encode(p.Operation); err != nil {
+		return errors.Annotate(err, "encode Operation")
+	}
+
+	return nil
 }
 
 func (p OperationEnvelope) MarshalJSON() ([]byte, error) {

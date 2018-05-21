@@ -34,24 +34,4 @@ var sampleDataVestingBalanceCreateOperation = `{
   ]
 }`
 
-// var sampleDataVestingBalanceCreateOperation = `{
-//   "amount": {
-//     "amount": 1,
-//     "asset_id": "1.3.1564"
-//   },
-//   "creator": "1.2.374566",
-//   "fee": {
-//     "amount": "3034918500",
-//     "asset_id": "1.3.1564"
-//   },
-//   "owner": "1.2.374566",
-//   "policy": [
-//     1,
-//     {
-//       "start_claim": "2018-05-10T15:07:55",
-//       "vesting_seconds": "31536000"
-//     }
-//   ]
-// }`
-
 //end of file

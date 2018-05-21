@@ -41,6 +41,9 @@ test_api:
 test_operations:
 	go test -v ./operations -run ^TestOperations$
 
+test_blocks:
+	go test -v ./api -run ^TestBlockRange$
+
 buildgen:
 	@echo "build btsgen"
 	@go get -u -d ./gen 

@@ -97,9 +97,9 @@ const (
 	OperationTypeAssetPublishFeed
 	OperationTypeWitnessCreate
 	OperationTypeWitnessUpdate
-	OperationTypeProposalCreate                        ///
-	OperationTypeProposalUpdate                        ///
-	OperationTypeProposalDelete                        ///
+	OperationTypeProposalCreate
+	OperationTypeProposalUpdate ///
+	OperationTypeProposalDelete
 	OperationTypeWithdrawPermissionCreate              ///
 	OperationTypeWithdrawPermissionUpdate              ///
 	OperationTypeWithdrawPermissionClaim               ///
