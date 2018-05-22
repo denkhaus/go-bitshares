@@ -3,6 +3,8 @@ package types
 //go:generate ffjson   $GOFILE
 
 import (
+	"encoding/json"
+
 	"github.com/denkhaus/bitshares/util"
 	sort "github.com/emirpasic/gods/utils"
 	"github.com/juju/errors"
@@ -240,7 +242,7 @@ func (p AccountAuthsMap) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type NoSpecialAuthority map[string]interface{}
+type NoSpecialAuthority struct{}
 
 type TopHoldersSpecialAuthority struct {
 	Asset         GrapheneID `json:"asset"`
@@ -292,35 +294,32 @@ func (p ActiveSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
 }
 
 type SpecialAuth struct {
-	typ  SpecialAuthorityType
-	data interface{}
+	Type SpecialAuthorityType
+	Auth interface{}
 }
 
 func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
-	d := []interface{}{}
-	if err := ffjson.Unmarshal(data, &d); err != nil {
-		return errors.Annotate(err, "unmarshal SpecialAuthsMap")
+	raw := make([]json.RawMessage, 2)
+	if err := ffjson.Unmarshal(data, &raw); err != nil {
+		return errors.Annotate(err, "unmarshal RawData")
 	}
 
-	if len(d) != 2 {
+	if len(raw) != 2 {
 		return ErrInvalidInputLength
 	}
 
-	t, ok := d[0].(float64)
-	if !ok {
-		return ErrInvalidInputType
+	if err := ffjson.Unmarshal(raw[0], &p.Type); err != nil {
+		return errors.Annotate(err, "unmarshal AuthorityType")
 	}
 
-	p.typ = SpecialAuthorityType(t)
-
-	switch p.typ {
+	switch p.Type {
 	case SpecialAuthorityTypeNoSpecial:
-		p.data = &NoSpecialAuthority{}
+		p.Auth = &NoSpecialAuthority{}
 	case SpecialAuthorityTypeTopHolders:
-		p.data = &TopHoldersSpecialAuthority{}
+		p.Auth = &TopHoldersSpecialAuthority{}
 	}
 
-	if err := ffjson.Unmarshal(util.ToBytes(d[1]), p.data); err != nil {
+	if err := ffjson.Unmarshal(raw[1], p.Auth); err != nil {
 		return errors.Annotate(err, "unmarshal SpecialAuthority")
 	}
 
@@ -329,23 +328,23 @@ func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
 
 func (p SpecialAuth) MarshalJSON() ([]byte, error) {
 	return ffjson.Marshal([]interface{}{
-		p.typ,
-		p.data,
+		p.Type,
+		p.Auth,
 	})
 }
 
 func (p SpecialAuth) Marshal(enc *util.TypeEncoder) error {
-	if err := enc.Encode(uint8(p.typ)); err != nil {
+	if err := enc.Encode(uint8(p.Type)); err != nil {
 		return errors.Annotate(err, "encode Type")
 	}
 
-	switch p.typ {
+	switch p.Type {
 	case SpecialAuthorityTypeNoSpecial:
-		if err := enc.Encode(p.data.(*NoSpecialAuthority)); err != nil {
+		if err := enc.Encode(p.Auth.(*NoSpecialAuthority)); err != nil {
 			return errors.Annotate(err, "encode Data")
 		}
 	case SpecialAuthorityTypeTopHolders:
-		if err := enc.Encode(p.data.(*TopHoldersSpecialAuthority)); err != nil {
+		if err := enc.Encode(p.Auth.(*TopHoldersSpecialAuthority)); err != nil {
 			return errors.Annotate(err, "encode Data")
 		}
 	}

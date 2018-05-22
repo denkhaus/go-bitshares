@@ -31,6 +31,14 @@ var (
 	EmptyParams = []interface{}{}
 )
 
+type WorkerInitializerType UInt8
+
+const (
+	WorkerInitializerTypeRefund WorkerInitializerType = iota
+	WorkerInitializerTypeVestingBalance
+	WorkerInitializerTypeBurn
+)
+
 type AccountCreateExtensionsType UInt8
 
 const (
@@ -98,7 +106,7 @@ const (
 	OperationTypeWitnessCreate
 	OperationTypeWitnessUpdate
 	OperationTypeProposalCreate
-	OperationTypeProposalUpdate ///
+	OperationTypeProposalUpdate
 	OperationTypeProposalDelete
 	OperationTypeWithdrawPermissionCreate              ///
 	OperationTypeWithdrawPermissionUpdate              ///
@@ -109,9 +117,9 @@ const (
 	OperationTypeCommitteeMemberUpdateGlobalParameters ///
 	OperationTypeVestingBalanceCreate
 	OperationTypeVestingBalanceWithdraw
-	OperationTypeWorkerCreate ///
-	OperationTypeCustom       ///
-	OperationTypeAssert       ///
+	OperationTypeWorkerCreate
+	OperationTypeCustom ///
+	OperationTypeAssert ///
 	OperationTypeBalanceClaim
 	OperationTypeOverrideTransfer
 	OperationTypeTransferToBlind   ///
@@ -120,8 +128,8 @@ const (
 	OperationTypeAssetSettleCancel ///
 	OperationTypeAssetClaimFees    ///
 	OperationTypeFBADistribute     ///
-	OperationTypeBidColatteral     ///
-	OperationTypeExecuteBid        ///
+	OperationTypeBidColatteral
+	OperationTypeExecuteBid ///
 )
 
 func (p OperationType) OperationName() string {

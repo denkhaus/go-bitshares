@@ -65,11 +65,10 @@ func (j *AccountUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 
 	{
 
-		obj, err = j.Extensions.MarshalJSON()
+		err = j.Extensions.MarshalJSONBuf(buf)
 		if err != nil {
 			return err
 		}
-		buf.Write(obj)
 
 	}
 	buf.WriteString(`,"fee":`)

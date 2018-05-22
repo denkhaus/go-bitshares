@@ -70,7 +70,7 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 	}
 
 	if len(raw) != 2 {
-		return errors.Errorf("Invalid operation data: %v", string(data))
+		return ErrInvalidInputLength
 	}
 
 	if err := ffjson.Unmarshal(raw[0], &p.Type); err != nil {

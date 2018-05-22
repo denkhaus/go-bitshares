@@ -27,17 +27,33 @@ var sampleDataProposalUpdateOperation = `{
     "1.2.90751",
     "1.2.90752"
   ],
-  "active_approvals_to_remove": [],
+  "active_approvals_to_remove": [
+    "1.2.123",
+    "1.2.456",
+  ],
   "extensions": [],
   "fee": {
     "amount": 200000,
     "asset_id": "1.3.0"
   },
   "fee_paying_account": "1.2.90744",
-  "key_approvals_to_add": [],
-  "key_approvals_to_remove": [],
-  "owner_approvals_to_add": [],
-  "owner_approvals_to_remove": [],
+  "key_approvals_to_add": [
+    "1.2.567",
+    "1.2.890",
+  ],
+  "key_approvals_to_remove": [
+    "1.2.987",
+    "1.2.765",
+    "1.2.543",
+  ],
+  "owner_approvals_to_add": [
+    "1.2.1234",
+    "1.2.4567",
+  ],
+  "owner_approvals_to_remove": [
+    "1.2.7654",
+    "1.2.9876",
+  ],
   "proposal": "1.10.7"
 }`
 
