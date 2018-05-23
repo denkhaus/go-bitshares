@@ -21,6 +21,13 @@ This API uses [ffjson](https://github.com/pquerna/ffjson). If you change this co
 make generate
 ```
 
+## testing
+
+Operations testing uses generated real blockchain sample code by gen package. To test this api run
+```
+make test_operations
+make test_api
+```
 ## code
 ```
 rpcApiUrl    := "http://localhost:8095" 
@@ -49,7 +56,7 @@ if err != nil {
 log.Printf("balances: %v", res)
 
 ```
-##implemented and tested (serialize/unserialize) operations
+## implemented and tested (serialize/unserialize) operations
 
 - [x] OperationTypeTransfer OperationType
 - [x] OperationTypeLimitOrderCreate
