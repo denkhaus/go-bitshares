@@ -49,10 +49,59 @@ if err != nil {
 log.Printf("balances: %v", res)
 
 ```
+##implemented and tested (serialize/unserialize) operations
+
+- [x] OperationTypeTransfer OperationType
+- [x] OperationTypeLimitOrderCreate
+- [x] OperationTypeLimitOrderCancel
+- [x] OperationTypeCallOrderUpdate
+- [x] OperationTypeFillOrder
+- [x] OperationTypeAccountCreate
+- [x] OperationTypeAccountUpdate
+- [x] OperationTypeAccountWhitelist
+- [x] OperationTypeAccountUpgrade
+- [ ] OperationTypeAccountTransfer 
+- [x] OperationTypeAssetCreate
+- [x] OperationTypeAssetUpdate
+- [x] OperationTypeAssetUpdateBitasset
+- [x] OperationTypeAssetUpdateFeedProducers
+- [x] OperationTypeAssetIssue
+- [x] OperationTypeAssetReserve
+- [x] OperationTypeAssetFundFeePool
+- [x] OperationTypeAssetSettle
+- [ ] OperationTypeAssetGlobalSettle 
+- [x] OperationTypeAssetPublishFeed
+- [x] OperationTypeWitnessCreate
+- [x] OperationTypeWitnessUpdate
+- [x] OperationTypeProposalCreate
+- [x] OperationTypeProposalUpdate
+- [x] OperationTypeProposalDelete
+- [ ] OperationTypeWithdrawPermissionCreate              
+- [ ] OperationTypeWithdrawPermissionUpdate              
+- [ ] OperationTypeWithdrawPermissionClaim               
+- [ ] OperationTypeWithdrawPermissionDelete              
+- [ ] OperationTypeCommitteeMemberCreate                 
+- [ ] OperationTypeCommitteeMemberUpdate                 
+- [ ] OperationTypeCommitteeMemberUpdateGlobalParameters 
+- [x] OperationTypeVestingBalanceCreate
+- [x] OperationTypeVestingBalanceWithdraw
+- [x] OperationTypeWorkerCreate
+- [ ] OperationTypeCustom 
+- [ ] OperationTypeAssert 
+- [x] OperationTypeBalanceClaim
+- [x] OperationTypeOverrideTransfer
+- [ ] OperationTypeTransferToBlind   
+- [ ] OperationTypeBlindTransfer     
+- [ ] OperationTypeTransferFromBlind 
+- [ ] OperationTypeAssetSettleCancel 
+- [ ] OperationTypeAssetClaimFees    
+- [ ] OperationTypeFBADistribute     
+- [x] OperationTypeBidColatteral
+- [ ] OperationTypeExecuteBid 
 
 ## todo
 - add missing operations
 - sign transactions by websocket api
 
 
-Have fun and feel free to contribute.
+Have fun and feel free to contribute needed operations and tests.
