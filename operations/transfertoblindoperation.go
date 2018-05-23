@@ -1,7 +1,7 @@
 package operations
 
 //skip this operation for now
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 // import (
 // 	"encoding/hex"

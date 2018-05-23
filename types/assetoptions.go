@@ -5,7 +5,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type AssetOptions struct {
 	MaxSupply            Int64       `json:"max_supply"`

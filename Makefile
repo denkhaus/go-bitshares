@@ -42,8 +42,9 @@ test_api:
 test_operations:
 	go test -v ./operations -run ^TestOperations$
 
+#this is a long running task
 test_blocks:
-	go test -v ./api -run ^TestBlockRange$
+	go test -v ./tests -run ^TestBlockRange$
 
 buildgen:
 	@echo "build btsgen"

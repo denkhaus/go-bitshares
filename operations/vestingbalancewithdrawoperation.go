@@ -1,6 +1,6 @@
 package operations
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 import (
 	"github.com/denkhaus/bitshares/types"

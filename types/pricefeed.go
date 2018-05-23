@@ -5,7 +5,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type PriceFeed struct {
 	MaintenanceCollateralRatio UInt16 `json:"maintenance_collateral_ratio"`

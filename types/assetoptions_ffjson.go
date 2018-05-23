@@ -44,11 +44,15 @@ func (j *AssetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	fflib.FormatBits2(buf, uint64(j.Flags), 10, false)
 	buf.WriteString(`,"description":`)
 	fflib.WriteJsonString(buf, string(j.Description))
-	/* Struct fall back. type=types.Price kind=struct */
 	buf.WriteString(`,"core_exchange_rate":`)
-	err = buf.Encode(&j.CoreExchangeRate)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.CoreExchangeRate.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"issuer_permissions":`)
 	fflib.FormatBits2(buf, uint64(j.IssuerPermissions), 10, false)
@@ -631,16 +635,16 @@ handle_CoreExchangeRate:
 	/* handler: j.CoreExchangeRate type=types.Price kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Price kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.CoreExchangeRate)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.CoreExchangeRate.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

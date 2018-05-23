@@ -7,7 +7,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type Signatures []Buffer
 
@@ -17,7 +17,7 @@ func (p Signatures) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	for _, sig := range p {
-		if err := enc.Encode(sig); err != nil {
+		if err := enc.Encode(sig.Byte()); err != nil {
 			return errors.Annotate(err, "encode Signature")
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type DynamicGlobalProperties struct {
 	ID                             GrapheneID `json:"id"`

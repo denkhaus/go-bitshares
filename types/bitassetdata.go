@@ -5,7 +5,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type BitassetOptions struct {
 	FeedLifetimeSec              UInt32     `json:"feed_lifetime_sec"`

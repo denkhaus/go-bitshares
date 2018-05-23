@@ -1,6 +1,6 @@
 package types
 
-//go:generate ffjson   $GOFILE
+//go:generate ffjson $GOFILE
 
 type OperationHistories []OperationHistory
 
