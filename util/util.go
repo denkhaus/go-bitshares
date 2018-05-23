@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 
 	"path"
 	"strconv"
@@ -25,18 +26,18 @@ func ToBytes(in interface{}) []byte {
 	return b
 }
 
-// func ToJSON(in interface{}) []byte {
-// 	b, err := ffjson.Marshal(in)
-// 	if err != nil {
-// 		panic("ToJSONBytes: unable to marshal input")
-// 	}
+func ToMap(in interface{}) map[string]interface{} {
+	b, err := ffjson.Marshal(in)
+	if err != nil {
+	}
 
-// 	b, err := ffjson.Unmarshal(in)
-// 	if err != nil {
-// 		panic("ToBytes: unable to marshal input")
-// 	}
-// 	return b
-// }
+	m := make(map[string]interface{})
+	if err := ffjson.Unmarshal(b, &m); err != nil {
+		panic("ToMap: unable to unmarshal input")
+	}
+
+	return nil
+}
 
 func DumpUnmarshaled(descr string, in []byte) {
 	var res interface{}
@@ -65,6 +66,10 @@ func Dump(descr string, in interface{}) {
 }
 
 func SafeUnquote(in string) (string, error) {
+	if len(in) == 0 || in == "null" {
+		return "", nil
+	}
+
 	if strings.HasPrefix(in, "\"") && strings.HasSuffix(in, "\"") {
 		q, err := strconv.Unquote(in)
 		if err != nil {
@@ -114,6 +119,25 @@ func WaitForCondition(d time.Duration, testFn func() bool) bool {
 			return false
 		}
 	}
+}
+
+func RemoveDirContents(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func RandomizeBytes(in []byte) []byte {

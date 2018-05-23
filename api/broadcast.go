@@ -1,8 +1,8 @@
 package api
 
-// func (p *bitsharesAPI) Broadcast(wifKeys []string, feeAsset objects.GrapheneObject, ops ...objects.Operation) (string, error) {
+// func (p *bitsharesAPI) Broadcast(wifKeys []string, feeAsset types.GrapheneObject, ops ...types.Operation) (string, error) {
 
-// 	operations := objects.Operations(ops)
+// 	operations := types.Operations(ops)
 // 	fees, err := p.GetRequiredFees(operations, feeAsset)
 // 	if err != nil {
 // 		return "", errors.Annotate(err, "GetRequiredFees")
@@ -17,7 +17,7 @@ package api
 // 		return "", errors.Annotate(err, "GetDynamicGlobalProperties")
 // 	}
 
-// 	tx, err := objects.NewTransactionWithBlockData(props)
+// 	tx, err := types.NewTransactionWithBlockData(props)
 // 	if err != nil {
 // 		return "", errors.Annotate(err, "NewTransaction")
 // 	}

@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/binary"
 	"io"
+	"reflect"
 	"strings"
 
 	"github.com/juju/errors"
@@ -43,13 +44,20 @@ func (p *TypeEncoder) EncodeNumber(v interface{}) error {
 }
 
 func (p *TypeEncoder) Encode(v interface{}) error {
+	if v == nil {
+		return nil
+	}
+
+	val := reflect.ValueOf(v)
+	if val.Kind() == reflect.Ptr && val.IsNil() {
+		return nil
+	}
+
 	if m, ok := v.(TypeMarshaller); ok {
 		return m.Marshal(p)
 	}
 
 	switch v := v.(type) {
-	case int:
-		return p.EncodeNumber(v)
 	case int8:
 		return p.EncodeNumber(v)
 	case int16:
@@ -86,6 +94,23 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 	default:
 		return errors.Errorf("TypeEncoder: unsupported type encountered")
 	}
+}
+
+func (p *TypeEncoder) EncodeArrString(v []string) error {
+	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
+		return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", v)
+	}
+
+	for _, val := range v {
+		if err := p.EncodeUVarint(uint64(len(val))); err != nil {
+			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+		}
+		if _, err := io.Copy(p.w, strings.NewReader(val)); err != nil {
+			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+		}
+	}
+
+	return nil
 }
 
 func (p *TypeEncoder) EncodeString(v string) error {
