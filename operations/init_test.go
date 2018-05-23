@@ -1,15 +1,12 @@
 package operations
 
 import (
-	"bytes"
-	"encoding/hex"
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
 
-	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/suite"
 
 	// importing this initializes sample data fetching
@@ -74,22 +71,10 @@ func (suite *operationsAPITest) Test_SerializeTransaction() {
 }
 
 func (suite *operationsAPITest) compareTransaction(tx *types.Transaction, debug bool) {
-	var buf bytes.Buffer
-	enc := util.NewTypeEncoder(&buf)
-	if err := enc.Encode(tx); err != nil {
-		suite.FailNow(err.Error(), "Encode")
-	}
-
-	suite.TestAPI.SetDebug(debug)
-	ref, err := suite.TestAPI.SerializeTransaction(tx)
+	ref, test, err := tests.CompareTransactions(suite.TestAPI, tx, debug)
 	if err != nil {
-		suite.FailNow(err.Error(), "SerializeTransaction")
+		suite.FailNow(err.Error(), "compareTry")
 	}
-
-	test := hex.EncodeToString(buf.Bytes())
-
-	// util.Dump("ref", ref)
-	// util.Dump("test", test)
 
 	suite.Equal(ref, test)
 }

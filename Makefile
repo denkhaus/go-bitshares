@@ -35,8 +35,9 @@ init: install_secp256k1
 	@go get -u github.com/cespare/reflex
 
 test_api: 
-	go test -v ./api -run ^TestCommon$
-	go test -v ./api -run ^TestSubscribe$
+	go test -v ./tests -run ^TestCommon$
+	go test -v ./tests -run ^TestSubscribe$
+	go test -v ./types 
 
 test_operations:
 	go test -v ./operations -run ^TestOperations$

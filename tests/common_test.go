@@ -1,10 +1,10 @@
-package api
+package tests
 
 import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/tests"
+	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
 
@@ -14,11 +14,11 @@ import (
 
 type commonTest struct {
 	suite.Suite
-	TestAPI BitsharesAPI
+	TestAPI api.BitsharesAPI
 }
 
 func (suite *commonTest) SetupTest() {
-	api := New(tests.WsFullApiUrl, tests.RpcApiUrl)
+	api := api.New(WsFullApiUrl, RpcApiUrl)
 	if err := api.Connect(); err != nil {
 		suite.FailNow(err.Error(), "Connect")
 	}
@@ -42,11 +42,11 @@ func (suite *commonTest) Test_GetChainID() {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(res, tests.ChainIDBitSharesFull)
+	suite.Equal(res, ChainIDBitSharesFull)
 }
 
 func (suite *commonTest) Test_GetAccountBalances() {
-	res, err := suite.TestAPI.GetAccountBalances(tests.UserID2, tests.AssetBTS)
+	res, err := suite.TestAPI.GetAccountBalances(UserID2, AssetBTS)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 1")
 	}
@@ -54,7 +54,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 	suite.NotNil(res)
 	//util.Dump("balance bts >", res)
 
-	res, err = suite.TestAPI.GetAccountBalances(tests.UserID2)
+	res, err = suite.TestAPI.GetAccountBalances(UserID2)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 2")
 	}
@@ -65,7 +65,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 
 func (suite *commonTest) Test_GetAccounts() {
 	suite.TestAPI.SetDebug(false)
-	res, err := suite.TestAPI.GetAccounts(tests.UserID2) //, tests.UserID3, tests.UserID4)
+	res, err := suite.TestAPI.GetAccounts(UserID2) //, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccounts")
 	}
@@ -78,13 +78,13 @@ func (suite *commonTest) Test_GetAccounts() {
 
 func (suite *commonTest) Test_GetObjects() {
 	res, err := suite.TestAPI.GetObjects(
-		tests.UserID1,
-		tests.AssetCNY,
-		tests.BitAssetDataCNY,
-		tests.LimitOrder1,
-		tests.CallOrder1,
-		tests.SettleOrder1,
-		tests.OperationHistory1,
+		UserID1,
+		AssetCNY,
+		BitAssetDataCNY,
+		LimitOrder1,
+		CallOrder1,
+		SettleOrder1,
+		OperationHistory1,
 	)
 
 	if err != nil {
@@ -130,7 +130,7 @@ func (suite *commonTest) Test_GetTradeHistory() {
 	dtTo := time.Now().UTC()
 
 	dtFrom := dtTo.Add(-time.Hour * 24)
-	res, err := suite.TestAPI.GetTradeHistory(tests.AssetBTS, tests.AssetHERO, dtTo, dtFrom, 50)
+	res, err := suite.TestAPI.GetTradeHistory(AssetBTS, AssetHERO, dtTo, dtFrom, 50)
 
 	if err != nil {
 		suite.FailNow(err.Error(), "GetTradeHistory")
@@ -142,7 +142,7 @@ func (suite *commonTest) Test_GetTradeHistory() {
 
 func (suite *commonTest) Test_GetLimitOrders() {
 
-	res, err := suite.TestAPI.GetLimitOrders(tests.AssetCNY, tests.AssetBTS, 50)
+	res, err := suite.TestAPI.GetLimitOrders(AssetCNY, AssetBTS, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetLimitOrders")
 	}
@@ -152,7 +152,7 @@ func (suite *commonTest) Test_GetLimitOrders() {
 }
 
 func (suite *commonTest) Test_GetCallOrders() {
-	res, err := suite.TestAPI.GetCallOrders(tests.AssetUSD, 50)
+	res, err := suite.TestAPI.GetCallOrders(AssetUSD, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetCallOrders")
 	}
@@ -162,7 +162,7 @@ func (suite *commonTest) Test_GetCallOrders() {
 }
 
 func (suite *commonTest) Test_GetMarginPositions() {
-	res, err := suite.TestAPI.GetMarginPositions(tests.UserID2)
+	res, err := suite.TestAPI.GetMarginPositions(UserID2)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetMarginPositions")
 	}
@@ -172,7 +172,7 @@ func (suite *commonTest) Test_GetMarginPositions() {
 }
 
 func (suite *commonTest) Test_GetSettleOrders() {
-	res, err := suite.TestAPI.GetSettleOrders(tests.AssetCNY, 50)
+	res, err := suite.TestAPI.GetSettleOrders(AssetCNY, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetSettleOrders")
 	}

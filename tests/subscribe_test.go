@@ -1,4 +1,4 @@
-package api
+package tests
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
-	"github.com/denkhaus/bitshares/tests"
+	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/suite"
@@ -28,11 +28,11 @@ const (
 // returns the current testing context
 type subscribeTest struct {
 	suite.Suite
-	TestAPI BitsharesAPI
+	TestAPI api.BitsharesAPI
 }
 
 func (suite *subscribeTest) SetupTest() {
-	api := New(tests.WsFullApiUrl, tests.RpcApiUrl)
+	api := api.New(WsFullApiUrl, RpcApiUrl)
 	if err := api.Connect(); err != nil {
 		suite.FailNow(err.Error(), "Connect")
 	}
@@ -55,7 +55,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 		SubscribeToMarketDuration, SubscribeToMarketMsgs)
 
 	if err := suite.TestAPI.SubscribeToMarket(SubscribeToMarketSubscriberID,
-		tests.AssetBTS, tests.AssetCNY); err != nil {
+		AssetBTS, AssetCNY); err != nil {
 		suite.FailNow(err.Error(), "SubscribeToMarket")
 	}
 
@@ -78,7 +78,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 	bar.Finish()
 
 	fmt.Println("Call UnsubscribeFromMarket")
-	if err := suite.TestAPI.UnsubscribeFromMarket(tests.AssetBTS, tests.AssetCNY); err != nil {
+	if err := suite.TestAPI.UnsubscribeFromMarket(AssetBTS, AssetCNY); err != nil {
 		suite.FailNow(err.Error(), "UnsubscribeFromMarket")
 	}
 }

@@ -499,7 +499,13 @@ func (p *Buffer) UnmarshalJSON(data []byte) error {
 	*p = buf
 	return nil
 }
+func (p Buffer) Byte() []byte {
+	return p
+}
 
+func (p Buffer) Length() int {
+	return len(p)
+}
 func (p Buffer) String() string {
 	return hex.EncodeToString(p)
 }
@@ -512,10 +518,6 @@ func (p *Buffer) FromString(data string) error {
 
 	*p = buf
 	return nil
-}
-
-func (p Buffer) Byte() []byte {
-	return p
 }
 
 func (p Buffer) MarshalJSON() ([]byte, error) {
@@ -533,7 +535,6 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
 func BufferFromString(data string) (Buffer, error) {
 	buf, err := hex.DecodeString(data)
 	if err != nil {

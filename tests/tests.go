@@ -1,6 +1,14 @@
 package tests
 
-import "github.com/denkhaus/bitshares/types"
+import (
+	"bytes"
+	"encoding/hex"
+
+	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
+	"github.com/juju/errors"
+)
 
 const (
 	//WsFullApiUrl = "wss://node.market.rudex.org"
@@ -64,3 +72,20 @@ var (
 	TestAccount3PrivKeyOwner  = "5JqmjeakPoTz3ComQ7Jgg11jHxywfkJHZPhMJoBomZLrZSfRAvr"
 	TestAccount3ID            = types.NewGrapheneID("1.2.391614")
 )
+
+func CompareTransactions(api api.BitsharesAPI, tx *types.Transaction, debug bool) (string, string, error) {
+	var buf bytes.Buffer
+	enc := util.NewTypeEncoder(&buf)
+	if err := enc.Encode(tx); err != nil {
+		return "", "", errors.Annotate(err, "Encode")
+	}
+
+	api.SetDebug(debug)
+	ref, err := api.SerializeTransaction(tx)
+	if err != nil {
+		return "", "", errors.Annotate(err, "SerializeTransaction")
+	}
+
+	test := hex.EncodeToString(buf.Bytes())
+	return ref, test, nil
+}

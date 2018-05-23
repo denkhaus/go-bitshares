@@ -1,20 +1,20 @@
-package api
+package tests
 
 import (
 	"testing"
 
-	"github.com/denkhaus/bitshares/tests"
+	"github.com/denkhaus/bitshares/api"
 	"github.com/stretchr/testify/suite"
 )
 
 type walletAPITest struct {
 	suite.Suite
-	TestAPI BitsharesAPI
+	TestAPI api.BitsharesAPI
 }
 
 func (suite *walletAPITest) SetupTest() {
 
-	api := New(tests.WsTestApiUrl, tests.RpcApiUrl)
+	api := api.New(WsTestApiUrl, RpcApiUrl)
 
 	if err := api.Connect(); err != nil {
 		suite.FailNow(err.Error(), "Connect")
@@ -60,7 +60,7 @@ func (suite *walletAPITest) Test_ChainConfig() {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(tests.ChainIDBitSharesTest, res)
+	suite.Equal(ChainIDBitSharesTest, res)
 }
 
 /*
