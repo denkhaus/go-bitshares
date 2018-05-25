@@ -499,10 +499,10 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 	p.Debug("get_objects <", resp)
 
 	data := resp.([]interface{})
-	ret := make([]interface{}, len(data))
+	ret := make([]interface{}, 0)
 	id := types.GrapheneID{}
 
-	for idx, obj := range data {
+	for _, obj := range data {
 		if obj == nil {
 			continue
 		}
@@ -513,52 +513,68 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 
 		b := util.ToBytes(obj)
 
+		//TODO: implement
+		// ObjectTypeBase
+		// ObjectTypeWitness
+		// ObjectTypeCustom
+		// ObjectTypeProposal
+		// ObjectTypeWithdrawPermission
+		// ObjectTypeVestingBalance
+		// ObjectTypeWorker
 		switch id.Space() {
 		case types.SpaceTypeProtocol:
 			switch id.Type() {
-			case types.ObjectTypeAsset:
-				ass := types.Asset{}
-				if err := ffjson.Unmarshal(b, &ass); err != nil {
-					return nil, errors.Annotate(err, "unmarshal Asset")
-				}
-				ret[idx] = ass
-
 			case types.ObjectTypeAccount:
 				acc := types.Account{}
 				if err := ffjson.Unmarshal(b, &acc); err != nil {
 					return nil, errors.Annotate(err, "unmarshal Account")
 				}
-				ret[idx] = acc
-
+				ret = append(ret, acc)
+			case types.ObjectTypeAsset:
+				ass := types.Asset{}
+				if err := ffjson.Unmarshal(b, &ass); err != nil {
+					return nil, errors.Annotate(err, "unmarshal Asset")
+				}
+				ret = append(ret, ass)
 			case types.ObjectTypeForceSettlement:
 				set := types.SettleOrder{}
 				if err := ffjson.Unmarshal(b, &set); err != nil {
 					return nil, errors.Annotate(err, "unmarshal SettleOrder")
 				}
-				ret[idx] = set
-
+				ret = append(ret, set)
 			case types.ObjectTypeLimitOrder:
 				lim := types.LimitOrder{}
 				if err := ffjson.Unmarshal(b, &lim); err != nil {
 					return nil, errors.Annotate(err, "unmarshal LimitOrder")
 				}
-				ret[idx] = lim
-
+				ret = append(ret, lim)
 			case types.ObjectTypeCallOrder:
 				cal := types.CallOrder{}
 				if err := ffjson.Unmarshal(b, &cal); err != nil {
 					return nil, errors.Annotate(err, "unmarshal CallOrder")
 				}
-				ret[idx] = cal
-
+				ret = append(ret, cal)
+			case types.ObjectTypeCommiteeMember:
+				mem := types.CommiteeMember{}
+				if err := ffjson.Unmarshal(b, &mem); err != nil {
+					return nil, errors.Annotate(err, "unmarshal CommiteeMember")
+				}
+				ret = append(ret, mem)
 			case types.ObjectTypeOperationHistory:
 				hist := types.OperationHistory{}
 				if err := ffjson.Unmarshal(b, &hist); err != nil {
 					return nil, errors.Annotate(err, "unmarshal OperationHistory")
 				}
-				ret[idx] = hist
+				ret = append(ret, hist)
+			case types.ObjectTypeBalance:
+				bal := types.Balance{}
+				if err := ffjson.Unmarshal(b, &bal); err != nil {
+					return nil, errors.Annotate(err, "unmarshal Balance")
+				}
+				ret = append(ret, bal)
 
 			default:
+				util.DumpUnmarshaled(id.Type().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 
@@ -569,9 +585,10 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				if err := ffjson.Unmarshal(b, &bit); err != nil {
 					return nil, errors.Annotate(err, "unmarshal BitAssetData")
 				}
-				ret[idx] = bit
+				ret = append(ret, bit)
 
 			default:
+				util.DumpUnmarshaled(id.Type().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 		}

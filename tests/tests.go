@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	//WsFullApiUrl = "wss://node.market.rudex.org"
-	WsFullApiUrl = "wss://bitshares.openledger.info/ws"
+	WsFullApiUrl = "wss://node.market.rudex.org"
+	//WsFullApiUrl = "wss://bitshares.openledger.info/ws"
 	WsTestApiUrl = "wss://node.testnet.bitshares.eu/ws"
 	RpcApiUrl    = "http://localhost:8095"
 )
@@ -43,11 +43,13 @@ var (
 	AssetRUBEL           = types.NewGrapheneID("1.3.1325")
 	AssetHERO            = types.NewGrapheneID("1.3.1362")
 
-	BitAssetDataCNY   = types.NewGrapheneID("2.4.13")         // cny bitasset data id
-	LimitOrder1       = types.NewGrapheneID("1.7.22765740")   // random LimitOrder ObjectID
-	CallOrder1        = types.NewGrapheneID("1.8.4582")       // random CallOrder ObjectID
 	SettleOrder1      = types.NewGrapheneID("1.4.1655")       // random SettleOrder ObjectID
+	CommiteeMember1   = types.NewGrapheneID("1.5.15")         // random CommiteeMember ObjectID
+	LimitOrder1       = types.NewGrapheneID("1.7.75961600")   // random LimitOrder ObjectID
+	CallOrder1        = types.NewGrapheneID("1.8.4582")       // random CallOrder ObjectID
 	OperationHistory1 = types.NewGrapheneID("1.11.187698971") // random OperationHistory ObjectID
+	Balance1          = types.NewGrapheneID("1.15.1")         // random Balance ObjectID
+	BitAssetDataCNY   = types.NewGrapheneID("2.4.13")         // cny bitasset data id
 
 	TestAccount1UserName      = "denk-haus"
 	TestAccount1Password      = "denkhaus-testnet"

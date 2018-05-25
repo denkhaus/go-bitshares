@@ -81,10 +81,12 @@ func (suite *commonTest) Test_GetObjects() {
 		UserID1,
 		AssetCNY,
 		BitAssetDataCNY,
-		LimitOrder1,
-		CallOrder1,
-		SettleOrder1,
+		// LimitOrder1,
+		// CallOrder1,
+		// SettleOrder1,
 		OperationHistory1,
+		CommiteeMember1,
+		Balance1,
 	)
 
 	if err != nil {
@@ -92,7 +94,7 @@ func (suite *commonTest) Test_GetObjects() {
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 7)
+	suite.Len(res, 6)
 	//util.Dump("objects >", res)
 }
 
