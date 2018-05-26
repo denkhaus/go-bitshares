@@ -4,27 +4,29 @@ import (
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/crypto"
+	"github.com/denkhaus/bitshares/operations"
+	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/suite"
 )
 
 type walletAPITest struct {
 	suite.Suite
 	TestAPI api.BitsharesAPI
+	KeyBag  *crypto.KeyBag
 }
 
 func (suite *walletAPITest) SetupTest() {
+	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl)
+	suite.KeyBag = crypto.NewKeyBag()
 
-	api := api.New(WsTestApiUrl, RpcApiUrl)
-
-	if err := api.Connect(); err != nil {
-		suite.FailNow(err.Error(), "Connect")
+	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
+		suite.FailNow(err.Error(), "KeyBag.Add 1")
 	}
-
-	api.OnError(func(err error) {
-		suite.FailNow(err.Error(), "OnError")
-	})
-
-	suite.TestAPI = api
+	if err := suite.KeyBag.Add(TestAccount3PrivKeyActive); err != nil {
+		suite.FailNow(err.Error(), "KeyBag.Add 2")
+	}
 }
 
 func (suite *walletAPITest) TearDown() {
@@ -33,27 +35,6 @@ func (suite *walletAPITest) TearDown() {
 	}
 }
 
-// func (suite *walletAPITest) Test_ListAssets() {
-// 	res, err := suite.TestAPI.ListAssets("PEG.FAKEUSD", 2)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "ListAssets")
-// 	}
-
-// 	suite.NotNil(res)
-// 	suite.Len(res, 2)
-// 	util.Dump("assets >", res)
-// }
-
-/* func (suite *walletAPITest) Test_GetBlock() {
-	res, err := suite.TestAPI.GetBlock(10454132)
-	if err != nil {
-		suite.FailNow(err.Error(), "GetBlock")
-	}
-
-	suite.NotNil(res)
-	util.Dump("get_block >", res)
-} */
-
 func (suite *walletAPITest) Test_ChainConfig() {
 	res, err := suite.TestAPI.GetChainID()
 	if err != nil {
@@ -61,6 +42,25 @@ func (suite *walletAPITest) Test_ChainConfig() {
 	}
 
 	suite.Equal(ChainIDBitSharesTest, res)
+}
+
+func (suite *walletAPITest) Test_SignTransaction() {
+	op := operations.TransferOperation{
+		Extensions: types.Extensions{},
+		Amount: types.AssetAmount{
+			Amount: 1000,
+			Asset:  *AssetTEST,
+		},
+		From: *TestAccount1ID,
+		To:   *TestAccount2ID,
+	}
+
+	trx, err := suite.TestAPI.SignTransaction(suite.KeyBag, AssetTEST, &op)
+	if err != nil {
+		suite.FailNow(err.Error(), "SignTransaction")
+	}
+
+	util.Dump("signed trx <", trx)
 }
 
 /*
@@ -113,32 +113,6 @@ func (suite *walletAPITest) Test_CancelOrder() {
 
 }
 */
-/* func (suite *walletAPITest) Test_Transfer() {
-
-	am := types.AssetAmount{
-		Amount: 1000,
-		Asset:  *AssetTEST,
-	}
-
-	op := operations.TransferOperation{
-		Extensions: []types.Extension{},
-		Amount:     am,
-	}
-
-	op.From.FromObjectID(TestAccount1ID.Id())
-	op.To.FromObjectID(TestAccount2ID.Id())
-
-	priv, err := crypto.Decode(TestAccount1PrivKey)
-	if err != nil {
-		suite.FailNow(err.Error(), "decode wif key")
-	}
-
-	privKeys := [][]byte{priv}
-	if err := suite.TestAPI.Broadcast(privKeys, op.Amount.Asset, &op); err != nil {
-		suite.FailNow(err.Error(), "broadcast")
-	}
-
-} */
 
 func TestWalletApi(t *testing.T) {
 	testSuite := new(walletAPITest)

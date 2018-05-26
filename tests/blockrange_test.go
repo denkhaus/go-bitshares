@@ -8,21 +8,13 @@ import (
 	"github.com/bradhe/stopwatch"
 	"github.com/stretchr/testify/assert"
 	// register operations
-	"github.com/denkhaus/bitshares/api"
+
 	_ "github.com/denkhaus/bitshares/operations"
 	"github.com/denkhaus/bitshares/util"
 )
 
 func TestBlockRange(t *testing.T) {
-	api := api.New(WsFullApiUrl, RpcApiUrl)
-	if err := api.Connect(); err != nil {
-		assert.FailNow(t, err.Error(), "Connect")
-	}
-
-	api.OnError(func(err error) {
-		assert.FailNow(t, err.Error(), "OnError")
-	})
-
+	api := NewTestAPI(t, WsFullApiUrl)
 	defer api.Close()
 
 	block := uint64(26878913)

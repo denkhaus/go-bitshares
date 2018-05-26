@@ -5,6 +5,7 @@ import (
 
 	"github.com/denkhaus/bitshares/client"
 	"github.com/denkhaus/bitshares/config"
+	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -37,7 +38,7 @@ type BitsharesAPI interface {
 	SetCredentials(username, password string)
 	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
-
+	SignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
 	//Websocket API functions
 	CancelAllSubscriptions() error
 	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error)
@@ -171,6 +172,48 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *types.Transaction) (string, erro
 	p.Debug("broadcast_transaction <", resp)
 
 	return resp.(string), nil
+}
+
+//SignTransaction creates a new Transaction by the given operations applies fees, current block data and signes the transaction wit the
+func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
+
+	operations := types.Operations(ops)
+	fees, err := p.GetRequiredFees(operations, feeAsset)
+	if err != nil {
+		return nil, errors.Annotate(err, "GetRequiredFees")
+	}
+
+	if err := operations.ApplyFees(fees); err != nil {
+		return nil, errors.Annotate(err, "ApplyFees")
+	}
+
+	props, err := p.GetDynamicGlobalProperties()
+	if err != nil {
+		return nil, errors.Annotate(err, "GetDynamicGlobalProperties")
+	}
+
+	tx, err := types.NewTransactionWithBlockData(props)
+	if err != nil {
+		return nil, errors.Annotate(err, "NewTransaction")
+	}
+
+	tx.Operations = operations
+
+	pubKeys, err := p.GetPotentialSignatures(tx)
+	if err != nil {
+		return nil, errors.Annotate(err, "GetPotentialSignatures")
+	}
+
+	util.DumpJSON("potential pubkeys >", pubKeys)
+
+	signedTrx := crypto.NewSignedTransaction(tx)
+	privKeys := keyBag.GetPotentialPrivKeys(pubKeys)
+
+	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
+		return nil, errors.Annotate(err, "Sign")
+	}
+
+	return tx, nil
 }
 
 //GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.

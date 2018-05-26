@@ -3,11 +3,13 @@ package tests
 import (
 	"bytes"
 	"encoding/hex"
+	"testing"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -88,4 +90,17 @@ func CompareTransactions(api api.BitsharesAPI, tx *types.Transaction, debug bool
 
 	test := hex.EncodeToString(buf.Bytes())
 	return ref, test, nil
+}
+
+func NewTestAPI(t *testing.T, wsAPIEndpoint string) api.BitsharesAPI {
+	api := api.New(wsAPIEndpoint, RpcApiUrl)
+	if err := api.Connect(); err != nil {
+		assert.FailNow(t, err.Error(), "Connect")
+	}
+
+	api.OnError(func(err error) {
+		assert.FailNow(t, err.Error(), "OnError")
+	})
+
+	return api
 }

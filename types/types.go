@@ -18,12 +18,13 @@ import (
 )
 
 var (
-	ErrRPCClientNotInitialized = fmt.Errorf("RPC client is not initialized")
-	ErrNotImplemented          = fmt.Errorf("not implemented")
-	ErrInvalidInputType        = fmt.Errorf("invalid input type")
-	ErrInvalidInputLength      = fmt.Errorf("invalid input length")
-	ErrInvalidPublicKey        = fmt.Errorf("invalid PublicKey")
-	ErrInvalidChecksum         = fmt.Errorf("invalid checksum")
+	ErrRPCClientNotInitialized      = fmt.Errorf("RPC client is not initialized")
+	ErrNotImplemented               = fmt.Errorf("not implemented")
+	ErrInvalidInputType             = fmt.Errorf("invalid input type")
+	ErrInvalidInputLength           = fmt.Errorf("invalid input length")
+	ErrInvalidPublicKey             = fmt.Errorf("invalid PublicKey")
+	ErrPublicKeyChainPrefixMismatch = fmt.Errorf("PublicKeychain prefix mismatch")
+	ErrInvalidChecksum              = fmt.Errorf("invalid checksum")
 )
 
 var (

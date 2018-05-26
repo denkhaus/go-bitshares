@@ -23,10 +23,10 @@ import (
 import "C"
 
 type SignedTransaction struct {
-	types.Transaction
+	*types.Transaction
 }
 
-func NewSignedTransaction(tx types.Transaction) *SignedTransaction {
+func NewSignedTransaction(tx *types.Transaction) *SignedTransaction {
 	if tx.Expiration.IsZero() {
 		exp := time.Now().Add(30 * time.Second)
 		tx.Expiration = types.Time{exp}
@@ -62,7 +62,7 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 	// Write the serialized transaction.
 	rawTx, err := tx.Serialize()
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "Serialize")
 	}
 
 	if _, err := msgBuffer.Write(rawTx); err != nil {
@@ -77,7 +77,7 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 func (tx *SignedTransaction) Sign(privKeys [][]byte, chain *config.ChainConfig) error {
 	digest, err := tx.Digest(chain)
 	if err != nil {
-		return err
+		return errors.Annotate(err, "Digest")
 	}
 
 	// Sign.

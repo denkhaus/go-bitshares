@@ -18,16 +18,7 @@ type commonTest struct {
 }
 
 func (suite *commonTest) SetupTest() {
-	api := api.New(WsFullApiUrl, RpcApiUrl)
-	if err := api.Connect(); err != nil {
-		suite.FailNow(err.Error(), "Connect")
-	}
-
-	api.OnError(func(err error) {
-		suite.FailNow(err.Error(), "OnError")
-	})
-
-	suite.TestAPI = api
+	suite.TestAPI = NewTestAPI(suite.T(), WsFullApiUrl)
 }
 
 func (suite *commonTest) TearDownTest() {

@@ -25,6 +25,8 @@ install_secp256k1:
 	cd /tmp/secp256k1 && ./autogen.sh 
 	cd /tmp/secp256k1 && ./configure --enable-module-recovery
 	cd /tmp/secp256k1 && make && sudo make install
+	#makes sure secp256k1 shared object is found while testing on my system
+	sudo ln -s /usr/local/lib/libsecp256k1.so.0 /usr/lib/libsecp256k1.so.0 
 
 init: install_secp256k1
 	@echo "######################## -> install dependencies"

@@ -74,9 +74,9 @@ func (p *KeyAuthsMap) UnmarshalJSON(data []byte) error {
 			return ErrInvalidInputType
 		}
 
-		pub, err := NewPublicKey(key)
+		pub, err := NewPublicKeyFromString(key)
 		if err != nil {
-			return errors.Annotate(err, "NewPublicKey")
+			return errors.Annotate(err, "NewPublicKeyFromString")
 		}
 
 		(*p)[pub.String()] = UInt16(weight)
@@ -115,9 +115,9 @@ func (p KeyAuthsMap) Marshal(enc *util.TypeEncoder) error {
 
 	for _, k := range keys {
 		key := k.(string)
-		pub, err := NewPublicKey(key)
+		pub, err := NewPublicKeyFromString(key)
 		if err != nil {
-			return errors.Annotate(err, "NewPublicKey")
+			return errors.Annotate(err, "NewPublicKeyFromString")
 		}
 
 		if err := pub.Marshal(enc); err != nil {

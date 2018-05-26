@@ -17,9 +17,9 @@ var keys = []string{
 
 func TestNewPublicKey(t *testing.T) {
 	for _, k := range keys {
-		key, err := NewPublicKey(k)
+		key, err := NewPublicKeyFromString(k)
 		if err != nil {
-			assert.FailNow(t, errors.Annotate(err, "NewPublicKey").Error())
+			assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
 		}
 
 		assert.Equal(t, key.String(), k)
