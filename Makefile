@@ -35,6 +35,7 @@ init: install_secp256k1
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx
 	@go get -u github.com/cespare/reflex
+	@go get -u github.com/bradhe/stopwatch
 
 test_api: 
 	go test -v ./tests -run ^TestCommon$

@@ -13,6 +13,7 @@ func init() {
 	types.OperationMap[op.Type()] = op
 }
 
+//virtual order
 type FillOrderOperation struct {
 	OrderID   types.GrapheneID  `json:"order_id"`
 	AccountID types.GrapheneID  `json:"account_id"`
@@ -58,12 +59,12 @@ func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode receives")
 	}
 
-	if err := enc.Encode(p.IsMaker); err != nil {
-		return errors.Annotate(err, "encode ismaker")
-	}
-
 	if err := enc.Encode(p.FillPrice); err != nil {
 		return errors.Annotate(err, "encode fillprice")
+	}
+
+	if err := enc.Encode(p.IsMaker); err != nil {
+		return errors.Annotate(err, "encode ismaker")
 	}
 
 	return nil
