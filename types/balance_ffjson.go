@@ -66,7 +66,16 @@ func (j *Balance) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"owner":`)
-	fflib.WriteJsonString(buf, string(j.Owner))
+
+	{
+
+		obj, err = j.Owner.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteByte('}')
 	return nil
 }
@@ -326,25 +335,24 @@ handle_LastClaimDate:
 
 handle_Owner:
 
-	/* handler: j.Owner type=types.Address kind=string quoted=false*/
+	/* handler: j.Owner type=types.Address kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Address", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Owner = Address(string(outBuf))
-
+			err = j.Owner.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

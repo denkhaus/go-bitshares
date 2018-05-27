@@ -77,8 +77,8 @@ static int sign(
 		return 0;
 	}
 
-	//printf("SIGNATURE DATA:\n");
-	//dump(sig.data, 65);
+	printf("SIGNATURE DATA:\n");
+	dump(sig.data, 65);
 
 	// Serialize and return success.
 	secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, signature, recid, &sig);

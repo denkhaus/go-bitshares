@@ -18,7 +18,11 @@ type commonTest struct {
 }
 
 func (suite *commonTest) SetupTest() {
-	suite.TestAPI = NewTestAPI(suite.T(), WsFullApiUrl)
+	suite.TestAPI = NewTestAPI(
+		suite.T(),
+		WsFullApiUrl,
+		RpcFullApiUrl,
+	)
 }
 
 func (suite *commonTest) TearDownTest() {

@@ -15,8 +15,9 @@ import (
 const (
 	WsFullApiUrl = "wss://node.market.rudex.org"
 	//WsFullApiUrl = "wss://bitshares.openledger.info/ws"
-	WsTestApiUrl = "wss://node.testnet.bitshares.eu/ws"
-	RpcApiUrl    = "http://localhost:8095"
+	WsTestApiUrl  = "wss://node.testnet.bitshares.eu/ws"
+	RpcFullApiUrl = "http://localhost:8095"
+	RpcTestApiUrl = "http://localhost:8094"
 )
 
 var (
@@ -94,8 +95,8 @@ func CompareTransactions(api api.BitsharesAPI, tx *types.Transaction, debug bool
 	return ref, test, nil
 }
 
-func NewTestAPI(t *testing.T, wsAPIEndpoint string) api.BitsharesAPI {
-	api := api.New(wsAPIEndpoint, RpcApiUrl)
+func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.BitsharesAPI {
+	api := api.New(wsAPIEndpoint, rpcAPIEndpoint)
 	if err := api.Connect(); err != nil {
 		assert.FailNow(t, err.Error(), "Connect")
 	}
@@ -105,4 +106,16 @@ func NewTestAPI(t *testing.T, wsAPIEndpoint string) api.BitsharesAPI {
 	})
 
 	return api
+}
+
+func CreateRefTransaction(t *testing.T) *types.Transaction {
+	tx := types.NewTransaction()
+	tx.RefBlockNum = 34294
+	tx.RefBlockPrefix = 3707022213
+
+	if err := tx.Expiration.UnmarshalJSON([]byte(`"2030-04-06T08:29:27"`)); err != nil {
+		assert.FailNow(t, err.Error(), "Unmarshal expiration")
+	}
+
+	return tx
 }

@@ -21,27 +21,13 @@ type operationsAPITest struct {
 }
 
 func (suite *operationsAPITest) SetupTest() {
-	api := api.New(tests.WsFullApiUrl, tests.RpcApiUrl)
+	suite.TestAPI = tests.NewTestAPI(
+		suite.T(),
+		tests.WsFullApiUrl,
+		tests.RpcFullApiUrl,
+	)
 
-	if err := api.Connect(); err != nil {
-		suite.FailNow(err.Error(), "Connect")
-	}
-
-	api.OnError(func(err error) {
-		suite.FailNow(err.Error(), "OnError")
-	})
-
-	suite.TestAPI = api
-
-	tx := types.NewTransaction()
-	tx.RefBlockNum = 34294
-	tx.RefBlockPrefix = 3707022213
-
-	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
-		suite.FailNow(err.Error(), "Unmarshal expiration")
-	}
-
-	suite.RefTx = tx
+	suite.RefTx = tests.CreateRefTransaction(suite.T())
 }
 
 func (suite *operationsAPITest) TearDownTest() {

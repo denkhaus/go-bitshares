@@ -23,8 +23,11 @@ var (
 	ErrInvalidInputType             = fmt.Errorf("invalid input type")
 	ErrInvalidInputLength           = fmt.Errorf("invalid input length")
 	ErrInvalidPublicKey             = fmt.Errorf("invalid PublicKey")
-	ErrPublicKeyChainPrefixMismatch = fmt.Errorf("PublicKeychain prefix mismatch")
+	ErrInvalidAddress               = fmt.Errorf("invalid Address")
+	ErrPublicKeyChainPrefixMismatch = fmt.Errorf("PublicKey chain prefix mismatch")
+	ErrAddressChainPrefixMismatch   = fmt.Errorf("Address chain prefix mismatch")
 	ErrInvalidChecksum              = fmt.Errorf("invalid checksum")
+	ErrNoSigningKeyFound            = fmt.Errorf("no signing key found")
 )
 
 var (

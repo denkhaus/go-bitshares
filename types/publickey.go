@@ -53,6 +53,10 @@ func (p PublicKey) Marshal(enc *util.TypeEncoder) error {
 	return enc.Encode(p.Bytes())
 }
 
+func (p *PublicKey) ToAddress() (*Address, error) {
+	return NewAddress(p)
+}
+
 func (p PublicKey) Bytes() []byte {
 	return p.key.SerializeCompressed()
 }

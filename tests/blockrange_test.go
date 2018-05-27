@@ -14,7 +14,7 @@ import (
 )
 
 func TestBlockRange(t *testing.T) {
-	api := NewTestAPI(t, WsFullApiUrl)
+	api := NewTestAPI(t, WsFullApiUrl, RpcFullApiUrl)
 	defer api.Close()
 
 	block := uint64(26878913)

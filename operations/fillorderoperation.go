@@ -32,7 +32,7 @@ func (p FillOrderOperation) Type() types.OperationType {
 	return types.OperationTypeFillOrder
 }
 
-//TODO: validate encode order!
+//TODO: something is still wrong here!
 
 func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {

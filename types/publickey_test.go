@@ -3,6 +3,7 @@ package types
 import (
 	"testing"
 
+	"github.com/denkhaus/bitshares/config"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,6 +17,7 @@ var keys = []string{
 }
 
 func TestNewPublicKey(t *testing.T) {
+	config.SetCurrentConfig(config.ChainIDBTS)
 	for _, k := range keys {
 		key, err := NewPublicKeyFromString(k)
 		if err != nil {

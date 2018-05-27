@@ -214,13 +214,9 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) (types.
 
 	p.Debug("list_account_balances <", resp)
 
-	data := resp.([]interface{})
-	ret := make(types.AssetAmounts, len(data))
-
-	for idx, a := range data {
-		if err := ffjson.Unmarshal(util.ToBytes(a), &ret[idx]); err != nil {
-			return nil, errors.Annotate(err, "unmarshal AssetAmount")
-		}
+	ret := types.AssetAmounts{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
 	return ret, nil
@@ -244,4 +240,31 @@ func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, erro
 	p.Debug("serialize_transaction <", resp)
 
 	return resp.(string), nil
+}
+
+// SignTransaction signs a transaction
+// @param tx the transaction to sign
+// @param broadcast bool defines if the transaction should be broadcasted
+// Returns the signed transaction.
+func (p *bitsharesAPI) WalletSignTransaction(tx *types.Transaction, broadcast bool) (*types.Transaction, error) {
+	defer p.SetDebug(false)
+
+	if p.rpcClient == nil {
+		return nil, types.ErrRPCClientNotInitialized
+	}
+
+	resp, err := p.rpcClient.CallAPI("sign_transaction", tx, broadcast)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Debug("wallet sign_transaction <", resp)
+
+	ret := types.Transaction{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Transaction")
+	}
+
+	return &ret, nil
+
 }

@@ -38,8 +38,11 @@ type BitsharesAPI interface {
 	SetCredentials(username, password string)
 	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
-	SignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
+	BuildAndSignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
+	SignTransaction(keyBag *crypto.KeyBag, trx *types.Transaction) (*types.Transaction, error)
+
 	//Websocket API functions
+	BroadcastTransaction(tx *types.Transaction) (string, error)
 	CancelAllSubscriptions() error
 	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error)
 	GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error)
@@ -71,6 +74,7 @@ type BitsharesAPI interface {
 	Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error)
 	SellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error)
 	SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error)
+	WalletSignTransaction(tx *types.Transaction, broadcast bool) (*types.Transaction, error)
 	SerializeTransaction(tx *types.Transaction) (string, error)
 }
 
@@ -174,8 +178,31 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *types.Transaction) (string, erro
 	return resp.(string), nil
 }
 
-//SignTransaction creates a new Transaction by the given operations applies fees, current block data and signes the transaction wit the
-func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
+//SignTransaction signes a given transaction assuming valid block properties and fees.
+func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (*types.Transaction, error) {
+	defer p.SetDebug(false)
+
+	pubKeys, err := p.GetPotentialSignatures(tx)
+	if err != nil {
+		return nil, errors.Annotate(err, "GetPotentialSignatures")
+	}
+
+	p.Debug("potential pubkeys <", pubKeys)
+
+	signedTrx := crypto.NewSignedTransaction(tx)
+	privKeys := keyBag.GetPotentialPrivKeys(pubKeys)
+
+	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
+		return nil, errors.Annotate(err, "Sign")
+	}
+
+	return tx, nil
+
+}
+
+//BuildAndSignTransaction builds a new Transaction by the given operation(s), applies fees, current block data and signes the transaction.
+func (p *bitsharesAPI) BuildAndSignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
+	defer p.SetDebug(false)
 
 	operations := types.Operations(ops)
 	fees, err := p.GetRequiredFees(operations, feeAsset)
@@ -204,10 +231,14 @@ func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, feeAsset types.Gra
 		return nil, errors.Annotate(err, "GetPotentialSignatures")
 	}
 
-	util.DumpJSON("potential pubkeys >", pubKeys)
+	p.Debug("potential pubkeys <", pubKeys)
 
 	signedTrx := crypto.NewSignedTransaction(tx)
+
 	privKeys := keyBag.GetPotentialPrivKeys(pubKeys)
+	if len(privKeys) == 0 {
+		return nil, types.ErrNoSigningKeyFound
+	}
 
 	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
 		return nil, errors.Annotate(err, "Sign")

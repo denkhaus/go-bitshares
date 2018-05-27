@@ -32,7 +32,11 @@ type subscribeTest struct {
 }
 
 func (suite *subscribeTest) SetupTest() {
-	suite.TestAPI = NewTestAPI(suite.T(), WsFullApiUrl)
+	suite.TestAPI = NewTestAPI(
+		suite.T(),
+		WsFullApiUrl,
+		RpcFullApiUrl,
+	)
 }
 
 func (suite *subscribeTest) TearDown() {

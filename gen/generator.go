@@ -66,7 +66,7 @@ func main() {
 
 	defer close(genChan)
 
-	api := api.New(tests.WsFullApiUrl, tests.RpcApiUrl)
+	api := api.New(tests.WsFullApiUrl, tests.RpcFullApiUrl)
 	if err := api.Connect(); err != nil {
 		handleError(errors.Annotate(err, "Connect"))
 	}

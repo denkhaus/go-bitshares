@@ -43,8 +43,10 @@ func (p PrivateKey) Bytes() []byte {
 }
 
 func (p PrivateKey) SharedSecret(pub *PublicKey, skLen, macLen int) (sk []byte, err error) {
-	pk := pub.ToECDSA()
-	if p.priv.PublicKey.Curve != pk.Curve {
+	puk := pub.ToECDSA()
+	pvk := p.priv
+
+	if pvk.PublicKey.Curve != puk.Curve {
 		return nil, ErrInvalidCurve
 	}
 
@@ -52,7 +54,7 @@ func (p PrivateKey) SharedSecret(pub *PublicKey, skLen, macLen int) (sk []byte, 
 		return nil, ErrSharedKeyTooBig
 	}
 
-	x, _ := pk.Curve.ScalarMult(pk.X, pk.Y, p.priv.D.Bytes())
+	x, _ := puk.Curve.ScalarMult(puk.X, puk.Y, pvk.D.Bytes())
 	if x == nil {
 		return nil, ErrSharedKeyIsPointAtInfinity
 	}
