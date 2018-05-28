@@ -4,8 +4,11 @@ import (
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
+	"github.com/denkhaus/bitshares/operations"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -20,10 +23,10 @@ func (suite *transactionsAPITest) SetupTest() {
 	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl, RpcTestApiUrl)
 	suite.KeyBag = crypto.NewKeyBag()
 
-	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
+	if err := suite.KeyBag.Add(TestAccount1PrivKeyOwner); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 1")
 	}
-	if err := suite.KeyBag.Add(TestAccount2PrivKey); err != nil {
+	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 2")
 	}
 
@@ -50,29 +53,28 @@ func (suite *transactionsAPITest) Test_ChainConfig() {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(ChainIDBitSharesTest, res)
+	suite.Equal(config.ChainIDTest, res)
 }
 
-// func (suite *transactionsAPITest) Test_BuildAndSignTransaction() {
-// 	op := operations.TransferOperation{
-// 		Extensions: types.Extensions{},
-// 		Amount: types.AssetAmount{
-// 			Amount: 1000,
-// 			Asset:  *AssetTEST,
-// 		},
-// 		From: *TestAccount1ID,
-// 		To:   *TestAccount2ID,
-// 	}
+func (suite *transactionsAPITest) Test_BuildSignedTransaction() {
+	op := operations.TransferOperation{
+		Extensions: types.Extensions{},
+		Amount: types.AssetAmount{
+			Amount: 1000,
+			Asset:  *AssetTEST,
+		},
+		From: *TestAccount1ID,
+		To:   *TestAccount2ID,
+	}
 
-// 	trx, err := suite.TestAPI.BuildAndSignTransaction(suite.KeyBag, AssetTEST, &op)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "BuildAndSignTransaction")
-// 	}
+	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	if err != nil {
+		suite.FailNow(err.Error(), "BuildSignedTransaction")
+	}
 
-// 	//util.Dump("signed trx <", trx)
-
-// 	suite.compareTransaction(trx, false)
-// }
+	//util.Dump("signed trx <", trx)
+	suite.compareTransaction(trx, false)
+}
 
 // func (suite *transactionsAPITest) Test_SignTransactionCompare() {
 
@@ -118,53 +120,81 @@ func (suite *transactionsAPITest) Test_ChainConfig() {
 // 	//suite.Equal(sigWallet[0], trxWs.Signatures[0])
 // }
 
-// func (suite *transactionsAPITest) Test_Transfer() {
-// 	op := operations.TransferOperation{
-// 		Extensions: types.Extensions{},
-// 		Amount: types.AssetAmount{
-// 			Amount: 1000,
-// 			Asset:  *AssetTEST,
-// 		},
-// 		From: *TestAccount1ID,
-// 		To:   *TestAccount2ID,
-// 	}
+func (suite *transactionsAPITest) Test_SignAndVerify() {
+	op := operations.TransferOperation{
+		Extensions: types.Extensions{},
+		Amount: types.AssetAmount{
+			Amount: 1000,
+			Asset:  *AssetTEST,
+		},
+		From: *TestAccount1ID,
+		To:   *TestAccount2ID,
+	}
 
-// 	trx, err := suite.TestAPI.BuildAndSignTransaction(suite.KeyBag, AssetTEST, &op)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "BuildAndSignTransaction")
-// 	}
+	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	if err != nil {
+		suite.FailNow(err.Error(), "BuildSignedTransaction")
+	}
 
-// 	//suite.TestAPI.SetDebug(true)
-// 	res, err := suite.TestAPI.BroadcastTransaction(trx)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "BroadcastTransaction")
-// 	}
+	suite.compareTransaction(trx, false)
 
-// 	util.Dump("transfer <", res)
+	v, err := suite.TestAPI.VerifySignedTransaction(suite.KeyBag, trx)
+	if err != nil {
+		suite.FailNow(err.Error(), "VerifySignedTransaction")
+	}
 
-// }
+	suite.True(v, "Verified")
+}
 
-// func (suite *transactionsAPITest) Test_GetAccountBalances() {
-// 	res, err := suite.TestAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "GetAccountBalances 1")
-// 	}
+func (suite *transactionsAPITest) Test_Transfer() {
+	op := operations.TransferOperation{
+		Extensions: types.Extensions{},
+		Amount: types.AssetAmount{
+			Amount: 1000,
+			Asset:  *AssetTEST,
+		},
+		From: *TestAccount1ID,
+		To:   *TestAccount2ID,
+	}
 
-// 	suite.NotNil(res)
-// 	suite.Len(res, 1)
+	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	if err != nil {
+		suite.FailNow(err.Error(), "BuildSignedTransaction")
+	}
 
-// 	//util.Dump("test amount TestAccount1 >", res)
+	suite.compareTransaction(trx, false)
 
-// 	res, err = suite.TestAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "GetAccountBalances 2")
-// 	}
+	suite.TestAPI.SetDebug(true)
+	res, err := suite.TestAPI.BroadcastTransaction(trx)
+	if err != nil {
+		suite.FailNow(err.Error(), "BroadcastTransaction")
+	}
 
-// 	suite.NotNil(res)
-// 	suite.Len(res, 1)
+	util.Dump("transfer <", res)
 
-// 	//util.Dump("test amount TestAccount2 >", res)
-// }
+}
+
+func (suite *transactionsAPITest) Test_GetAccountBalances() {
+	res, err := suite.TestAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetAccountBalances 1")
+	}
+
+	suite.NotNil(res)
+	suite.Len(res, 1)
+
+	//util.Dump("test amount TestAccount1 >", res)
+
+	res, err = suite.TestAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetAccountBalances 2")
+	}
+
+	suite.NotNil(res)
+	suite.Len(res, 1)
+
+	//util.Dump("test amount TestAccount2 >", res)
+}
 
 func (suite *transactionsAPITest) compareTransaction(tx *types.Transaction, debug bool) {
 	ref, test, err := CompareTransactions(suite.TestAPI, tx, debug)

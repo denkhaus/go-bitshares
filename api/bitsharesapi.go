@@ -38,7 +38,8 @@ type BitsharesAPI interface {
 	SetCredentials(username, password string)
 	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
-	BuildAndSignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
+	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
+	VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (bool, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.Transaction) (*types.Transaction, error)
 
 	//Websocket API functions
@@ -190,7 +191,7 @@ func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.Transact
 	p.Debug("potential pubkeys <", pubKeys)
 
 	signedTrx := crypto.NewSignedTransaction(tx)
-	privKeys := keyBag.GetPotentialPrivKeys(pubKeys)
+	privKeys := keyBag.PrivateKeys(pubKeys)
 
 	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
 		return nil, errors.Annotate(err, "Sign")
@@ -200,8 +201,28 @@ func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.Transact
 
 }
 
-//BuildAndSignTransaction builds a new Transaction by the given operation(s), applies fees, current block data and signes the transaction.
-func (p *bitsharesAPI) BuildAndSignTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
+func (p *bitsharesAPI) VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (bool, error) {
+	defer p.SetDebug(false)
+
+	pubKeys, err := p.GetPotentialSignatures(tx)
+	if err != nil {
+		return false, errors.Annotate(err, "GetPotentialSignatures")
+	}
+
+	p.Debug("potential pubkeys <", pubKeys)
+
+	signedTrx := crypto.NewSignedTransaction(tx)
+
+	pk := keyBag.PublicKeys(pubKeys)
+	if len(pk) == 0 {
+		return false, types.ErrNoVerifyingKeyFound
+	}
+
+	return signedTrx.Verify(pk, config.CurrentConfig())
+}
+
+//BuilSignedTransaction builds a new Transaction by the given operation(s), applies fees, current block data and signes the transaction.
+func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
 	defer p.SetDebug(false)
 
 	operations := types.Operations(ops)
@@ -235,7 +256,7 @@ func (p *bitsharesAPI) BuildAndSignTransaction(keyBag *crypto.KeyBag, feeAsset t
 
 	signedTrx := crypto.NewSignedTransaction(tx)
 
-	privKeys := keyBag.GetPotentialPrivKeys(pubKeys)
+	privKeys := keyBag.PrivateKeys(pubKeys)
 	if len(privKeys) == 0 {
 		return nil, types.ErrNoSigningKeyFound
 	}

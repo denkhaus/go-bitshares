@@ -29,6 +29,7 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 	}
 
 	priv := w.PrivKey
+	raw := base58.Decode(wifPrivateKey)
 	pub, err := NewPublicKey(priv.PubKey())
 	if err != nil {
 		return nil, errors.Annotate(err, "NewPublicKey")
@@ -36,7 +37,7 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 
 	k := PrivateKey{
 		priv: priv,
-		raw:  base58.Decode(wifPrivateKey),
+		raw:  raw,
 		pub:  pub,
 	}
 
@@ -46,6 +47,7 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 func (p PrivateKey) PublicKey() *PublicKey {
 	return p.pub
 }
+
 func (p PrivateKey) Bytes() []byte {
 	return p.priv.Serialize()
 }
@@ -53,6 +55,7 @@ func (p PrivateKey) Bytes() []byte {
 func (p PrivateKey) BytesRaw() []byte {
 	return p.raw
 }
+
 func (p PrivateKey) ToHex() string {
 	return hex.EncodeToString(p.raw)
 }

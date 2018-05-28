@@ -36,8 +36,15 @@ func NewSignedTransaction(tx *types.Transaction) *SignedTransaction {
 }
 
 func (tx *SignedTransaction) Serialize() ([]byte, error) {
-	var b bytes.Buffer
+	//remove signatures before serializing
+	sigTemp := tx.Signatures
+	tx.Signatures = types.Signatures{}
+	defer func() {
+		//and restore
+		tx.Signatures = sigTemp
+	}()
 
+	var b bytes.Buffer
 	enc := util.NewTypeEncoder(&b)
 	if err := enc.Encode(tx.Transaction); err != nil {
 		return nil, errors.Annotate(err, "encode transaction")
@@ -59,18 +66,11 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 		return nil, errors.Annotate(err, "failed to write chain ID")
 	}
 
-	//remove signatures while serializing
-	sigTemp := tx.Signatures
-	tx.Signatures = types.Signatures{}
-
 	// Write the serialized transaction.
 	rawTx, err := tx.Serialize()
 	if err != nil {
 		return nil, errors.Annotate(err, "Serialize")
 	}
-
-	//restore signatures
-	tx.Signatures = sigTemp
 
 	if _, err := msgBuffer.Write(rawTx); err != nil {
 		return nil, errors.Annotate(err, "failed to write serialized transaction")
@@ -136,7 +136,7 @@ func (tx *SignedTransaction) Verify(pubKeys [][]byte, chain *config.ChainConfig)
 	// Compute the digest, again.
 	digest, err := tx.Digest(chain)
 	if err != nil {
-		return false, err
+		return false, errors.Annotate(err, "Digest")
 	}
 
 	cDigest := C.CBytes(digest)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
 
@@ -37,7 +38,7 @@ func (suite *commonTest) Test_GetChainID() {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(res, ChainIDBitSharesFull)
+	suite.Equal(res, config.ChainIDBTS)
 }
 
 func (suite *commonTest) Test_GetAccountBalances() {

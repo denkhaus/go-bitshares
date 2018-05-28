@@ -28,6 +28,7 @@ var (
 	ErrAddressChainPrefixMismatch   = fmt.Errorf("Address chain prefix mismatch")
 	ErrInvalidChecksum              = fmt.Errorf("invalid checksum")
 	ErrNoSigningKeyFound            = fmt.Errorf("no signing key found")
+	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
 )
 
 var (
@@ -495,14 +496,9 @@ func (p *Buffer) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "Unmarshal")
 	}
 
-	buf, err := hex.DecodeString(b)
-	if err != nil {
-		return errors.Annotate(err, "DecodeString")
-	}
-
-	*p = buf
-	return nil
+	return p.FromString(b)
 }
+
 func (p Buffer) Byte() []byte {
 	return p
 }
@@ -510,6 +506,7 @@ func (p Buffer) Byte() []byte {
 func (p Buffer) Length() int {
 	return len(p)
 }
+
 func (p Buffer) String() string {
 	return hex.EncodeToString(p)
 }
@@ -539,12 +536,9 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-func BufferFromString(data string) (Buffer, error) {
-	buf, err := hex.DecodeString(data)
-	if err != nil {
-		return nil, errors.Annotate(err, "DecodeString")
-	}
 
-	b := Buffer(buf)
-	return b, nil
+func BufferFromString(data string) (b Buffer, err error) {
+	b = Buffer{}
+	err = b.FromString(data)
+	return
 }

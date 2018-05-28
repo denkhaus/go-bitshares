@@ -11,7 +11,7 @@ import (
 
 // KeyBag holds private keys in memory, for signing transactions.
 type KeyBag struct {
-	keys []*types.PrivateKey `json:"keys"`
+	keys []*types.PrivateKey
 }
 
 func NewKeyBag() *KeyBag {
@@ -64,12 +64,26 @@ func (b KeyBag) AvailableKeys() (out []*types.PublicKey) {
 	return
 }
 
-func (b KeyBag) GetPotentialPrivKeys(pubKeys types.PublicKeys) [][]byte {
+func (b KeyBag) PrivateKeys(pubKeys types.PublicKeys) [][]byte {
 	ret := make([][]byte, 0)
 	for _, pub := range pubKeys {
 		for _, k := range b.keys {
 			if pub.Equal(k.PublicKey()) {
-				ret = append(ret, k.BytesRaw())
+				ret = append(ret, k.Bytes())
+			}
+		}
+	}
+
+	return ret
+}
+
+func (b KeyBag) PublicKeys(pubKeys types.PublicKeys) [][]byte {
+	ret := make([][]byte, 0)
+	for _, pub := range pubKeys {
+		for _, k := range b.keys {
+			p := k.PublicKey()
+			if pub.Equal(p) {
+				ret = append(ret, p.Bytes())
 			}
 		}
 	}

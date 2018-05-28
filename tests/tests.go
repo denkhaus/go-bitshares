@@ -21,30 +21,28 @@ const (
 )
 
 var (
-	ChainIDBitSharesFull = "4018d7844c78f6a6c41c6a552b898022310fc5dec06da467ee7905a8dad512c8"
-	ChainIDBitSharesTest = "39f5e2ede1f8bc1a3a54a7914414e3779e33193f1f5693510e73cb7a87617447"
-	UserID1              = types.NewGrapheneID("1.2.282")  //xeroc user account
-	UserID2              = types.NewGrapheneID("1.2.253")  //stan user account
-	UserID3              = types.NewGrapheneID("1.2.0")    //committee-account user account
-	UserID4              = types.NewGrapheneID("1.2.1751") //denkhaus user account
-	AssetCNY             = types.NewGrapheneID("1.3.113")  //cny asset
-	AssetBTS             = types.NewGrapheneID("1.3.0")    //bts asset
-	AssetUSD             = types.NewGrapheneID("1.3.121")  // usd asset
-	AssetTEST            = types.NewGrapheneID("1.3.0")    // test asset
-	AssetPEGFAKEUSD      = types.NewGrapheneID("1.3.22")   // test asset
-	AssetBTC             = types.NewGrapheneID("1.3.103")
-	AssetSILVER          = types.NewGrapheneID("1.3.105")
-	AssetGOLD            = types.NewGrapheneID("1.3.106")
-	AssetEUR             = types.NewGrapheneID("1.3.120")
-	AssetOBITS           = types.NewGrapheneID("1.3.562")
-	AssetOpenETH         = types.NewGrapheneID("1.3.850")
-	AssetOpenLTC         = types.NewGrapheneID("1.3.859")
-	AssetOpenBTC         = types.NewGrapheneID("1.3.861")
-	AssetOpenSTEEM       = types.NewGrapheneID("1.3.973")
-	AssetOpenUSDT        = types.NewGrapheneID("1.3.1042")
-	AssetYOYOW           = types.NewGrapheneID("1.3.1093")
-	AssetRUBEL           = types.NewGrapheneID("1.3.1325")
-	AssetHERO            = types.NewGrapheneID("1.3.1362")
+	UserID1         = types.NewGrapheneID("1.2.282")  //xeroc user account
+	UserID2         = types.NewGrapheneID("1.2.253")  //stan user account
+	UserID3         = types.NewGrapheneID("1.2.0")    //committee-account user account
+	UserID4         = types.NewGrapheneID("1.2.1751") //denkhaus user account
+	AssetCNY        = types.NewGrapheneID("1.3.113")  //cny asset
+	AssetBTS        = types.NewGrapheneID("1.3.0")    //bts asset
+	AssetUSD        = types.NewGrapheneID("1.3.121")  // usd asset
+	AssetTEST       = types.NewGrapheneID("1.3.0")    // test asset
+	AssetPEGFAKEUSD = types.NewGrapheneID("1.3.22")   // test asset
+	AssetBTC        = types.NewGrapheneID("1.3.103")
+	AssetSILVER     = types.NewGrapheneID("1.3.105")
+	AssetGOLD       = types.NewGrapheneID("1.3.106")
+	AssetEUR        = types.NewGrapheneID("1.3.120")
+	AssetOBITS      = types.NewGrapheneID("1.3.562")
+	AssetOpenETH    = types.NewGrapheneID("1.3.850")
+	AssetOpenLTC    = types.NewGrapheneID("1.3.859")
+	AssetOpenBTC    = types.NewGrapheneID("1.3.861")
+	AssetOpenSTEEM  = types.NewGrapheneID("1.3.973")
+	AssetOpenUSDT   = types.NewGrapheneID("1.3.1042")
+	AssetYOYOW      = types.NewGrapheneID("1.3.1093")
+	AssetRUBEL      = types.NewGrapheneID("1.3.1325")
+	AssetHERO       = types.NewGrapheneID("1.3.1362")
 
 	SettleOrder1      = types.NewGrapheneID("1.4.1655")       // random SettleOrder ObjectID
 	CommiteeMember1   = types.NewGrapheneID("1.5.15")         // random CommiteeMember ObjectID
