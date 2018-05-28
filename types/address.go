@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"crypto/sha512"
 	"fmt"
 
 	"github.com/btcsuite/btcutil/base58"
@@ -53,12 +54,8 @@ func (p Address) Bytes() []byte {
 }
 
 func NewAddress(pub *PublicKey) (*Address, error) {
-	buf512, err := util.Sha512(pub.Bytes())
-	if err != nil {
-		return nil, errors.Annotate(err, "Sha512")
-	}
-
-	data, err := util.Ripemd160(buf512)
+	buf512 := sha512.Sum512(pub.Bytes())
+	data, err := util.Ripemd160(buf512[:])
 	if err != nil {
 		return nil, errors.Annotate(err, "Ripemd160")
 	}

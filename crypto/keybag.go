@@ -69,7 +69,7 @@ func (b KeyBag) GetPotentialPrivKeys(pubKeys types.PublicKeys) [][]byte {
 	for _, pub := range pubKeys {
 		for _, k := range b.keys {
 			if pub.Equal(k.PublicKey()) {
-				ret = append(ret, k.Bytes())
+				ret = append(ret, k.BytesRaw())
 			}
 		}
 	}

@@ -5,13 +5,12 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/pquerna/ffjson/ffjson"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 type PublicKeys []PublicKey
@@ -118,16 +117,20 @@ func NewPublicKeyFromString(key string) (*PublicKey, error) {
 	return &k, nil
 }
 
-func NewPublicKey(pub *btcec.PublicKey) *PublicKey {
+func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	buf := pub.SerializeCompressed()
-	chk1 := buf[len(buf)-4:]
 	cnf := config.CurrentConfig()
+
+	chk, err := util.Ripemd160Checksum(buf)
+	if err != nil {
+		return nil, errors.Annotate(err, "Ripemd160Checksum")
+	}
 
 	k := PublicKey{
 		key:      pub,
 		prefix:   cnf.Prefix(),
-		checksum: chk1,
+		checksum: chk,
 	}
 
-	return &k
+	return &k, nil
 }

@@ -59,11 +59,18 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 		return nil, errors.Annotate(err, "failed to write chain ID")
 	}
 
+	//remove signatures while serializing
+	sigTemp := tx.Signatures
+	tx.Signatures = types.Signatures{}
+
 	// Write the serialized transaction.
 	rawTx, err := tx.Serialize()
 	if err != nil {
 		return nil, errors.Annotate(err, "Serialize")
 	}
+
+	//restore signatures
+	tx.Signatures = sigTemp
 
 	if _, err := msgBuffer.Write(rawTx); err != nil {
 		return nil, errors.Annotate(err, "failed to write serialized transaction")

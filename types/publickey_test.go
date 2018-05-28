@@ -14,6 +14,11 @@ var keys = []string{
 	"BTS6iUXJDmAPNbHWHtDDcmPTQ6F3nMBqi6pUHdhSkzWNd6grob2JP",
 	"BTS5KCRzL27VLBvhPJ1DaXViuUPxyEXjDvVtWaifUkouNr2MkMGSH",
 	"BTS6ThjMq97v6dLQUAmdsZfWG9ENq8nghVUhmLMQi52MDqXvtRGNc",
+	"BTS5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk",
+	"BTS5yXqEBShUgcVm7Mve8Fg4RzQ2ftPpmo77aMbz884eX9aeGVvwD",
+	"BTS5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP",
+	"BTS5shffTjVoT4J8Zrj3f2mQJw4UVKrnbx5FWYhVgov45EpBf2NYi",
+	"BTS56fy8qpkLzNoguGMPgPNkkznxnx2woEg1qPq7E6gF2SeGSRyK5",
 }
 
 func TestNewPublicKey(t *testing.T) {
@@ -24,6 +29,6 @@ func TestNewPublicKey(t *testing.T) {
 			assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
 		}
 
-		assert.Equal(t, key.String(), k)
+		assert.Equal(t, k, key.String())
 	}
 }

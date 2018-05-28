@@ -1,10 +1,12 @@
 package types
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/juju/errors"
 )
 
@@ -17,6 +19,7 @@ var (
 type PrivateKey struct {
 	priv *btcec.PrivateKey
 	pub  *PublicKey
+	raw  []byte
 }
 
 func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
@@ -26,9 +29,15 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 	}
 
 	priv := w.PrivKey
+	pub, err := NewPublicKey(priv.PubKey())
+	if err != nil {
+		return nil, errors.Annotate(err, "NewPublicKey")
+	}
+
 	k := PrivateKey{
 		priv: priv,
-		pub:  NewPublicKey(priv.PubKey()),
+		raw:  base58.Decode(wifPrivateKey),
+		pub:  pub,
 	}
 
 	return &k, nil
@@ -37,9 +46,15 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 func (p PrivateKey) PublicKey() *PublicKey {
 	return p.pub
 }
-
 func (p PrivateKey) Bytes() []byte {
 	return p.priv.Serialize()
+}
+
+func (p PrivateKey) BytesRaw() []byte {
+	return p.raw
+}
+func (p PrivateKey) ToHex() string {
+	return hex.EncodeToString(p.raw)
 }
 
 func (p PrivateKey) SharedSecret(pub *PublicKey, skLen, macLen int) (sk []byte, err error) {
