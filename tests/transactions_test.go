@@ -19,14 +19,15 @@ type transactionsAPITest struct {
 	RefTx   *types.Transaction
 }
 
-func (suite *transactionsAPITest) SetupTest() {
+func (suite *transactionsAPITest) SetupSuite() {
 	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl, RpcTestApiUrl)
-	suite.KeyBag = crypto.NewKeyBag()
 
-	if err := suite.KeyBag.Add(TestAccount1PrivKeyOwner); err != nil {
+	suite.KeyBag = crypto.NewKeyBag()
+	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 1")
 	}
-	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
+
+	if err := suite.KeyBag.Add(TestAccount2PrivKeyActive); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 2")
 	}
 
@@ -37,7 +38,7 @@ func (suite *transactionsAPITest) SetupTest() {
 	}
 }
 
-func (suite *transactionsAPITest) TearDownTest() {
+func (suite *transactionsAPITest) TearDownSuite() {
 	if err := suite.TestAPI.WalletLock(); err != nil {
 		suite.FailNow(err.Error(), "WalletLock")
 	}

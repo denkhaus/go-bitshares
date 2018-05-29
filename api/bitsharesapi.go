@@ -185,37 +185,35 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *types.Transaction) (string, erro
 func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (*types.Transaction, error) {
 	defer p.SetDebug(false)
 
-	pubKeys, err := p.GetPotentialSignatures(tx)
+	reqPk, err := p.RequiredSigningKeys(tx)
 	if err != nil {
-		return nil, errors.Annotate(err, "GetPotentialSignatures")
+		return nil, errors.Annotate(err, "RequiredSigningKeys")
 	}
 
-	p.Debug("potential pubkeys <", pubKeys)
-
 	signedTrx := crypto.NewSignedTransaction(tx)
-	privKeys := keyBag.PrivateKeys(pubKeys)
+	privKeys := keyBag.PrivateKeys(reqPk)
+	if len(privKeys) == 0 {
+		return nil, types.ErrNoSigningKeyFound
+	}
 
 	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
 		return nil, errors.Annotate(err, "Sign")
 	}
 
 	return tx, nil
-
 }
 
 func (p *bitsharesAPI) VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (bool, error) {
 	defer p.SetDebug(false)
 
-	pubKeys, err := p.GetPotentialSignatures(tx)
+	reqPk, err := p.RequiredSigningKeys(tx)
 	if err != nil {
-		return false, errors.Annotate(err, "GetPotentialSignatures")
+		return false, errors.Annotate(err, "RequiredSigningKeys")
 	}
-
-	p.Debug("potential pubkeys <", pubKeys)
 
 	signedTrx := crypto.NewSignedTransaction(tx)
 
-	pk := keyBag.PublicKeys(pubKeys)
+	pk := keyBag.PublicKeys(reqPk)
 	if len(pk) == 0 {
 		return false, types.ErrNoVerifyingKeyFound
 	}
@@ -249,6 +247,28 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 
 	tx.Operations = operations
 
+	reqPk, err := p.RequiredSigningKeys(tx)
+	if err != nil {
+		return nil, errors.Annotate(err, "RequiredSigningKeys")
+	}
+
+	signedTrx := crypto.NewSignedTransaction(tx)
+
+	privKeys := keyBag.PrivateKeys(reqPk)
+	if len(privKeys) == 0 {
+		return nil, types.ErrNoSigningKeyFound
+	}
+
+	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
+		return nil, errors.Annotate(err, "Sign")
+	}
+
+	return tx, nil
+}
+
+func (p *bitsharesAPI) RequiredSigningKeys(tx *types.Transaction) (types.PublicKeys, error) {
+	defer p.SetDebug(false)
+
 	potPk, err := p.GetPotentialSignatures(tx)
 	if err != nil {
 		return nil, errors.Annotate(err, "GetPotentialSignatures")
@@ -263,18 +283,7 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 
 	p.Debug("required pubkeys <", reqPk)
 
-	signedTrx := crypto.NewSignedTransaction(tx)
-
-	privKeys := keyBag.PrivateKeys(reqPk)
-	if len(privKeys) == 0 {
-		return nil, types.ErrNoSigningKeyFound
-	}
-
-	if err := signedTrx.Sign(privKeys, config.CurrentConfig()); err != nil {
-		return nil, errors.Annotate(err, "Sign")
-	}
-
-	return tx, nil
+	return reqPk, nil
 }
 
 //GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.

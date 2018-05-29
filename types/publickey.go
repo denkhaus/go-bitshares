@@ -9,6 +9,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/util"
+	sort "github.com/emirpasic/gods/utils"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -133,4 +134,18 @@ func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	}
 
 	return &k, nil
+}
+
+func publicKeyComparator(key1, key2 *PublicKey) (int, error) {
+	addr1, err := key1.ToAddress()
+	if err != nil {
+		return 0, errors.Annotate(err, "ToAddress 1")
+	}
+
+	addr2, err := key2.ToAddress()
+	if err != nil {
+		return 0, errors.Annotate(err, "ToAddress 2")
+	}
+
+	return sort.StringComparator(addr1.String(), addr2.String()), nil
 }
