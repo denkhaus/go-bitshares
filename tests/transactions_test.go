@@ -171,7 +171,6 @@ func (suite *transactionsAPITest) Test_Transfer() {
 	}
 
 	util.Dump("transfer <", res)
-
 }
 
 func (suite *transactionsAPITest) Test_GetAccountBalances() {

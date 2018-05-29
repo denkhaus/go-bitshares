@@ -53,7 +53,7 @@ func (suite *operationsAPITest) Test_SerializeTransaction() {
 	}
 
 	suite.NotNil(hex)
-	suite.Equal("f68585abf4dce7c80457000000", hex)
+	suite.Equal("f68585abf4dc678e5971000000", hex)
 }
 
 func (suite *operationsAPITest) compareTransaction(tx *types.Transaction, debug bool) {
