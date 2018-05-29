@@ -57,6 +57,8 @@ type BitsharesAPI interface {
 	GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error)
 	GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error)
 	GetObjects(objectIDs ...types.GrapheneObject) ([]interface{}, error)
+	GetPotentialSignatures(tx *types.Transaction) (types.PublicKeys, error)
+	GetRequiredSignatures(tx *types.Transaction, keys types.PublicKeys) (types.PublicKeys, error)
 	GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
@@ -247,16 +249,23 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 
 	tx.Operations = operations
 
-	pubKeys, err := p.GetPotentialSignatures(tx)
+	potPk, err := p.GetPotentialSignatures(tx)
 	if err != nil {
 		return nil, errors.Annotate(err, "GetPotentialSignatures")
 	}
 
-	p.Debug("potential pubkeys <", pubKeys)
+	p.Debug("potential pubkeys <", potPk)
+
+	reqPk, err := p.GetRequiredSignatures(tx, potPk)
+	if err != nil {
+		return nil, errors.Annotate(err, "GetRequiredSignatures")
+	}
+
+	p.Debug("required pubkeys <", reqPk)
 
 	signedTrx := crypto.NewSignedTransaction(tx)
 
-	privKeys := keyBag.PrivateKeys(pubKeys)
+	privKeys := keyBag.PrivateKeys(reqPk)
 	if len(privKeys) == 0 {
 		return nil, types.ErrNoSigningKeyFound
 	}
@@ -280,6 +289,24 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) (types.Publ
 	}
 
 	p.Debug("get_potential_signatures <", resp)
+
+	ret := types.PublicKeys{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal PublicKeys")
+	}
+
+	return ret, nil
+}
+
+func (p *bitsharesAPI) GetRequiredSignatures(tx *types.Transaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
+	defer p.SetDebug(false)
+
+	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_required_signatures", tx, potKeys)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Debug("get_required_signatures <", resp)
 
 	ret := types.PublicKeys{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {

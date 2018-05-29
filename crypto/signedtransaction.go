@@ -81,6 +81,33 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 	return digest[:], nil
 }
 
+func (tx *SignedTransaction) SignTest(privKeys [][]byte, chain *config.ChainConfig) error {
+	var buf bytes.Buffer
+	chainid, _ := hex.DecodeString(chain.ID())
+	//fmt.Println(tx.Operations[0])
+	//fmt.Println(" ")
+	txraw, err := tx.Serialize()
+	if err != nil {
+		return err
+	}
+	//fmt.Println(tx_raw)
+	//fmt.Println(" ")
+	buf.Write(chainid)
+	buf.Write(txraw)
+	data := buf.Bytes()
+	//msg_sha := crypto.Sha256(buf.Bytes())
+
+	var sigs types.Signatures
+
+	for _, privb := range privKeys {
+		sigBytes := tx.Sign_Single(privb, data)
+		sigs = append(sigs, types.Buffer(sigBytes))
+	}
+
+	tx.Transaction.Signatures = sigs
+	return nil
+}
+
 func (tx *SignedTransaction) Sign(privKeys [][]byte, chain *config.ChainConfig) error {
 	digest, err := tx.Digest(chain)
 	if err != nil {

@@ -164,7 +164,7 @@ func (suite *transactionsAPITest) Test_Transfer() {
 
 	suite.compareTransaction(trx, false)
 
-	suite.TestAPI.SetDebug(true)
+	//suite.TestAPI.SetDebug(true)
 	res, err := suite.TestAPI.BroadcastTransaction(trx)
 	if err != nil {
 		suite.FailNow(err.Error(), "BroadcastTransaction")

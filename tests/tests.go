@@ -61,11 +61,14 @@ var (
 	TestAccount1PrivKeyMemo   = "TEST5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk"
 	TestAccount1ID            = types.NewGrapheneID("1.2.3464")
 
-	TestAccount2UserName = "denk-baum"
-	TestAccount2Password = "denkhaus-testnet"
-	TestAccount2PubKey   = "TEST5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP"
-	TestAccount2PrivKey  = "5KRZv3ZmkcE71K9KwEKG6pV6pyufkMQgCJrCu8xKLf2y7R7J8YK"
-	TestAccount2ID       = types.NewGrapheneID("1.2.3496")
+	TestAccount2UserName      = "denk-baum"
+	TestAccount2Password      = "denkhaus-testnet"
+	TestAccount2PubKeyActive  = "TEST5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP"
+	TestAccount2PrivKeyActive = "5KRZv3ZmkcE71K9KwEKG6pV6pyufkMQgCJrCu8xKLf2y7R7J8YK"
+	TestAccount2PubKeyOwner   = "TEST8Yqc82JvQfThZJLSMKdhJ1ZhsT9L58tB47ETiJQrB1yg1ygtwu"
+	TestAccount2PrivKeyOwner  = "5K55UKUQicrdnNdnmfoSoW8zZNhCdkP2jcT73sLxn8tu8K2N58p"
+	TestAccount2PubKeyMemo    = "TEST5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP"
+	TestAccount2ID            = types.NewGrapheneID("1.2.3496")
 
 	TestAccount3UserName      = "bs-test"
 	TestAccount3Password      = "denkhaus-test"
