@@ -92,9 +92,9 @@ func NewAddressFromString(add string) (*Address, error) {
 	}
 
 	chk1 := b58[len(b58)-4:]
-	addBytes := b58[:len(b58)-4]
+	data := b58[:len(b58)-4]
 
-	chk2, err := util.Ripemd160Checksum(addBytes)
+	chk2, err := util.Ripemd160Checksum(data)
 	if err != nil {
 		return nil, errors.Annotate(err, "Ripemd160Checksum")
 	}
@@ -104,7 +104,7 @@ func NewAddressFromString(add string) (*Address, error) {
 	}
 
 	a := Address{
-		data:     addBytes,
+		data:     data,
 		prefix:   prefix,
 		checksum: chk1,
 	}

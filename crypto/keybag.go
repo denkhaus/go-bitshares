@@ -57,36 +57,30 @@ func (b *KeyBag) ImportFromFile(path string) error {
 	return nil
 }
 
-func (b KeyBag) AvailableKeys() (out []*types.PublicKey) {
+func (b KeyBag) Publics() (out types.PublicKeys) {
 	for _, k := range b.keys {
-		out = append(out, k.PublicKey())
+		pub := k.PublicKey()
+		out = append(out, *pub)
 	}
 	return
 }
+func (b KeyBag) Privates() (out types.PrivateKeys) {
+	for _, k := range b.keys {
+		priv := k
+		out = append(out, *priv)
+	}
 
-func (b KeyBag) PrivateKeys(pubKeys types.PublicKeys) [][]byte {
-	ret := make([][]byte, 0)
+	return
+}
+func (b KeyBag) PrivatesByPublics(pubKeys types.PublicKeys) (out types.PrivateKeys) {
 	for _, pub := range pubKeys {
 		for _, k := range b.keys {
 			if pub.Equal(k.PublicKey()) {
-				ret = append(ret, k.Bytes())
+				priv := k
+				out = append(out, *priv)
 			}
 		}
 	}
 
-	return ret
-}
-
-func (b KeyBag) PublicKeys(pubKeys types.PublicKeys) [][]byte {
-	ret := make([][]byte, 0)
-	for _, pub := range pubKeys {
-		for _, k := range b.keys {
-			p := k.PublicKey()
-			if pub.Equal(p) {
-				ret = append(ret, p.Bytes())
-			}
-		}
-	}
-
-	return ret
+	return
 }

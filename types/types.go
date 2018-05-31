@@ -29,6 +29,8 @@ var (
 	ErrInvalidChecksum              = fmt.Errorf("invalid checksum")
 	ErrNoSigningKeyFound            = fmt.Errorf("no signing key found")
 	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
+	ErrInvalidDigestLength          = fmt.Errorf("invalid digest length")
+	ErrInvalidPrivateKeyCurve       = fmt.Errorf("invalid PrivateKey curve")
 )
 
 var (
@@ -499,7 +501,7 @@ func (p *Buffer) UnmarshalJSON(data []byte) error {
 	return p.FromString(b)
 }
 
-func (p Buffer) Byte() []byte {
+func (p Buffer) Bytes() []byte {
 	return p
 }
 
@@ -530,7 +532,7 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode length")
 	}
 
-	if err := enc.Encode(p.Byte()); err != nil {
+	if err := enc.Encode(p.Bytes()); err != nil {
 		return errors.Annotate(err, "encode bytes")
 	}
 

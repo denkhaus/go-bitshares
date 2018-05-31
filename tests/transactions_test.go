@@ -64,8 +64,8 @@ func (suite *transactionsAPITest) Test_BuildSignedTransaction() {
 			Amount: 1000,
 			Asset:  *AssetTEST,
 		},
-		From: *TestAccount1ID,
-		To:   *TestAccount2ID,
+		From: *TestAccount2ID,
+		To:   *TestAccount1ID,
 	}
 
 	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -128,8 +128,8 @@ func (suite *transactionsAPITest) Test_SignAndVerify() {
 			Amount: 1000,
 			Asset:  *AssetTEST,
 		},
-		From: *TestAccount1ID,
-		To:   *TestAccount2ID,
+		From: *TestAccount2ID,
+		To:   *TestAccount1ID,
 	}
 
 	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -139,7 +139,7 @@ func (suite *transactionsAPITest) Test_SignAndVerify() {
 
 	suite.compareTransaction(trx, false)
 
-	v, err := suite.TestAPI.VerifySignedTransaction(suite.KeyBag, trx)
+	v, err := suite.TestAPI.VerifySignedTransaction(trx)
 	if err != nil {
 		suite.FailNow(err.Error(), "VerifySignedTransaction")
 	}
@@ -147,15 +147,43 @@ func (suite *transactionsAPITest) Test_SignAndVerify() {
 	suite.True(v, "Verified")
 }
 
-func (suite *transactionsAPITest) Test_Transfer() {
+// func (suite *transactionsAPITest) Test_TransferWebsocket() {
+// 	time.Sleep(3 * time.Second)
+// 	op := operations.TransferOperation{
+// 		Extensions: types.Extensions{},
+// 		Amount: types.AssetAmount{
+// 			Amount: 100000,
+// 			Asset:  *AssetTEST,
+// 		},
+// 		From: *TestAccount2ID,
+// 		To:   *TestAccount1ID,
+// 	}
+
+// 	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+// 	if err != nil {
+// 		suite.FailNow(err.Error(), "BuildSignedTransaction")
+// 	}
+
+// 	suite.compareTransaction(trx, false)
+
+// 	//suite.TestAPI.SetDebug(true)
+// 	res, err := suite.TestAPI.BroadcastTransaction(trx)
+// 	if err != nil {
+// 		suite.FailNow(err.Error(), "BroadcastTransaction")
+// 	}
+
+// 	util.Dump("transfer <", res)
+// }
+
+func (suite *transactionsAPITest) Test_TransferWallet() {
 	op := operations.TransferOperation{
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
-			Amount: 1000,
+			Amount: 100000,
 			Asset:  *AssetTEST,
 		},
-		From: *TestAccount1ID,
-		To:   *TestAccount2ID,
+		From: *TestAccount2ID,
+		To:   *TestAccount1ID,
 	}
 
 	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -165,8 +193,10 @@ func (suite *transactionsAPITest) Test_Transfer() {
 
 	suite.compareTransaction(trx, false)
 
+	trx.Signatures.Reset()
+
 	//suite.TestAPI.SetDebug(true)
-	res, err := suite.TestAPI.BroadcastTransaction(trx)
+	res, err := suite.TestAPI.WalletSignTransaction(trx, true)
 	if err != nil {
 		suite.FailNow(err.Error(), "BroadcastTransaction")
 	}

@@ -1,13 +1,10 @@
 package tests
 
 import (
-	"bytes"
-	"encoding/hex"
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -80,20 +77,13 @@ var (
 )
 
 func CompareTransactions(api api.BitsharesAPI, tx *types.Transaction, debug bool) (string, string, error) {
-	var buf bytes.Buffer
-	enc := util.NewTypeEncoder(&buf)
-	if err := enc.Encode(tx); err != nil {
-		return "", "", errors.Annotate(err, "Encode")
-	}
-
 	api.SetDebug(debug)
 	ref, err := api.SerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")
 	}
 
-	test := hex.EncodeToString(buf.Bytes())
-	return ref, test, nil
+	return ref, tx.ToHex(), nil
 }
 
 func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.BitsharesAPI {
@@ -114,7 +104,15 @@ func CreateRefTransaction(t *testing.T) *types.Transaction {
 	tx.RefBlockNum = 34294
 	tx.RefBlockPrefix = 3707022213
 
-	if err := tx.Expiration.UnmarshalJSON([]byte(`"2030-04-06T08:29:27"`)); err != nil {
+	//tm := time.Date(2016, 4, 6, 8, 29, 27, 0, time.UTC)
+	// tm, err := time.Parse(time.RFC3339, "2016-04-06T08:29:27")
+	// if err != nil {
+	// 	assert.FailNow(t, err.Error(), "Parse")
+	// }
+
+	//tx.Expiration = types.Time{tm}
+
+	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
 		assert.FailNow(t, err.Error(), "Unmarshal expiration")
 	}
 

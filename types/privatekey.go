@@ -1,6 +1,7 @@
 package types
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 
@@ -15,6 +16,8 @@ var (
 	ErrSharedKeyTooBig            = fmt.Errorf("shared key params are too big")
 	ErrSharedKeyIsPointAtInfinity = fmt.Errorf("shared key is point at infinity")
 )
+
+type PrivateKeys []PrivateKey
 
 type PrivateKey struct {
 	priv *btcec.PrivateKey
@@ -46,6 +49,14 @@ func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {
 
 func (p PrivateKey) PublicKey() *PublicKey {
 	return p.pub
+}
+
+func (p PrivateKey) ECPrivateKey() *btcec.PrivateKey {
+	return p.priv
+}
+
+func (p PrivateKey) ToECDSA() *ecdsa.PrivateKey {
+	return p.priv.ToECDSA()
 }
 
 func (p PrivateKey) Bytes() []byte {

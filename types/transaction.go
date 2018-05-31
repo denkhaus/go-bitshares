@@ -1,6 +1,8 @@
 package types
 
 import (
+	"bytes"
+	"encoding/hex"
 	"time"
 
 	"github.com/denkhaus/bitshares/util"
@@ -8,22 +10,6 @@ import (
 )
 
 //go:generate ffjson $GOFILE
-
-type Signatures []Buffer
-
-func (p Signatures) Marshal(enc *util.TypeEncoder) error {
-	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
-		return errors.Annotate(err, "encode length")
-	}
-
-	for _, sig := range p {
-		if err := enc.Encode(sig.Byte()); err != nil {
-			return errors.Annotate(err, "encode Signature")
-		}
-	}
-
-	return nil
-}
 
 const (
 	TxExpirationDefault = 30 * time.Second
@@ -91,8 +77,22 @@ func (p Transaction) Marshal(enc *util.TypeEncoder) error {
 func (p *Transaction) AdjustExpiration(dur time.Duration) {
 	p.Expiration = p.Expiration.Add(dur)
 }
+func (p Transaction) Bytes() []byte {
+	var b bytes.Buffer
 
-//NewTransactionWithBlockData creates a new Transaction and initialises
+	enc := util.NewTypeEncoder(&b)
+	if err := enc.Encode(p); err != nil {
+		panic(errors.Annotate(err, "Encode"))
+	}
+
+	return b.Bytes()
+}
+
+func (p Transaction) ToHex() string {
+	return hex.EncodeToString(p.Bytes())
+}
+
+//NewTransactionWithBlockData creates a new Transaction and initializes
 //relevant Blockdata fields and expiration.
 func NewTransactionWithBlockData(props *DynamicGlobalProperties) (*Transaction, error) {
 	prefix, err := props.RefBlockPrefix()
@@ -107,6 +107,7 @@ func NewTransactionWithBlockData(props *DynamicGlobalProperties) (*Transaction, 
 		Expiration:     props.Time.Add(TxExpirationDefault),
 		RefBlockPrefix: prefix,
 	}
+
 	return &tx, nil
 }
 
