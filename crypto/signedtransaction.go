@@ -7,13 +7,13 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"time"
 	"unsafe"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 
 	"github.com/juju/errors"
 )
@@ -74,12 +74,12 @@ func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 
 	// Compute the digest.
 	digest := sha256.Sum256(msgBuffer.Bytes())
-	fmt.Println(hex.EncodeToString(digest[:]))
+	util.Dump("digest", hex.EncodeToString(digest[:]))
 
 	return digest[:], nil
 }
 
-func (tx *SignedTransaction) SignTest1(keys types.PrivateKeys, chain *config.ChainConfig) error {
+func (tx *SignedTransaction) SignTest2(keys types.PrivateKeys, chain *config.ChainConfig) error {
 	privKeys := make([][]byte, len(keys))
 
 	for idx, k := range keys {
@@ -112,12 +112,7 @@ func (tx *SignedTransaction) SignTest1(keys types.PrivateKeys, chain *config.Cha
 	return nil
 }
 
-func (tx *SignedTransaction) SignTest2(privKeys types.PrivateKeys, chain *config.ChainConfig) error {
-	digest, err := tx.Digest(chain)
-	if err != nil {
-		return errors.Annotate(err, "Digest")
-	}
-
+func (tx *SignedTransaction) Sign(privKeys types.PrivateKeys, chain *config.ChainConfig) error {
 	for _, prv := range privKeys {
 		ecdsaKey := prv.ToECDSA()
 		if ecdsaKey.Curve != btcec.S256() {
@@ -125,7 +120,12 @@ func (tx *SignedTransaction) SignTest2(privKeys types.PrivateKeys, chain *config
 		}
 
 		for {
-			sig, err := btcec.SignCompact(btcec.S256(), prv.ECPrivateKey(), digest, true)
+			digest, err := tx.Digest(chain)
+			if err != nil {
+				return errors.Annotate(err, "Digest")
+			}
+
+			sig, err := prv.SignCompact(digest)
 			if err != nil {
 				return errors.Annotate(err, "SignCompact")
 			}
@@ -133,11 +133,6 @@ func (tx *SignedTransaction) SignTest2(privKeys types.PrivateKeys, chain *config
 			if !isCanonical(sig) {
 				//make canonical by adjusting expiration time
 				tx.AdjustExpiration(time.Second)
-				digest, err = tx.Digest(chain)
-				if err != nil {
-					return errors.Annotate(err, "Digest")
-				}
-
 			} else {
 				tx.Signatures = append(tx.Signatures, types.Buffer(sig))
 				break
@@ -148,7 +143,7 @@ func (tx *SignedTransaction) SignTest2(privKeys types.PrivateKeys, chain *config
 	return nil
 }
 
-func (tx *SignedTransaction) Sign(keys types.PrivateKeys, chain *config.ChainConfig) error {
+func (tx *SignedTransaction) SignTest3(keys types.PrivateKeys, chain *config.ChainConfig) error {
 	privKeys := make([][]byte, len(keys))
 
 	for idx, k := range keys {

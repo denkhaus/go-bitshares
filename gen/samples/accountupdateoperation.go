@@ -16,7 +16,16 @@ func init() {
 var sampleDataAccountUpdateOperation = `{
   "account": "1.2.115296",
   "active": {
-    "account_auths": [],
+    "account_auths": [
+      [
+        "1.2.96086",
+         1
+      ],
+      [
+        "1.2.123456",
+         1
+      ]
+    ],
     "address_auths": [],
     "key_auths": [
       [

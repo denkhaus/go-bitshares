@@ -101,11 +101,11 @@ func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.Bitshare
 
 func CreateRefTransaction(t *testing.T) *types.Transaction {
 	tx := types.NewTransaction()
-	tx.RefBlockNum = 34294
 	tx.RefBlockPrefix = 3707022213
+	tx.RefBlockNum = 34294
 
 	//tm := time.Date(2016, 4, 6, 8, 29, 27, 0, time.UTC)
-	// tm, err := time.Parse(time.RFC3339, "2016-04-06T08:29:27")
+	// tm, err := time.Parse(types.TimeFormat, `"2016-04-06T08:29:27"`)
 	// if err != nil {
 	// 	assert.FailNow(t, err.Error(), "Parse")
 	// }

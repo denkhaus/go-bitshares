@@ -70,6 +70,10 @@ func (p PrivateKey) BytesRaw() []byte {
 func (p PrivateKey) ToHex() string {
 	return hex.EncodeToString(p.raw)
 }
+func (p PrivateKey) SignCompact(hash []byte) (sig []byte, err error) {
+	sig, err = btcec.SignCompact(btcec.S256(), p.ECPrivateKey(), hash, true)
+	return
+}
 
 func (p PrivateKey) SharedSecret(pub *PublicKey, skLen, macLen int) (sk []byte, err error) {
 	puk := pub.ToECDSA()

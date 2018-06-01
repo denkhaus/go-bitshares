@@ -256,10 +256,11 @@ func (p AccountAuthsMap) Marshal(enc *util.TypeEncoder) error {
 
 	for k, v := range p {
 		if err := enc.Encode(k); err != nil {
-			return errors.Annotate(err, "encode Key")
+			return errors.Annotate(err, "encode account")
 		}
+
 		if err := enc.Encode(v); err != nil {
-			return errors.Annotate(err, "encode Value")
+			return errors.Annotate(err, "encode Weight")
 		}
 	}
 
