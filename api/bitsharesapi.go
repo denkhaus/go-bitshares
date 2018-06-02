@@ -38,15 +38,15 @@ type BitsharesAPI interface {
 	SetCredentials(username, password string)
 	OnError(func(error))
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
-	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error)
-	VerifySignedTransaction(tx *types.Transaction) (bool, error)
-	SignTransaction(keyBag *crypto.KeyBag, trx *types.Transaction) (*types.Transaction, error)
-	SignWithKeys(types.PrivateKeys, *types.Transaction) (*types.Transaction, error)
+	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
+	VerifySignedTransaction(tx *types.SignedTransaction) (bool, error)
+	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
+	SignWithKeys(types.PrivateKeys, *types.SignedTransaction) error
 
 	//Websocket API functions
-	BroadcastTransaction(tx *types.Transaction) (string, error)
+	BroadcastTransaction(tx *types.SignedTransaction) error
 	CancelAllSubscriptions() error
-	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error)
+	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error)
 	GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error)
 	GetAccountByName(name string) (*types.Account, error)
 	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error)
@@ -58,8 +58,9 @@ type BitsharesAPI interface {
 	GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error)
 	GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error)
 	GetObjects(objectIDs ...types.GrapheneObject) ([]interface{}, error)
-	GetPotentialSignatures(tx *types.Transaction) (types.PublicKeys, error)
-	GetRequiredSignatures(tx *types.Transaction, keys types.PublicKeys) (types.PublicKeys, error)
+	GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error)
+	GetRequiredSignatures(tx *types.SignedTransaction, keys types.PublicKeys) (types.PublicKeys, error)
+	GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error)
 	GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
@@ -72,14 +73,14 @@ type BitsharesAPI interface {
 	WalletLock() error
 	WalletUnlock(password string) error
 	WalletIsLocked() (bool, error)
-	BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.Transaction, error)
-	Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error)
-	BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error)
-	Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error)
-	SellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error)
-	SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error)
-	WalletSignTransaction(tx *types.Transaction, broadcast bool) (*types.Transaction, error)
-	SerializeTransaction(tx *types.Transaction) (string, error)
+	BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
+	Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
+	BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
+	SellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error)
+	WalletSignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error)
+	SerializeTransaction(tx *types.SignedTransaction) (string, error)
 }
 
 type bitsharesAPI struct {
@@ -170,54 +171,54 @@ func (p *bitsharesAPI) CancelAllSubscriptions() error {
 //Broadcast a transaction to the network.
 //The transaction will be checked for validity in the local database prior to broadcasting.
 //If it fails to apply locally, an error will be thrown and the transaction will not be broadcast.
-func (p *bitsharesAPI) BroadcastTransaction(tx *types.Transaction) (string, error) {
+func (p *bitsharesAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	defer p.SetDebug(false)
-	resp, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
+
+	_, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	p.Debug("broadcast_transaction <", resp)
-
-	return resp.(string), nil
+	return nil
 }
 
 //SignTransaction signs a given transaction.
 //Required signing keys get selected by api and have to be in KeyBag.
-func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.Transaction) (*types.Transaction, error) {
+func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) error {
 	defer p.SetDebug(false)
 
 	reqPk, err := p.RequiredSigningKeys(tx)
 	if err != nil {
-		return nil, errors.Annotate(err, "RequiredSigningKeys")
+		return errors.Annotate(err, "RequiredSigningKeys")
 	}
 
-	trx := crypto.NewSignedTransaction(tx)
+	signer := crypto.NewTransactionSigner(tx)
+
 	privKeys := keyBag.PrivatesByPublics(reqPk)
 	if len(privKeys) == 0 {
-		return nil, types.ErrNoSigningKeyFound
+		return types.ErrNoSigningKeyFound
 	}
 
-	if err := trx.Sign(privKeys, config.CurrentConfig()); err != nil {
-		return nil, errors.Annotate(err, "Sign")
+	if err := signer.Sign(privKeys, config.CurrentConfig()); err != nil {
+		return errors.Annotate(err, "Sign")
 	}
 
-	return tx, nil
+	return nil
 }
 
 //SignWithKeys signs a given transaction with given private keys.
-func (p *bitsharesAPI) SignWithKeys(keys types.PrivateKeys, tx *types.Transaction) (*types.Transaction, error) {
+func (p *bitsharesAPI) SignWithKeys(keys types.PrivateKeys, tx *types.SignedTransaction) error {
 	defer p.SetDebug(false)
 
-	trx := crypto.NewSignedTransaction(tx)
-	if err := trx.Sign(keys, config.CurrentConfig()); err != nil {
-		return nil, errors.Annotate(err, "Sign")
+	signer := crypto.NewTransactionSigner(tx)
+	if err := signer.Sign(keys, config.CurrentConfig()); err != nil {
+		return errors.Annotate(err, "Sign")
 	}
 
-	return tx, nil
+	return nil
 }
 
-func (p *bitsharesAPI) VerifySignedTransaction(tx *types.Transaction) (bool, error) {
+func (p *bitsharesAPI) VerifySignedTransaction(tx *types.SignedTransaction) (bool, error) {
 	defer p.SetDebug(false)
 
 	reqPk, err := p.RequiredSigningKeys(tx)
@@ -225,13 +226,18 @@ func (p *bitsharesAPI) VerifySignedTransaction(tx *types.Transaction) (bool, err
 		return false, errors.Annotate(err, "RequiredSigningKeys")
 	}
 
-	trx := crypto.NewSignedTransaction(tx)
-	return trx.Verify(reqPk, config.CurrentConfig())
+	signer := crypto.NewTransactionSigner(tx)
+	verified, err := signer.Verify(reqPk, config.CurrentConfig())
+	if err != nil {
+		return false, errors.Annotate(err, "Verify")
+	}
+
+	return verified, nil
 }
 
 //BuildSignedTransaction builds a new transaction by given operation(s),
 //applies fees, current block data and signs the transaction.
-func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.Transaction, error) {
+func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	operations := types.Operations(ops)
@@ -249,7 +255,7 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 		return nil, errors.Annotate(err, "GetDynamicGlobalProperties")
 	}
 
-	tx, err := types.NewTransactionWithBlockData(props)
+	tx, err := types.NewSignedTransactionWithBlockData(props)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewTransaction")
 	}
@@ -261,21 +267,21 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 		return nil, errors.Annotate(err, "RequiredSigningKeys")
 	}
 
-	trx := crypto.NewSignedTransaction(tx)
+	signer := crypto.NewTransactionSigner(tx)
 
 	privKeys := keyBag.PrivatesByPublics(reqPk)
 	if len(privKeys) == 0 {
 		return nil, types.ErrNoSigningKeyFound
 	}
 
-	if err := trx.Sign(privKeys, config.CurrentConfig()); err != nil {
+	if err := signer.Sign(privKeys, config.CurrentConfig()); err != nil {
 		return nil, errors.Annotate(err, "Sign")
 	}
 
 	return tx, nil
 }
 
-func (p *bitsharesAPI) RequiredSigningKeys(tx *types.Transaction) (types.PublicKeys, error) {
+func (p *bitsharesAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	defer p.SetDebug(false)
 
 	potPk, err := p.GetPotentialSignatures(tx)
@@ -298,7 +304,7 @@ func (p *bitsharesAPI) RequiredSigningKeys(tx *types.Transaction) (types.PublicK
 //GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.
 //This call can be used by wallets to filter their set of public keys to just the relevant subset prior to calling
 //GetRequiredSignatures to get the minimum subset.
-func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) (types.PublicKeys, error) {
+func (p *bitsharesAPI) GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	defer p.SetDebug(false)
 
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_potential_signatures", tx)
@@ -316,7 +322,7 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.Transaction) (types.Publ
 	return ret, nil
 }
 
-func (p *bitsharesAPI) GetRequiredSignatures(tx *types.Transaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
+func (p *bitsharesAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
 	defer p.SetDebug(false)
 
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_required_signatures", tx, potKeys)
@@ -738,7 +744,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 }
 
 // CancelOrder cancels an order given by orderID
-func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.Id(), broadcast)
@@ -748,7 +754,7 @@ func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 
 	p.Debug("cancel_order <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}

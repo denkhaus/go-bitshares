@@ -139,7 +139,6 @@ func (suite *commonTest) Test_GetTradeHistory() {
 }
 
 func (suite *commonTest) Test_GetLimitOrders() {
-
 	res, err := suite.TestAPI.GetLimitOrders(AssetCNY, AssetBTS, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetLimitOrders")

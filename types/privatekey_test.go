@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/hex"
 	"testing"
 
 	"github.com/denkhaus/bitshares/config"
@@ -34,6 +33,7 @@ func Test_PrivatePublic(t *testing.T) {
 		}
 
 		assert.Equal(t, pub, key.PublicKey().String())
+		assert.Equal(t, wif, key.ToWIF())
 	}
 }
 
@@ -49,7 +49,6 @@ func TestDecode(t *testing.T) {
 			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
 		}
 
-		got := hex.EncodeToString(key.Bytes())
-		assert.Equal(t, hx, got)
+		assert.Equal(t, hx, key.ToHex())
 	}
 }

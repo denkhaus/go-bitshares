@@ -40,6 +40,8 @@ init: install_secp256k1
 test_api: 
 	go test -v ./tests -run ^TestCommon$
 	go test -v ./tests -run ^TestSubscribe$
+	go test -v ./tests -run ^TestWalletAPI$
+	go test -v ./tests -run ^TestWebsocketAPI$
 	go test -v ./types 
 
 test_operations:

@@ -63,13 +63,15 @@ func (p PrivateKey) Bytes() []byte {
 	return p.priv.Serialize()
 }
 
-func (p PrivateKey) BytesRaw() []byte {
-	return p.raw
-}
 
 func (p PrivateKey) ToHex() string {
-	return hex.EncodeToString(p.raw)
+	return hex.EncodeToString(p.Bytes())
 }
+
+func (p PrivateKey) ToWIF() string {
+	return base58.Encode(p.raw)
+}
+
 func (p PrivateKey) SignCompact(hash []byte) (sig []byte, err error) {
 	sig, err = btcec.SignCompact(btcec.S256(), p.ECPrivateKey(), hash, true)
 	return

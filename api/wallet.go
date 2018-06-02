@@ -62,7 +62,7 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
@@ -76,7 +76,7 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 
 	p.Debug("buy <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}
@@ -92,13 +92,13 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 //
 // @param account the account providing the asset being sold, and which will receive the processed of the sale.
 // @param base The name or id of the asset to sell.
-// @param quote The name or id of the asset to recieve.
+// @param quote The name or id of the asset to receive.
 // @param rate The rate in base:quote at which you want to sell.
 // @param amount The amount of base you want to sell.
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
@@ -112,7 +112,7 @@ func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.Grap
 
 	p.Debug("sell <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}
@@ -120,7 +120,8 @@ func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.Grap
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
+	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 	//TODO: use proper precision, avoid rounding
 	minToReceive := fmt.Sprintf("%f", amount)
 	amountToSell := fmt.Sprintf("%f", rate*amount)
@@ -129,7 +130,7 @@ func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.Gra
 }
 
 func (p *bitsharesAPI) SellEx(account types.GrapheneObject, base, quote types.GrapheneObject,
-	rate float64, amount float64, broadcast bool) (*types.Transaction, error) {
+	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 
 	//TODO: use proper precision, avoid rounding
 	amountToSell := fmt.Sprintf("%f", amount)
@@ -140,7 +141,7 @@ func (p *bitsharesAPI) SellEx(account types.GrapheneObject, base, quote types.Gr
 
 // SellAsset
 func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
-	minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.Transaction, error) {
+	minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
@@ -158,7 +159,7 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell stri
 
 	p.Debug("sell_asset <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}
@@ -173,7 +174,7 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell stri
 // @param amountOfCollateral: the amount of the backing asset to add to your collateral position. Make this negative to claim back some of your collateral. The backing asset is defined in the bitasset_options for the asset being borrowed.
 // @param broadcast: true to broadcast the transaction on the network
 func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
-	amountOfCollateral string, broadcast bool) (*types.Transaction, error) {
+	amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error) {
 
 	defer p.SetDebug(false)
 
@@ -191,7 +192,7 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow 
 
 	p.Debug("borrow_asset <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}
@@ -225,7 +226,7 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) (types.
 // SerializeTransaction converts a signed_transaction in JSON form to its binary representation.
 // @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
-func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, error) {
+func (p *bitsharesAPI) SerializeTransaction(tx *types.SignedTransaction) (string, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
@@ -246,7 +247,7 @@ func (p *bitsharesAPI) SerializeTransaction(tx *types.Transaction) (string, erro
 // @param tx the transaction to sign
 // @param broadcast bool defines if the transaction should be broadcasted
 // Returns the signed transaction.
-func (p *bitsharesAPI) WalletSignTransaction(tx *types.Transaction, broadcast bool) (*types.Transaction, error) {
+func (p *bitsharesAPI) WalletSignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
@@ -260,7 +261,7 @@ func (p *bitsharesAPI) WalletSignTransaction(tx *types.Transaction, broadcast bo
 
 	p.Debug("wallet sign_transaction <", resp)
 
-	ret := types.Transaction{}
+	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}

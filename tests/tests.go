@@ -1,10 +1,14 @@
 package tests
 
 import (
+	"encoding/hex"
+	"bytes"
 	"testing"
+	"time"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,9 +16,10 @@ import (
 const (
 	WsFullApiUrl = "wss://node.market.rudex.org"
 	//WsFullApiUrl = "wss://bitshares.openledger.info/ws"
-	WsTestApiUrl  = "wss://node.testnet.bitshares.eu/ws"
-	RpcFullApiUrl = "http://localhost:8095"
-	RpcTestApiUrl = "http://localhost:8094"
+	WsTestApiUrl        = "wss://node.testnet.bitshares.eu/ws"
+	RpcFullApiUrl       = "http://localhost:8095"
+	RpcTestApiUrl       = "http://localhost:8094"
+	RpcTestCustomApiUrl = "http://localhost:8093"
 )
 
 var (
@@ -76,14 +81,20 @@ var (
 	TestAccount3ID            = types.NewGrapheneID("1.2.391614")
 )
 
-func CompareTransactions(api api.BitsharesAPI, tx *types.Transaction, debug bool) (string, string, error) {
+func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
 	api.SetDebug(debug)
 	ref, err := api.SerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")
 	}
 
-	return ref, tx.ToHex(), nil
+	var buf bytes.Buffer
+	enc := util.NewTypeEncoder(&buf)
+	if err := tx.Marshal(enc); err != nil {
+		return "", "", errors.Annotate(err, "marshal Transaction")
+	}	
+
+	return ref, hex.EncodeToString(buf.Bytes()), nil
 }
 
 func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.BitsharesAPI {
@@ -99,22 +110,13 @@ func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.Bitshare
 	return api
 }
 
-func CreateRefTransaction(t *testing.T) *types.Transaction {
-	tx := types.NewTransaction()
+func CreateRefTransaction(t *testing.T) *types.SignedTransaction {
+	tx := types.NewSignedTransaction()
 	tx.RefBlockPrefix = 3707022213
 	tx.RefBlockNum = 34294
 
-	//tm := time.Date(2016, 4, 6, 8, 29, 27, 0, time.UTC)
-	// tm, err := time.Parse(types.TimeFormat, `"2016-04-06T08:29:27"`)
-	// if err != nil {
-	// 	assert.FailNow(t, err.Error(), "Parse")
-	// }
-
-	//tx.Expiration = types.Time{tm}
-
-	if err := tx.Expiration.UnmarshalJSON([]byte(`"2016-04-06T08:29:27"`)); err != nil {
-		assert.FailNow(t, err.Error(), "Unmarshal expiration")
-	}
+	tm := time.Date(2016, 4, 6, 8, 29, 27, 0, time.UTC)
+	tx.Expiration = types.Time{tm}
 
 	return tx
 }

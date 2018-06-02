@@ -5,15 +5,12 @@ package crypto
 import (
 	// Stdlib
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"time"
 	"unsafe"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/bitshares/util"
 
 	"github.com/juju/errors"
 )
@@ -23,96 +20,36 @@ import (
 // #include "signing.h"
 import "C"
 
-type SignedTransaction struct {
-	*types.Transaction
+type TransactionSigner struct {
+	*types.SignedTransaction
 }
 
-func NewSignedTransaction(tx *types.Transaction) *SignedTransaction {
+func NewTransactionSigner(tx *types.SignedTransaction) *TransactionSigner {
 	if tx.Expiration.IsZero() {
 		exp := time.Now().Add(30 * time.Second)
 		tx.Expiration = types.Time{exp}
 	}
 
-	return &SignedTransaction{tx}
+	return &TransactionSigner{tx}
 }
 
-func (tx *SignedTransaction) Serialize() ([]byte, error) {
-	//remove signatures before serializing
-	sigTemp := tx.Signatures
-	tx.Signatures.Reset()
-
-	defer func() {
-		//and restore
-		tx.Signatures = sigTemp
-	}()
-
-	return tx.Bytes(), nil
-}
-
-func (tx *SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
-	var msgBuffer bytes.Buffer
-
-	// Write the chain ID.
-	rawChainID, err := hex.DecodeString(chain.ID())
+func (tx *TransactionSigner) SignTest2(keys types.PrivateKeys, chain *config.ChainConfig) error {
+	digest, err := tx.Digest(chain)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to decode chain ID: %v", chain.ID())
+		return errors.Annotate(err, "Digest")
 	}
-
-	if _, err := msgBuffer.Write(rawChainID); err != nil {
-		return nil, errors.Annotate(err, "failed to write chain ID")
-	}
-
-	// Write the serialized transaction.
-	rawTx, err := tx.Serialize()
-	if err != nil {
-		return nil, errors.Annotate(err, "Serialize")
-	}
-
-	if _, err := msgBuffer.Write(rawTx); err != nil {
-		return nil, errors.Annotate(err, "failed to write serialized transaction")
-	}
-
-	// Compute the digest.
-	digest := sha256.Sum256(msgBuffer.Bytes())
-	util.Dump("digest", hex.EncodeToString(digest[:]))
-
-	return digest[:], nil
-}
-
-func (tx *SignedTransaction) SignTest2(keys types.PrivateKeys, chain *config.ChainConfig) error {
-	privKeys := make([][]byte, len(keys))
-
-	for idx, k := range keys {
-		privKeys[idx] = k.Bytes()
-	}
-
-	var buf bytes.Buffer
-	chainid, _ := hex.DecodeString(chain.ID())
-	//fmt.Println(tx.Operations[0])
-	//fmt.Println(" ")
-	txraw, err := tx.Serialize()
-	if err != nil {
-		return err
-	}
-	//fmt.Println(tx_raw)
-	//fmt.Println(" ")
-	buf.Write(chainid)
-	buf.Write(txraw)
-	data := buf.Bytes()
-	//msg_sha := crypto.Sha256(buf.Bytes())
 
 	var sigs types.Signatures
-
-	for _, privb := range privKeys {
-		sigBytes := tx.Sign_Single(privb, data)
-		sigs = append(sigs, types.Buffer(sigBytes))
+	for _, priv := range keys {
+		sig := tx.SignSingle(priv, digest)
+		sigs = append(sigs, types.Buffer(sig))
 	}
 
-	tx.Transaction.Signatures = sigs
+	tx.Signatures = sigs
 	return nil
 }
 
-func (tx *SignedTransaction) Sign(privKeys types.PrivateKeys, chain *config.ChainConfig) error {
+func (tx *TransactionSigner) Sign(privKeys types.PrivateKeys, chain *config.ChainConfig) error {
 	for _, prv := range privKeys {
 		ecdsaKey := prv.ToECDSA()
 		if ecdsaKey.Curve != btcec.S256() {
@@ -143,7 +80,43 @@ func (tx *SignedTransaction) Sign(privKeys types.PrivateKeys, chain *config.Chai
 	return nil
 }
 
-func (tx *SignedTransaction) SignTest3(keys types.PrivateKeys, chain *config.ChainConfig) error {
+func (tx *TransactionSigner) Verify(pubKeys types.PublicKeys, chain *config.ChainConfig) (bool, error) {
+	dig, err := tx.Digest(chain)
+	if err != nil {
+		return false, errors.Annotate(err, "Digest")
+	}
+
+	pubKeysFound := make(types.PublicKeys, 0)
+	for _, signature := range tx.Signatures {
+		sig := signature.Bytes()
+
+		p, _, err := btcec.RecoverCompact(btcec.S256(), sig, dig)
+		if err != nil {
+			return false, errors.Annotate(err, "RecoverCompact")
+		}
+
+		pub, err := types.NewPublicKey(p)
+		if err != nil {
+			return false, errors.Annotate(err, "NewPublicKey")
+		}
+
+		pubKeysFound = append(pubKeysFound, *pub)
+	}
+
+	if len(pubKeysFound) != len(pubKeys) {
+		return false, nil
+	}
+
+	for idx := range pubKeys {
+		if !pubKeys[idx].Equal(&pubKeysFound[idx]) {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
+
+func (tx *TransactionSigner) SignTest4(keys types.PrivateKeys, chain *config.ChainConfig) error {
 	privKeys := make([][]byte, len(keys))
 
 	for idx, k := range keys {
@@ -195,12 +168,12 @@ func (tx *SignedTransaction) SignTest3(keys types.PrivateKeys, chain *config.Cha
 		si[idx] = types.Buffer(sig)
 	}
 
-	tx.Transaction.Signatures = si
+	tx.Signatures = si
 	return nil
 }
 
 // Verify verifys the Transaction against the public keys
-func (tx *SignedTransaction) Verify(pubs types.PublicKeys, chain *config.ChainConfig) (bool, error) {
+func (tx *TransactionSigner) VerifyTest4(pubs types.PublicKeys, chain *config.ChainConfig) (bool, error) {
 	pubKeys := make([][]byte, len(pubs))
 
 	for idx, k := range pubs {

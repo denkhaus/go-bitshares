@@ -108,7 +108,6 @@ log.Printf("balances: %v", res)
 
 ## todo
 - add missing operations
-- sign transactions by websocket api
 
 
 Have fun and feel free to contribute needed operations and tests.
