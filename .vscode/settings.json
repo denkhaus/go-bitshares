@@ -25,7 +25,7 @@
    "go.testTimeout": "3m",
    "go.buildFlags": ["-v"],
    "go.enableCodeLens": {
-     "references": true,
+     "references": false,
      "runtest": true
   },
   "files.associations": {

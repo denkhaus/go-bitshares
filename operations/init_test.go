@@ -17,7 +17,7 @@ import (
 type operationsAPITest struct {
 	suite.Suite
 	TestAPI api.BitsharesAPI
-	RefTx   *types.Transaction
+	RefTx   *types.SignedTransaction
 }
 
 func (suite *operationsAPITest) SetupTest() {
@@ -79,12 +79,9 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 		},
 	}
 
-	trx, err := suite.TestAPI.SignWithKeys(keyBag.Privates(), suite.RefTx)
-	if err != nil {
+	if err := suite.TestAPI.SignWithKeys(keyBag.Privates(), suite.RefTx); err != nil {
 		suite.FailNow(err.Error(), "SignTransaction")
 	}
-
-	suite.NotNil(trx)
 
 	expected := "f68585abf4dce7c8045701036400000000000000001d00e1f" +
 		"50500000000001027000000000000160000011f2627efb5c5" +
@@ -97,7 +94,7 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 	suite.Equal(expected[:len(expected)-130], test[:len(test)-130])
 }
 
-func (suite *operationsAPITest) compareTransaction(tx *types.Transaction, debug bool) {
+func (suite *operationsAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {
 	ref, test, err := tests.CompareTransactions(suite.TestAPI, tx, debug)
 	if err != nil {
 		suite.FailNow(err.Error(), "compareTransactions")
