@@ -18,12 +18,19 @@ import (
 )
 
 var (
-	ErrRPCClientNotInitialized = fmt.Errorf("RPC client is not initialized")
-	ErrNotImplemented          = fmt.Errorf("not implemented")
-	ErrInvalidInputType        = fmt.Errorf("invalid input type")
-	ErrInvalidInputLength      = fmt.Errorf("invalid input length")
-	ErrInvalidPublicKey        = fmt.Errorf("invalid PublicKey")
-	ErrInvalidChecksum         = fmt.Errorf("invalid checksum")
+	ErrRPCClientNotInitialized      = fmt.Errorf("RPC client is not initialized")
+	ErrNotImplemented               = fmt.Errorf("not implemented")
+	ErrInvalidInputType             = fmt.Errorf("invalid input type")
+	ErrInvalidInputLength           = fmt.Errorf("invalid input length")
+	ErrInvalidPublicKey             = fmt.Errorf("invalid PublicKey")
+	ErrInvalidAddress               = fmt.Errorf("invalid Address")
+	ErrPublicKeyChainPrefixMismatch = fmt.Errorf("PublicKey chain prefix mismatch")
+	ErrAddressChainPrefixMismatch   = fmt.Errorf("Address chain prefix mismatch")
+	ErrInvalidChecksum              = fmt.Errorf("invalid checksum")
+	ErrNoSigningKeyFound            = fmt.Errorf("no signing key found")
+	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
+	ErrInvalidDigestLength          = fmt.Errorf("invalid digest length")
+	ErrInvalidPrivateKeyCurve       = fmt.Errorf("invalid PrivateKey curve")
 )
 
 var (
@@ -479,6 +486,10 @@ func (t Time) Add(dur time.Duration) Time {
 	return Time{t.Time.Add(dur)}
 }
 
+func (t *Time) FromTime(tm time.Time) {
+	t.Time = tm
+}
+
 func (t Time) IsZero() bool {
 	return t.Time.IsZero()
 }
@@ -491,21 +502,17 @@ func (p *Buffer) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "Unmarshal")
 	}
 
-	buf, err := hex.DecodeString(b)
-	if err != nil {
-		return errors.Annotate(err, "DecodeString")
-	}
-
-	*p = buf
-	return nil
+	return p.FromString(b)
 }
-func (p Buffer) Byte() []byte {
+
+func (p Buffer) Bytes() []byte {
 	return p
 }
 
 func (p Buffer) Length() int {
 	return len(p)
 }
+
 func (p Buffer) String() string {
 	return hex.EncodeToString(p)
 }
@@ -529,18 +536,15 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode length")
 	}
 
-	if err := enc.Encode(p.Byte()); err != nil {
+	if err := enc.Encode(p.Bytes()); err != nil {
 		return errors.Annotate(err, "encode bytes")
 	}
 
 	return nil
 }
-func BufferFromString(data string) (Buffer, error) {
-	buf, err := hex.DecodeString(data)
-	if err != nil {
-		return nil, errors.Annotate(err, "DecodeString")
-	}
 
-	b := Buffer(buf)
-	return b, nil
+func BufferFromString(data string) (b Buffer, err error) {
+	b = Buffer{}
+	err = b.FromString(data)
+	return
 }

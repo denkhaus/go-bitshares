@@ -11,8 +11,6 @@ import (
 	"encoding/hex"
 	"strconv"
 
-	"github.com/btcsuite/btcd/btcec"
-
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
@@ -45,8 +43,8 @@ func (p Memo) Marshal(enc *util.TypeEncoder) error {
 }
 
 //Encrypt encodes the memo message
-func (p *Memo) Encrypt(priv *btcec.PrivateKey, msg string) error {
-	sec, err := util.SharedSecret(priv, p.To.ToECDSA(), 16, 16)
+func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
+	sec, err := priv.SharedSecret(&p.To, 16, 16)
 	if err != nil {
 		return errors.Annotate(err, "SharedSecret")
 	}
@@ -78,8 +76,8 @@ func (p *Memo) Encrypt(priv *btcec.PrivateKey, msg string) error {
 }
 
 //Decrypt decodes the memo message
-func (p Memo) Decrypt(priv *btcec.PrivateKey) (string, error) {
-	sec, err := util.SharedSecret(priv, p.To.ToECDSA(), 16, 16)
+func (p Memo) Decrypt(priv *PrivateKey) (string, error) {
+	sec, err := priv.SharedSecret(&p.To, 16, 16)
 	if err != nil {
 		return "", errors.Annotate(err, "SharedSecret")
 	}

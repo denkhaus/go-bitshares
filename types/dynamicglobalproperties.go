@@ -43,10 +43,10 @@ func (p DynamicGlobalProperties) RefBlockPrefix() (UInt32, error) {
 
 	rawPrefix := rawBlockID[4:8]
 
-	var prefix UInt32
+	var prefix uint32
 	if err := binary.Read(bytes.NewReader(rawPrefix), binary.LittleEndian, &prefix); err != nil {
 		return 0, errors.Annotatef(err, "failed to read block prefix: %v", rawPrefix)
 	}
 
-	return prefix, nil
+	return UInt32(prefix), nil
 }

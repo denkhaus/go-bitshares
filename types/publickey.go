@@ -5,12 +5,13 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/pquerna/ffjson/ffjson"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/util"
+	sort "github.com/emirpasic/gods/utils"
 	"github.com/juju/errors"
+	"github.com/pquerna/ffjson/ffjson"
 )
 
 type PublicKeys []PublicKey
@@ -33,9 +34,9 @@ func (p *PublicKey) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "Unmarshal")
 	}
 
-	pub, err := NewPublicKey(key)
+	pub, err := NewPublicKeyFromString(key)
 	if err != nil {
-		return errors.Annotate(err, "NewPublicKey")
+		return errors.Annotate(err, "NewPublicKeyFromString")
 	}
 
 	p.key = pub.key
@@ -52,20 +53,41 @@ func (p PublicKey) Marshal(enc *util.TypeEncoder) error {
 	return enc.Encode(p.Bytes())
 }
 
+func (p *PublicKey) ToAddress() (*Address, error) {
+	return NewAddress(p)
+}
+
 func (p PublicKey) Bytes() []byte {
 	return p.key.SerializeCompressed()
+}
+
+func (p PublicKey) Equal(pub *PublicKey) bool {
+	return p.key.IsEqual(pub.key)
 }
 
 func (p PublicKey) ToECDSA() *ecdsa.PublicKey {
 	return p.key.ToECDSA()
 }
 
+// MaxSharedKeyLength returns the maximum length of the shared key the
+// public key can produce.
+func (p PublicKey) MaxSharedKeyLength() int {
+	return (p.key.ToECDSA().Curve.Params().BitSize + 7) / 8
+}
+
 //NewPublicKey creates a new PublicKey from string
 //e.g.("BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR")
-func NewPublicKey(key string) (*PublicKey, error) {
-	prefix := key[:3]
+func NewPublicKeyFromString(key string) (*PublicKey, error) {
+	cnf := config.CurrentConfig()
+	prefixChain := cnf.Prefix()
 
-	b58 := base58.Decode(key[3:])
+	prefix := key[:len(prefixChain)]
+
+	if prefix != prefixChain {
+		return nil, ErrPublicKeyChainPrefixMismatch
+	}
+
+	b58 := base58.Decode(key[len(prefixChain):])
 	if len(b58) < 5 {
 		return nil, ErrInvalidPublicKey
 	}
@@ -87,11 +109,43 @@ func NewPublicKey(key string) (*PublicKey, error) {
 		return nil, errors.Annotate(err, "ParsePubKey")
 	}
 
-	k := &PublicKey{
+	k := PublicKey{
 		key:      pub,
 		prefix:   prefix,
 		checksum: chk1,
 	}
 
-	return k, nil
+	return &k, nil
+}
+
+func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
+	buf := pub.SerializeCompressed()
+	cnf := config.CurrentConfig()
+
+	chk, err := util.Ripemd160Checksum(buf)
+	if err != nil {
+		return nil, errors.Annotate(err, "Ripemd160Checksum")
+	}
+
+	k := PublicKey{
+		key:      pub,
+		prefix:   cnf.Prefix(),
+		checksum: chk,
+	}
+
+	return &k, nil
+}
+
+func publicKeyComparator(key1, key2 *PublicKey) (int, error) {
+	addr1, err := key1.ToAddress()
+	if err != nil {
+		return 0, errors.Annotate(err, "ToAddress 1")
+	}
+
+	addr2, err := key2.ToAddress()
+	if err != nil {
+		return 0, errors.Annotate(err, "ToAddress 2")
+	}
+
+	return sort.StringComparator(addr1.String(), addr2.String()), nil
 }

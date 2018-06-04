@@ -16,11 +16,28 @@ func init() {
 var sampleDataAccountUpdateOperation = `{
   "account": "1.2.115296",
   "active": {
-    "account_auths": [],
+    "account_auths": [
+      [
+        "1.2.96086",
+         1
+      ],
+      [
+        "1.2.123456",
+         1
+      ]
+    ],
     "address_auths": [],
     "key_auths": [
       [
+        "BTS7jp4WPJaVerGJbNC4scaoHSdY7wSemAcdg6HikhNQqvegxYyyM",
+        1
+      ],
+      [
         "BTS7wPKvv8zNBFWZmBQqPfW5Df9sfBvyS2c24MmJ1mkHjZCaowHNx",
+        1
+      ],
+      [
+        "BTS5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk",
         1
       ]
     ],

@@ -1,0 +1,38 @@
+{
+    // Controls the font size in pixels.
+   "editor.fontSize": 18,
+   "git.confirmSync": false,
+   "git.autofetch": true,
+   "git.enableSmartCommit": true,
+   "explorer.confirmDragAndDrop": false,
+   "explorer.confirmDelete": false,
+   "gitlens.advanced.messages": {
+     "suppressCommitHasNoPreviousCommitWarning": false,
+     "suppressCommitNotFoundWarning": false,
+     "suppressFileNotUnderSourceControlWarning": false,
+     "suppressGitVersionWarning": false,
+     "suppressLineUncommittedWarning": false,
+     "suppressNoRepositoryWarning": false,
+     "suppressResultsExplorerNotice": false,
+     "suppressShowKeyBindingsNotice": true
+   },
+   "liveServer.settings.donotShowInfoMsg": true,
+   "react.beautify.onSave": true,
+   "emmet.includeLanguages": {
+     "javascript": "javascriptreact"
+   },  
+   "gitlens.historyExplorer.enabled": true,
+   "go.testTimeout": "3m",
+   "go.buildFlags": ["-v"],
+   "go.enableCodeLens": {
+     "references": false,
+     "runtest": true
+  },
+  "files.associations": {
+    "secp256k1.h": "c",
+    "secp256k1_recovery.h": "c"
+  },
+  "cSpell.words": [
+    "Unmarshaled"
+  ],
+ }

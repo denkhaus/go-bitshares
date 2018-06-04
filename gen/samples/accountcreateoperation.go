@@ -19,7 +19,11 @@ var sampleDataAccountCreateOperation = `{
     "address_auths": [],
     "key_auths": [
       [
-        "BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR",
+        "BTS6pbVDAjRFiw6fkiKYCrkz7PFeL7XNAfefrsREwg8MKpJ9VYV9x",
+        1
+      ],
+      [
+        "BTS6zLNtyFVToBsBZDsgMhgjpwysYVbsQD6YhP3kRkQhANUB4w7Qp",
         1
       ]
     ],
@@ -67,7 +71,15 @@ var sampleDataAccountCreateOperation = `{
     "address_auths": [],
     "key_auths": [
       [
-        "BTS8YMTPBafG4cC5qje9UGoRBxU8XdMjJUHUwHNKgM6AiZA79yUiP",
+        "BTS6pbVDAjRFiw6fkiKYCrkz7PFeL7XNAfefrsREwg8MKpJ9VYV9x",
+        1
+      ],
+      [
+        "BTS6zLNtyFVToBsBZDsgMhgjpwysYVbsQD6YhP3kRkQhANUB4w7Qp",
+        1
+      ],
+      [
+        "BTS8CemMDjdUWSV5wKotEimhK6c4dY7p2PdzC2qM1HpAP8aLtZfE7",
         1
       ]
     ],

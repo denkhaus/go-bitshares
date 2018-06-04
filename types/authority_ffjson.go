@@ -368,7 +368,7 @@ handle_KeyAuths:
 
 handle_AddressAuths:
 
-	/* handler: j.AddressAuths type=types.AuthsMap kind=map quoted=false*/
+	/* handler: j.AddressAuths type=types.AddressAuthsMap kind=map quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

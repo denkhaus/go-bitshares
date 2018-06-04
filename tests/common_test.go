@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
 
@@ -18,16 +19,11 @@ type commonTest struct {
 }
 
 func (suite *commonTest) SetupTest() {
-	api := api.New(WsFullApiUrl, RpcApiUrl)
-	if err := api.Connect(); err != nil {
-		suite.FailNow(err.Error(), "Connect")
-	}
-
-	api.OnError(func(err error) {
-		suite.FailNow(err.Error(), "OnError")
-	})
-
-	suite.TestAPI = api
+	suite.TestAPI = NewTestAPI(
+		suite.T(),
+		WsFullApiUrl,
+		RpcFullApiUrl,
+	)
 }
 
 func (suite *commonTest) TearDownTest() {
@@ -42,7 +38,7 @@ func (suite *commonTest) Test_GetChainID() {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
 
-	suite.Equal(res, ChainIDBitSharesFull)
+	suite.Equal(res, config.ChainIDBTS)
 }
 
 func (suite *commonTest) Test_GetAccountBalances() {
@@ -81,10 +77,12 @@ func (suite *commonTest) Test_GetObjects() {
 		UserID1,
 		AssetCNY,
 		BitAssetDataCNY,
-		LimitOrder1,
-		CallOrder1,
-		SettleOrder1,
+		// LimitOrder1,
+		// CallOrder1,
+		// SettleOrder1,
 		OperationHistory1,
+		CommiteeMember1,
+		Balance1,
 	)
 
 	if err != nil {
@@ -92,7 +90,7 @@ func (suite *commonTest) Test_GetObjects() {
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 7)
+	suite.Len(res, 6)
 	//util.Dump("objects >", res)
 }
 
@@ -141,7 +139,6 @@ func (suite *commonTest) Test_GetTradeHistory() {
 }
 
 func (suite *commonTest) Test_GetLimitOrders() {
-
 	res, err := suite.TestAPI.GetLimitOrders(AssetCNY, AssetBTS, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetLimitOrders")

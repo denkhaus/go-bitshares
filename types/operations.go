@@ -138,7 +138,7 @@ func (p *Operations) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p Operations) ApplyFees(fees []AssetAmount) error {
+func (p Operations) ApplyFees(fees AssetAmounts) error {
 	if len(p) != len(fees) {
 		return errors.New("count of fees must match count of operations")
 	}

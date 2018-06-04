@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,18 +65,20 @@ var sharedSecrets = [][]interface{}{
 }
 
 func Test_SharedSecrets(t *testing.T) {
+	config.SetCurrentConfig(config.ChainIDGPH)
+
 	for _, tst := range sharedSecrets {
-		priv, err := util.GetPrivateKey(tst[0].(string))
+		priv, err := NewPrivateKeyFromWif(tst[0].(string))
 		if err != nil {
 			assert.FailNow(t, err.Error(), "GetPrivateKey")
 		}
 
-		pub, err := NewPublicKey(tst[1].(string))
+		pub, err := NewPublicKeyFromString(tst[1].(string))
 		if err != nil {
 			assert.FailNow(t, err.Error(), "GetPublicKey")
 		}
 
-		sec2, err := util.SharedSecret(priv, pub.ToECDSA(), 16, 16)
+		sec2, err := priv.SharedSecret(pub, 16, 16)
 		if err != nil {
 			assert.FailNow(t, err.Error(), "sharedSecret")
 		}
@@ -91,16 +93,17 @@ func Test_SharedSecrets(t *testing.T) {
 }
 
 func Test_MemoDecrypt(t *testing.T) {
-	for _, tst := range testCases {
+	config.SetCurrentConfig(config.ChainIDGPH)
 
-		from, err := NewPublicKey(tst["from"])
+	for _, tst := range testCases {
+		from, err := NewPublicKeyFromString(tst["from"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "NewPublicKey [from]")
+			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [from]")
 		}
 
-		to, err := NewPublicKey(tst["to"])
+		to, err := NewPublicKeyFromString(tst["to"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "NewPublicKey [to]")
+			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [to]")
 		}
 
 		var nonce UInt64
@@ -121,9 +124,9 @@ func Test_MemoDecrypt(t *testing.T) {
 			Nonce:   nonce,
 		}
 
-		priv, err := util.GetPrivateKey(tst["wif"])
+		priv, err := NewPrivateKeyFromWif(tst["wif"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "GetPrivateKey")
+			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
 		}
 
 		m, err := memo.Decrypt(priv)
@@ -136,16 +139,18 @@ func Test_MemoDecrypt(t *testing.T) {
 }
 
 func Test_MemoEncrypt(t *testing.T) {
+	config.SetCurrentConfig(config.ChainIDGPH)
+
 	for _, tst := range testCases {
 
-		from, err := NewPublicKey(tst["from"])
+		from, err := NewPublicKeyFromString(tst["from"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "NewPublicKey [from]")
+			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [from]")
 		}
 
-		to, err := NewPublicKey(tst["to"])
+		to, err := NewPublicKeyFromString(tst["to"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "NewPublicKey [to]")
+			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [to]")
 		}
 
 		var nonce UInt64
@@ -166,9 +171,9 @@ func Test_MemoEncrypt(t *testing.T) {
 			Nonce:   nonce,
 		}
 
-		priv, err := util.GetPrivateKey(tst["wif"])
+		priv, err := NewPrivateKeyFromWif(tst["wif"])
 		if err != nil {
-			assert.FailNow(t, err.Error(), "GetPrivateKey")
+			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
 		}
 
 		if err := memo.Encrypt(priv, tst["plain"]); err != nil {
