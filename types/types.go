@@ -486,6 +486,10 @@ func (t Time) Add(dur time.Duration) Time {
 	return Time{t.Time.Add(dur)}
 }
 
+func (t *Time) FromTime(tm time.Time) {
+	t.Time = tm
+}
+
 func (t Time) IsZero() bool {
 	return t.Time.IsZero()
 }

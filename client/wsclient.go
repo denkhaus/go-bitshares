@@ -87,7 +87,7 @@ func (p *wsClient) SetDebug(debug bool) {
 	p.debug = debug
 }
 
-func (p wsClient) Debug(descr string, in interface{}) {
+func (p *wsClient) Debug(descr string, in interface{}) {
 	if p.debug {
 		util.Dump(descr, in)
 	}

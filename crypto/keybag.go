@@ -9,7 +9,7 @@ import (
 	"github.com/juju/errors"
 )
 
-// KeyBag holds private keys in memory, for signing transactions.
+// KeyBag is a PrivateKey collection for signing and verifying purposes.
 type KeyBag struct {
 	keys []*types.PrivateKey
 }
@@ -64,6 +64,16 @@ func (b KeyBag) Publics() (out types.PublicKeys) {
 	}
 	return
 }
+
+func (b KeyBag) PublicPresent(pub *types.PublicKey) bool {
+	for _, k := range b.keys {
+		if k.PublicKey().Equal(pub) {
+			return true
+		}
+	}
+	return false
+}
+
 func (b KeyBag) Privates() (out types.PrivateKeys) {
 	for _, k := range b.keys {
 		priv := k

@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"encoding/hex"
 	"bytes"
+	"encoding/hex"
 	"testing"
 	"time"
 
@@ -92,7 +92,7 @@ func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debu
 	enc := util.NewTypeEncoder(&buf)
 	if err := tx.Marshal(enc); err != nil {
 		return "", "", errors.Annotate(err, "marshal Transaction")
-	}	
+	}
 
 	return ref, hex.EncodeToString(buf.Bytes()), nil
 }
@@ -116,7 +116,7 @@ func CreateRefTransaction(t *testing.T) *types.SignedTransaction {
 	tx.RefBlockNum = 34294
 
 	tm := time.Date(2016, 4, 6, 8, 29, 27, 0, time.UTC)
-	tx.Expiration = types.Time{tm}
+	tx.Expiration.FromTime(tm)
 
 	return tx
 }

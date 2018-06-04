@@ -44,6 +44,7 @@ func (suite *websocketAPITest) Test_ChainConfig() {
 
 	suite.Equal(config.ChainIDTest, res)
 }
+
 func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 	op := operations.TransferOperation{
 		Extensions: types.Extensions{},
@@ -64,31 +65,31 @@ func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 	suite.compareTransaction(trx, false)
 }
 
-// func (suite *websocketAPITest) Test_SignAndVerify() {
-// 	op := operations.TransferOperation{
-// 		Extensions: types.Extensions{},
-// 		Amount: types.AssetAmount{
-// 			Amount: 1000,
-// 			Asset:  *AssetTEST,
-// 		},
-// 		From: *TestAccount2ID,
-// 		To:   *TestAccount1ID,
-// 	}
+func (suite *websocketAPITest) Test_SignAndVerify() {
+	op := operations.TransferOperation{
+		Extensions: types.Extensions{},
+		Amount: types.AssetAmount{
+			Amount: 1000,
+			Asset:  *AssetTEST,
+		},
+		From: *TestAccount2ID,
+		To:   *TestAccount1ID,
+	}
 
-// 	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "BuildSignedTransaction")
-// 	}
+	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	if err != nil {
+		suite.FailNow(err.Error(), "BuildSignedTransaction")
+	}
 
-// 	suite.compareTransaction(trx, false)
+	suite.compareTransaction(trx, false)
 
-// 	v, err := suite.TestAPI.VerifySignedTransaction(trx)
-// 	if err != nil {
-// 		suite.FailNow(err.Error(), "VerifySignedTransaction")
-// 	}
+	v, err := suite.TestAPI.VerifySignedTransaction(suite.KeyBag, trx)
+	if err != nil {
+		suite.FailNow(err.Error(), "VerifySignedTransaction")
+	}
 
-// 	suite.True(v, "Verified")
-// }
+	suite.True(v, "Verified")
+}
 
 func (suite *websocketAPITest) Test_Transfer() {
 	op := operations.TransferOperation{
