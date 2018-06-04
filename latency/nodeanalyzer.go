@@ -1,7 +1,11 @@
 package latency
 
 import (
+	"context"
+	"fmt"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/juju/errors"
@@ -54,52 +58,98 @@ var (
 
 type NodeStats struct {
 	api      api.BitsharesAPI
-	latency  uint64
-	attempts uint64
+	latency  time.Duration
+	attempts int64
+	errors   int64
 	endpoint string
 }
 
 func (p *NodeStats) onError(err error) {
+	fmt.Println(err)
+	p.errors++
+}
 
+func (p *NodeStats) Score() time.Duration {
+	if p.attempts > 0 {
+		return time.Duration(int64(p.latency) / p.attempts)
+	}
+
+	return -1
+}
+
+func (p *NodeStats) String() string {
+	return fmt.Sprintf("ep: %s | attempts: %d | errors: %d | score: %s",
+		p.endpoint, p.attempts, p.errors, p.Score())
 }
 
 func NewNodeStats(wsRPCEndpoint, walletRPCEndpoint string) (*NodeStats, error) {
-	stats := NodeStats{
-		endpoint: wsRPCEndpoint,
-	}
-
-	api := api.New(stats.endpoint, "walletRPCEndpoint")
+	api := api.New(wsRPCEndpoint, walletRPCEndpoint)
 	if err := api.Connect(); err != nil {
 		return nil, errors.Annotate(err, "Connect")
 	}
 
-	api.OnError(stats.onError)
-	stats.api = api
+	stats := &NodeStats{
+		endpoint: wsRPCEndpoint,
+		api:      api,
+	}
 
-	return &stats, nil
+	api.OnError(stats.onError)
+	return stats, nil
+}
+
+func (p *NodeStats) check() {
+	tm := time.Now()
+	_, err := p.api.GetDynamicGlobalProperties()
+	if err != nil {
+		p.errors++
+	}
+
+	p.latency += time.Since(tm)
+	p.attempts++
 }
 
 type LatencyTester struct {
 	sync.Mutex
+	wg                sync.WaitGroup
+	ticker            *time.Ticker
+	ctx               context.Context
+	cancel            context.CancelFunc
 	statsMap          map[string]*NodeStats
 	walletRPCEndpoint string
 }
 
-func NewLatencyTester(walletRPCEndpoint string) (*LatencyTester, error) {
+func NewLatencyTester(ctx context.Context, walletRPCEndpoint string, checkDur time.Duration) (*LatencyTester, error) {
+	cctx, cancel := context.WithCancel(ctx)
 	lat := LatencyTester{
 		statsMap:          make(map[string]*NodeStats),
 		walletRPCEndpoint: walletRPCEndpoint,
+		ticker:            time.NewTicker(checkDur),
+		cancel:            cancel,
+		ctx:               cctx,
 	}
 
 	for _, ep := range knownEndpoints {
 		stat, err := NewNodeStats(ep, walletRPCEndpoint)
-		if err != nil {
-			return nil, errors.Annotate(err, "NewNodeStats")
+		if err == nil {
+			lat.Lock()
+			lat.statsMap[ep] = stat
+			lat.Unlock()
 		}
-		lat.statsMap[ep] = stat
 	}
 
 	return &lat, nil
+}
+
+func (p *LatencyTester) String() string {
+	p.Lock()
+	defer p.Unlock()
+	builder := strings.Builder{}
+	for _, stats := range p.statsMap {
+		builder.WriteString(stats.String())
+		builder.WriteString("\n")
+	}
+
+	return builder.String()
 }
 
 func (p *LatencyTester) AddEndpoint(ep string) error {
@@ -117,7 +167,34 @@ func (p *LatencyTester) AddEndpoint(ep string) error {
 	return nil
 }
 
-func (p *LatencyTester) Start() error {
+func (p *LatencyTester) check() {
+	p.Lock()
+	defer p.Unlock()
 
-	return nil
+	for _, stats := range p.statsMap {
+		go stats.check()
+	}
+}
+
+func (p *LatencyTester) Done() <-chan struct{} {
+	return p.ctx.Done()
+}
+
+func (p *LatencyTester) Start() {
+	p.wg.Add(1)
+	go func() {
+		defer p.wg.Done()
+		select {
+		case <-p.ticker.C:
+			p.check()
+		case <-p.ctx.Done():
+			return
+		}
+	}()
+}
+
+func (p *LatencyTester) Stop() {
+	p.ticker.Stop()
+	p.cancel()
+	p.wg.Wait()
 }

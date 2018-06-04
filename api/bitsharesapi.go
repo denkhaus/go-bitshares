@@ -36,7 +36,7 @@ type BitsharesAPI interface {
 	HistoryAPIID() int
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
-	OnError(func(error))
+	OnError(client.ErrorFunc)
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
 	VerifySignedTransaction(tx *types.SignedTransaction) (bool, error)
@@ -810,7 +810,7 @@ func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{})
 }
 
 //OnError hook your error callback here
-func (p *bitsharesAPI) OnError(errorFn func(err error)) {
+func (p *bitsharesAPI) OnError(errorFn client.ErrorFunc) {
 	p.wsClient.OnError(errorFn)
 }
 

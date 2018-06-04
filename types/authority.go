@@ -11,7 +11,6 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
-//TODO implement AddressAuths
 type Authority struct {
 	WeightThreshold UInt32          `json:"weight_threshold"`
 	AccountAuths    AccountAuthsMap `json:"account_auths"`
@@ -178,7 +177,7 @@ func (p AddressAuthsMap) MarshalJSON() ([]byte, error) {
 
 	buf, err := ffjson.Marshal(ret)
 	if err != nil {
-		return nil, errors.Annotate(err, "marshal AuthsMap")
+		return nil, errors.Annotate(err, "Marshal")
 	}
 
 	return buf, nil
@@ -194,7 +193,7 @@ func (p AddressAuthsMap) Marshal(enc *util.TypeEncoder) error {
 			return errors.Annotate(err, "encode Key")
 		}
 		if err := enc.Encode(v); err != nil {
-			return errors.Annotate(err, "encode ValueExtension")
+			return errors.Annotate(err, "encode Value")
 		}
 	}
 
@@ -206,7 +205,7 @@ type AccountAuthsMap map[GrapheneID]UInt16
 func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
 	var res interface{}
 	if err := ffjson.Unmarshal(data, &res); err != nil {
-		return errors.Annotate(err, "unmarshal AccountAuthsMap")
+		return errors.Annotate(err, "Unmarshal")
 	}
 
 	(*p) = make(map[GrapheneID]UInt16)
@@ -243,7 +242,7 @@ func (p AccountAuthsMap) MarshalJSON() ([]byte, error) {
 
 	buf, err := ffjson.Marshal(ret)
 	if err != nil {
-		return nil, errors.Annotate(err, "marshal AccountAuthsMap")
+		return nil, errors.Annotate(err, "Marshal")
 	}
 
 	return buf, nil
