@@ -1,7 +1,9 @@
 # bitshares
 
-A Bitshares API consuming a websocket connection to an active full node and, if you need wallet functions, an optional RPC connection to your local `cli_wallet`. 
-Look for several examples in tests. This is work in progress and may have breaking changes as development goes on. Use it on your own risk. 
+A Bitshares API consuming a websocket connection to an active full node. If you need wallet functions, specify an optional RPC connection to your local `cli_wallet`. 
+Look for several examples in tests. This is work in progress and may have breaking changes. 
+No additional cgo dependencies for transaction signing required. 
+Use it on your own risk. 
 
 
 ## install
@@ -9,13 +11,13 @@ Look for several examples in tests. This is work in progress and may have breaki
 go get -u github.com/denkhaus/bitshares
 ```
 
-Install dependencies like [secp256k1](https://github.com/bitcoin-core/secp256k1) with
+Install dev-dependencies with
 ```
 make init
 ```
 
-
-This API uses [ffjson](https://github.com/pquerna/ffjson). If you change this code you have to regenerate the required static `MarshalJSON` and `UnmarshalJSON` functions for all API-structures with
+This API uses [ffjson](https://github.com/pquerna/ffjson). 
+If you change this code you have to regenerate the required static `MarshalJSON` and `UnmarshalJSON` functions for all API-structures with
 
 ```
 make generate
@@ -23,10 +25,17 @@ make generate
 
 ## testing
 
+To test this stuff I use a combined MainNet/TestNet wallet in docker you can find [here](https://github.com/denkhaus/bitshares-docker).
 Operations testing uses generated real blockchain sample code by gen package. To test this api run
 ```
 make test_operations
 make test_api
+```
+
+or a long running block (deserialize/serialize/compare) range test.
+
+```
+make test_blocks
 ```
 ## code
 ```
@@ -62,7 +71,7 @@ log.Printf("balances: %v", res)
 - [x] OperationTypeLimitOrderCreate
 - [x] OperationTypeLimitOrderCancel
 - [x] OperationTypeCallOrderUpdate
-- [x] OperationTypeFillOrder
+- [x] OperationTypeFillOrder (test failing)
 - [x] OperationTypeAccountCreate
 - [x] OperationTypeAccountUpdate
 - [x] OperationTypeAccountWhitelist
@@ -108,6 +117,8 @@ log.Printf("balances: %v", res)
 
 ## todo
 - add missing operations
+- add convenience functions
+- add a "BestNodeSelector" utility that chooses the most reliable node for API connections.
 
 
 Have fun and feel free to contribute needed operations and tests.

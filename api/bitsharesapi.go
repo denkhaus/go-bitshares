@@ -39,7 +39,7 @@ type BitsharesAPI interface {
 	OnError(client.ErrorFunc)
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
-	VerifySignedTransaction(tx *types.SignedTransaction) (bool, error)
+	VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
 	SignWithKeys(types.PrivateKeys, *types.SignedTransaction) error
 
@@ -218,16 +218,11 @@ func (p *bitsharesAPI) SignWithKeys(keys types.PrivateKeys, tx *types.SignedTran
 	return nil
 }
 
-func (p *bitsharesAPI) VerifySignedTransaction(tx *types.SignedTransaction) (bool, error) {
+func (p *bitsharesAPI) VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error) {
 	defer p.SetDebug(false)
 
-	reqPk, err := p.RequiredSigningKeys(tx)
-	if err != nil {
-		return false, errors.Annotate(err, "RequiredSigningKeys")
-	}
-
 	signer := crypto.NewTransactionSigner(tx)
-	verified, err := signer.Verify(reqPk, config.CurrentConfig())
+	verified, err := signer.Verify(keyBag, config.CurrentConfig())
 	if err != nil {
 		return false, errors.Annotate(err, "Verify")
 	}

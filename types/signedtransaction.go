@@ -56,7 +56,8 @@ func (p SignedTransaction) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-func (p SignedTransaction) Serialize() ([]byte, error) {
+//SerializeTrx serializes the transaction wihout signatures.
+func (p SignedTransaction) SerializeTrx() ([]byte, error) {
 	var b bytes.Buffer
 
 	enc := util.NewTypeEncoder(&b)
@@ -67,6 +68,19 @@ func (p SignedTransaction) Serialize() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+//ToHex returns th hex representation of the underlying transaction + signatures.
+func (p SignedTransaction) ToHex() (string, error) {
+	var b bytes.Buffer
+
+	enc := util.NewTypeEncoder(&b)
+	if err := enc.Encode(p); err != nil {
+		return "", errors.Annotate(err, "encode SignedTransaction")
+	}
+
+	return hex.EncodeToString(b.Bytes()), nil
+}
+
+//Digest calculates ths sha256 hash of the transaction.
 func (tx SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 	writer := sha256.New()
 
@@ -82,7 +96,7 @@ func (tx SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
 		return nil, errors.Annotate(err, "Write [chainID]")
 	}
 
-	rawTrx, err := tx.Serialize()
+	rawTrx, err := tx.SerializeTrx()
 	if err != nil {
 		return nil, errors.Annotatef(err, "Serialize")
 	}
@@ -120,11 +134,14 @@ func NewSignedTransactionWithBlockData(props *DynamicGlobalProperties) (*SignedT
 
 	return &tx, nil
 }
+
+//NewSignedTransaction creates an new SignedTransaction
 func NewSignedTransaction() *SignedTransaction {
+	tm := time.Now().UTC().Add(TxExpirationDefault)
 	tx := SignedTransaction{
 		Transaction: Transaction{
 			Extensions: Extensions{},
-			Expiration: Time{time.Now().UTC().Add(TxExpirationDefault)},
+			Expiration: Time{tm},
 		},
 		Signatures: Signatures{},
 	}

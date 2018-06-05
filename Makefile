@@ -1,6 +1,4 @@
 
-all: generate
-
 clean_ffjson_base: 
 	@rm -rf types/ffjson-inception* ||:
 	@rm -f types/*_ffjson_expose.go ||:
@@ -17,20 +15,8 @@ generate: clean_ffjson_base
 generate_new: clean_ffjson_base clean_ffjson_gen		
 	-go generate ./...
 
-
-install_secp256k1:
-	@echo "######################## -> install secp256k1"
-	@rm -rf /tmp/secp256k1
-	git clone https://github.com/bitcoin-core/secp256k1.git /tmp/secp256k1
-	cd /tmp/secp256k1 && ./autogen.sh 
-	cd /tmp/secp256k1 && ./configure --enable-module-recovery
-	cd /tmp/secp256k1 && make && sudo make install
-	#makes sure secp256k1 shared object is found while testing on my system
-	sudo ln -s /usr/local/lib/libsecp256k1.so.0 /usr/lib/libsecp256k1.so.0 
-
-init: install_secp256k1
+init: 
 	@echo "######################## -> install dependencies"
-	@go get -u github.com/pquerna/ffjson
 	@go get -u golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx
@@ -47,8 +33,9 @@ test_api:
 test_operations:
 	go test -v ./operations -run ^TestOperations$
 
-#this is a long running task
+#
 test_blocks:
+	@echo "this is a long running task abort with Ctrl + C"
 	go test -v ./tests -run ^TestBlockRange$
 
 buildgen:

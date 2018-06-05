@@ -63,7 +63,6 @@ func (p PrivateKey) Bytes() []byte {
 	return p.priv.Serialize()
 }
 
-
 func (p PrivateKey) ToHex() string {
 	return hex.EncodeToString(p.Bytes())
 }

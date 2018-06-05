@@ -13,7 +13,6 @@ import (
 	_ "github.com/denkhaus/bitshares/gen/samples"
 )
 
-//Note: operation tests may fail for now cause extensions marshalling is questionable.
 type operationsAPITest struct {
 	suite.Suite
 	TestAPI api.BitsharesAPI
@@ -83,15 +82,7 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 		suite.FailNow(err.Error(), "SignTransaction")
 	}
 
-	expected := "f68585abf4dce7c8045701036400000000000000001d00e1f" +
-		"50500000000001027000000000000160000011f2627efb5c5" +
-		"144440e06ff567f1a09928d699ac6f5122653cd7173362a1a" +
-		"e20205952c874ed14ccec050be1c86c1a300811763ef3b481" +
-		"e562e0933c09b40e31fb"
-
-	test := trx.ToHex()
-
-	suite.Equal(expected[:len(expected)-130], test[:len(test)-130])
+	suite.compareTransaction(suite.RefTx, false)
 }
 
 func (suite *operationsAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {
