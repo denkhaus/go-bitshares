@@ -10,18 +10,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_LatencyAnalyzer(t *testing.T) {
+func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 
 	ctx := context.Background()
-	//ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
-	lat, err := NewLatencyTester(ctx, tests.RpcFullApiUrl, 10*time.Second)
+	ctx, _ = context.WithTimeout(ctx, 60*time.Second)
+	lat, err := NewLatencyTester(ctx, tests.RpcFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
 
 	lat.Start()
-	time.Sleep(3000 * time.Second)
-	lat.Stop()
-	//<-lat.Done()
+	<-lat.Done()
 	fmt.Print(lat.String())
 }
