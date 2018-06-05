@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
 	"github.com/juju/errors"
+	"gopkg.in/tomb.v2"
 )
 
 var (
@@ -20,19 +22,19 @@ var (
 		"wss://bitshares.crypto.fans/ws",
 		"wss://node.market.rudex.org",
 		"wss://api.bts.blckchnd.com",
-		// "wss://eu.nodes.bitshares.ws",
-		// "wss://btsws.roelandp.nl/ws",
-		// "wss://btsfullnode.bangzi.info/ws",
-		// "wss://api-ru.bts.blckchnd.com",
-		// "wss://kc-us-dex.xeldal.com/ws",
-		// "wss://api.btsxchng.com",
-		// "wss://api.bts.network",
-		// "wss://dexnode.net/ws",
-		// "wss://us.nodes.bitshares.ws",
-		// "wss://api.bts.mobi/ws",
-		// "wss://blockzms.xyz/ws",
-		// "wss://bts-api.lafona.net/ws",
-		// "wss://api.bts.ai/",
+		"wss://eu.nodes.bitshares.ws",
+		"wss://btsws.roelandp.nl/ws",
+		"wss://btsfullnode.bangzi.info/ws",
+		"wss://api-ru.bts.blckchnd.com",
+		"wss://kc-us-dex.xeldal.com/ws",
+		"wss://api.btsxchng.com",
+		"wss://api.bts.network",
+		"wss://dexnode.net/ws",
+		"wss://us.nodes.bitshares.ws",
+		"wss://api.bts.mobi/ws",
+		"wss://blockzms.xyz/ws",
+		"wss://bts-api.lafona.net/ws",
+		"wss://api.bts.ai/",
 		// "wss://la.dexnode.net/ws",
 		// "wss://openledger.hk/ws",
 		// "wss://sg.nodes.bitshares.ws",
@@ -106,33 +108,33 @@ func NewNodeStats(wsRPCEndpoint, walletRPCEndpoint string) (*NodeStats, error) {
 	return stats, nil
 }
 
-func (p *NodeStats) check() {
+func (p *NodeStats) check() error {
 	tm := time.Now()
 	_, err := p.api.GetDynamicGlobalProperties()
 	if err != nil {
 		p.errors++
+		return errors.Annotate(err, "GetDynamicGlobalProperties")
 	}
 
-	p.latency += time.Since(tm)
 	p.attempts++
+	p.latency += time.Since(tm)
+	fmt.Printf("checked stats for %s\n", p)
+	return nil
 }
 
 type LatencyTester struct {
 	sync.Mutex
-	wg                sync.WaitGroup
-	ctx               context.Context
-	cancel            context.CancelFunc
+	tmb               *tomb.Tomb
 	statsMap          map[string]*NodeStats
 	walletRPCEndpoint string
 }
 
 func NewLatencyTester(ctx context.Context, walletRPCEndpoint string) (*LatencyTester, error) {
-	cctx, cancel := context.WithCancel(ctx)
+	tmb, _ := tomb.WithContext(ctx)
 	lat := LatencyTester{
 		statsMap:          make(map[string]*NodeStats),
 		walletRPCEndpoint: walletRPCEndpoint,
-		cancel:            cancel,
-		ctx:               cctx,
+		tmb:               tmb,
 	}
 
 	for _, ep := range knownEndpoints {
@@ -174,29 +176,37 @@ func (p *LatencyTester) String() string {
 // }
 
 func (p *LatencyTester) Done() <-chan struct{} {
-	return p.ctx.Done()
+	return p.tmb.Dead()
 }
 
 func (p *LatencyTester) Start() {
-	p.wg.Add(1)
+	p.tmb.Go(func() error {
+		var cnt int32
 
-	go func() {
-		defer p.wg.Done()
 		for {
 			for _, stats := range p.statsMap {
 				select {
-				case <-p.ctx.Done():
-					return
+				case <-p.tmb.Dying():
+					return tomb.ErrDying
 				default:
-					time.Sleep(1 * time.Second)
-					go stats.check()
 				}
+
+				for atomic.LoadInt32(&cnt) > 3 {
+					time.Sleep(1 * time.Second)
+				}
+
+				st := stats
+				p.tmb.Go(func() error {
+					atomic.AddInt32(&cnt, 1)
+					defer atomic.AddInt32(&cnt, -1)
+					return st.check()
+				})
 			}
 		}
-	}()
+	})
 }
 
-func (p *LatencyTester) Stop() {
-	p.cancel()
-	p.wg.Wait()
+func (p *LatencyTester) Stop() error {
+	p.tmb.Kill(nil)
+	return p.tmb.Wait()
 }

@@ -181,7 +181,7 @@ func (p *wsClient) receive() {
 
 				call.done()
 			} else {
-				p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
+				p.errors <- errors.Errorf("no corresponding call found for incoming rpc data %v", p.resp)
 				continue
 			}
 		} else if err := p.handleCustomData(data); err != nil {

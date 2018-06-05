@@ -18,8 +18,24 @@ func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
-
+ 
 	lat.Start()
 	<-lat.Done()
+	fmt.Print(lat.String())
+}
+
+func Test_LatencyAnalyzerWithStop(t *testing.T) {
+	lat, err := NewLatencyTester(context.Background(), tests.RpcFullApiUrl)
+	if err != nil {
+		assert.FailNow(t, err.Error(), "NewLatencyTester")
+	}
+
+	lat.Start()
+	time.Sleep(5 * time.Second)
+
+	if err := lat.Stop(); err != nil {
+		assert.FailNow(t, err.Error(), "Stop")
+	}
+
 	fmt.Print(lat.String())
 }
