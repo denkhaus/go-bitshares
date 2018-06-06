@@ -39,7 +39,6 @@ type wsClient struct {
 func NewWebsocketClient(endpointURL string) WebsocketClient {
 	cli := wsClient{
 		pending:   make(map[uint64]*RPCCall),
-		errors:    make(chan error, 10),
 		notifyFns: make(map[int]NotifyFunc),
 		currentID: 1,
 		url:       endpointURL,
@@ -55,6 +54,7 @@ func (p *wsClient) Connect() error {
 		return errors.Annotate(err, "dial")
 	}
 
+	p.errors = make(chan error, 10)
 	p.Decoder = ffjson.NewDecoder()
 	p.Encoder = ffjson.NewEncoder(conn)
 	p.conn = conn

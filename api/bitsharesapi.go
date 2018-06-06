@@ -6,6 +6,7 @@ import (
 	"github.com/denkhaus/bitshares/client"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
+	"github.com/denkhaus/bitshares/latency"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -84,6 +85,7 @@ type BitsharesAPI interface {
 }
 
 type bitsharesAPI struct {
+	latTester      latency.LatencyTester
 	wsClient       client.WebsocketClient
 	rpcClient      client.RPCClient
 	username       string
@@ -816,7 +818,7 @@ func (p *bitsharesAPI) SetCredentials(username, password string) {
 	p.password = password
 }
 
-// Connect initializes the API and connects underlying clients
+// Connect initializes the API and connects underlying resources
 func (p *bitsharesAPI) Connect() (err error) {
 	if err := p.wsClient.Connect(); err != nil {
 		return errors.Annotate(err, "ws connect")
@@ -875,7 +877,7 @@ func (p *bitsharesAPI) getAPIIDs() (err error) {
 	return nil
 }
 
-//Close() shuts down the api and closes underlying clients.
+//Close shuts the API down and closes underlying resources.
 func (p *bitsharesAPI) Close() error {
 	if p.rpcClient != nil {
 		if err := p.rpcClient.Close(); err != nil {
@@ -891,12 +893,20 @@ func (p *bitsharesAPI) Close() error {
 		p.wsClient = nil
 	}
 
+	if p.latTester != nil {
+		if err := p.latTester.Close(); err != nil {
+			return errors.Annotate(err, "close latency tester")
+		}
+		p.latTester = nil
+	}
+
 	return nil
 }
 
 //New creates a new BitsharesAPI interface.
-//Param wsEndpointURL is mandatory.
-//Param rpcEndpointURL is optional
+//wsEndpointURL is a mandatory websocket node URL. rpcEndpointURL is an optional RPC
+//endpoint to your local `cli_wallet`. The use of wallet functions without this argument
+//will throw an error. If you do not use wallet API, provide an empty string.
 func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	var rpcClient client.RPCClient
 	if rpcEndpointURL != "" {
@@ -914,4 +924,32 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	}
 
 	return &api
+}
+
+func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAPI, error) {
+	var rpcClient client.RPCClient
+	if rpcEndpointURL != "" {
+		rpcClient = client.NewRPCClient(rpcEndpointURL)
+	}
+
+	latTester, err := latency.NewLatencyTester(startupEndpointURL)
+	if err != nil {
+		return nil, errors.Annotate(err, "NewLatencyTester")
+	}
+
+	latTester.Start()
+	wsClient := latTester.TopNodeClient()
+
+	api := bitsharesAPI{
+		latTester:      latTester,
+		wsClient:       wsClient,
+		rpcClient:      rpcClient,
+		databaseAPIID:  InvalidApiID,
+		historyAPIID:   InvalidApiID,
+		broadcastAPIID: InvalidApiID,
+		cryptoAPIID:    InvalidApiID,
+		debug:          false,
+	}
+
+	return &api, nil
 }

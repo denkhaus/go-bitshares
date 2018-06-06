@@ -2,7 +2,7 @@ package latency
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -14,18 +14,18 @@ func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 
 	ctx := context.Background()
 	ctx, _ = context.WithTimeout(ctx, 60*time.Second)
-	lat, err := NewLatencyTester(ctx, tests.RpcFullApiUrl)
+	lat, err := NewLatencyTesterWithContext(ctx, tests.WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
 
 	lat.Start()
 	<-lat.Done()
-	fmt.Print(lat.String())
+	log.Print(lat.String())
 }
 
 func Test_LatencyAnalyzerWithStop(t *testing.T) {
-	lat, err := NewLatencyTester(context.Background(), tests.RpcFullApiUrl)
+	lat, err := NewLatencyTester(tests.WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
@@ -33,9 +33,9 @@ func Test_LatencyAnalyzerWithStop(t *testing.T) {
 	lat.Start()
 	time.Sleep(16 * time.Second)
 
-	if err := lat.Stop(); err != nil {
-		assert.FailNow(t, err.Error(), "Stop")
+	if err := lat.Close(); err != nil {
+		assert.FailNow(t, err.Error(), "Close")
 	}
 
-	fmt.Print(lat.String())
+	log.Print(lat.String())
 }

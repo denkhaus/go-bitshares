@@ -3,16 +3,21 @@ package latency
 import (
 	"context"
 	"fmt"
+	"log"
+	"math"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
-	"github.com/juju/errors"
+	"github.com/denkhaus/bitshares/client"
+	sort "github.com/emirpasic/gods/utils"
 	"gopkg.in/tomb.v2"
 )
 
 var (
+	//LoopSeconds = time for one pass to calc dynamic delay
+	LoopSeconds = 60
+	//our known node endpoints
 	knownEndpoints = []string{
 		"wss://eu.openledger.info/ws",
 		"wss://bitshares.openledger.info/ws",
@@ -30,35 +35,36 @@ var (
 		"wss://api.bts.network",
 		"wss://dexnode.net/ws",
 		"wss://us.nodes.bitshares.ws",
-		// "wss://api.bts.mobi/ws",
-		// "wss://blockzms.xyz/ws",
-		// "wss://bts-api.lafona.net/ws",
-		// "wss://api.bts.ai/",
-		// "wss://la.dexnode.net/ws",
-		// "wss://openledger.hk/ws",
-		// "wss://sg.nodes.bitshares.ws",
-		// "wss://bts.open.icowallet.net/ws",
-		// "wss://ws.gdex.io",
-		// "wss://bitshares-api.wancloud.io/ws",
-		// "wss://ws.hellobts.com/",
-		// "wss://bitshares.dacplay.org/ws",
-		// "wss://crazybit.online",
-		// "wss://kimziv.com/ws",
-		// "wss://wss.ioex.top",
-		// "wss://node.btscharts.com/ws",
-		// "wss://bts-seoul.clockwork.gr/",
-		// "wss://bitshares.cyberit.io/",
-		// "wss://api.btsgo.net/ws",
-		// "wss://ws.winex.pro",
-		// "wss://bts.to0l.cn:4443/ws",
-		// "wss://bitshares.bts123.cc:15138/",
-		// "wss://bit.btsabc.org/ws",
-		// "wss://ws.gdex.top",
+		"wss://api.bts.mobi/ws",
+		"wss://blockzms.xyz/ws",
+		"wss://bts-api.lafona.net/ws",
+		"wss://api.bts.ai/",
+		"wss://la.dexnode.net/ws",
+		"wss://openledger.hk/ws",
+		"wss://sg.nodes.bitshares.ws",
+		"wss://bts.open.icowallet.net/ws",
+		"wss://ws.gdex.io",
+		"wss://bitshares-api.wancloud.io/ws",
+		"wss://ws.hellobts.com/",
+		"wss://bitshares.dacplay.org/ws",
+		"wss://crazybit.online",
+		"wss://kimziv.com/ws",
+		"wss://wss.ioex.top",
+		"wss://node.btscharts.com/ws",
+		"wss://bts-seoul.clockwork.gr/",
+		"wss://bitshares.cyberit.io/",
+		"wss://api.btsgo.net/ws",
+		"wss://ws.winex.pro",
+		"wss://bts.to0l.cn:4443/ws",
+		"wss://bitshares.bts123.cc:15138/",
+		"wss://bit.btsabc.org/ws",
+		"wss://ws.gdex.top",
 	}
 )
 
+//NodeStats holds stat data for each endpoint
 type NodeStats struct {
-	api      api.BitsharesAPI
+	cli      client.WebsocketClient
 	latency  time.Duration
 	attempts int64
 	errors   int64
@@ -66,10 +72,10 @@ type NodeStats struct {
 }
 
 func (p *NodeStats) onError(err error) {
-	fmt.Println(err)
 	p.errors++
 }
 
+//Latency returns the nodes latency
 func (p *NodeStats) Latency() time.Duration {
 	if p.attempts > 0 {
 		return time.Duration(int64(p.latency) / p.attempts)
@@ -78,8 +84,12 @@ func (p *NodeStats) Latency() time.Duration {
 	return 0
 }
 
+//Score returns reliability score for each node. The less the better.
 func (p *NodeStats) Score() int64 {
 	lat := int64(p.Latency())
+	if lat == 0 {
+		return math.MaxInt64
+	}
 	if p.errors == 0 {
 		return lat
 	}
@@ -87,115 +97,200 @@ func (p *NodeStats) Score() int64 {
 	return lat * p.errors
 }
 
+// String returns the stats string representation
 func (p *NodeStats) String() string {
 	return fmt.Sprintf("ep: %s | attempts: %d | errors: %d | latency: %s | score: %d",
 		p.endpoint, p.attempts, p.errors, p.Latency(), p.Score())
 }
 
-func NewNodeStats(wsRPCEndpoint, walletRPCEndpoint string) (*NodeStats, error) {
-	api := api.New(wsRPCEndpoint, walletRPCEndpoint)
-	if err := api.Connect(); err != nil {
-		return nil, errors.Annotate(err, "Connect")
-	}
-
+//NewNodeStats creates a new stat object
+func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 	stats := &NodeStats{
 		endpoint: wsRPCEndpoint,
-		api:      api,
+		cli:      client.NewWebsocketClient(wsRPCEndpoint),
 	}
 
-	api.OnError(stats.onError)
-	return stats, nil
+	stats.cli.OnError(stats.onError)
+	return stats
 }
 
-func (p *NodeStats) check() error {
+func (p *NodeStats) check() {
+	if err := p.cli.Connect(); err != nil {
+		p.errors++
+		return
+	}
+	defer p.cli.Close()
+
 	tm := time.Now()
-	_, err := p.api.GetDynamicGlobalProperties()
+	_, err := p.cli.CallAPI(1, "login", "", "")
 	if err != nil {
 		p.errors++
-		return errors.Annotate(err, "GetDynamicGlobalProperties")
+		return
 	}
 
-	p.attempts++
 	p.latency += time.Since(tm)
+	p.attempts++
 
-	return nil
+	log.Println("check: ", p.String())
 }
 
-type LatencyTester struct {
+type LatencyTester interface {
+	Start()
+	Close() error
+	String() string
+	AddEndpoint(ep string)
+	TopNodeEndpoint() string
+	TopNodeClient() client.WebsocketClient
+	Done() <-chan struct{}
+}
+type latencyTester struct {
 	sync.Mutex
-	tmb               *tomb.Tomb
-	toApply           []string
-	statsMap          map[string]*NodeStats
-	walletRPCEndpoint string
+	tmb         *tomb.Tomb
+	toApply     []string
+	fallbackURL string
+	stats       []interface{}
+	pass        int
 }
 
-func NewLatencyTester(ctx context.Context, walletRPCEndpoint string) (*LatencyTester, error) {
+func NewLatencyTester(fallbackURL string) (LatencyTester, error) {
+	return NewLatencyTesterWithContext(context.Background(), fallbackURL)
+}
+
+func NewLatencyTesterWithContext(ctx context.Context, fallbackURL string) (LatencyTester, error) {
 	tmb, _ := tomb.WithContext(ctx)
-	lat := LatencyTester{
-		statsMap:          make(map[string]*NodeStats),
-		walletRPCEndpoint: walletRPCEndpoint,
-		tmb:               tmb,
+	lat := latencyTester{
+		fallbackURL: fallbackURL,
+		stats:       make([]interface{}, 0, len(knownEndpoints)),
+		tmb:         tmb,
 	}
 
 	lat.createStats(knownEndpoints)
 	return &lat, nil
 }
 
-func (p *LatencyTester) String() string {
+func (p *latencyTester) String() string {
 	builder := strings.Builder{}
 
 	p.Lock()
 	defer p.Unlock()
-	for _, stats := range p.statsMap {
-		builder.WriteString(stats.String())
+	for _, s := range p.stats {
+		stat := s.(*NodeStats)
+		builder.WriteString(stat.String())
 		builder.WriteString("\n")
 	}
 
 	return builder.String()
 }
 
-func (p *LatencyTester) AddEndpoint(ep string) {
+//AddEndpoint adds a new endpoint while the latencyTester is running
+func (p *latencyTester) AddEndpoint(ep string) {
 	p.toApply = append(p.toApply, ep)
 }
 
-func (p *LatencyTester) createStats(eps []string) {
+func (p *latencyTester) sortResults() {
+	p.Lock()
+	defer p.Unlock()
+
+	sort.Sort(p.stats, func(a, b interface{}) int {
+		sa := a.(*NodeStats).Score()
+		sb := b.(*NodeStats).Score()
+		if sa > sb {
+			return 1
+		}
+
+		if sa < sb {
+			return -1
+		}
+
+		return 0
+	})
+}
+
+func (p *latencyTester) createStats(eps []string) {
 	p.Lock()
 	defer p.Unlock()
 
 	for _, ep := range eps {
-		if _, ok := p.statsMap[ep]; !ok {
-			stat, err := NewNodeStats(ep, p.walletRPCEndpoint)
-			if err == nil {
-				p.statsMap[ep] = stat
+		found := false
+		for _, s := range p.stats {
+			stat := s.(*NodeStats)
+			if stat.endpoint == ep {
+				found = true
 			}
+		}
+
+		if !found {
+			p.stats = append(
+				p.stats,
+				NewNodeStats(ep),
+			)
 		}
 	}
 }
 
-func (p *LatencyTester) Done() <-chan struct{} {
+//TopNodeEndpoint returns the fastest endpoint URL. If the tester has no validated results
+//your given fallback endpoint is returned.
+func (p *latencyTester) TopNodeEndpoint() string {
+	if p.pass > 0 {
+		p.Lock()
+		defer p.Unlock()
+		st := p.stats[0].(*NodeStats)
+		return st.endpoint
+	}
+
+	return p.fallbackURL
+}
+
+//TopNodeClient returns a new WebsocketClient to connect to the fastest node.
+//If the tester has no validated results, a client with your given
+//fallback endpoint is returned. You need to call Connect for yourself.
+func (p *latencyTester) TopNodeClient() client.WebsocketClient {
+	return client.NewWebsocketClient(
+		p.TopNodeEndpoint(),
+	)
+}
+
+// Done returns the channel that can be used to wait until
+// the tester has finished.
+func (p *latencyTester) Done() <-chan struct{} {
 	return p.tmb.Dead()
 }
 
-func (p *LatencyTester) Start() {
+//Start starts the testing process
+func (p *latencyTester) Start() {
 	p.tmb.Go(func() error {
 		for {
 			//apply later incoming endpoints
 			p.createStats(p.toApply)
-			for ep := range p.statsMap {
+			// dynamic sleep time
+			slp := time.Duration(LoopSeconds/len(p.stats)) * time.Second
+			for i := 0; i < len(p.stats); i++ {
 				select {
 				case <-p.tmb.Dying():
+					p.sortResults()
 					return tomb.ErrDying
 				default:
-					e := ep
-					time.Sleep(1 * time.Second)
-					p.tmb.Go(p.statsMap[e].check)
+					idx := i
+					time.Sleep(slp)
+					p.tmb.Go(func() error {
+						p.Lock()
+						defer p.Unlock()
+
+						st := p.stats[idx].(*NodeStats)
+						st.check()
+						return nil
+					})
 				}
 			}
+
+			p.sortResults()
+			p.pass++
 		}
 	})
 }
 
-func (p *LatencyTester) Stop() error {
+//Close stops the tester and waits until all goroutines have finished.
+func (p *latencyTester) Close() error {
 	p.tmb.Kill(nil)
 	return p.tmb.Wait()
 }
