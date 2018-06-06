@@ -48,7 +48,7 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 	return resp.(bool), err
 }
 
-// Buy places a limit order attempting to buy one asset with another.
+// WalletBuy places a limit order attempting to buy one asset with another.
 // This API call abstracts away some of the details of the sell_asset call to be more
 // user friendly. All orders placed with buy never timeout and will not be killed if they
 // cannot be filled immediately. If you wish for one of these parameters to be different,
@@ -62,14 +62,19 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
+func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
 	}
 
-	resp, err := p.rpcClient.CallAPI("buy", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
+	resp, err := p.rpcClient.CallAPI(
+		"buy", account.Id(),
+		base.Id(), quote.Id(),
+		rate, amount, broadcast,
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +89,7 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 	return &ret, nil
 }
 
-// Sell places a limit order attempting to sell one asset for another.
+// WalletSell places a limit order attempting to sell one asset for another.
 // This API call abstracts away some of the details of the sell_asset call to be more
 // user friendly. All orders placed with sell never timeout and will not be killed if they
 // cannot be filled immediately. If you wish for one of these parameters to be different,
@@ -98,14 +103,19 @@ func (p *bitsharesAPI) Buy(account types.GrapheneObject, base, quote types.Graph
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
+func (p *bitsharesAPI) WalletSell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
 	}
 
-	resp, err := p.rpcClient.CallAPI("sell", account.Id(), base.Id(), quote.Id(), rate, amount, broadcast)
+	resp, err := p.rpcClient.CallAPI(
+		"sell", account.Id(),
+		base.Id(), quote.Id(),
+		rate, amount, broadcast,
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,27 +130,27 @@ func (p *bitsharesAPI) Sell(account types.GrapheneObject, base, quote types.Grap
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
+func (p *bitsharesAPI) WalletBuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 	//TODO: use proper precision, avoid rounding
 	minToReceive := fmt.Sprintf("%f", amount)
 	amountToSell := fmt.Sprintf("%f", rate*amount)
 
-	return p.SellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
+	return p.WalletSellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
 }
 
-func (p *bitsharesAPI) SellEx(account types.GrapheneObject, base, quote types.GrapheneObject,
+func (p *bitsharesAPI) WalletSellEx(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 
 	//TODO: use proper precision, avoid rounding
 	amountToSell := fmt.Sprintf("%f", amount)
 	minToReceive := fmt.Sprintf("%f", rate*amount)
 
-	return p.SellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
+	return p.WalletSellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
 }
 
 // SellAsset
-func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
+func (p *bitsharesAPI) WalletSellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
 	minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
@@ -148,7 +158,8 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell stri
 		return nil, types.ErrRPCClientNotInitialized
 	}
 
-	resp, err := p.rpcClient.CallAPI("sell_asset", account.Id(),
+	resp, err := p.rpcClient.CallAPI(
+		"sell_asset", account.Id(),
 		amountToSell, symbolToSell.Id(),
 		minToReceive, symbolToReceive.Id(),
 		timeout, fillOrKill, broadcast,
@@ -167,13 +178,13 @@ func (p *bitsharesAPI) SellAsset(account types.GrapheneObject, amountToSell stri
 	return &ret, nil
 }
 
-// BorrowAsset borrows an asset or update the debt/collateral ratio for the loan.
+// WalletBorrowAsset borrows an asset or update the debt/collateral ratio for the loan.
 // @param account: the id of the account associated with the transaction.
 // @param amountToBorrow: the amount of the asset being borrowed. Make this value negative to pay back debt.
 // @param symbolToBorrow: the symbol or id of the asset being borrowed.
 // @param amountOfCollateral: the amount of the backing asset to add to your collateral position. Make this negative to claim back some of your collateral. The backing asset is defined in the bitasset_options for the asset being borrowed.
 // @param broadcast: true to broadcast the transaction on the network
-func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
+func (p *bitsharesAPI) WalletBorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
 	amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error) {
 
 	defer p.SetDebug(false)
@@ -182,7 +193,8 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow 
 		return nil, types.ErrRPCClientNotInitialized
 	}
 
-	resp, err := p.rpcClient.CallAPI("borrow_asset", account.Id(),
+	resp, err := p.rpcClient.CallAPI(
+		"borrow_asset", account.Id(),
 		amountToBorrow, symbolToBorrow.Id(),
 		amountOfCollateral, broadcast,
 	)
@@ -200,7 +212,7 @@ func (p *bitsharesAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow 
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error) {
+func (p *bitsharesAPI) WalletListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error) {
 
 	defer p.SetDebug(false)
 
@@ -226,7 +238,7 @@ func (p *bitsharesAPI) ListAccountBalances(account types.GrapheneObject) (types.
 // SerializeTransaction converts a signed_transaction in JSON form to its binary representation.
 // @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
-func (p *bitsharesAPI) SerializeTransaction(tx *types.SignedTransaction) (string, error) {
+func (p *bitsharesAPI) WalletSerializeTransaction(tx *types.SignedTransaction) (string, error) {
 	defer p.SetDebug(false)
 
 	if p.rpcClient == nil {

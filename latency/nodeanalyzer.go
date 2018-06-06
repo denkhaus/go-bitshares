@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
@@ -31,10 +30,10 @@ var (
 		"wss://api.bts.network",
 		"wss://dexnode.net/ws",
 		"wss://us.nodes.bitshares.ws",
-		"wss://api.bts.mobi/ws",
-		"wss://blockzms.xyz/ws",
-		"wss://bts-api.lafona.net/ws",
-		"wss://api.bts.ai/",
+		// "wss://api.bts.mobi/ws",
+		// "wss://blockzms.xyz/ws",
+		// "wss://bts-api.lafona.net/ws",
+		// "wss://api.bts.ai/",
 		// "wss://la.dexnode.net/ws",
 		// "wss://openledger.hk/ws",
 		// "wss://sg.nodes.bitshares.ws",
@@ -118,13 +117,14 @@ func (p *NodeStats) check() error {
 
 	p.attempts++
 	p.latency += time.Since(tm)
-	fmt.Printf("checked stats for %s\n", p)
+
 	return nil
 }
 
 type LatencyTester struct {
 	sync.Mutex
 	tmb               *tomb.Tomb
+	toApply           []string
 	statsMap          map[string]*NodeStats
 	walletRPCEndpoint string
 }
@@ -137,13 +137,7 @@ func NewLatencyTester(ctx context.Context, walletRPCEndpoint string) (*LatencyTe
 		tmb:               tmb,
 	}
 
-	for _, ep := range knownEndpoints {
-		stat, err := NewNodeStats(ep, walletRPCEndpoint)
-		if err == nil {
-			lat.statsMap[ep] = stat
-		}
-	}
-
+	lat.createStats(knownEndpoints)
 	return &lat, nil
 }
 
@@ -160,20 +154,23 @@ func (p *LatencyTester) String() string {
 	return builder.String()
 }
 
-// func (p *LatencyTester) AddEndpoint(ep string) error {
-// 	p.Lock()
-// 	defer p.Unlock()
+func (p *LatencyTester) AddEndpoint(ep string) {
+	p.toApply = append(p.toApply, ep)
+}
 
-// 	if _, ok := p.statsMap[ep]; !ok {
-// 		stat, err := NewNodeStats(ep, p.walletRPCEndpoint)
-// 		if err != nil {
-// 			return errors.Annotate(err, "NewNodeStats")
-// 		}
-// 		p.statsMap[ep] = stat
-// 	}
+func (p *LatencyTester) createStats(eps []string) {
+	p.Lock()
+	defer p.Unlock()
 
-// 	return nil
-// }
+	for _, ep := range eps {
+		if _, ok := p.statsMap[ep]; !ok {
+			stat, err := NewNodeStats(ep, p.walletRPCEndpoint)
+			if err == nil {
+				p.statsMap[ep] = stat
+			}
+		}
+	}
+}
 
 func (p *LatencyTester) Done() <-chan struct{} {
 	return p.tmb.Dead()
@@ -181,26 +178,18 @@ func (p *LatencyTester) Done() <-chan struct{} {
 
 func (p *LatencyTester) Start() {
 	p.tmb.Go(func() error {
-		var cnt int32
-
 		for {
-			for _, stats := range p.statsMap {
+			//apply later incoming endpoints
+			p.createStats(p.toApply)
+			for ep := range p.statsMap {
 				select {
 				case <-p.tmb.Dying():
 					return tomb.ErrDying
 				default:
-				}
-
-				for atomic.LoadInt32(&cnt) > 3 {
+					e := ep
 					time.Sleep(1 * time.Second)
+					p.tmb.Go(p.statsMap[e].check)
 				}
-
-				st := stats
-				p.tmb.Go(func() error {
-					atomic.AddInt32(&cnt, 1)
-					defer atomic.AddInt32(&cnt, -1)
-					return st.check()
-				})
 			}
 		}
 	})
