@@ -169,8 +169,8 @@ func (p *bitsharesAPI) CancelAllSubscriptions() error {
 }
 
 //Broadcast a transaction to the network.
-//The transaction will be checked for validity in the local database prior to broadcasting.
-//If it fails to apply locally, an error will be thrown and the transaction will not be broadcast.
+//The transaction will be checked for validity prior to broadcasting.
+//If it fails to apply at the connected node, an error will be thrown and the transaction will not be broadcast.
 func (p *bitsharesAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	defer p.SetDebug(false)
 
@@ -183,7 +183,7 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 }
 
 //SignTransaction signs a given transaction.
-//Required signing keys get selected by api and have to be in KeyBag.
+//Required signing keys get selected by API and have to be in keyBag.
 func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) error {
 	defer p.SetDebug(false)
 
@@ -218,6 +218,8 @@ func (p *bitsharesAPI) SignWithKeys(keys types.PrivateKeys, tx *types.SignedTran
 	return nil
 }
 
+//VerifySignedTransaction verifies a signed transaction against all available keys in keyBag.
+//If all required key are found the function returns true, otherwise false.
 func (p *bitsharesAPI) VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error) {
 	defer p.SetDebug(false)
 
@@ -276,6 +278,8 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 	return tx, nil
 }
 
+//RequiredSigningKeys is a convenience call to retrieve the minimum subset of public keys to sign a transaction.
+//If the transaction is already signed, the result is empty.
 func (p *bitsharesAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	defer p.SetDebug(false)
 
@@ -317,6 +321,7 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 	return ret, nil
 }
 
+//GetRequiredSignatures returns the minimum subset of public keys to sign a transaction.
 func (p *bitsharesAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
 	defer p.SetDebug(false)
 
@@ -398,7 +403,7 @@ func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop type
 	return ret, nil
 }
 
-//GetAccounts returns a list of accounts by ID.
+//GetAccounts returns a list of accounts by accountID(s).
 func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Accounts, error) {
 	defer p.SetDebug(false)
 
@@ -418,7 +423,7 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 	return ret, nil
 }
 
-//GetDynamicGlobalProperties
+//GetDynamicGlobalProperties returns essential runtime properties of bitshares network.
 func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	defer p.SetDebug(false)
 
@@ -458,8 +463,8 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 }
 
 //ListAssets retrieves assets
-//@param lowerBoundSymbol: Lower bound of symbol names to retrieve
-//@param limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
+//lowerBoundSymbol: Lower bound of symbol names to retrieve
+//limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
 func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error) {
 	defer p.SetDebug(false)
 
@@ -482,8 +487,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 	return ret, nil
 }
 
-//GetRequiredFees calculates the required fee for each operation in the specified asset type.
-//If the asset type does not have a valid core_exchange_rate
+//GetRequiredFees calculates the required fee for each operation by the specified asset type.
 func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
 	defer p.SetDebug(false)
 
@@ -548,7 +552,7 @@ func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 	return ret, nil
 }
 
-//GetCallOrders returns CallOrders types.
+//GetCallOrders returns CallOrders type.
 func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error) {
 	defer p.SetDebug(false)
 
@@ -571,7 +575,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 	return ret, nil
 }
 
-//GetMarginPositions returns CallOrders type specified account.
+//GetMarginPositions returns CallOrders type.
 func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
 	defer p.SetDebug(false)
 
@@ -765,7 +769,7 @@ func (p bitsharesAPI) Debug(descr string, in interface{}) {
 }
 
 //SetDebug enables/disables function scoped debugging output.
-//Note: due to readability reasons debug is switched off after return from api call.
+//Note: due to readability reasons debug is switched off after return from call.
 func (p *bitsharesAPI) SetDebug(debug bool) {
 	p.debug = debug
 
@@ -794,29 +798,30 @@ func (p *bitsharesAPI) CryptoAPIID() int {
 	return p.cryptoAPIID
 }
 
+//CallWsAPI invokes a websocket API call
 func (p *bitsharesAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	defer p.SetDebug(false)
 	return p.wsClient.CallAPI(apiID, method, args...)
 }
 
-//OnError hook your notify callback here
+//OnError - hook your notify callback here
 func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
 	return p.wsClient.OnNotify(subscriberID, notifyFn)
 }
 
-//OnError hook your error callback here
+//OnError - hook your error callback here
 func (p *bitsharesAPI) OnError(errorFn client.ErrorFunc) {
 	p.wsClient.OnError(errorFn)
 }
 
-//SetCredentials defines username and password for Websocket api login.
-//Not necessary actually.
+//SetCredentials defines username and password for Websocket API login.
 func (p *bitsharesAPI) SetCredentials(username, password string) {
 	p.username = username
 	p.password = password
 }
 
 // Connect initializes the API and connects underlying resources
+// The websocket API is connected through the client provider.
 func (p *bitsharesAPI) Connect() (err error) {
 
 	if p.rpcClient != nil {
@@ -892,9 +897,10 @@ func (p *bitsharesAPI) Close() error {
 }
 
 //New creates a new BitsharesAPI interface.
-//wsEndpointURL is a mandatory websocket node URL. rpcEndpointURL is an optional RPC
-//endpoint to your local `cli_wallet`. The use of wallet functions without this argument
-//will throw an error. If you do not use wallet API, provide an empty string.
+//wsEndpointURL: Is a mandatory websocket node URL.
+//rpcEndpointURL: Is an optional RPC endpoint to your local `cli_wallet`.
+//The use of wallet functions without this argument will throw an error.
+//If you do not use wallet API, provide an empty string.
 func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	var rpcClient client.RPCClient
 	if rpcEndpointURL != "" {
@@ -916,6 +922,12 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	return &api
 }
 
+//NewWithAutoEndpoint creates a new BitsharesAPI interface with automatic node latency checking.
+//It's best to use this API instance type for a long API lifecycle because the latency tester takes time to unleash its magic.
+//startupEndpointURL: Iss a mandatory websocket node URL to startup the latency tester quickly.
+//rpcEndpointURL: Is an optional RPC endpoint to your local `cli_wallet`.
+//The use of wallet functions without this argument
+//will throw an error. If you do not use wallet API, provide an empty string.
 func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAPI, error) {
 	var rpcClient client.RPCClient
 	if rpcEndpointURL != "" {
