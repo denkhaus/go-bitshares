@@ -6,7 +6,6 @@ import (
 	"github.com/denkhaus/bitshares/client"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
-	"github.com/denkhaus/bitshares/latency"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -85,8 +84,7 @@ type BitsharesAPI interface {
 }
 
 type bitsharesAPI struct {
-	latTester      latency.LatencyTester
-	wsClient       client.WebsocketClient
+	wsClient       ClientProvider
 	rpcClient      client.RPCClient
 	username       string
 	password       string
@@ -820,9 +818,6 @@ func (p *bitsharesAPI) SetCredentials(username, password string) {
 
 // Connect initializes the API and connects underlying resources
 func (p *bitsharesAPI) Connect() (err error) {
-	if err := p.wsClient.Connect(); err != nil {
-		return errors.Annotate(err, "ws connect")
-	}
 
 	if p.rpcClient != nil {
 		if err := p.rpcClient.Connect(); err != nil {
@@ -893,13 +888,6 @@ func (p *bitsharesAPI) Close() error {
 		p.wsClient = nil
 	}
 
-	if p.latTester != nil {
-		if err := p.latTester.Close(); err != nil {
-			return errors.Annotate(err, "close latency tester")
-		}
-		p.latTester = nil
-	}
-
 	return nil
 }
 
@@ -913,8 +901,10 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		rpcClient = client.NewRPCClient(rpcEndpointURL)
 	}
 
+	pr := NewSimpleClientProvider(wsEndpointURL)
+
 	api := bitsharesAPI{
-		wsClient:       client.NewWebsocketClient(wsEndpointURL),
+		wsClient:       pr,
 		rpcClient:      rpcClient,
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
@@ -932,17 +922,13 @@ func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAP
 		rpcClient = client.NewRPCClient(rpcEndpointURL)
 	}
 
-	latTester, err := latency.NewLatencyTester(startupEndpointURL)
+	pr, err := NewBestNodeClientProvider(startupEndpointURL)
 	if err != nil {
-		return nil, errors.Annotate(err, "NewLatencyTester")
+		return nil, errors.Annotate(err, "NewBestNodeClientProvider")
 	}
 
-	latTester.Start()
-	wsClient := latTester.TopNodeClient()
-
 	api := bitsharesAPI{
-		latTester:      latTester,
-		wsClient:       wsClient,
+		wsClient:       pr,
 		rpcClient:      rpcClient,
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,

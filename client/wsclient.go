@@ -83,6 +83,10 @@ func (p *wsClient) Close() error {
 	return nil
 }
 
+func (p *wsClient) IsConnected() bool {
+	return p.conn != nil
+}
+
 func (p *wsClient) SetDebug(debug bool) {
 	p.debug = debug
 }

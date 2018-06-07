@@ -6,6 +6,7 @@ type NotifyFunc func(msg interface{}) error
 type ErrorFunc func(error)
 
 type WebsocketClient interface {
+	IsConnected() bool
 	OnError(fn ErrorFunc)
 	SetDebug(debug bool)
 	OnNotify(subscriberID int, fn NotifyFunc) error

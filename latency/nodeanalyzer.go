@@ -62,6 +62,17 @@ var (
 	}
 )
 
+type LatencyTester interface {
+	Start()
+	Close() error
+	String() string
+	AddEndpoint(ep string)
+	OnTopNodeChanged(fn func(topNodeEndpoint string))
+	TopNodeEndpoint() string
+	TopNodeClient() client.WebsocketClient
+	Done() <-chan struct{}
+}
+
 //NodeStats holds stat data for each endpoint
 type NodeStats struct {
 	cli      client.WebsocketClient
@@ -114,6 +125,10 @@ func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 	return stats
 }
 
+func (p *NodeStats) Equals(n *NodeStats) bool {
+	return p.endpoint == n.endpoint
+}
+
 func (p *NodeStats) check() {
 	if err := p.cli.Connect(); err != nil {
 		p.errors++
@@ -134,22 +149,14 @@ func (p *NodeStats) check() {
 	log.Println("check: ", p.String())
 }
 
-type LatencyTester interface {
-	Start()
-	Close() error
-	String() string
-	AddEndpoint(ep string)
-	TopNodeEndpoint() string
-	TopNodeClient() client.WebsocketClient
-	Done() <-chan struct{}
-}
 type latencyTester struct {
 	sync.Mutex
-	tmb         *tomb.Tomb
-	toApply     []string
-	fallbackURL string
-	stats       []interface{}
-	pass        int
+	tmb              *tomb.Tomb
+	toApply          []string
+	fallbackURL      string
+	onTopNodeChanged func(string)
+	stats            []interface{}
+	pass             int
 }
 
 func NewLatencyTester(fallbackURL string) (LatencyTester, error) {
@@ -182,6 +189,10 @@ func (p *latencyTester) String() string {
 	return builder.String()
 }
 
+func (p *latencyTester) OnTopNodeChanged(fn func(string)) {
+	p.onTopNodeChanged = fn
+}
+
 //AddEndpoint adds a new endpoint while the latencyTester is running
 func (p *latencyTester) AddEndpoint(ep string) {
 	p.toApply = append(p.toApply, ep)
@@ -191,6 +202,7 @@ func (p *latencyTester) sortResults() {
 	p.Lock()
 	defer p.Unlock()
 
+	oldTop := p.stats[0].(*NodeStats)
 	sort.Sort(p.stats, func(a, b interface{}) int {
 		sa := a.(*NodeStats).Score()
 		sb := b.(*NodeStats).Score()
@@ -204,6 +216,13 @@ func (p *latencyTester) sortResults() {
 
 		return 0
 	})
+
+	newTop := p.stats[0].(*NodeStats)
+	if !oldTop.Equals(newTop) {
+		if p.onTopNodeChanged != nil {
+			go p.onTopNodeChanged(newTop.endpoint)
+		}
+	}
 }
 
 func (p *latencyTester) createStats(eps []string) {
