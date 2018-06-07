@@ -39,8 +39,8 @@ func (suite *operationsAPITest) Test_SerializeRefTransaction() {
 	suite.compareTransaction(suite.RefTx, false)
 }
 
-func (suite *operationsAPITest) Test_SerializeTransaction() {
-	hex, err := suite.TestAPI.SerializeTransaction(suite.RefTx)
+func (suite *operationsAPITest) Test_WalletSerializeTransaction() {
+	hex, err := suite.TestAPI.WalletSerializeTransaction(suite.RefTx)
 	if err != nil {
 		suite.FailNow(err.Error(), "SerializeTransaction")
 	}

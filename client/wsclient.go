@@ -39,7 +39,6 @@ type wsClient struct {
 func NewWebsocketClient(endpointURL string) WebsocketClient {
 	cli := wsClient{
 		pending:   make(map[uint64]*RPCCall),
-		errors:    make(chan error, 10),
 		notifyFns: make(map[int]NotifyFunc),
 		currentID: 1,
 		url:       endpointURL,
@@ -55,6 +54,7 @@ func (p *wsClient) Connect() error {
 		return errors.Annotate(err, "dial")
 	}
 
+	p.errors = make(chan error, 10)
 	p.Decoder = ffjson.NewDecoder()
 	p.Encoder = ffjson.NewEncoder(conn)
 	p.conn = conn
@@ -81,6 +81,10 @@ func (p *wsClient) Close() error {
 	}
 
 	return nil
+}
+
+func (p *wsClient) IsConnected() bool {
+	return p.conn != nil
 }
 
 func (p *wsClient) SetDebug(debug bool) {
@@ -181,7 +185,7 @@ func (p *wsClient) receive() {
 
 				call.done()
 			} else {
-				p.errors <- errors.Errorf("no corresponding call found for incomming rpc data %v", p.resp)
+				p.errors <- errors.Errorf("no corresponding call found for incoming rpc data %v", p.resp)
 				continue
 			}
 		} else if err := p.handleCustomData(data); err != nil {
