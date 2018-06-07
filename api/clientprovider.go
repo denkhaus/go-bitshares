@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"sync"
 
 	"github.com/denkhaus/bitshares/client"
@@ -39,7 +40,7 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 }
 
 type BestNodeClientProvider struct {
-	sync.Mutex
+	mu sync.Mutex
 	client.WebsocketClient
 	tester latency.LatencyTester
 }
@@ -61,19 +62,20 @@ func NewBestNodeClientProvider(endpointURL string) (*BestNodeClientProvider, err
 }
 
 func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) {
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if p.WebsocketClient.IsConnected() {
 		p.WebsocketClient.Close()
 	}
 
 	p.WebsocketClient = p.tester.TopNodeClient()
+	log.Println("top node client changed")
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if !p.WebsocketClient.IsConnected() {
 		if err := p.Connect(); err != nil {
@@ -85,8 +87,8 @@ func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...inter
 }
 
 func (p *BestNodeClientProvider) Close() error {
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	if p.WebsocketClient.IsConnected() {
 		p.WebsocketClient.Close()

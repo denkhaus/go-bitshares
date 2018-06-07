@@ -3,7 +3,6 @@ package latency
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"sync"
@@ -145,12 +144,10 @@ func (p *NodeStats) check() {
 
 	p.latency += time.Since(tm)
 	p.attempts++
-
-	log.Println("check: ", p.String())
 }
 
 type latencyTester struct {
-	sync.Mutex
+	mu               sync.Mutex
 	tmb              *tomb.Tomb
 	toApply          []string
 	fallbackURL      string
@@ -178,8 +175,8 @@ func NewLatencyTesterWithContext(ctx context.Context, fallbackURL string) (Laten
 func (p *latencyTester) String() string {
 	builder := strings.Builder{}
 
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	for _, s := range p.stats {
 		stat := s.(*NodeStats)
 		builder.WriteString(stat.String())
@@ -199,8 +196,8 @@ func (p *latencyTester) AddEndpoint(ep string) {
 }
 
 func (p *latencyTester) sortResults() {
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	oldTop := p.stats[0].(*NodeStats)
 	sort.Sort(p.stats, func(a, b interface{}) int {
@@ -220,14 +217,15 @@ func (p *latencyTester) sortResults() {
 	newTop := p.stats[0].(*NodeStats)
 	if !oldTop.Equals(newTop) {
 		if p.onTopNodeChanged != nil {
+			//use goroutine here to avoid deadlock
 			go p.onTopNodeChanged(newTop.endpoint)
 		}
 	}
 }
 
 func (p *latencyTester) createStats(eps []string) {
-	p.Lock()
-	defer p.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	for _, ep := range eps {
 		found := false
@@ -251,8 +249,8 @@ func (p *latencyTester) createStats(eps []string) {
 //your given fallback endpoint is returned.
 func (p *latencyTester) TopNodeEndpoint() string {
 	if p.pass > 0 {
-		p.Lock()
-		defer p.Unlock()
+		p.mu.Lock()
+		defer p.mu.Unlock()
 		st := p.stats[0].(*NodeStats)
 		return st.endpoint
 	}
@@ -292,8 +290,8 @@ func (p *latencyTester) Start() {
 					idx := i
 					time.Sleep(slp)
 					p.tmb.Go(func() error {
-						p.Lock()
-						defer p.Unlock()
+						p.mu.Lock()
+						defer p.mu.Unlock()
 
 						st := p.stats[idx].(*NodeStats)
 						st.check()

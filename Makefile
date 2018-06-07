@@ -35,8 +35,8 @@ test_operations:
 
 #
 test_blocks:
-	@echo "this is a long running task abort with Ctrl + C"
-	go test -v ./tests -run ^TestBlockRange$
+	@echo "this is a long running test, abort with Ctrl + C"
+	go test -v ./tests -timeout 10m -run ^TestBlockRange$
 
 buildgen:
 	@echo "build btsgen"
