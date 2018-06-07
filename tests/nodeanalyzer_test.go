@@ -1,4 +1,4 @@
-package latency
+package tests
 
 import (
 	"context"
@@ -6,15 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/tests"
+	"github.com/denkhaus/bitshares/latency"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
-
 	ctx := context.Background()
 	ctx, _ = context.WithTimeout(ctx, 60*time.Second)
-	lat, err := NewLatencyTesterWithContext(ctx, tests.WsFullApiUrl)
+	lat, err := latency.NewLatencyTesterWithContext(ctx, WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
@@ -25,7 +24,7 @@ func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 }
 
 func Test_LatencyAnalyzerWithStop(t *testing.T) {
-	lat, err := NewLatencyTester(tests.WsFullApiUrl)
+	lat, err := latency.NewLatencyTester(WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
