@@ -11,7 +11,7 @@ import (
 
 type GrapheneObject interface {
 	util.TypeMarshaller
-	Id() string
+	ID() string
 	Type() ObjectType
 	Equals(id GrapheneObject) bool
 	Valid() bool
@@ -22,7 +22,7 @@ type GrapheneObjects []GrapheneObject
 func (p GrapheneObjects) ToStrings() []string {
 	ids := make([]string, len(p))
 	for idx, o := range p {
-		ids[idx] = o.Id()
+		ids[idx] = o.ID()
 	}
 
 	return ids
@@ -83,15 +83,11 @@ func (p *GrapheneID) UnmarshalJSON(s []byte) error {
 }
 
 func (p GrapheneID) Equals(o GrapheneObject) bool {
-	return p.id == o.Id()
+	return p.id == o.ID()
 }
 
-func (p GrapheneID) EqualsID(o string) bool {
-	return p.id == o
-}
-
-//Id returns the objects ID
-func (p GrapheneID) Id() string {
+//ID returns the objects ID
+func (p GrapheneID) ID() string {
 	return p.id
 }
 
@@ -130,7 +126,7 @@ func NewGrapheneID(id string) *GrapheneID {
 }
 
 func (p GrapheneID) String() string {
-	return p.Id()
+	return p.ID()
 }
 
 func (p GrapheneID) Valid() bool {

@@ -70,8 +70,8 @@ func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types
 	}
 
 	resp, err := p.rpcClient.CallAPI(
-		"buy", account.Id(),
-		base.Id(), quote.Id(),
+		"buy", account.ID(),
+		base.ID(), quote.ID(),
 		rate, amount, broadcast,
 	)
 
@@ -111,8 +111,8 @@ func (p *bitsharesAPI) WalletSell(account types.GrapheneObject, base, quote type
 	}
 
 	resp, err := p.rpcClient.CallAPI(
-		"sell", account.Id(),
-		base.Id(), quote.Id(),
+		"sell", account.ID(),
+		base.ID(), quote.ID(),
 		rate, amount, broadcast,
 	)
 
@@ -159,9 +159,9 @@ func (p *bitsharesAPI) WalletSellAsset(account types.GrapheneObject, amountToSel
 	}
 
 	resp, err := p.rpcClient.CallAPI(
-		"sell_asset", account.Id(),
-		amountToSell, symbolToSell.Id(),
-		minToReceive, symbolToReceive.Id(),
+		"sell_asset", account.ID(),
+		amountToSell, symbolToSell.ID(),
+		minToReceive, symbolToReceive.ID(),
 		timeout, fillOrKill, broadcast,
 	)
 	if err != nil {
@@ -194,8 +194,8 @@ func (p *bitsharesAPI) WalletBorrowAsset(account types.GrapheneObject, amountToB
 	}
 
 	resp, err := p.rpcClient.CallAPI(
-		"borrow_asset", account.Id(),
-		amountToBorrow, symbolToBorrow.Id(),
+		"borrow_asset", account.ID(),
+		amountToBorrow, symbolToBorrow.ID(),
 		amountOfCollateral, broadcast,
 	)
 	if err != nil {
@@ -220,7 +220,7 @@ func (p *bitsharesAPI) WalletListAccountBalances(account types.GrapheneObject) (
 		return nil, types.ErrRPCClientNotInitialized
 	}
 
-	resp, err := p.rpcClient.CallAPI("list_account_balances", account.Id())
+	resp, err := p.rpcClient.CallAPI("list_account_balances", account.ID())
 	if err != nil {
 		return nil, err
 	}
