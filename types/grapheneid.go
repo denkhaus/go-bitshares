@@ -146,6 +146,10 @@ func (p *GrapheneID) FromRawData(in interface{}) error {
 }
 
 func (p *GrapheneID) FromString(in string) error {
+	if len(in) == 0 {
+		return nil
+	}
+
 	parts := strings.Split(in, ".")
 
 	if len(parts) == 3 {
@@ -162,7 +166,73 @@ func (p *GrapheneID) FromString(in string) error {
 			return errors.Errorf("unable to parse GrapheneID [type] from %s", in)
 		}
 
-		p.objectType = ObjectType(typ)
+		switch p.spaceType {
+		case SpaceTypeProtocol:
+			switch ObjectType(typ) {
+			case ObjectTypeBase:
+				p.objectType = ObjectTypeBase
+			case ObjectTypeAccount:
+				p.objectType = ObjectTypeAccount
+			case ObjectTypeAsset:
+				p.objectType = ObjectTypeAsset
+			case ObjectTypeForceSettlement:
+				p.objectType = ObjectTypeForceSettlement
+			case ObjectTypeCommiteeMember:
+				p.objectType = ObjectTypeCommiteeMember
+			case ObjectTypeWitness:
+				p.objectType = ObjectTypeWitness
+			case ObjectTypeLimitOrder:
+				p.objectType = ObjectTypeLimitOrder
+			case ObjectTypeCallOrder:
+				p.objectType = ObjectTypeCallOrder
+			case ObjectTypeCustom:
+				p.objectType = ObjectTypeCustom
+			case ObjectTypeProposal:
+				p.objectType = ObjectTypeProposal
+			case ObjectTypeOperationHistory:
+				p.objectType = ObjectTypeOperationHistory
+			case ObjectTypeWithdrawPermission:
+				p.objectType = ObjectTypeWithdrawPermission
+			case ObjectTypeVestingBalance:
+				p.objectType = ObjectTypeVestingBalance
+			case ObjectTypeWorker:
+				p.objectType = ObjectTypeWorker
+			case ObjectTypeBalance:
+				p.objectType = ObjectTypeBalance
+			}
+
+		case SpaceTypeImplementation:
+			switch ObjectType(typ) {
+			case ObjectTypeGlobalProperty:
+				p.objectType = ObjectTypeGlobalProperty
+			case ObjectTypeDynamicGlobalProperty:
+				p.objectType = ObjectTypeDynamicGlobalProperty
+			case ObjectTypeAssetDynamicData:
+				p.objectType = ObjectTypeAssetDynamicData
+			case ObjectTypeAssetBitAssetData:
+				p.objectType = ObjectTypeAssetBitAssetData
+			case ObjectTypeAccountBalance:
+				p.objectType = ObjectTypeAccountBalance
+			case ObjectTypeAccountStatistics:
+				p.objectType = ObjectTypeAccountStatistics
+			case ObjectTypeTransaction:
+				p.objectType = ObjectTypeTransaction
+			case ObjectTypeBlockSummary:
+				p.objectType = ObjectTypeBlockSummary
+			case ObjectTypeAccountTransactionHistory:
+				p.objectType = ObjectTypeAccountTransactionHistory
+			case ObjectTypeBlindedBalance:
+				p.objectType = ObjectTypeBlindedBalance
+			case ObjectTypeChainProperty:
+				p.objectType = ObjectTypeChainProperty
+			case ObjectTypeWitnessSchedule:
+				p.objectType = ObjectTypeWitnessSchedule
+			case ObjectTypeBudgetRecord:
+				p.objectType = ObjectTypeBudgetRecord
+			case ObjectTypeSpecialAuthority:
+				p.objectType = ObjectTypeSpecialAuthority
+			}
+		}
 
 		inst, err := strconv.ParseUint(parts[2], 10, 64)
 		if err != nil {
