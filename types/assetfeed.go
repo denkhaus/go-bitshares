@@ -15,6 +15,18 @@ type AssetFeed struct {
 	FeedInfo   PriceFeed
 }
 
+func (p AssetFeed) MarshalJSON() ([]byte, error) {
+	data := make([]interface{}, 2)
+	data[0] = p.DateTime
+	data[1] = p.FeedInfo
+
+	ret := make([]interface{}, 2)
+	ret[0] = p.ProviderID
+	ret[1] = data
+
+	return ffjson.Marshal(ret)
+}
+
 func (p *AssetFeed) UnmarshalJSON(data []byte) error {
 
 	raw := make([]json.RawMessage, 2)
