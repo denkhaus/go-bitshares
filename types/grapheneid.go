@@ -12,7 +12,9 @@ import (
 type GrapheneObject interface {
 	util.TypeMarshaller
 	ID() string
+	String() string
 	Type() ObjectType
+	Space() SpaceType
 	Equals(id GrapheneObject) bool
 	Valid() bool
 }
@@ -64,26 +66,25 @@ func (p GrapheneID) MarshalJSON() ([]byte, error) {
 }
 
 func (p *GrapheneID) UnmarshalJSON(s []byte) error {
-	str := string(s)
-
-	if len(str) > 0 && str != "null" {
-		q, err := util.SafeUnquote(str)
-		if err != nil {
-			return errors.Annotate(err, "SafeUnquote")
-		}
-
-		if err := p.FromString(q); err != nil {
-			return errors.Annotate(err, "FromString")
-		}
-
-		return nil
+	var val string
+	if err := ffjson.Unmarshal(s, &val); err != nil {
+		return errors.Annotate(err, "Unmarshal")
 	}
 
-	return errors.Errorf("unable to unmarshal GrapheneID from %s", str)
+	if err := p.FromString(val); err != nil {
+		return errors.Annotate(err, "FromString")
+	}
+
+	return nil
 }
 
 func (p GrapheneID) Equals(o GrapheneObject) bool {
 	return p.id == o.ID()
+}
+
+//String, GrapheneID implements Stringer
+func (p GrapheneID) String() string {
+	return p.id
 }
 
 //ID returns the objects ID
@@ -123,10 +124,6 @@ func NewGrapheneID(id string) *GrapheneID {
 	}
 
 	return gid
-}
-
-func (p GrapheneID) String() string {
-	return p.ID()
 }
 
 func (p GrapheneID) Valid() bool {
