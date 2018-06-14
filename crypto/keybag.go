@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
@@ -20,6 +21,20 @@ func NewKeyBag() *KeyBag {
 	}
 
 	return &bag
+}
+
+func (p KeyBag) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p.keys))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	for _, k := range p.keys {
+		if err := enc.Encode(k.Bytes()); err != nil {
+			return errors.Annotate(err, "encode Key")
+		}
+	}
+
+	return nil
 }
 
 func (b *KeyBag) Add(wifKey string) error {

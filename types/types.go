@@ -7,8 +7,12 @@ package types
 //go:generate stringer -type=AssetPermission
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"strconv"
 	"time"
 
@@ -541,6 +545,53 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
+}
+
+//Encrypt AES-encrypts the buffer content
+func (p *Buffer) Encrypt(cipherKey []byte) ([]byte, error) {
+	block, err := aes.NewCipher(cipherKey)
+	if err != nil {
+		return nil, errors.Annotate(err, "NewCipher")
+	}
+
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	ciphertext := make([]byte, aes.BlockSize+p.Length())
+	iv := ciphertext[:aes.BlockSize]
+
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, errors.Annotate(err, "ReadFull")
+	}
+
+	cipher.NewCFBEncrypter(block, iv).XORKeyStream(
+		ciphertext[aes.BlockSize:],
+		p.Bytes(),
+	)
+
+	return ciphertext, nil
+}
+
+//Decrypt AES decrypts the buffer content
+func (p *Buffer) Decrypt(cipherKey []byte) ([]byte, error) {
+	block, err := aes.NewCipher(cipherKey)
+	if err != nil {
+		return nil, errors.Annotate(err, "NewCipher")
+	}
+
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	if byteLen := p.Length(); byteLen < aes.BlockSize {
+		return nil, errors.Errorf("invalid cipher size %d", byteLen)
+	}
+
+	buf := p.Bytes()
+	iv := buf[:aes.BlockSize]
+	buf = buf[aes.BlockSize:]
+
+	// XORKeyStream can work in-place if the two arguments are the same.
+	cipher.NewCFBDecrypter(block, iv).XORKeyStream(buf, buf)
+
+	return buf, nil
 }
 
 func BufferFromString(data string) (b Buffer, err error) {
