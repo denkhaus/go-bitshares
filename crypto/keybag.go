@@ -29,9 +29,27 @@ func (p KeyBag) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	for _, k := range p.keys {
-		if err := enc.Encode(k.Bytes()); err != nil {
+		if err := enc.Encode(k); err != nil {
 			return errors.Annotate(err, "encode Key")
 		}
+	}
+
+	return nil
+}
+
+func (p *KeyBag) Unmarshal(enc *util.TypeDecoder) error {
+	var len uint64
+	if err := enc.DecodeUVarint(&len); err != nil {
+		return errors.Annotate(err, "decode length")
+	}
+
+	for i := len; i > 0; i-- {
+		var key types.PrivateKey
+		if err := enc.Decode(&key); err != nil {
+			return errors.Annotate(err, "decode key")
+		}
+
+		p.keys = append(p.keys, &key)
 	}
 
 	return nil

@@ -547,6 +547,19 @@ func (p Buffer) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func (p *Buffer) Unmarshal(dec *util.TypeDecoder) error {
+	var len uint64
+	if err := dec.DecodeUVarint(&len); err != nil {
+		return errors.Annotate(err, "decode length")
+	}
+
+	if err := dec.ReadBytes(p, len); err != nil {
+		return errors.Annotate(err, "decode bytes")
+	}
+
+	return nil
+}
+
 //Encrypt AES-encrypts the buffer content
 func (p *Buffer) Encrypt(cipherKey []byte) ([]byte, error) {
 	block, err := aes.NewCipher(cipherKey)
