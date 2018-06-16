@@ -37,19 +37,19 @@ func (p KeyBag) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-func (p *KeyBag) Unmarshal(enc *util.TypeDecoder) error {
+func (p *KeyBag) Unmarshal(dec *util.TypeDecoder) error {
 	var len uint64
-	if err := enc.DecodeUVarint(&len); err != nil {
+	if err := dec.DecodeUVarint(&len); err != nil {
 		return errors.Annotate(err, "decode length")
 	}
 
 	for i := len; i > 0; i-- {
-		var key types.PrivateKey
-		if err := enc.Decode(&key); err != nil {
+		key := &types.PrivateKey{}
+		if err := dec.Decode(&key); err != nil {
 			return errors.Annotate(err, "decode key")
 		}
 
-		p.keys = append(p.keys, &key)
+		p.keys = append(p.keys, key)
 	}
 
 	return nil
@@ -63,6 +63,21 @@ func (b *KeyBag) Add(wifKey string) error {
 
 	b.keys = append(b.keys, privKey)
 	return nil
+}
+
+func (b *KeyBag) Remove(pub string) bool {
+	for _, p := range b.Publics() {
+		if p.String() == pub {
+			for idx, k := range b.keys {
+				if k.PublicKey().Equal(&p) {
+					b.keys = append(b.keys[:idx], b.keys[idx+1:]...)
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func (b *KeyBag) ImportFromFile(path string) error {
