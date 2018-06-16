@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -61,6 +62,17 @@ func (p GrapheneID) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func (p *GrapheneID) Unmarshal(dec *util.TypeDecoder) error {
+	var ins uint64
+	if err := dec.DecodeUVarint(&ins); err != nil {
+		return errors.Annotate(err, "decode instance")
+	}
+
+	p.instance = UInt64(ins)
+	p.resetID()
+	return nil
+}
+
 func (p GrapheneID) MarshalJSON() ([]byte, error) {
 	return ffjson.Marshal(p.id)
 }
@@ -76,6 +88,14 @@ func (p *GrapheneID) UnmarshalJSON(s []byte) error {
 	}
 
 	return nil
+}
+
+func (p *GrapheneID) resetID() {
+	p.id = fmt.Sprintf("%d.%d.%d",
+		p.spaceType,
+		p.objectType,
+		p.instance,
+	)
 }
 
 func (p GrapheneID) Equals(o GrapheneObject) bool {
