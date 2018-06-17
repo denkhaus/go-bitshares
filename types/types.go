@@ -13,6 +13,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"time"
 
@@ -611,4 +612,12 @@ func BufferFromString(data string) (b Buffer, err error) {
 	b = Buffer{}
 	err = b.FromString(data)
 	return
+}
+
+func ToAmount(val float64, prec float64) Int64 {
+	return Int64(val * math.Pow(10, prec))
+}
+
+func FromAmount(val Int64, prec float64) float64 {
+	return float64(val) / math.Pow(10, prec)
 }
