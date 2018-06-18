@@ -19,8 +19,7 @@ type TransactionSigner struct {
 func NewTransactionSigner(tx *types.SignedTransaction) *TransactionSigner {
 	tm := time.Now().UTC()
 	if tx.Expiration.IsZero() || tx.Expiration.Before(tm) {
-		exp := tm.Add(30 * time.Second)
-		tx.Expiration.FromTime(exp)
+		tx.Expiration.Set(30 * time.Second)
 	}
 
 	return &TransactionSigner{
