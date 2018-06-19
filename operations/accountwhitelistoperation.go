@@ -21,7 +21,11 @@ type AccountWhitelistOperation struct {
 	NewListing         types.UInt8       `json:"new_listing"`
 }
 
-func (p *AccountWhitelistOperation) ApplyFee(fee types.AssetAmount) {
+func (p AccountWhitelistOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AccountWhitelistOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

@@ -15,7 +15,8 @@ var (
 
 type Operation interface {
 	util.TypeMarshaller
-	ApplyFee(fee AssetAmount)
+	SetFee(fee AssetAmount)
+	GetFee() AssetAmount
 	Type() OperationType
 }
 
@@ -144,10 +145,34 @@ func (p Operations) ApplyFees(fees AssetAmounts) error {
 	}
 
 	for idx, op := range p {
-		op.ApplyFee(fees[idx])
+		op.SetFee(fees[idx])
 	}
 
 	return nil
+}
+
+func (p Operations) CombinedFees() AssetAmounts {
+	amounts := make(AssetAmounts, 0)
+	feeMap := make(map[GrapheneID]Int64)
+	for _, op := range p {
+		f := op.GetFee()
+		if fee, ok := feeMap[f.Asset]; ok {
+			feeMap[f.Asset] = fee + f.Amount
+		} else {
+			feeMap[f.Asset] = f.Amount
+		}
+	}
+
+	for ass, am := range feeMap {
+		amounts = append(amounts,
+			AssetAmount{
+				Asset:  ass,
+				Amount: am,
+			},
+		)
+	}
+
+	return amounts
 }
 
 func (p Operations) Types() [][]OperationType {

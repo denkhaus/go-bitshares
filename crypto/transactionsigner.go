@@ -10,7 +10,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//TransactionSigner can sign and verify a transactions.
+//TransactionSigner can sign and verify a transaction.
 type TransactionSigner struct {
 	*types.SignedTransaction
 }

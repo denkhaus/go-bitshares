@@ -24,7 +24,11 @@ type WorkerCreateOperation struct {
 	WorkEndDate   types.Time              `json:"work_end_date"`
 }
 
-func (p *WorkerCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p WorkerCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *WorkerCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

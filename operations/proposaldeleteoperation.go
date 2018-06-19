@@ -21,7 +21,11 @@ type ProposalDeleteOperation struct {
 	UsingOwnerAuthority bool              `json:"using_owner_authority"`
 }
 
-func (p *ProposalDeleteOperation) ApplyFee(fee types.AssetAmount) {
+func (p ProposalDeleteOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *ProposalDeleteOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

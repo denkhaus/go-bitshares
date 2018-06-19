@@ -23,7 +23,11 @@ type OverrideTransferOperation struct {
 	To         types.GrapheneID  `json:"to"`
 }
 
-func (p *OverrideTransferOperation) ApplyFee(fee types.AssetAmount) {
+func (p OverrideTransferOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *OverrideTransferOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

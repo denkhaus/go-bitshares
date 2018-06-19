@@ -25,7 +25,11 @@ type AccountCreateOperation struct {
 	Options         types.AccountOptions          `json:"options"`
 }
 
-func (p *AccountCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p AccountCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AccountCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

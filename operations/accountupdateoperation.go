@@ -22,7 +22,11 @@ type AccountUpdateOperation struct {
 	Owner      *types.Authority              `json:"owner,omitempty"`
 }
 
-func (p *AccountUpdateOperation) ApplyFee(fee types.AssetAmount) {
+func (p AccountUpdateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AccountUpdateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

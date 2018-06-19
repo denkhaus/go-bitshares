@@ -21,7 +21,11 @@ type AssetUpdateFeedProducersOperation struct {
 	NewFeedProducers types.GrapheneIDs `json:"new_feed_producers"`
 }
 
-func (p *AssetUpdateFeedProducersOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetUpdateFeedProducersOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetUpdateFeedProducersOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

@@ -24,7 +24,11 @@ type AssetCreateOperation struct {
 	Symbol             string                 `json:"symbol"`
 }
 
-func (p *AssetCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

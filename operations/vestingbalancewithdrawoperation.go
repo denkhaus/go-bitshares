@@ -20,7 +20,11 @@ type VestingBalanceWithdrawOperation struct {
 	VestingBalance types.GrapheneID  `json:"vesting_balance"`
 }
 
-func (p *VestingBalanceWithdrawOperation) ApplyFee(fee types.AssetAmount) {
+func (p VestingBalanceWithdrawOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *VestingBalanceWithdrawOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

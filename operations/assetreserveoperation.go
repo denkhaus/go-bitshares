@@ -20,7 +20,11 @@ type AssetReserveOperation struct {
 	Extensions      types.Extensions  `json:"extensions"`
 }
 
-func (p *AssetReserveOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetReserveOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetReserveOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

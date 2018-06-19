@@ -21,7 +21,11 @@ type BidColatteralOperation struct {
 	Fee                  types.AssetAmount `json:"fee"`
 }
 
-func (p *BidColatteralOperation) ApplyFee(fee types.AssetAmount) {
+func (p BidColatteralOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *BidColatteralOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

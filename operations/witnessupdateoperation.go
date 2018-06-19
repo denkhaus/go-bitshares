@@ -21,7 +21,11 @@ type WitnessUpdateOperation struct {
 	WitnessAccount types.GrapheneID  `json:"witness_account"`
 }
 
-func (p *WitnessUpdateOperation) ApplyFee(fee types.AssetAmount) {
+func (p WitnessUpdateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *WitnessUpdateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 
