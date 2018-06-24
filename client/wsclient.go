@@ -1,6 +1,7 @@
 package client
 
 import (
+	"io"
 	"net"
 
 	"log"
@@ -160,7 +161,11 @@ func (p *wsClient) receive() {
 				}
 			}
 
-			p.errors <- errors.Annotate(err, "decode in")
+			//report all errors but EOF
+			if err != io.EOF {
+				p.errors <- errors.Annotate(err, "DecodeReader")
+			}
+
 			continue
 		}
 
