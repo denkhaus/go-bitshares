@@ -40,24 +40,27 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 }
 
 type BestNodeClientProvider struct {
-	mu sync.Mutex
+	mu  sync.Mutex
+	api BitsharesAPI
 	client.WebsocketClient
 	tester latency.LatencyTester
 }
 
-func NewBestNodeClientProvider(endpointURL string) (*BestNodeClientProvider, error) {
+func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (*BestNodeClientProvider, error) {
 	tester, err := latency.NewLatencyTester(endpointURL)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewLatencyTester")
 	}
 
-	tester.Start()
 	pr := &BestNodeClientProvider{
+		api:             api,
 		tester:          tester,
 		WebsocketClient: tester.TopNodeClient(),
 	}
 
 	tester.OnTopNodeChanged(pr.onTopNodeChanged)
+	tester.Start()
+
 	return pr, nil
 }
 
@@ -79,7 +82,10 @@ func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...inter
 
 	if !p.WebsocketClient.IsConnected() {
 		if err := p.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect")
+			return nil, errors.Annotate(err, "Connect [client]")
+		}
+		if err := p.api.Connect(); err != nil {
+			return nil, errors.Annotate(err, "Connect [api]")
 		}
 	}
 
