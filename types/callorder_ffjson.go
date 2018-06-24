@@ -56,9 +56,9 @@ func (j *CallOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"collateral":`)
-	fflib.FormatBits2(buf, uint64(j.Collateral), 10, false)
+	fflib.FormatBits2(buf, uint64(j.Collateral), 10, j.Collateral < 0)
 	buf.WriteString(`,"debt":`)
-	fflib.FormatBits2(buf, uint64(j.Debt), 10, false)
+	fflib.FormatBits2(buf, uint64(j.Debt), 10, j.Debt < 0)
 	buf.WriteString(`,"call_price":`)
 
 	{
@@ -326,7 +326,7 @@ handle_Borrower:
 
 handle_Collateral:
 
-	/* handler: j.Collateral type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.Collateral type=types.Int64 kind=int64 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -351,7 +351,7 @@ handle_Collateral:
 
 handle_Debt:
 
-	/* handler: j.Debt type=types.UInt64 kind=uint64 quoted=false*/
+	/* handler: j.Debt type=types.Int64 kind=int64 quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

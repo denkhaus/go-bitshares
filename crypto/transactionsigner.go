@@ -10,7 +10,7 @@ import (
 	"github.com/juju/errors"
 )
 
-//TransactionSigner can sign and verify a transactions.
+//TransactionSigner can sign and verify a transaction.
 type TransactionSigner struct {
 	*types.SignedTransaction
 }
@@ -19,8 +19,7 @@ type TransactionSigner struct {
 func NewTransactionSigner(tx *types.SignedTransaction) *TransactionSigner {
 	tm := time.Now().UTC()
 	if tx.Expiration.IsZero() || tx.Expiration.Before(tm) {
-		exp := tm.Add(30 * time.Second)
-		tx.Expiration.FromTime(exp)
+		tx.Expiration.Set(30 * time.Second)
 	}
 
 	return &TransactionSigner{
@@ -94,11 +93,10 @@ func (tx *TransactionSigner) Verify(keyBag *KeyBag, chain *config.ChainConfig) (
 }
 
 func isCanonical(sig []byte) bool {
-	if ((sig[0] & 0x80) != 0) || (sig[0] == 0) ||
-		((sig[1] & 0x80) != 0) || ((sig[32] & 0x80) != 0) ||
-		(sig[32] == 0) || ((sig[33] & 0x80) != 0) {
-		return false
-	}
-
-	return true
+	d := sig
+	t1 := (d[1] & 0x80) == 0
+	t2 := !(d[1] == 0 && ((d[2] & 0x80) == 0))
+	t3 := (d[33] & 0x80) == 0
+	t4 := !(d[33] == 0 && ((d[34] & 0x80) == 0))
+	return t1 && t2 && t3 && t4
 }

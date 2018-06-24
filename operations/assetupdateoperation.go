@@ -22,7 +22,11 @@ type AssetUpdateOperation struct {
 	NewOptions    types.AssetOptions `json:"new_options"`
 }
 
-func (p *AssetUpdateOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetUpdateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetUpdateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

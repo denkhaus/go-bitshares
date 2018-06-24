@@ -1,9 +1,11 @@
 package types
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/denkhaus/bitshares/config"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,5 +52,32 @@ func TestDecode(t *testing.T) {
 		}
 
 		assert.Equal(t, hx, key.ToHex())
+	}
+}
+
+func TestMarshalUnmarshal(t *testing.T) {
+	config.SetCurrentConfig(config.ChainIDBTS)
+
+	for _, k := range data {
+		wif := k[0]
+		key1, err := NewPrivateKeyFromWif(wif)
+		if err != nil {
+			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
+		}
+
+		var buf bytes.Buffer
+		enc := util.NewTypeEncoder(&buf)
+
+		if err := key1.Marshal(enc); err != nil {
+			assert.FailNow(t, err.Error(), "Marshal")
+		}
+
+		dec := util.NewTypeDecoder(&buf)
+		var key2 PrivateKey
+		if err := key2.Unmarshal(dec); err != nil {
+			assert.FailNow(t, err.Error(), "Unmarshal")
+		}
+
+		assert.Equal(t, key2.Bytes(), key1.Bytes())
 	}
 }

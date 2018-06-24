@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -11,8 +12,10 @@ import (
 
 type GrapheneObject interface {
 	util.TypeMarshaller
-	Id() string
+	ID() string
+	String() string
 	Type() ObjectType
+	Space() SpaceType
 	Equals(id GrapheneObject) bool
 	Valid() bool
 }
@@ -22,7 +25,7 @@ type GrapheneObjects []GrapheneObject
 func (p GrapheneObjects) ToStrings() []string {
 	ids := make([]string, len(p))
 	for idx, o := range p {
-		ids[idx] = o.Id()
+		ids[idx] = o.ID()
 	}
 
 	return ids
@@ -59,39 +62,53 @@ func (p GrapheneID) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func (p *GrapheneID) Unmarshal(dec *util.TypeDecoder) error {
+	var ins uint64
+	if err := dec.DecodeUVarint(&ins); err != nil {
+		return errors.Annotate(err, "decode instance")
+	}
+
+	p.instance = UInt64(ins)
+	p.resetID()
+	return nil
+}
+
 func (p GrapheneID) MarshalJSON() ([]byte, error) {
 	return ffjson.Marshal(p.id)
 }
 
 func (p *GrapheneID) UnmarshalJSON(s []byte) error {
-	str := string(s)
-
-	if len(str) > 0 && str != "null" {
-		q, err := util.SafeUnquote(str)
-		if err != nil {
-			return errors.Annotate(err, "SafeUnquote")
-		}
-
-		if err := p.FromString(q); err != nil {
-			return errors.Annotate(err, "FromString")
-		}
-
-		return nil
+	var val string
+	if err := ffjson.Unmarshal(s, &val); err != nil {
+		return errors.Annotate(err, "Unmarshal")
 	}
 
-	return errors.Errorf("unable to unmarshal GrapheneID from %s", str)
+	if err := p.FromString(val); err != nil {
+		return errors.Annotate(err, "FromString")
+	}
+
+	return nil
+}
+
+func (p *GrapheneID) resetID() {
+	p.id = fmt.Sprintf("%d.%d.%d",
+		p.spaceType,
+		p.objectType,
+		p.instance,
+	)
 }
 
 func (p GrapheneID) Equals(o GrapheneObject) bool {
-	return p.id == o.Id()
+	return p.id == o.ID()
 }
 
-func (p GrapheneID) EqualsID(o string) bool {
-	return p.id == o
+//String, GrapheneID implements Stringer
+func (p GrapheneID) String() string {
+	return p.id
 }
 
-//Id returns the objects ID
-func (p GrapheneID) Id() string {
+//ID returns the objects ID
+func (p GrapheneID) ID() string {
 	return p.id
 }
 
@@ -129,10 +146,6 @@ func NewGrapheneID(id string) *GrapheneID {
 	return gid
 }
 
-func (p GrapheneID) String() string {
-	return p.Id()
-}
-
 func (p GrapheneID) Valid() bool {
 	return p.id != "" &&
 		p.spaceType != SpaceTypeUndefined &&
@@ -153,6 +166,10 @@ func (p *GrapheneID) FromRawData(in interface{}) error {
 }
 
 func (p *GrapheneID) FromString(in string) error {
+	if len(in) == 0 {
+		return nil
+	}
+
 	parts := strings.Split(in, ".")
 
 	if len(parts) == 3 {
@@ -169,7 +186,73 @@ func (p *GrapheneID) FromString(in string) error {
 			return errors.Errorf("unable to parse GrapheneID [type] from %s", in)
 		}
 
-		p.objectType = ObjectType(typ)
+		switch p.spaceType {
+		case SpaceTypeProtocol:
+			switch ObjectType(typ) {
+			case ObjectTypeBase:
+				p.objectType = ObjectTypeBase
+			case ObjectTypeAccount:
+				p.objectType = ObjectTypeAccount
+			case ObjectTypeAsset:
+				p.objectType = ObjectTypeAsset
+			case ObjectTypeForceSettlement:
+				p.objectType = ObjectTypeForceSettlement
+			case ObjectTypeCommiteeMember:
+				p.objectType = ObjectTypeCommiteeMember
+			case ObjectTypeWitness:
+				p.objectType = ObjectTypeWitness
+			case ObjectTypeLimitOrder:
+				p.objectType = ObjectTypeLimitOrder
+			case ObjectTypeCallOrder:
+				p.objectType = ObjectTypeCallOrder
+			case ObjectTypeCustom:
+				p.objectType = ObjectTypeCustom
+			case ObjectTypeProposal:
+				p.objectType = ObjectTypeProposal
+			case ObjectTypeOperationHistory:
+				p.objectType = ObjectTypeOperationHistory
+			case ObjectTypeWithdrawPermission:
+				p.objectType = ObjectTypeWithdrawPermission
+			case ObjectTypeVestingBalance:
+				p.objectType = ObjectTypeVestingBalance
+			case ObjectTypeWorker:
+				p.objectType = ObjectTypeWorker
+			case ObjectTypeBalance:
+				p.objectType = ObjectTypeBalance
+			}
+
+		case SpaceTypeImplementation:
+			switch ObjectType(typ) {
+			case ObjectTypeGlobalProperty:
+				p.objectType = ObjectTypeGlobalProperty
+			case ObjectTypeDynamicGlobalProperty:
+				p.objectType = ObjectTypeDynamicGlobalProperty
+			case ObjectTypeAssetDynamicData:
+				p.objectType = ObjectTypeAssetDynamicData
+			case ObjectTypeAssetBitAssetData:
+				p.objectType = ObjectTypeAssetBitAssetData
+			case ObjectTypeAccountBalance:
+				p.objectType = ObjectTypeAccountBalance
+			case ObjectTypeAccountStatistics:
+				p.objectType = ObjectTypeAccountStatistics
+			case ObjectTypeTransaction:
+				p.objectType = ObjectTypeTransaction
+			case ObjectTypeBlockSummary:
+				p.objectType = ObjectTypeBlockSummary
+			case ObjectTypeAccountTransactionHistory:
+				p.objectType = ObjectTypeAccountTransactionHistory
+			case ObjectTypeBlindedBalance:
+				p.objectType = ObjectTypeBlindedBalance
+			case ObjectTypeChainProperty:
+				p.objectType = ObjectTypeChainProperty
+			case ObjectTypeWitnessSchedule:
+				p.objectType = ObjectTypeWitnessSchedule
+			case ObjectTypeBudgetRecord:
+				p.objectType = ObjectTypeBudgetRecord
+			case ObjectTypeSpecialAuthority:
+				p.objectType = ObjectTypeSpecialAuthority
+			}
+		}
 
 		inst, err := strconv.ParseUint(parts[2], 10, 64)
 		if err != nil {

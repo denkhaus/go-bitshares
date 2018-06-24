@@ -21,7 +21,11 @@ type AssetUpdateBitassetOperation struct {
 	NewOptions    types.BitassetOptions `json:"new_options"`
 }
 
-func (p *AssetUpdateBitassetOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetUpdateBitassetOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetUpdateBitassetOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

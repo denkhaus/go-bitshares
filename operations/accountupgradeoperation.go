@@ -20,7 +20,11 @@ type AccountUpgradeOperation struct {
 	UpgradeToLifetimeMember bool              `json:"upgrade_to_lifetime_member"`
 }
 
-func (p *AccountUpgradeOperation) ApplyFee(fee types.AssetAmount) {
+func (p AccountUpgradeOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AccountUpgradeOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

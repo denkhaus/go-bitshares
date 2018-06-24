@@ -26,7 +26,11 @@ type ProposalUpdateOperation struct {
 	Proposal                types.GrapheneID  `json:"proposal"`
 }
 
-func (p *ProposalUpdateOperation) ApplyFee(fee types.AssetAmount) {
+func (p ProposalUpdateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *ProposalUpdateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

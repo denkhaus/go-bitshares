@@ -28,7 +28,11 @@ type LimitOrderCreateOperation struct {
 	Extensions   types.Extensions  `json:"extensions"`
 }
 
-func (p *LimitOrderCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p LimitOrderCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *LimitOrderCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

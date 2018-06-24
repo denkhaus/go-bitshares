@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
@@ -22,6 +23,38 @@ func NewKeyBag() *KeyBag {
 	return &bag
 }
 
+func (p KeyBag) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p.keys))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	for _, k := range p.keys {
+		if err := enc.Encode(k); err != nil {
+			return errors.Annotate(err, "encode Key")
+		}
+	}
+
+	return nil
+}
+
+func (p *KeyBag) Unmarshal(dec *util.TypeDecoder) error {
+	var len uint64
+	if err := dec.DecodeUVarint(&len); err != nil {
+		return errors.Annotate(err, "decode length")
+	}
+
+	for i := len; i > 0; i-- {
+		key := &types.PrivateKey{}
+		if err := dec.Decode(&key); err != nil {
+			return errors.Annotate(err, "decode key")
+		}
+
+		p.keys = append(p.keys, key)
+	}
+
+	return nil
+}
+
 func (b *KeyBag) Add(wifKey string) error {
 	privKey, err := types.NewPrivateKeyFromWif(wifKey)
 	if err != nil {
@@ -30,6 +63,21 @@ func (b *KeyBag) Add(wifKey string) error {
 
 	b.keys = append(b.keys, privKey)
 	return nil
+}
+
+func (b *KeyBag) Remove(pub string) bool {
+	for _, p := range b.Publics() {
+		if p.String() == pub {
+			for idx, k := range b.keys {
+				if k.PublicKey().Equal(&p) {
+					b.keys = append(b.keys[:idx], b.keys[idx+1:]...)
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func (b *KeyBag) ImportFromFile(path string) error {

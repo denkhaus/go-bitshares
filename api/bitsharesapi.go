@@ -136,7 +136,7 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
 	defer p.SetDebug(false)
 	// returns nil if successfull
-	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.Id(), quote.Id())
+	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.ID(), quote.ID())
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject
 func (p *bitsharesAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error {
 	defer p.SetDebug(false)
 	// returns nil if successfull
-	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.Id(), quote.Id())
+	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.ID(), quote.ID())
 	if err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop type
 		limit = GetAccountHistoryLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(p.historyAPIID, "get_account_history", account.Id(), stop.Id(), limit, start.Id())
+	resp, err := p.wsClient.CallAPI(p.historyAPIID, "get_account_history", account.ID(), stop.ID(), limit, start.ID())
 	if err != nil {
 		return nil, err
 	}
@@ -447,7 +447,7 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	defer p.SetDebug(false)
 
 	ids := types.GrapheneObjects(assets).ToStrings()
-	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.Id(), ids)
+	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.ID(), ids)
 	if err != nil {
 		return nil, err
 	}
@@ -491,7 +491,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
 	defer p.SetDebug(false)
 
-	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Types(), feeAsset.Id())
+	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Types(), feeAsset.ID())
 	if err != nil {
 		return nil, err
 	}
@@ -514,7 +514,7 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 		limit = GetLimitOrdersLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(0, "get_limit_orders", base.Id(), quote.Id(), limit)
+	resp, err := p.wsClient.CallAPI(0, "get_limit_orders", base.ID(), quote.ID(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -537,7 +537,7 @@ func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 		limit = GetSettleOrdersLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(0, "get_settle_orders", assetID.Id(), limit)
+	resp, err := p.wsClient.CallAPI(0, "get_settle_orders", assetID.ID(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -560,7 +560,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 		limit = GetCallOrdersLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(0, "get_call_orders", assetID.Id(), limit)
+	resp, err := p.wsClient.CallAPI(0, "get_call_orders", assetID.ID(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -579,7 +579,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
 	defer p.SetDebug(false)
 
-	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.Id())
+	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.ID())
 	if err != nil {
 		return nil, err
 	}
@@ -602,7 +602,7 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 		limit = GetTradeHistoryLimit
 	}
 
-	resp, err := p.wsClient.CallAPI(0, "get_trade_history", base.Id(), quote.Id(), toTime, fromTime, limit)
+	resp, err := p.wsClient.CallAPI(0, "get_trade_history", base.ID(), quote.ID(), toTime, fromTime, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -746,7 +746,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
 	defer p.SetDebug(false)
 
-	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.Id(), broadcast)
+	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.ID(), broadcast)
 	if err != nil {
 		return nil, err
 	}

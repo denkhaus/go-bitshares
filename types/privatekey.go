@@ -8,6 +8,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
@@ -23,6 +24,40 @@ type PrivateKey struct {
 	priv *btcec.PrivateKey
 	pub  *PublicKey
 	raw  []byte
+}
+
+func (p PrivateKey) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p.raw))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	if err := enc.Encode(p.raw); err != nil {
+		return errors.Annotate(err, "encode raw")
+	}
+
+	return nil
+}
+
+func (p *PrivateKey) Unmarshal(dec *util.TypeDecoder) error {
+	var len uint64
+	if err := dec.DecodeUVarint(&len); err != nil {
+		return errors.Annotate(err, "decode length")
+	}
+
+	if err := dec.ReadBytes(&p.raw, len); err != nil {
+		return errors.Annotate(err, "decode raw")
+	}
+
+	wif := base58.Encode(p.raw)
+	k, err := NewPrivateKeyFromWif(wif)
+	if err != nil {
+		return errors.Annotate(err, "NewPrivateKeyFromWif")
+	}
+
+	p.priv = k.priv
+	p.pub = k.pub
+
+	return nil
 }
 
 func NewPrivateKeyFromWif(wifPrivateKey string) (*PrivateKey, error) {

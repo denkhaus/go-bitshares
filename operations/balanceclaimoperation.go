@@ -21,7 +21,11 @@ type BalanceClaimOperation struct {
 	Fee              types.AssetAmount `json:"fee"`
 }
 
-func (p *BalanceClaimOperation) ApplyFee(fee types.AssetAmount) {
+func (p BalanceClaimOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *BalanceClaimOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

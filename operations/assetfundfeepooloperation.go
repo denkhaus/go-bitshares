@@ -21,7 +21,11 @@ type AssetFundFeePoolOperation struct {
 	FromAccount types.GrapheneID  `json:"from_account"`
 }
 
-func (p *AssetFundFeePoolOperation) ApplyFee(fee types.AssetAmount) {
+func (p AssetFundFeePoolOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *AssetFundFeePoolOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

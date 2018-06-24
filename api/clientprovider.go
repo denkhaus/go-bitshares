@@ -70,7 +70,7 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) {
 	}
 
 	p.WebsocketClient = p.tester.TopNodeClient()
-	log.Println("top node client changed")
+	log.Printf("top node client changed -> %s\n", newEndpoint)
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {

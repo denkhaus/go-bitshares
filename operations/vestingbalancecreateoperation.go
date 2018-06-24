@@ -21,7 +21,11 @@ type VestingBalanceCreateOperation struct {
 	Policy  types.VestingPolicy `json:"policy"`
 }
 
-func (p *VestingBalanceCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p VestingBalanceCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *VestingBalanceCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

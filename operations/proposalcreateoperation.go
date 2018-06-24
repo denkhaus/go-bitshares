@@ -22,7 +22,11 @@ type ProposalCreateOperation struct {
 	ProposedOps         types.OperationEnvelopeHolders `json:"proposed_ops"`
 }
 
-func (p *ProposalCreateOperation) ApplyFee(fee types.AssetAmount) {
+func (p ProposalCreateOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *ProposalCreateOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 

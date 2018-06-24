@@ -82,6 +82,8 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 		return p.EncodeNumber(v)
 	case string:
 		return p.EncodeString(v)
+	case []string:
+		return p.EncodeStringSlice(v)
 	case []byte:
 		return p.writeBytes(v)
 	case bool:
@@ -96,17 +98,17 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 	}
 }
 
-func (p *TypeEncoder) EncodeArrString(v []string) error {
+func (p *TypeEncoder) EncodeStringSlice(v []string) error {
 	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
-		return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", v)
+		return errors.Annotate(err, "EncodeUVarint [slice length]")
 	}
 
 	for _, val := range v {
 		if err := p.EncodeUVarint(uint64(len(val))); err != nil {
-			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+			return errors.Annotate(err, "EncodeUVarint [string length]")
 		}
 		if _, err := io.Copy(p.w, strings.NewReader(val)); err != nil {
-			return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", val)
+			return errors.Annotate(err, "Copy [string]")
 		}
 	}
 
@@ -115,7 +117,7 @@ func (p *TypeEncoder) EncodeArrString(v []string) error {
 
 func (p *TypeEncoder) EncodeString(v string) error {
 	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
-		return errors.Annotatef(err, "TypeEncoder: failed to write string: %v", v)
+		return errors.Annotatef(err, "EncodeUVarint [string length]", v)
 	}
 
 	return p.writeString(v)

@@ -24,7 +24,11 @@ type FillOrderOperation struct {
 	FillPrice types.Price       `json:"fill_price"`
 }
 
-func (p *FillOrderOperation) ApplyFee(fee types.AssetAmount) {
+func (p FillOrderOperation) GetFee() types.AssetAmount {
+	return p.Fee
+}
+
+func (p *FillOrderOperation) SetFee(fee types.AssetAmount) {
 	p.Fee = fee
 }
 
