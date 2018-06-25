@@ -31,6 +31,10 @@ func (p GrapheneObjects) ToStrings() []string {
 	return ids
 }
 
+func (p GrapheneObjects) String() string {
+	return strings.Join(p.ToStrings(), " ")
+}
+
 type GrapheneIDs []GrapheneID
 
 func (p GrapheneIDs) Marshal(enc *util.TypeEncoder) error {
