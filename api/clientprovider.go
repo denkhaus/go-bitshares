@@ -75,7 +75,6 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	log.Printf("change top node client -> %s\n", newEndpoint)
 
 	if p.WebsocketClient.IsConnected() {
-		log.Println("close old client")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
@@ -88,12 +87,10 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	log.Printf("CallAPI: %s\n", method)
 
 	if !p.WebsocketClient.IsConnected() {
 		//unlock to avoid deadlock
 		p.mu.Unlock()
-		log.Println("connect new client")
 		if err := p.api.Connect(); err != nil {
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
@@ -107,15 +104,13 @@ func (p *BestNodeClientProvider) Close() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	log.Println("close client provider")
 	if p.WebsocketClient.IsConnected() {
-		log.Println("close client")
+
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
 	}
 
-	log.Println("close tester")
 	if err := p.tester.Close(); err != nil {
 		return errors.Annotate(err, "Close [tester]")
 	}
