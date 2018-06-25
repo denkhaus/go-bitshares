@@ -66,7 +66,7 @@ type LatencyTester interface {
 	Close() error
 	String() string
 	AddEndpoint(ep string)
-	OnTopNodeChanged(fn func(topNodeEndpoint string))
+	OnTopNodeChanged(fn func(string) error)
 	TopNodeEndpoint() string
 	TopNodeClient() client.WebsocketClient
 	Done() <-chan struct{}
@@ -151,7 +151,7 @@ type latencyTester struct {
 	tmb              *tomb.Tomb
 	toApply          []string
 	fallbackURL      string
-	onTopNodeChanged func(string)
+	onTopNodeChanged func(string) error
 	stats            []interface{}
 	pass             int
 }
@@ -186,7 +186,7 @@ func (p *latencyTester) String() string {
 	return builder.String()
 }
 
-func (p *latencyTester) OnTopNodeChanged(fn func(string)) {
+func (p *latencyTester) OnTopNodeChanged(fn func(string) error) {
 	p.onTopNodeChanged = fn
 }
 
@@ -218,7 +218,9 @@ func (p *latencyTester) sortResults() {
 	if !oldTop.Equals(newTop) {
 		if p.onTopNodeChanged != nil {
 			//use goroutine here to avoid deadlock
-			go p.onTopNodeChanged(newTop.endpoint)
+			p.tmb.Go(func() error {
+				return p.onTopNodeChanged(newTop.endpoint)
+			})
 		}
 	}
 }
