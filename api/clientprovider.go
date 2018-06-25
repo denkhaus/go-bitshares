@@ -103,7 +103,6 @@ func (p *BestNodeClientProvider) Close() error {
 	defer p.mu.Unlock()
 
 	if p.IsConnected() {
-		p.WebsocketClient.Close()
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
