@@ -11,6 +11,7 @@ import (
 
 type ClientProvider interface {
 	OnError(fn client.ErrorFunc)
+	Connect() error
 	OnNotify(subscriberID int, fn client.NotifyFunc) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	SetDebug(debug bool)
@@ -19,20 +20,23 @@ type ClientProvider interface {
 
 type SimpleClientProvider struct {
 	client.WebsocketClient
+	api BitsharesAPI
 }
 
-func NewSimpleClientProvider(endpointURL string) *SimpleClientProvider {
+func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) *SimpleClientProvider {
+	wsc := client.NewWebsocketClient(endpointURL)
 	sim := SimpleClientProvider{
-		WebsocketClient: client.NewWebsocketClient(endpointURL),
+		api:             api,
+		WebsocketClient: wsc,
 	}
 
 	return &sim
 }
 
 func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	if !p.WebsocketClient.IsConnected() {
-		if err := p.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect")
+	if !p.IsConnected() {
+		if err := p.api.Connect(); err != nil {
+			return nil, errors.Annotate(err, "Connect [api]")
 		}
 	}
 
@@ -77,36 +81,28 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	}
 
 	p.WebsocketClient = p.tester.TopNodeClient()
-
-	if err := p.Connect(); err != nil {
-		return errors.Annotate(err, "Connect [client]")
-	}
-
-	if err := p.api.Connect(); err != nil {
-		return errors.Annotate(err, "Connect [api]")
-	}
-
 	return nil
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	if !p.IsConnected() {
-		if err := p.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect [client]")
+		if err := p.api.Connect(); err != nil {
+			return nil, errors.Annotate(err, "Connect [api]")
 		}
 	}
 
-	return p.WebsocketClient.CallAPI(apiID, method, args...)
+	p.mu.Lock()
+	resp, err := p.WebsocketClient.CallAPI(apiID, method, args...)
+	p.mu.Unlock()
+
+	return resp, err
 }
 
 func (p *BestNodeClientProvider) Close() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if p.WebsocketClient.IsConnected() {
+	if p.IsConnected() {
 		p.WebsocketClient.Close()
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")

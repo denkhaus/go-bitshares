@@ -826,7 +826,13 @@ func (p *bitsharesAPI) Connect() (err error) {
 
 	if p.rpcClient != nil {
 		if err := p.rpcClient.Connect(); err != nil {
-			return errors.Annotate(err, "rpc connect")
+			return errors.Annotate(err, "Connect [rpc]")
+		}
+	}
+
+	if p.wsClient != nil {
+		if err := p.wsClient.Connect(); err != nil {
+			return errors.Annotate(err, "Connect [ws]")
 		}
 	}
 
@@ -908,10 +914,7 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		rpcClient = client.NewRPCClient(rpcEndpointURL)
 	}
 
-	pr := NewSimpleClientProvider(wsEndpointURL)
-
-	api := bitsharesAPI{
-		wsClient:       pr,
+	api := &bitsharesAPI{
 		rpcClient:      rpcClient,
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
@@ -920,7 +923,8 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		debug:          false,
 	}
 
-	return &api
+	api.wsClient = NewSimpleClientProvider(wsEndpointURL, api)
+	return api
 }
 
 //NewWithAutoEndpoint creates a new BitsharesAPI interface with automatic node latency checking.
