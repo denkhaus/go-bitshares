@@ -903,6 +903,7 @@ func (p *bitsharesAPI) Close() error {
 //If you do not use wallet API, provide an empty string.
 func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	var rpcClient client.RPCClient
+
 	if rpcEndpointURL != "" {
 		rpcClient = client.NewRPCClient(rpcEndpointURL)
 	}
@@ -930,6 +931,7 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 //will throw an error. If you do not use wallet API, provide an empty string.
 func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAPI, error) {
 	var rpcClient client.RPCClient
+
 	if rpcEndpointURL != "" {
 		rpcClient = client.NewRPCClient(rpcEndpointURL)
 	}

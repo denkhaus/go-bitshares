@@ -64,30 +64,31 @@ func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (*BestNodeC
 	return pr, nil
 }
 
-func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) {
+func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	log.Printf("change top node client -> %s\n", newEndpoint)
 
 	if p.WebsocketClient.IsConnected() {
 		p.WebsocketClient.Close()
 	}
 
 	p.WebsocketClient = p.tester.TopNodeClient()
-	log.Printf("top node client changed -> %s\n", newEndpoint)
+
+	if err := p.Connect(); err != nil {
+		return errors.Annotate(err, "Connect [client]")
+	}
+
+	if err := p.api.Connect(); err != nil {
+		return errors.Annotate(err, "Connect [api]")
+	}
+
+	return nil
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	if !p.WebsocketClient.IsConnected() {
-		if err := p.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect [client]")
-		}
-		if err := p.api.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect [api]")
-		}
-	}
 
 	return p.WebsocketClient.CallAPI(apiID, method, args...)
 }
