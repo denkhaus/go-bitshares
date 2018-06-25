@@ -821,8 +821,7 @@ func (p *bitsharesAPI) SetCredentials(username, password string) {
 }
 
 // Connect initializes the API and connects underlying resources
-// The websocket API is connected through the client provider.
-func (p *bitsharesAPI) Connect() (err error) {
+func (p *bitsharesAPI) Connect() error {
 
 	if p.rpcClient != nil {
 		if err := p.rpcClient.Connect(); err != nil {
@@ -852,7 +851,7 @@ func (p *bitsharesAPI) Connect() (err error) {
 		return errors.Annotate(err, "GetChainID")
 	}
 
-	if err = config.SetCurrentConfig(chainID); err != nil {
+	if err := config.SetCurrentConfig(chainID); err != nil {
 		return errors.Annotate(err, "SetCurrentConfig")
 	}
 
@@ -887,14 +886,14 @@ func (p *bitsharesAPI) getAPIIDs() (err error) {
 func (p *bitsharesAPI) Close() error {
 	if p.rpcClient != nil {
 		if err := p.rpcClient.Close(); err != nil {
-			return errors.Annotate(err, "close rpc client")
+			return errors.Annotate(err, "Close [wallet rpc]")
 		}
 		p.rpcClient = nil
 	}
 
 	if p.wsClient != nil {
 		if err := p.wsClient.Close(); err != nil {
-			return errors.Annotate(err, "close ws client")
+			return errors.Annotate(err, "Close [ws]")
 		}
 		p.wsClient = nil
 	}

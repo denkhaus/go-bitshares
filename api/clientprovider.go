@@ -23,7 +23,7 @@ type SimpleClientProvider struct {
 	api BitsharesAPI
 }
 
-func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) *SimpleClientProvider {
+func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) ClientProvider {
 	wsc := client.NewWebsocketClient(endpointURL)
 	sim := SimpleClientProvider{
 		api:             api,
@@ -34,7 +34,7 @@ func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) *SimpleClient
 }
 
 func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	if !p.IsConnected() {
+	if !p.WebsocketClient.IsConnected() {
 		if err := p.api.Connect(); err != nil {
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
@@ -44,13 +44,13 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 }
 
 type BestNodeClientProvider struct {
-	mu  sync.Mutex
-	api BitsharesAPI
 	client.WebsocketClient
+	mu     sync.Mutex
+	api    BitsharesAPI
 	tester latency.LatencyTester
 }
 
-func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (*BestNodeClientProvider, error) {
+func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProvider, error) {
 	tester, err := latency.NewLatencyTester(endpointURL)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewLatencyTester")
@@ -74,7 +74,8 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 
 	log.Printf("change top node client -> %s\n", newEndpoint)
 
-	if p.IsConnected() {
+	if p.WebsocketClient.IsConnected() {
+		log.Println("close old client")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
@@ -85,29 +86,36 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	if !p.IsConnected() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	log.Printf("CallAPI: %s\n", method)
+
+	if !p.WebsocketClient.IsConnected() {
+		//unlock to avoid deadlock
+		p.mu.Unlock()
+		log.Println("connect new client")
 		if err := p.api.Connect(); err != nil {
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
+		p.mu.Lock()
 	}
 
-	p.mu.Lock()
-	resp, err := p.WebsocketClient.CallAPI(apiID, method, args...)
-	p.mu.Unlock()
-
-	return resp, err
+	return p.WebsocketClient.CallAPI(apiID, method, args...)
 }
 
 func (p *BestNodeClientProvider) Close() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if p.IsConnected() {
+	log.Println("close client provider")
+	if p.WebsocketClient.IsConnected() {
+		log.Println("close client")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
 	}
 
+	log.Println("close tester")
 	if err := p.tester.Close(); err != nil {
 		return errors.Annotate(err, "Close [tester]")
 	}

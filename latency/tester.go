@@ -195,7 +195,7 @@ func (p *latencyTester) AddEndpoint(ep string) {
 	p.toApply = append(p.toApply, ep)
 }
 
-func (p *latencyTester) sortResults() {
+func (p *latencyTester) sortResults(notify bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -215,7 +215,7 @@ func (p *latencyTester) sortResults() {
 	})
 
 	newTop := p.stats[0].(*NodeStats)
-	if !oldTop.Equals(newTop) {
+	if notify && !oldTop.Equals(newTop) {
 		if p.onTopNodeChanged != nil {
 			//use goroutine here to avoid deadlock
 			p.tmb.Go(func() error {
@@ -286,7 +286,7 @@ func (p *latencyTester) Start() {
 			for i := 0; i < len(p.stats); i++ {
 				select {
 				case <-p.tmb.Dying():
-					p.sortResults()
+					p.sortResults(false)
 					return tomb.ErrDying
 				default:
 					idx := i
@@ -302,7 +302,7 @@ func (p *latencyTester) Start() {
 				}
 			}
 
-			p.sortResults()
+			p.sortResults(true)
 			p.pass++
 		}
 	})

@@ -43,7 +43,6 @@ func NewWebsocketClient(endpointURL string) WebsocketClient {
 		notifyFns: make(map[int]NotifyFunc),
 		currentID: 1,
 		url:       endpointURL,
-		debug:     false,
 	}
 
 	return &cli
@@ -52,8 +51,12 @@ func NewWebsocketClient(endpointURL string) WebsocketClient {
 func (p *wsClient) Connect() error {
 	conn, err := websocket.Dial(p.url, "", "http://localhost/")
 	if err != nil {
-		return errors.Annotate(err, "dial")
+		return errors.Annotate(err, "Dial")
 	}
+
+	p.debug = false
+	p.shutdown = false
+	p.closing = false
 
 	p.errors = make(chan error, 10)
 	p.Decoder = ffjson.NewDecoder()
@@ -72,8 +75,11 @@ func (p *wsClient) Connect() error {
 func (p *wsClient) Close() error {
 	if p.conn != nil {
 		p.closing = true
+		if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
+			return errors.Annotate(err, "SetWriteDeadline")
+		}
 		if err := p.conn.Close(); err != nil {
-			return errors.Annotate(err, "close connection")
+			return errors.Annotate(err, "Close [conn]")
 		}
 
 		p.wg.Wait()
@@ -85,6 +91,10 @@ func (p *wsClient) Close() error {
 }
 
 func (p *wsClient) IsConnected() bool {
+	if p.shutdown || p.closing {
+		return false
+	}
+
 	return p.conn != nil
 }
 
@@ -124,7 +134,7 @@ func (p *wsClient) handleCustomData(data map[string]interface{}) error {
 		p.notify.reset()
 		err := mapstructure.Decode(data, &p.notify)
 		if err != nil {
-			return errors.Annotate(err, "decode notify")
+			return errors.Annotate(err, "Decode [notify]")
 		}
 
 		params := p.notify.Params.([]interface{})
@@ -172,7 +182,7 @@ func (p *wsClient) receive() {
 		if p.resp.Is(data) {
 			p.resp.reset()
 			if err := mapstructure.Decode(data, &p.resp); err != nil {
-				p.errors <- errors.Annotate(err, "decode response")
+				p.errors <- errors.Annotate(err, "Decode [resp]")
 				continue
 			}
 
@@ -194,7 +204,7 @@ func (p *wsClient) receive() {
 				continue
 			}
 		} else if err := p.handleCustomData(data); err != nil {
-			p.errors <- errors.Annotate(err, "handle custom data")
+			p.errors <- errors.Annotate(err, "handleCustomData")
 			continue
 		}
 	}
@@ -235,7 +245,7 @@ func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (inter
 
 	call, err := p.Call("call", param)
 	if err != nil {
-		return nil, errors.Annotate(err, "call")
+		return nil, errors.Annotate(err, "Call")
 	}
 
 	<-call.Done
@@ -264,7 +274,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	p.Debug("ws req >", call.Request)
 
 	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
-		return nil, errors.Annotate(err, "set write deadline")
+		return nil, errors.Annotate(err, "SetWriteDeadline")
 	}
 
 	if err := p.Encode(call.Request); err != nil {
@@ -272,7 +282,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 		delete(p.pending, call.Request.ID)
 		p.mutex.Unlock()
 
-		return nil, errors.Annotate(err, "encode")
+		return nil, errors.Annotate(err, "Encode [req]")
 	}
 
 	return call, nil
