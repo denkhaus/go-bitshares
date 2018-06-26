@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	"github.com/pquerna/ffjson/ffjson"
+
 	"strconv"
 	"strings"
 
@@ -42,14 +44,13 @@ type VoteID struct {
 }
 
 func (p *VoteID) UnmarshalJSON(data []byte) error {
-	str := string(data)
+	var str string
 
-	q, err := util.SafeUnquote(str)
-	if err != nil {
-		return errors.Annotate(err, "unquote VoteID")
+	if err := ffjson.Unmarshal(data, &str); err != nil {
+		return errors.Annotate(err, "Unmarshal")
 	}
 
-	tk := strings.Split(q, ":")
+	tk := strings.Split(str, ":")
 	if len(tk) != 2 {
 		return errors.Errorf("unable to unmarshal Vote from %s", str)
 	}

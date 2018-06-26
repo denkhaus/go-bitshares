@@ -2,19 +2,13 @@ package util
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
 
-	"path"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/mitchellh/go-homedir"
 	"github.com/pquerna/ffjson/ffjson"
 )
 
@@ -37,49 +31,6 @@ func ToMap(in interface{}) map[string]interface{} {
 	}
 
 	return nil
-}
-
-func DumpUnmarshaled(descr string, in []byte) {
-	var res interface{}
-	if err := json.Unmarshal(in, &res); err != nil {
-		panic("DumpUnmarshaled: unable to unmarshal input")
-	}
-
-	Dump(descr, res)
-}
-
-func DumpJSON(descr string, in interface{}) {
-	fmt.Printf("%s ------------------------- json dump start ---------------------------------------\n", descr)
-	out, err := json.MarshalIndent(in, "", "  ")
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	os.Stdout.Write(out)
-	fmt.Printf("\n%s ------------------------- json dump end ---------------------------------------\n\n", descr)
-}
-
-func Dump(descr string, in interface{}) {
-	fmt.Printf("%s ------------------------- dump start ---------------------------------------\n", descr)
-	spew.Dump(in)
-	fmt.Printf("%s -------------------------  dump end  ---------------------------------------\n\n", descr)
-}
-
-func SafeUnquote(in string) (string, error) {
-	if len(in) == 0 || in == "null" {
-		return "", nil
-	}
-
-	if strings.HasPrefix(in, "\"") && strings.HasSuffix(in, "\"") {
-		q, err := strconv.Unquote(in)
-		if err != nil {
-			return "", err
-		}
-
-		return q, nil
-	}
-
-	return in, nil
 }
 
 //WaitForCondition is a testify Condition for timeout based testing
@@ -164,13 +115,4 @@ func ToPrecisionString(value float64, precision int) string {
 	val := ToFixed(value, precision)
 	ft := fmt.Sprintf("%%.%df", precision)
 	return fmt.Sprintf(ft, val)
-}
-
-func JoinHome(p string) (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	return path.Join(home, p), nil
 }

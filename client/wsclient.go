@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/bitshares/logging"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"
@@ -34,7 +34,6 @@ type wsClient struct {
 	pending     map[uint64]*RPCCall
 	mutexNotify sync.Mutex // protects the following
 	notifyFns   map[int]NotifyFunc
-	debug       bool
 }
 
 func NewWebsocketClient(endpointURL string) WebsocketClient {
@@ -54,7 +53,6 @@ func (p *wsClient) Connect() error {
 		return errors.Annotate(err, "Dial")
 	}
 
-	p.debug = false
 	p.shutdown = false
 	p.closing = false
 
@@ -98,16 +96,6 @@ func (p *wsClient) IsConnected() bool {
 	return p.conn != nil
 }
 
-func (p *wsClient) SetDebug(debug bool) {
-	p.debug = debug
-}
-
-func (p *wsClient) Debug(descr string, in interface{}) {
-	if p.debug {
-		util.Dump(descr, in)
-	}
-}
-
 func (p *wsClient) monitor() {
 	defer p.wg.Done()
 
@@ -127,7 +115,7 @@ func (p *wsClient) monitor() {
 }
 
 func (p *wsClient) handleCustomData(data map[string]interface{}) error {
-	p.Debug("ws notify <", data)
+	logging.DumpJSON("ws notify <", data)
 
 	switch {
 	case p.notify.Is(data):
@@ -186,7 +174,7 @@ func (p *wsClient) receive() {
 				continue
 			}
 
-			p.Debug("ws resp <", data)
+			logging.DumpJSON("ws resp <", data)
 
 			if call, ok := p.pending[p.resp.ID]; ok {
 				p.mutex.Lock()
@@ -271,7 +259,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
 
-	p.Debug("ws req >", call.Request)
+	logging.DumpJSON("ws req >", call.Request)
 
 	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return nil, errors.Annotate(err, "SetWriteDeadline")

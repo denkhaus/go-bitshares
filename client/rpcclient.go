@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/bitshares/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
 
 type RPCClient interface {
 	CallAPI(method string, args ...interface{}) (interface{}, error)
-	SetDebug(debug bool)
 	Close() error
 	Connect() error
 }
@@ -27,7 +26,6 @@ type rpcClient struct {
 	endpointURL string
 	req         rpcRequest
 	res         rpcResponseString
-	debug       bool
 	timeout     int
 }
 
@@ -47,16 +45,6 @@ func (p *rpcClient) Close() error {
 	return nil
 }
 
-func (p *rpcClient) SetDebug(debug bool) {
-	p.debug = debug
-}
-
-func (p rpcClient) Debug(descr string, in interface{}) {
-	if p.debug {
-		util.DumpJSON(descr, in)
-	}
-}
-
 func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, error) {
 	p.req.Method = method
 	p.req.ID = uint64(rand.Int63())
@@ -66,7 +54,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 		return nil, errors.Annotate(err, "Encode")
 	}
 
-	p.Debug("rpc req >", p.req)
+	logging.DumpJSON("rpc req >", p.req)
 
 	req, err := http.NewRequest("POST", p.endpointURL, p.decBuf)
 	if err != nil {
@@ -91,7 +79,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 		return p.res.Result, p.res.Error
 	}
 
-	p.Debug("rpc resp <", p.res.Result)
+	logging.DumpJSON("rpc resp <", p.res.Result)
 
 	return p.res.Result, nil
 }
@@ -100,7 +88,6 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 func NewRPCClient(rpcEndpointURL string) RPCClient {
 	cli := rpcClient{
 		endpointURL: rpcEndpointURL,
-		debug:       false,
 	}
 
 	return &cli

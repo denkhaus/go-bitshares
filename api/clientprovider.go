@@ -14,7 +14,6 @@ type ClientProvider interface {
 	Connect() error
 	OnNotify(subscriberID int, fn client.NotifyFunc) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
-	SetDebug(debug bool)
 	Close() error
 }
 

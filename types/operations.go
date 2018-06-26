@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/denkhaus/bitshares/logging"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
@@ -83,12 +84,12 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 	if op, ok := OperationMap[p.Type]; ok {
 		p.Operation = op
 		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
-			util.DumpUnmarshaled(descr, raw[1])
+			logging.DumpUnmarshaled(descr, raw[1])
 			return errors.Annotatef(err, "unmarshal Operation %s", p.Type)
 		}
 	} else {
 		fmt.Printf("Operation type %s not yet supported\n", p.Type)
-		util.DumpUnmarshaled(descr, raw[1])
+		logging.DumpUnmarshaled(descr, raw[1])
 	}
 
 	return nil
