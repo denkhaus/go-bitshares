@@ -82,7 +82,6 @@ var (
 )
 
 func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
-	api.SetDebug(debug)
 	ref, err := api.WalletSerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")

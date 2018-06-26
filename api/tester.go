@@ -1,4 +1,4 @@
-package latency
+package api
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/denkhaus/bitshares/client"
+	"github.com/Sirupsen/logrus"
 	sort "github.com/emirpasic/gods/utils"
 	"gopkg.in/tomb.v2"
 )
@@ -68,13 +68,13 @@ type LatencyTester interface {
 	AddEndpoint(ep string)
 	OnTopNodeChanged(fn func(string) error)
 	TopNodeEndpoint() string
-	TopNodeClient() client.WebsocketClient
+	TopNodeClient() WebsocketClient
 	Done() <-chan struct{}
 }
 
 //NodeStats holds stat data for each endpoint
 type NodeStats struct {
-	cli      client.WebsocketClient
+	cli      WebsocketClient
 	latency  time.Duration
 	attempts int64
 	errors   int64
@@ -117,7 +117,7 @@ func (p *NodeStats) String() string {
 func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 	stats := &NodeStats{
 		endpoint: wsRPCEndpoint,
-		cli:      client.NewWebsocketClient(wsRPCEndpoint),
+		cli:      NewWebsocketClient(wsRPCEndpoint),
 	}
 
 	stats.cli.OnError(stats.onError)
@@ -263,8 +263,8 @@ func (p *latencyTester) TopNodeEndpoint() string {
 //TopNodeClient returns a new WebsocketClient to connect to the fastest node.
 //If the tester has no validated results, a client with your given
 //fallback endpoint is returned. You need to call Connect for yourself.
-func (p *latencyTester) TopNodeClient() client.WebsocketClient {
-	return client.NewWebsocketClient(
+func (p *latencyTester) TopNodeClient() WebsocketClient {
+	return NewWebsocketClient(
 		p.TopNodeEndpoint(),
 	)
 }
@@ -275,41 +275,57 @@ func (p *latencyTester) Done() <-chan struct{} {
 	return p.tmb.Dead()
 }
 
+func (p *latencyTester) runPass() error {
+	// dynamic sleep time
+	slp := time.Duration(LoopSeconds/len(p.stats)) * time.Second
+
+	for i := 0; i < len(p.stats); i++ {
+		select {
+		case <-p.tmb.Dying():
+			return tomb.ErrDying
+		default:
+			time.Sleep(slp)
+			p.mu.Lock()
+			st := p.stats[i].(*NodeStats)
+			st.check()
+			p.mu.Unlock()
+		}
+	}
+
+	return nil
+}
+
 //Start starts the testing process
 func (p *latencyTester) Start() {
+	logrus.Debug("start [tester]")
+
 	p.tmb.Go(func() error {
 		for {
-			//apply later incoming endpoints
-			p.createStats(p.toApply)
-			// dynamic sleep time
-			slp := time.Duration(LoopSeconds/len(p.stats)) * time.Second
-			for i := 0; i < len(p.stats); i++ {
-				select {
-				case <-p.tmb.Dying():
+			select {
+			case <-p.tmb.Dying():
+				p.sortResults(false)
+				return tomb.ErrDying
+			default:
+				//apply later incoming endpoints
+				p.createStats(p.toApply)
+				if err := p.runPass(); err != nil {
+					//provide sorted results on return
 					p.sortResults(false)
-					return tomb.ErrDying
-				default:
-					idx := i
-					time.Sleep(slp)
-					p.tmb.Go(func() error {
-						p.mu.Lock()
-						defer p.mu.Unlock()
-
-						st := p.stats[idx].(*NodeStats)
-						st.check()
-						return nil
-					})
+					return err
 				}
-			}
 
-			p.sortResults(true)
-			p.pass++
+				p.sortResults(true)
+				p.pass++
+			}
 		}
 	})
 }
 
 //Close stops the tester and waits until all goroutines have finished.
 func (p *latencyTester) Close() error {
+	logrus.Debug("kill [tomb]")
 	p.tmb.Kill(nil)
+
+	logrus.Debug("wait [tomb]")
 	return p.tmb.Wait()
 }

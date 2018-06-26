@@ -1,4 +1,4 @@
-package client
+package api
 
 import (
 	"io"
@@ -115,7 +115,7 @@ func (p *wsClient) monitor() {
 }
 
 func (p *wsClient) handleCustomData(data map[string]interface{}) error {
-	logging.DumpJSON("ws notify <", data)
+	logging.DDumpJSON("ws notify <", data)
 
 	switch {
 	case p.notify.Is(data):
@@ -174,7 +174,7 @@ func (p *wsClient) receive() {
 				continue
 			}
 
-			logging.DumpJSON("ws resp <", data)
+			logging.DDumpJSON("ws resp <", data)
 
 			if call, ok := p.pending[p.resp.ID]; ok {
 				p.mutex.Lock()
@@ -259,7 +259,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
 
-	logging.DumpJSON("ws req >", call.Request)
+	logging.DDumpJSON("ws req >", call.Request)
 
 	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return nil, errors.Annotate(err, "SetWriteDeadline")

@@ -3,7 +3,6 @@ package api
 import (
 	"time"
 
-	"github.com/denkhaus/bitshares/client"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/logging"
@@ -35,7 +34,7 @@ type BitsharesAPI interface {
 	HistoryAPIID() int
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
-	OnError(client.ErrorFunc)
+	OnError(ErrorFunc)
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
 	VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error)
@@ -84,7 +83,7 @@ type BitsharesAPI interface {
 
 type bitsharesAPI struct {
 	wsClient       ClientProvider
-	rpcClient      client.RPCClient
+	rpcClient      RPCClient
 	username       string
 	password       string
 	databaseAPIID  int
@@ -99,7 +98,7 @@ func (p *bitsharesAPI) getAPIID(identifier string) (int, error) {
 		return InvalidApiID, errors.Annotate(err, identifier)
 	}
 
-	logging.DumpJSON("getApiID <", resp)
+	logging.DDumpJSON("getApiID <", resp)
 
 	return int(resp.(float64)), nil
 }
@@ -111,7 +110,7 @@ func (p *bitsharesAPI) login() (bool, error) {
 		return false, err
 	}
 
-	logging.DumpJSON("login <", resp)
+	logging.DDumpJSON("login <", resp)
 
 	return resp.(bool), nil
 }
@@ -268,14 +267,14 @@ func (p *bitsharesAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.P
 		return nil, errors.Annotate(err, "GetPotentialSignatures")
 	}
 
-	logging.DumpJSON("potential pubkeys <", potPk)
+	logging.DDumpJSON("potential pubkeys <", potPk)
 
 	reqPk, err := p.GetRequiredSignatures(tx, potPk)
 	if err != nil {
 		return nil, errors.Annotate(err, "GetRequiredSignatures")
 	}
 
-	logging.DumpJSON("required pubkeys <", reqPk)
+	logging.DDumpJSON("required pubkeys <", reqPk)
 
 	return reqPk, nil
 }
@@ -289,7 +288,7 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 		return nil, err
 	}
 
-	logging.DumpJSON("get_potential_signatures <", resp)
+	logging.DDumpJSON("get_potential_signatures <", resp)
 
 	ret := types.PublicKeys{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -306,7 +305,7 @@ func (p *bitsharesAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKey
 		return nil, err
 	}
 
-	logging.DumpJSON("get_required_signatures <", resp)
+	logging.DDumpJSON("get_required_signatures <", resp)
 
 	ret := types.PublicKeys{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -323,7 +322,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*types.Block, error) {
 		return nil, err
 	}
 
-	logging.DumpJSON("get_block <", resp)
+	logging.DDumpJSON("get_block <", resp)
 
 	ret := types.Block{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -340,7 +339,7 @@ func (p *bitsharesAPI) GetAccountByName(name string) (*types.Account, error) {
 		return nil, err
 	}
 
-	logging.DumpJSON("get_account_by_name <", resp)
+	logging.DDumpJSON("get_account_by_name <", resp)
 
 	ret := types.Account{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -365,7 +364,7 @@ func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop type
 		return nil, err
 	}
 
-	logging.DumpJSON("get_account_history <", resp)
+	logging.DDumpJSON("get_account_history <", resp)
 
 	ret := types.OperationHistories{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -383,7 +382,7 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 		return nil, err
 	}
 
-	logging.DumpJSON("get_accounts <", resp)
+	logging.DDumpJSON("get_accounts <", resp)
 
 	ret := types.Accounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -400,7 +399,7 @@ func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalPropert
 		return nil, err
 	}
 
-	logging.DumpJSON("get_dynamic_global_properties <", resp)
+	logging.DDumpJSON("get_dynamic_global_properties <", resp)
 
 	var ret types.DynamicGlobalProperties
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -418,7 +417,7 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 		return nil, err
 	}
 
-	logging.DumpJSON("get_account_balances <", resp)
+	logging.DDumpJSON("get_account_balances <", resp)
 
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -441,7 +440,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 		return nil, err
 	}
 
-	logging.DumpJSON("list_assets <", resp)
+	logging.DDumpJSON("list_assets <", resp)
 
 	ret := types.Assets{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -458,7 +457,7 @@ func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.Grap
 		return nil, err
 	}
 
-	logging.DumpJSON("get_required_fees <", resp)
+	logging.DDumpJSON("get_required_fees <", resp)
 
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -479,7 +478,7 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 		return nil, err
 	}
 
-	logging.DumpJSON("get_limit_orders <", resp)
+	logging.DDumpJSON("get_limit_orders <", resp)
 
 	ret := types.LimitOrders{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -500,7 +499,7 @@ func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 		return nil, err
 	}
 
-	logging.DumpJSON("get_settle_orders <", resp)
+	logging.DDumpJSON("get_settle_orders <", resp)
 
 	ret := types.SettleOrders{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -521,7 +520,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 		return nil, err
 	}
 
-	logging.DumpJSON("get_call_orders <", resp)
+	logging.DDumpJSON("get_call_orders <", resp)
 
 	ret := types.CallOrders{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -538,7 +537,7 @@ func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types
 		return nil, err
 	}
 
-	logging.DumpJSON("get_margin_positions <", resp)
+	logging.DDumpJSON("get_margin_positions <", resp)
 
 	ret := types.CallOrders{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -559,7 +558,7 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 		return nil, err
 	}
 
-	logging.DumpJSON("get_trade_history <", resp)
+	logging.DDumpJSON("get_trade_history <", resp)
 
 	ret := types.MarketTrades{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -576,7 +575,7 @@ func (p *bitsharesAPI) GetChainID() (string, error) {
 		return "", err
 	}
 
-	logging.DumpJSON("get_chain_id <", resp)
+	logging.DDumpJSON("get_chain_id <", resp)
 
 	return resp.(string), nil
 }
@@ -589,7 +588,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 		return nil, err
 	}
 
-	logging.DumpJSON("get_objects <", resp)
+	logging.DDumpJSON("get_objects <", resp)
 
 	data := resp.([]interface{})
 	ret := make([]interface{}, 0)
@@ -667,7 +666,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				ret = append(ret, bal)
 
 			default:
-				logging.DumpUnmarshaled(id.Type().String(), b)
+				logging.DDumpUnmarshaled(id.Type().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 
@@ -681,7 +680,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				ret = append(ret, bit)
 
 			default:
-				logging.DumpUnmarshaled(id.Type().String(), b)
+				logging.DDumpUnmarshaled(id.Type().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 		}
@@ -697,7 +696,7 @@ func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 		return nil, err
 	}
 
-	logging.DumpJSON("cancel_order <", resp)
+	logging.DDumpJSON("cancel_order <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -734,7 +733,7 @@ func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{})
 }
 
 //OnError - hook your error callback here
-func (p *bitsharesAPI) OnError(errorFn client.ErrorFunc) {
+func (p *bitsharesAPI) OnError(errorFn ErrorFunc) {
 	p.wsClient.OnError(errorFn)
 }
 
@@ -830,10 +829,10 @@ func (p *bitsharesAPI) Close() error {
 //The use of wallet functions without this argument will throw an error.
 //If you do not use wallet API, provide an empty string.
 func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
-	var rpcClient client.RPCClient
+	var rpcClient RPCClient
 
 	if rpcEndpointURL != "" {
-		rpcClient = client.NewRPCClient(rpcEndpointURL)
+		rpcClient = NewRPCClient(rpcEndpointURL)
 	}
 
 	api := &bitsharesAPI{
@@ -855,10 +854,10 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 //The use of wallet functions without this argument
 //will throw an error. If you do not use wallet API, provide an empty string.
 func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAPI, error) {
-	var rpcClient client.RPCClient
+	var rpcClient RPCClient
 
 	if rpcEndpointURL != "" {
-		rpcClient = client.NewRPCClient(rpcEndpointURL)
+		rpcClient = NewRPCClient(rpcEndpointURL)
 	}
 
 	api := &bitsharesAPI{

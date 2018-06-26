@@ -1,4 +1,4 @@
-package client
+package api
 
 import (
 	"bytes"
@@ -54,7 +54,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 		return nil, errors.Annotate(err, "Encode")
 	}
 
-	logging.DumpJSON("rpc req >", p.req)
+	logging.DDumpJSON("rpc req >", p.req)
 
 	req, err := http.NewRequest("POST", p.endpointURL, p.decBuf)
 	if err != nil {
@@ -79,7 +79,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 		return p.res.Result, p.res.Error
 	}
 
-	logging.DumpJSON("rpc resp <", p.res.Result)
+	logging.DDumpJSON("rpc resp <", p.res.Result)
 
 	return p.res.Result, nil
 }

@@ -9,11 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	// register operations
 
+	"github.com/denkhaus/bitshares/logging"
 	_ "github.com/denkhaus/bitshares/operations"
-	"github.com/denkhaus/bitshares/util"
 )
 
 func TestBlockRange(t *testing.T) {
+
 	api := NewTestAPI(t, WsFullApiUrl, RpcFullApiUrl)
 	defer api.Close()
 
@@ -33,13 +34,13 @@ func TestBlockRange(t *testing.T) {
 			time.Sleep(300 * time.Millisecond) // to avoid EOF from client
 			ref, test, err := CompareTransactions(api, &tx, false)
 			if err != nil {
-				util.Dump("trx", tx)
+				logging.DDump("trx", tx)
 				assert.FailNow(t, err.Error(), "CompareTransactions")
 				return
 			}
 
 			if !assert.Equal(t, ref, test) {
-				util.Dump("trx", tx)
+				logging.DDump("trx", tx)
 				return
 			}
 		}

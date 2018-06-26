@@ -1,29 +1,27 @@
 package api
 
 import (
-	"log"
 	"sync"
 
-	"github.com/denkhaus/bitshares/client"
-	"github.com/denkhaus/bitshares/latency"
+	"github.com/Sirupsen/logrus"
 	"github.com/juju/errors"
 )
 
 type ClientProvider interface {
-	OnError(fn client.ErrorFunc)
+	OnError(fn ErrorFunc)
 	Connect() error
-	OnNotify(subscriberID int, fn client.NotifyFunc) error
+	OnNotify(subscriberID int, fn NotifyFunc) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
 }
 
 type SimpleClientProvider struct {
-	client.WebsocketClient
+	WebsocketClient
 	api BitsharesAPI
 }
 
 func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) ClientProvider {
-	wsc := client.NewWebsocketClient(endpointURL)
+	wsc := NewWebsocketClient(endpointURL)
 	sim := SimpleClientProvider{
 		api:             api,
 		WebsocketClient: wsc,
@@ -43,14 +41,14 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 }
 
 type BestNodeClientProvider struct {
-	client.WebsocketClient
+	WebsocketClient
 	mu     sync.Mutex
 	api    BitsharesAPI
-	tester latency.LatencyTester
+	tester LatencyTester
 }
 
 func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProvider, error) {
-	tester, err := latency.NewLatencyTester(endpointURL)
+	tester, err := NewLatencyTester(endpointURL)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewLatencyTester")
 	}
@@ -71,9 +69,10 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	log.Printf("change top node client -> %s\n", newEndpoint)
+	logrus.Debugf("change top node client -> %s\n", newEndpoint)
 
 	if p.WebsocketClient.IsConnected() {
+		logrus.Debug("close [client]")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
@@ -90,6 +89,7 @@ func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...inter
 	if !p.WebsocketClient.IsConnected() {
 		//unlock to avoid deadlock
 		p.mu.Unlock()
+		logrus.Debug("reconnect api")
 		if err := p.api.Connect(); err != nil {
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
@@ -103,13 +103,15 @@ func (p *BestNodeClientProvider) Close() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	logrus.Debug("close provider")
 	if p.WebsocketClient.IsConnected() {
-
+		logrus.Debug("close [client]")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
 	}
 
+	logrus.Debug("close [tester]")
 	if err := p.tester.Close(); err != nil {
 		return errors.Annotate(err, "Close [tester]")
 	}

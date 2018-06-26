@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
-	"github.com/denkhaus/bitshares/latency"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +14,7 @@ func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 	t.Log("create tester")
 	ctx := context.Background()
 	ctx, _ = context.WithTimeout(ctx, 60*time.Second)
-	lat, err := latency.NewLatencyTesterWithContext(ctx, WsFullApiUrl)
+	lat, err := api.NewLatencyTesterWithContext(ctx, WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}
@@ -29,9 +28,9 @@ func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 }
 
 //long running test
-func Test_LatencyAnalyzerWithStop(t *testing.T) {
+func Test_LatencyAnalyzerWithClose(t *testing.T) {
 	t.Log("create tester")
-	lat, err := latency.NewLatencyTester(WsFullApiUrl)
+	lat, err := api.NewLatencyTester(WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")
 	}

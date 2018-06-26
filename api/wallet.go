@@ -38,7 +38,7 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
 
-	logging.DumpJSON("is_locked <", resp)
+	logging.DDumpJSON("is_locked <", resp)
 
 	return resp.(bool), err
 }
@@ -72,7 +72,7 @@ func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types
 		return nil, err
 	}
 
-	logging.DumpJSON("buy <", resp)
+	logging.DDumpJSON("buy <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -111,7 +111,7 @@ func (p *bitsharesAPI) WalletSell(account types.GrapheneObject, base, quote type
 		return nil, err
 	}
 
-	logging.DumpJSON("sell <", resp)
+	logging.DDumpJSON("sell <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -157,7 +157,7 @@ func (p *bitsharesAPI) WalletSellAsset(account types.GrapheneObject, amountToSel
 		return nil, err
 	}
 
-	logging.DumpJSON("sell_asset <", resp)
+	logging.DDumpJSON("sell_asset <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -189,7 +189,7 @@ func (p *bitsharesAPI) WalletBorrowAsset(account types.GrapheneObject, amountToB
 		return nil, err
 	}
 
-	logging.DumpJSON("borrow_asset <", resp)
+	logging.DDumpJSON("borrow_asset <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -210,7 +210,7 @@ func (p *bitsharesAPI) WalletListAccountBalances(account types.GrapheneObject) (
 		return nil, err
 	}
 
-	logging.DumpJSON("list_account_balances <", resp)
+	logging.DDumpJSON("list_account_balances <", resp)
 
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -233,7 +233,7 @@ func (p *bitsharesAPI) WalletSerializeTransaction(tx *types.SignedTransaction) (
 		return "", err
 	}
 
-	logging.DumpJSON("serialize_transaction <", resp)
+	logging.DDumpJSON("serialize_transaction <", resp)
 
 	return resp.(string), nil
 }
@@ -252,7 +252,7 @@ func (p *bitsharesAPI) WalletSignTransaction(tx *types.SignedTransaction, broadc
 		return nil, err
 	}
 
-	logging.DumpJSON("wallet sign_transaction <", resp)
+	logging.DDumpJSON("wallet sign_transaction <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {

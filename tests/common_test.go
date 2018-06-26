@@ -60,7 +60,6 @@ func (suite *commonTest) Test_GetAccountBalances() {
 }
 
 func (suite *commonTest) Test_GetAccounts() {
-	suite.TestAPI.SetDebug(false)
 	res, err := suite.TestAPI.GetAccounts(UserID2) //, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccounts")

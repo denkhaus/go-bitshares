@@ -39,7 +39,7 @@ func Print(a ...interface{}) {
 	fmt.Fprint(logrus.StandardLogger().Out, a...)
 }
 
-func DumpUnmarshaled(descr string, in []byte) {
+func DDumpUnmarshaled(descr string, in []byte) {
 	if logrus.GetLevel() < logrus.DebugLevel {
 		return
 	}
@@ -49,10 +49,10 @@ func DumpUnmarshaled(descr string, in []byte) {
 		panic("DumpUnmarshaled: unable to unmarshal input")
 	}
 
-	Dump(descr, res)
+	DDump(descr, res)
 }
 
-func DumpJSON(descr string, in interface{}) {
+func DDumpJSON(descr string, in interface{}) {
 	if logrus.GetLevel() < logrus.DebugLevel {
 		return
 	}
@@ -63,15 +63,19 @@ func DumpJSON(descr string, in interface{}) {
 	}
 
 	Printf("%s ------------------------- dump start ---------------------------------------\n", descr)
-	Println(out)
+	Println(string(out))
 	Printf("%s -------------------------  dump end  ---------------------------------------\n\n", descr)
 }
 
-func Dump(descr string, in interface{}) {
+func DDump(descr string, in interface{}) {
 	if logrus.GetLevel() < logrus.DebugLevel {
 		return
 	}
 
+	Dump(descr, in)
+}
+
+func Dump(descr string, in interface{}) {
 	Printf("%s ------------------------- dump start ---------------------------------------\n", descr)
 	spew.Fdump(logrus.StandardLogger().Out, in)
 	Printf("%s -------------------------  dump end  ---------------------------------------\n\n", descr)
