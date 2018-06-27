@@ -91,6 +91,7 @@ func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...inter
 		p.mu.Unlock()
 		logrus.Debug("reconnect api")
 		if err := p.api.Connect(); err != nil {
+			p.mu.Lock()
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
 		p.mu.Lock()
