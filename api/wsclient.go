@@ -12,6 +12,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"
+	"github.com/tevino/abool"
 	"golang.org/x/net/websocket"
 )
 
@@ -26,8 +27,8 @@ type wsClient struct {
 	notify      rpcNotify   // unmarshal target
 	onError     ErrorFunc
 	errors      chan error
-	closing     bool
-	shutdown    bool
+	closing     *abool.AtomicBool
+	shutdown    *abool.AtomicBool
 	currentID   uint64
 	wg          sync.WaitGroup
 	mutex       sync.Mutex // protects the following
@@ -38,6 +39,8 @@ type wsClient struct {
 
 func NewWebsocketClient(endpointURL string) WebsocketClient {
 	cli := wsClient{
+		closing:   abool.NewBool(false),
+		shutdown:  abool.NewBool(false),
 		pending:   make(map[uint64]*RPCCall),
 		notifyFns: make(map[int]NotifyFunc),
 		currentID: 1,
@@ -53,8 +56,8 @@ func (p *wsClient) Connect() error {
 		return errors.Annotate(err, "Dial")
 	}
 
-	p.shutdown = false
-	p.closing = false
+	p.shutdown.UnSet()
+	p.closing.UnSet()
 
 	p.errors = make(chan error, 10)
 	p.Decoder = ffjson.NewDecoder()
@@ -72,7 +75,7 @@ func (p *wsClient) Connect() error {
 
 func (p *wsClient) Close() error {
 	if p.conn != nil {
-		p.closing = true
+		p.closing.Set()
 		if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
 			return errors.Annotate(err, "SetWriteDeadline")
 		}
@@ -89,7 +92,7 @@ func (p *wsClient) Close() error {
 }
 
 func (p *wsClient) IsConnected() bool {
-	if p.shutdown || p.closing {
+	if p.shutdown.IsSet() || p.closing.IsSet() {
 		return false
 	}
 
@@ -99,7 +102,7 @@ func (p *wsClient) IsConnected() bool {
 func (p *wsClient) monitor() {
 	defer p.wg.Done()
 
-	for !p.shutdown {
+	for !p.shutdown.IsSet() {
 		select {
 		case err := <-p.errors:
 			if err != nil {
@@ -148,7 +151,7 @@ func (p *wsClient) handleCustomData(data map[string]interface{}) error {
 func (p *wsClient) receive() {
 	defer p.wg.Done()
 
-	for !p.closing {
+	for !p.closing.IsSet() {
 		//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
 		var data map[string]interface{}
 		if err := p.DecodeReader(p.conn, &data); err != nil {
@@ -201,7 +204,7 @@ func (p *wsClient) receive() {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	p.shutdown = true
+	p.shutdown.Set()
 	for _, call := range p.pending {
 		call.Error = ErrShutdown
 		call.done()
@@ -241,7 +244,7 @@ func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (inter
 }
 
 func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
-	if p.shutdown || p.closing {
+	if !p.IsConnected() {
 		return nil, ErrShutdown
 	}
 
