@@ -3,7 +3,7 @@ package api
 import (
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -69,10 +69,10 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	logrus.Debugf("change top node client -> %s\n", newEndpoint)
+	logging.Debugf("change top node client -> %s\n", newEndpoint)
 
 	if p.WebsocketClient.IsConnected() {
-		logrus.Debug("close [client]")
+		logging.Debug("close [client]")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
@@ -83,20 +83,20 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 }
 
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 
-	if !p.WebsocketClient.IsConnected() {
-		//unlock to avoid deadlock
-		p.mu.Unlock()
-		logrus.Debug("reconnect api")
+	p.mu.Lock()
+	conn := p.WebsocketClient.IsConnected()
+	p.mu.Unlock()
+
+	if !conn {
+		logging.Debug("reconnect api")
 		if err := p.api.Connect(); err != nil {
-			p.mu.Lock()
 			return nil, errors.Annotate(err, "Connect [api]")
 		}
-		p.mu.Lock()
 	}
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	return p.WebsocketClient.CallAPI(apiID, method, args...)
 }
 
@@ -104,15 +104,15 @@ func (p *BestNodeClientProvider) Close() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	logrus.Debug("close provider")
+	logging.Debug("close provider")
 	if p.WebsocketClient.IsConnected() {
-		logrus.Debug("close [client]")
+		logging.Debug("close [client]")
 		if err := p.WebsocketClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [client]")
 		}
 	}
 
-	logrus.Debug("close [tester]")
+	logging.Debug("close [tester]")
 	if err := p.tester.Close(); err != nil {
 		return errors.Annotate(err, "Close [tester]")
 	}

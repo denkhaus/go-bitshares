@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/denkhaus/bitshares/logging"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )

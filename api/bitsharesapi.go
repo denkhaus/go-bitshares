@@ -5,9 +5,9 @@ import (
 
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
-	"github.com/denkhaus/bitshares/logging"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )

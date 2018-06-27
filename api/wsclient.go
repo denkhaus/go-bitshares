@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/denkhaus/bitshares/logging"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"

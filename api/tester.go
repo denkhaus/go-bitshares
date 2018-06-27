@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/denkhaus/logging"
 	sort "github.com/emirpasic/gods/utils"
 	"gopkg.in/tomb.v2"
 )
@@ -195,10 +195,9 @@ func (p *latencyTester) AddEndpoint(ep string) {
 	p.toApply = append(p.toApply, ep)
 }
 
-func (p *latencyTester) sortResults(notify bool) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+func (p *latencyTester) sortResults(notify bool) error {
 
+	p.mu.Lock()
 	oldTop := p.stats[0].(*NodeStats)
 	sort.Sort(p.stats, func(a, b interface{}) int {
 		sa := a.(*NodeStats).Score()
@@ -215,14 +214,15 @@ func (p *latencyTester) sortResults(notify bool) {
 	})
 
 	newTop := p.stats[0].(*NodeStats)
+	p.mu.Unlock()
+
 	if notify && !oldTop.Equals(newTop) {
 		if p.onTopNodeChanged != nil {
-			//use goroutine here to avoid deadlock
-			p.tmb.Go(func() error {
-				return p.onTopNodeChanged(newTop.endpoint)
-			})
+			return p.onTopNodeChanged(newTop.endpoint)
 		}
 	}
+
+	return nil
 }
 
 func (p *latencyTester) createStats(eps []string) {
@@ -278,7 +278,6 @@ func (p *latencyTester) Done() <-chan struct{} {
 func (p *latencyTester) runPass() error {
 	// dynamic sleep time
 	slp := time.Duration(LoopSeconds/len(p.stats)) * time.Second
-
 	for i := 0; i < len(p.stats); i++ {
 		select {
 		case <-p.tmb.Dying():
@@ -297,7 +296,7 @@ func (p *latencyTester) runPass() error {
 
 //Start starts the testing process
 func (p *latencyTester) Start() {
-	logrus.Debug("start [tester]")
+	logging.Debug("latencytester: start")
 
 	p.tmb.Go(func() error {
 		for {
@@ -323,9 +322,9 @@ func (p *latencyTester) Start() {
 
 //Close stops the tester and waits until all goroutines have finished.
 func (p *latencyTester) Close() error {
-	logrus.Debug("kill [tomb]")
+	logging.Debug("latencytester: kill [tomb]")
 	p.tmb.Kill(nil)
 
-	logrus.Debug("wait [tomb]")
+	logging.Debug("latencytester: wait [tomb]")
 	return p.tmb.Wait()
 }
