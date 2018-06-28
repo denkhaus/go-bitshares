@@ -1,10 +1,9 @@
 package api
 
 import (
-	"sync"
-
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
+	"github.com/sasha-s/go-deadlock"
 )
 
 type ClientProvider interface {
@@ -42,7 +41,7 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 
 type BestNodeClientProvider struct {
 	WebsocketClient
-	mu     sync.Mutex
+	mu     deadlock.Mutex
 	api    BitsharesAPI
 	tester LatencyTester
 }

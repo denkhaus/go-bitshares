@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/denkhaus/logging"
 	sort "github.com/emirpasic/gods/utils"
+	deadlock "github.com/sasha-s/go-deadlock"
 	"gopkg.in/tomb.v2"
 )
 
@@ -147,7 +147,7 @@ func (p *NodeStats) check() {
 }
 
 type latencyTester struct {
-	mu               sync.Mutex
+	mu               deadlock.Mutex
 	tmb              *tomb.Tomb
 	toApply          []string
 	fallbackURL      string

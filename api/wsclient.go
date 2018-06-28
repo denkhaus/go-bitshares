@@ -12,6 +12,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"
+	"github.com/sasha-s/go-deadlock"
 	"github.com/tevino/abool"
 	"golang.org/x/net/websocket"
 )
@@ -31,9 +32,9 @@ type wsClient struct {
 	shutdown    *abool.AtomicBool
 	currentID   uint64
 	wg          sync.WaitGroup
-	mutex       sync.Mutex // protects the following
+	mutex       deadlock.Mutex // protects the following
 	pending     map[uint64]*RPCCall
-	mutexNotify sync.Mutex // protects the following
+	mutexNotify deadlock.Mutex // protects the following
 	notifyFns   map[int]NotifyFunc
 }
 
