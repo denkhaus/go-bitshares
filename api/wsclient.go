@@ -3,8 +3,9 @@ package api
 import (
 	"io"
 	"net"
+	"os"
+	"syscall"
 
-	"log"
 	"sync"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/juju/errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pquerna/ffjson/ffjson"
-	"github.com/sasha-s/go-deadlock"
 	"github.com/tevino/abool"
 	"golang.org/x/net/websocket"
 )
@@ -32,9 +32,9 @@ type wsClient struct {
 	shutdown    *abool.AtomicBool
 	currentID   uint64
 	wg          sync.WaitGroup
-	mutex       deadlock.Mutex // protects the following
+	mutex       sync.Mutex // protects the following
 	pending     map[uint64]*RPCCall
-	mutexNotify deadlock.Mutex // protects the following
+	mutexNotify sync.Mutex // protects the following
 	notifyFns   map[int]NotifyFunc
 }
 
@@ -77,11 +77,13 @@ func (p *wsClient) Connect() error {
 func (p *wsClient) Close() error {
 	if p.conn != nil {
 		p.closing.Set()
-		if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
-			return errors.Annotate(err, "SetWriteDeadline")
-		}
-		if err := p.conn.Close(); err != nil {
-			return errors.Annotate(err, "Close [conn]")
+		if !p.shutdown.IsSet() {
+			if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
+				return errors.Annotate(err, "SetWriteDeadline")
+			}
+			if err := p.conn.Close(); err != nil {
+				return errors.Annotate(err, "Close [conn]")
+			}
 		}
 
 		p.wg.Wait()
@@ -110,7 +112,8 @@ func (p *wsClient) monitor() {
 				if p.onError != nil {
 					p.onError(err)
 				} else {
-					log.Println("rpc error: ", err)
+					logging.Errorf("WebsocketClient error: %s", err)
+					logging.Warn("please set the API OnError hook to avoid this message")
 				}
 			}
 		default:
@@ -158,8 +161,13 @@ func (p *wsClient) receive() {
 		if err := p.DecodeReader(p.conn, &data); err != nil {
 			if e, ok := err.(*net.OpError); ok {
 				if e.Err.Error() == "use of closed network connection" {
-					// end loop without notification
 					break
+				}
+
+				if syscallErr, ok := e.Err.(*os.SyscallError); ok {
+					if syscallErr.Err == syscall.ECONNRESET {
+						break
+					}
 				}
 			}
 
