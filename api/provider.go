@@ -3,7 +3,8 @@ package api
 import (
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
-	"github.com/sasha-s/go-deadlock"
+	deadlock "github.com/sasha-s/go-deadlock"
+	"github.com/tevino/abool"
 )
 
 type ClientProvider interface {
@@ -41,9 +42,10 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 
 type BestNodeClientProvider struct {
 	WebsocketClient
-	mu     deadlock.Mutex
-	api    BitsharesAPI
-	tester LatencyTester
+	mu          deadlock.RWMutex
+	nodeChanged *abool.AtomicBool
+	api         BitsharesAPI
+	tester      LatencyTester
 }
 
 func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProvider, error) {
@@ -55,6 +57,7 @@ func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProv
 	pr := &BestNodeClientProvider{
 		api:             api,
 		tester:          tester,
+		nodeChanged:     abool.NewBool(false),
 		WebsocketClient: tester.TopNodeClient(),
 	}
 
@@ -65,10 +68,14 @@ func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProv
 }
 
 func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
+	logging.Debugf("change top node client -> %s\n", newEndpoint)
+	p.nodeChanged.Set()
+	return nil
+}
+
+func (p *BestNodeClientProvider) renewClient() error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	logging.Debugf("change top node client -> %s\n", newEndpoint)
 
 	if p.WebsocketClient.IsConnected() {
 		logging.Debug("close [client]")
@@ -81,21 +88,29 @@ func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
 	return nil
 }
 
+func (p *BestNodeClientProvider) handleReconnect() error {
+	if err := p.renewClient(); err != nil {
+		return errors.Annotate(err, "renewClient")
+	}
+
+	logging.Debug("reconnect api")
+	if err := p.api.Connect(); err != nil {
+		return errors.Annotate(err, "Connect [api]")
+	}
+
+	return nil
+}
+
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-
-	p.mu.Lock()
-	conn := p.WebsocketClient.IsConnected()
-	p.mu.Unlock()
-
-	if !conn {
-		logging.Debug("reconnect api")
-		if err := p.api.Connect(); err != nil {
-			return nil, errors.Annotate(err, "Connect [api]")
+	if p.nodeChanged.IsSet() {
+		p.nodeChanged.UnSet()
+		if err := p.handleReconnect(); err != nil {
+			return nil, errors.Annotate(err, "handleReconnect")
 		}
 	}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	return p.WebsocketClient.CallAPI(apiID, method, args...)
 }
 

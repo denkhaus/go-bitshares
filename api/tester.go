@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/logging"
 	sort "github.com/emirpasic/gods/utils"
 	deadlock "github.com/sasha-s/go-deadlock"
@@ -74,11 +75,12 @@ type LatencyTester interface {
 
 //NodeStats holds stat data for each endpoint
 type NodeStats struct {
-	cli      WebsocketClient
-	latency  time.Duration
-	attempts int64
-	errors   int64
-	endpoint string
+	cli        WebsocketClient
+	latency    time.Duration
+	requiredDB []string
+	attempts   int64
+	errors     int64
+	endpoint   string
 }
 
 func (p *NodeStats) onError(err error) {
@@ -97,14 +99,17 @@ func (p *NodeStats) Latency() time.Duration {
 //Score returns reliability score for each node. The less the better.
 func (p *NodeStats) Score() int64 {
 	lat := int64(p.Latency())
+
 	if lat == 0 {
 		return math.MaxInt64
 	}
+
 	if p.errors == 0 {
 		return lat
 	}
 
-	return lat * p.errors
+	// add 5ms per error
+	return lat + p.errors*5000000
 }
 
 // String returns the stats string representation
@@ -118,6 +123,12 @@ func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 	stats := &NodeStats{
 		endpoint: wsRPCEndpoint,
 		cli:      NewWebsocketClient(wsRPCEndpoint),
+		requiredDB: []string{
+			"database",
+			"history",
+			"network_broadcast",
+			"crypto",
+		},
 	}
 
 	stats.cli.OnError(stats.onError)
@@ -128,7 +139,22 @@ func (p *NodeStats) Equals(n *NodeStats) bool {
 	return p.endpoint == n.endpoint
 }
 
+func (p *NodeStats) checkNode() {
+	_, err := p.cli.CallAPI(1, "login", "", "")
+	if err != nil {
+		p.errors++
+	}
+
+	for _, name := range p.requiredDB {
+		_, err := p.cli.CallAPI(1, name, types.EmptyParams)
+		if err != nil {
+			p.errors++
+		}
+	}
+}
+
 func (p *NodeStats) check() {
+	p.attempts++
 	if err := p.cli.Connect(); err != nil {
 		p.errors++
 		return
@@ -136,18 +162,12 @@ func (p *NodeStats) check() {
 	defer p.cli.Close()
 
 	tm := time.Now()
-	_, err := p.cli.CallAPI(1, "login", "", "")
-	if err != nil {
-		p.errors++
-		return
-	}
-
+	p.checkNode()
 	p.latency += time.Since(tm)
-	p.attempts++
 }
 
 type latencyTester struct {
-	mu               deadlock.Mutex
+	mu               deadlock.RWMutex
 	tmb              *tomb.Tomb
 	toApply          []string
 	fallbackURL      string
@@ -251,8 +271,8 @@ func (p *latencyTester) createStats(eps []string) {
 //your given fallback endpoint is returned.
 func (p *latencyTester) TopNodeEndpoint() string {
 	if p.pass > 0 {
-		p.mu.Lock()
-		defer p.mu.Unlock()
+		p.mu.RLock()
+		defer p.mu.RUnlock()
 		st := p.stats[0].(*NodeStats)
 		return st.endpoint
 	}
@@ -284,10 +304,10 @@ func (p *latencyTester) runPass() error {
 			return tomb.ErrDying
 		default:
 			time.Sleep(slp)
-			p.mu.Lock()
+			p.mu.RLock()
 			st := p.stats[i].(*NodeStats)
 			st.check()
-			p.mu.Unlock()
+			p.mu.RUnlock()
 		}
 	}
 
