@@ -108,8 +108,8 @@ func (p *NodeStats) Score() int64 {
 		return lat
 	}
 
-	// add 5ms per error
-	return lat + p.errors*5000000
+	// add 10ms per error
+	return lat + p.errors*10000000
 }
 
 // String returns the stats string representation
@@ -157,7 +157,6 @@ func (p *NodeStats) check() {
 	p.attempts++
 	if err := p.cli.Connect(); err != nil {
 		p.errors++
-		return
 	}
 	defer p.cli.Close()
 
