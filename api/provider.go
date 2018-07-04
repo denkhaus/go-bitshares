@@ -68,7 +68,7 @@ func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProv
 }
 
 func (p *BestNodeClientProvider) onTopNodeChanged(newEndpoint string) error {
-	logging.Debugf("change top node client -> %s\n", newEndpoint)
+	logging.Infof("change top node client -> %s\n", newEndpoint)
 	p.nodeChanged.Set()
 	return nil
 }
