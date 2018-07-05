@@ -108,8 +108,8 @@ func (p *NodeStats) Score() int64 {
 		return lat
 	}
 
-	// add 10ms per error
-	return lat + p.errors*10000000
+	// add 50ms per error
+	return lat + p.errors*50000000
 }
 
 // String returns the stats string representation
