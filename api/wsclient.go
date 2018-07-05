@@ -61,7 +61,9 @@ func (p *wsClient) Connect() error {
 		return errors.Annotate(err, "NewConfig")
 	}
 
-	config.Dialer.Timeout = DialerTimeout
+	config.Dialer = &net.Dialer{
+		Timeout: DialerTimeout,
+	}
 
 	conn, err := websocket.DialConfig(config)
 	if err != nil {
