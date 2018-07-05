@@ -17,7 +17,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var ErrShutdown = errors.New("connection is shut down")
+var (
+	DialerTimeout = time.Duration(5 * time.Second)
+	WriteTimeout  = time.Duration(5 * time.Second)
+	ErrShutdown   = errors.New("connection is shut down")
+)
 
 type wsClient struct {
 	*ffjson.Decoder
@@ -52,7 +56,14 @@ func NewWebsocketClient(endpointURL string) WebsocketClient {
 }
 
 func (p *wsClient) Connect() error {
-	conn, err := websocket.Dial(p.url, "", "http://localhost/")
+	config, err := websocket.NewConfig(p.url, "http://localhost/")
+	if err != nil {
+		return errors.Annotate(err, "NewConfig")
+	}
+
+	config.Dialer.Timeout = DialerTimeout
+
+	conn, err := websocket.DialConfig(config)
 	if err != nil {
 		return errors.Annotate(err, "Dial")
 	}
@@ -78,7 +89,7 @@ func (p *wsClient) Close() error {
 	if p.conn != nil {
 		p.closing.Set()
 		if !p.shutdown.IsSet() {
-			if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
+			if err := p.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
 				return errors.Annotate(err, "SetWriteDeadline")
 			}
 			if err := p.conn.Close(); err != nil {
@@ -171,7 +182,7 @@ func (p *wsClient) receive() {
 				}
 			}
 
-			//report all errors but EOF
+			//report all other errors but EOF
 			if err != io.EOF {
 				p.errors <- errors.Annotate(err, "DecodeReader")
 			}
@@ -273,7 +284,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 
 	logging.DDumpJSON("ws req >", call.Request)
 
-	if err := p.conn.SetWriteDeadline(time.Now().Add(5 * time.Second)); err != nil {
+	if err := p.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
 		return nil, errors.Annotate(err, "SetWriteDeadline")
 	}
 
