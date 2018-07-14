@@ -21,7 +21,7 @@ func (p *AssetAmount) Rate(prec float64) float64 {
 }
 
 func (p AssetAmount) Valid() bool {
-	return p.Asset.Valid() && p.Amount != 0
+	return p.Asset.Valid() && p.Amount > 0
 }
 
 func (p AssetAmount) Marshal(enc *util.TypeEncoder) error {
