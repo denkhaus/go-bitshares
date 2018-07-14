@@ -195,7 +195,6 @@ func (p *wsClient) receive() {
 		var data map[string]interface{}
 		if err := p.DecodeReader(p.conn, &data); err != nil {
 			if p.mustEndReceive(err) {
-				p.errors <- errors.Annotate(err, "mustEndReceive")
 				break
 			}
 
