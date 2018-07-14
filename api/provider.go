@@ -101,8 +101,15 @@ func (p *BestNodeClientProvider) handleReconnect() error {
 	return nil
 }
 
+func (p *BestNodeClientProvider) needsReconnect() bool {
+	return p.nodeChanged.IsSet() ||
+		!p.WebsocketClient.IsConnected()
+}
+
 func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	if p.nodeChanged.IsSet() {
+	//ensure reliable connection
+	if p.needsReconnect() {
+		// either way unsignal nodeChanged
 		p.nodeChanged.UnSet()
 		if err := p.handleReconnect(); err != nil {
 			return nil, errors.Annotate(err, "handleReconnect")

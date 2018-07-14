@@ -19,7 +19,7 @@ import (
 
 var (
 	DialerTimeout    = time.Duration(5 * time.Second)
-	ReadWriteTimeout = time.Duration(5 * time.Second)
+	ReadWriteTimeout = time.Duration(10 * time.Second)
 	ErrShutdown      = errors.New("connection is shut down")
 )
 
@@ -165,6 +165,28 @@ func (p *wsClient) handleCustomData(data map[string]interface{}) error {
 	return nil
 }
 
+func (p *wsClient) mustEndReceive(err error) bool {
+	if e, ok := err.(*net.OpError); ok {
+		if e.Err.Error() == "use of closed network connection" {
+			return true
+		}
+
+		if syscallErr, ok := e.Err.(*os.SyscallError); ok {
+			if syscallErr.Err == syscall.ECONNRESET {
+				return true
+			}
+		}
+	}
+
+	if e, ok := err.(net.Error); ok {
+		if e.Timeout() {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (p *wsClient) receive() {
 	defer p.wg.Done()
 
@@ -172,19 +194,12 @@ func (p *wsClient) receive() {
 		//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
 		var data map[string]interface{}
 		if err := p.DecodeReader(p.conn, &data); err != nil {
-			if e, ok := err.(*net.OpError); ok {
-				if e.Err.Error() == "use of closed network connection" {
-					break
-				}
-
-				if syscallErr, ok := e.Err.(*os.SyscallError); ok {
-					if syscallErr.Err == syscall.ECONNRESET {
-						break
-					}
-				}
+			if p.mustEndReceive(err) {
+				p.errors <- errors.Annotate(err, "mustEndReceive")
+				break
 			}
 
-			//report all other errors but EOF
+			//report all errors but EOF
 			if err != io.EOF {
 				p.errors <- errors.Annotate(err, "DecodeReader")
 			}

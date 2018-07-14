@@ -31,7 +31,7 @@ type rpcClient struct {
 
 func (p *rpcClient) Connect() error {
 	p.Client = &http.Client{
-		Timeout: 3 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
 	p.decBuf = new(bytes.Buffer)
