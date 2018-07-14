@@ -18,9 +18,9 @@ import (
 )
 
 var (
-	DialerTimeout = time.Duration(5 * time.Second)
-	WriteTimeout  = time.Duration(5 * time.Second)
-	ErrShutdown   = errors.New("connection is shut down")
+	DialerTimeout    = time.Duration(5 * time.Second)
+	ReadWriteTimeout = time.Duration(5 * time.Second)
+	ErrShutdown      = errors.New("connection is shut down")
 )
 
 type wsClient struct {
@@ -91,8 +91,8 @@ func (p *wsClient) Close() error {
 	if p.conn != nil {
 		p.closing.Set()
 		if !p.shutdown.IsSet() {
-			if err := p.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
-				return errors.Annotate(err, "SetWriteDeadline")
+			if err := p.conn.SetDeadline(time.Now().Add(ReadWriteTimeout)); err != nil {
+				return errors.Annotate(err, "SetDeadline")
 			}
 			if err := p.conn.Close(); err != nil {
 				return errors.Annotate(err, "Close [conn]")
@@ -286,8 +286,8 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 
 	logging.DDumpJSON("ws req >", call.Request)
 
-	if err := p.conn.SetWriteDeadline(time.Now().Add(WriteTimeout)); err != nil {
-		return nil, errors.Annotate(err, "SetWriteDeadline")
+	if err := p.conn.SetDeadline(time.Now().Add(ReadWriteTimeout)); err != nil {
+		return nil, errors.Annotate(err, "SetDeadline")
 	}
 
 	if err := p.Encode(call.Request); err != nil {
