@@ -290,7 +290,7 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 			Params: args,
 			ID:     p.currentID,
 		},
-		Done: make(chan *RPCCall, 20),
+		Done: make(chan *RPCCall, 200),
 	}
 
 	p.mutex.Lock()
