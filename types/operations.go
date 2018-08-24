@@ -184,3 +184,15 @@ func (p Operations) Types() [][]OperationType {
 
 	return ret
 }
+
+func (p Operations) Envelopes() []OperationEnvelope {
+	ret := make([]OperationEnvelope, len(p))
+	for idx, op := range p {
+		ret[idx] = OperationEnvelope{
+			Type:      op.Type(),
+			Operation: op,
+		}
+	}
+
+	return ret
+}

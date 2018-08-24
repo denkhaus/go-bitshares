@@ -450,7 +450,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 
 //GetRequiredFees calculates the required fee for each operation by the specified asset type.
 func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
-	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Types(), feeAsset.ID())
+	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Envelopes(), feeAsset.ID())
 	if err != nil {
 		return nil, err
 	}
