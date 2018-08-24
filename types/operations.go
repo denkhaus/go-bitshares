@@ -176,15 +176,6 @@ func (p Operations) CombinedFees() AssetAmounts {
 	return amounts
 }
 
-func (p Operations) Types() [][]OperationType {
-	ret := make([][]OperationType, len(p))
-	for idx, op := range p {
-		ret[idx] = []OperationType{op.Type()}
-	}
-
-	return ret
-}
-
 func (p Operations) Envelopes() []OperationEnvelope {
 	ret := make([]OperationEnvelope, len(p))
 	for idx, op := range p {
