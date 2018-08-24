@@ -34,18 +34,8 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	if j.NewSigningKey != nil {
-		buf.WriteString(`,"new_signing_key":`)
+		buf.WriteString(`{ "new_signing_key":`)
 
 		{
 
@@ -57,7 +47,7 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 
 		}
 	} else {
-		buf.WriteString(`,"new_signing_key":null`)
+		buf.WriteString(`{ "new_signing_key":null`)
 	}
 	buf.WriteString(`,"new_url":`)
 	fflib.WriteJsonString(buf, string(j.NewURL))
@@ -83,6 +73,23 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		buf.Write(obj)
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -91,8 +98,6 @@ const (
 	ffjtWitnessUpdateOperationbase = iota
 	ffjtWitnessUpdateOperationnosuchkey
 
-	ffjtWitnessUpdateOperationFee
-
 	ffjtWitnessUpdateOperationNewSigningKey
 
 	ffjtWitnessUpdateOperationNewURL
@@ -100,9 +105,9 @@ const (
 	ffjtWitnessUpdateOperationWitness
 
 	ffjtWitnessUpdateOperationWitnessAccount
-)
 
-var ffjKeyWitnessUpdateOperationFee = []byte("fee")
+	ffjtWitnessUpdateOperationFee
+)
 
 var ffjKeyWitnessUpdateOperationNewSigningKey = []byte("new_signing_key")
 
@@ -111,6 +116,8 @@ var ffjKeyWitnessUpdateOperationNewURL = []byte("new_url")
 var ffjKeyWitnessUpdateOperationWitness = []byte("witness")
 
 var ffjKeyWitnessUpdateOperationWitnessAccount = []byte("witness_account")
+
+var ffjKeyWitnessUpdateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *WitnessUpdateOperation) UnmarshalJSON(input []byte) error {
@@ -209,6 +216,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyWitnessUpdateOperationFee, kn) {
+					currentKey = ffjtWitnessUpdateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyWitnessUpdateOperationWitnessAccount, kn) {
 					currentKey = ffjtWitnessUpdateOperationWitnessAccount
 					state = fflib.FFParse_want_colon
@@ -233,12 +246,6 @@ mainparse:
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyWitnessUpdateOperationFee, kn) {
-					currentKey = ffjtWitnessUpdateOperationFee
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
 				currentKey = ffjtWitnessUpdateOperationnosuchkey
 				state = fflib.FFParse_want_colon
 				goto mainparse
@@ -256,9 +263,6 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
-				case ffjtWitnessUpdateOperationFee:
-					goto handle_Fee
-
 				case ffjtWitnessUpdateOperationNewSigningKey:
 					goto handle_NewSigningKey
 
@@ -270,6 +274,9 @@ mainparse:
 
 				case ffjtWitnessUpdateOperationWitnessAccount:
 					goto handle_WitnessAccount
+
+				case ffjtWitnessUpdateOperationFee:
+					goto handle_Fee
 
 				case ffjtWitnessUpdateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -284,26 +291,6 @@ mainparse:
 			}
 		}
 	}
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
 
 handle_NewSigningKey:
 
@@ -404,6 +391,32 @@ handle_WitnessAccount:
 			err = j.WitnessAccount.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

@@ -14,18 +14,10 @@ func init() {
 }
 
 type AccountUpgradeOperation struct {
-	AccountToUpgrade        types.GrapheneID  `json:"account_to_upgrade"`
-	Extensions              types.Extensions  `json:"extensions"`
-	Fee                     types.AssetAmount `json:"fee"`
-	UpgradeToLifetimeMember bool              `json:"upgrade_to_lifetime_member"`
-}
-
-func (p AccountUpgradeOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AccountUpgradeOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	AccountToUpgrade        types.GrapheneID `json:"account_to_upgrade"`
+	Extensions              types.Extensions `json:"extensions"`
+	UpgradeToLifetimeMember bool             `json:"upgrade_to_lifetime_member"`
 }
 
 func (p AccountUpgradeOperation) Type() types.OperationType {

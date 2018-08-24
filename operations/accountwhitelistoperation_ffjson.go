@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,7 +35,7 @@ func (j *AccountWhitelistOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"account_to_list":`)
+	buf.WriteString(`{ "account_to_list":`)
 
 	{
 
@@ -73,18 +74,25 @@ func (j *AccountWhitelistOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	} else {
 		buf.WriteString(`null`)
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	buf.WriteString(`,"new_listing":`)
 	fflib.FormatBits2(buf, uint64(j.NewListing), 10, false)
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -99,9 +107,9 @@ const (
 
 	ffjtAccountWhitelistOperationExtensions
 
-	ffjtAccountWhitelistOperationFee
-
 	ffjtAccountWhitelistOperationNewListing
+
+	ffjtAccountWhitelistOperationFee
 )
 
 var ffjKeyAccountWhitelistOperationAccountToList = []byte("account_to_list")
@@ -110,9 +118,9 @@ var ffjKeyAccountWhitelistOperationAuthorizingAccount = []byte("authorizing_acco
 
 var ffjKeyAccountWhitelistOperationExtensions = []byte("extensions")
 
-var ffjKeyAccountWhitelistOperationFee = []byte("fee")
-
 var ffjKeyAccountWhitelistOperationNewListing = []byte("new_listing")
+
+var ffjKeyAccountWhitelistOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AccountWhitelistOperation) UnmarshalJSON(input []byte) error {
@@ -214,14 +222,14 @@ mainparse:
 
 				}
 
-				if fflib.EqualFoldRight(ffjKeyAccountWhitelistOperationNewListing, kn) {
-					currentKey = ffjtAccountWhitelistOperationNewListing
+				if fflib.SimpleLetterEqualFold(ffjKeyAccountWhitelistOperationFee, kn) {
+					currentKey = ffjtAccountWhitelistOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyAccountWhitelistOperationFee, kn) {
-					currentKey = ffjtAccountWhitelistOperationFee
+				if fflib.EqualFoldRight(ffjKeyAccountWhitelistOperationNewListing, kn) {
+					currentKey = ffjtAccountWhitelistOperationNewListing
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -270,11 +278,11 @@ mainparse:
 				case ffjtAccountWhitelistOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtAccountWhitelistOperationFee:
-					goto handle_Fee
-
 				case ffjtAccountWhitelistOperationNewListing:
 					goto handle_NewListing
+
+				case ffjtAccountWhitelistOperationFee:
+					goto handle_Fee
 
 				case ffjtAccountWhitelistOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -408,26 +416,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_NewListing:
 
 	/* handler: j.NewListing type=types.UInt8 kind=uint8 quoted=false*/
@@ -445,6 +433,32 @@ handle_NewListing:
 			err = j.NewListing.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

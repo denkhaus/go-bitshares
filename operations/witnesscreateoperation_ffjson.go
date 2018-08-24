@@ -6,6 +6,7 @@ package operations
 import (
 	"bytes"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -33,7 +34,7 @@ func (j *WitnessCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"block_signing_key":`)
+	buf.WriteString(`{ "block_signing_key":`)
 
 	{
 
@@ -42,16 +43,6 @@ func (j *WitnessCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 			return err
 		}
 		buf.Write(obj)
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
 
 	}
 	buf.WriteString(`,"url":`)
@@ -67,6 +58,23 @@ func (j *WitnessCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		buf.Write(obj)
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -77,20 +85,20 @@ const (
 
 	ffjtWitnessCreateOperationBlockSigningKey
 
-	ffjtWitnessCreateOperationFee
-
 	ffjtWitnessCreateOperationURL
 
 	ffjtWitnessCreateOperationWitnessAccount
+
+	ffjtWitnessCreateOperationFee
 )
 
 var ffjKeyWitnessCreateOperationBlockSigningKey = []byte("block_signing_key")
 
-var ffjKeyWitnessCreateOperationFee = []byte("fee")
-
 var ffjKeyWitnessCreateOperationURL = []byte("url")
 
 var ffjKeyWitnessCreateOperationWitnessAccount = []byte("witness_account")
+
+var ffjKeyWitnessCreateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *WitnessCreateOperation) UnmarshalJSON(input []byte) error {
@@ -187,6 +195,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyWitnessCreateOperationFee, kn) {
+					currentKey = ffjtWitnessCreateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyWitnessCreateOperationWitnessAccount, kn) {
 					currentKey = ffjtWitnessCreateOperationWitnessAccount
 					state = fflib.FFParse_want_colon
@@ -195,12 +209,6 @@ mainparse:
 
 				if fflib.SimpleLetterEqualFold(ffjKeyWitnessCreateOperationURL, kn) {
 					currentKey = ffjtWitnessCreateOperationURL
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyWitnessCreateOperationFee, kn) {
-					currentKey = ffjtWitnessCreateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -231,14 +239,14 @@ mainparse:
 				case ffjtWitnessCreateOperationBlockSigningKey:
 					goto handle_BlockSigningKey
 
-				case ffjtWitnessCreateOperationFee:
-					goto handle_Fee
-
 				case ffjtWitnessCreateOperationURL:
 					goto handle_URL
 
 				case ffjtWitnessCreateOperationWitnessAccount:
 					goto handle_WitnessAccount
+
+				case ffjtWitnessCreateOperationFee:
+					goto handle_Fee
 
 				case ffjtWitnessCreateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -271,26 +279,6 @@ handle_BlockSigningKey:
 			err = j.BlockSigningKey.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
 			}
 		}
 		state = fflib.FFParse_after_value
@@ -342,6 +330,32 @@ handle_WitnessAccount:
 			err = j.WitnessAccount.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

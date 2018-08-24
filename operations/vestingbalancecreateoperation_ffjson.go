@@ -6,6 +6,7 @@ package operations
 import (
 	"bytes"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -33,7 +34,7 @@ func (j *VestingBalanceCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer)
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"amount":`)
+	buf.WriteString(`{ "amount":`)
 
 	{
 
@@ -52,16 +53,6 @@ func (j *VestingBalanceCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer)
 			return err
 		}
 		buf.Write(obj)
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
 
 	}
 	buf.WriteString(`,"owner":`)
@@ -86,6 +77,23 @@ func (j *VestingBalanceCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer)
 		buf.Write(obj)
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -98,22 +106,22 @@ const (
 
 	ffjtVestingBalanceCreateOperationCreator
 
-	ffjtVestingBalanceCreateOperationFee
-
 	ffjtVestingBalanceCreateOperationOwner
 
 	ffjtVestingBalanceCreateOperationPolicy
+
+	ffjtVestingBalanceCreateOperationFee
 )
 
 var ffjKeyVestingBalanceCreateOperationAmount = []byte("amount")
 
 var ffjKeyVestingBalanceCreateOperationCreator = []byte("creator")
 
-var ffjKeyVestingBalanceCreateOperationFee = []byte("fee")
-
 var ffjKeyVestingBalanceCreateOperationOwner = []byte("owner")
 
 var ffjKeyVestingBalanceCreateOperationPolicy = []byte("policy")
+
+var ffjKeyVestingBalanceCreateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *VestingBalanceCreateOperation) UnmarshalJSON(input []byte) error {
@@ -218,6 +226,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyVestingBalanceCreateOperationFee, kn) {
+					currentKey = ffjtVestingBalanceCreateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.SimpleLetterEqualFold(ffjKeyVestingBalanceCreateOperationPolicy, kn) {
 					currentKey = ffjtVestingBalanceCreateOperationPolicy
 					state = fflib.FFParse_want_colon
@@ -226,12 +240,6 @@ mainparse:
 
 				if fflib.SimpleLetterEqualFold(ffjKeyVestingBalanceCreateOperationOwner, kn) {
 					currentKey = ffjtVestingBalanceCreateOperationOwner
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyVestingBalanceCreateOperationFee, kn) {
-					currentKey = ffjtVestingBalanceCreateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -271,14 +279,14 @@ mainparse:
 				case ffjtVestingBalanceCreateOperationCreator:
 					goto handle_Creator
 
-				case ffjtVestingBalanceCreateOperationFee:
-					goto handle_Fee
-
 				case ffjtVestingBalanceCreateOperationOwner:
 					goto handle_Owner
 
 				case ffjtVestingBalanceCreateOperationPolicy:
 					goto handle_Policy
+
+				case ffjtVestingBalanceCreateOperationFee:
+					goto handle_Fee
 
 				case ffjtVestingBalanceCreateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -339,26 +347,6 @@ handle_Creator:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_Owner:
 
 	/* handler: j.Owner type=types.GrapheneID kind=struct quoted=false*/
@@ -401,6 +389,32 @@ handle_Policy:
 			err = j.Policy.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

@@ -14,19 +14,11 @@ func init() {
 }
 
 type CallOrderUpdateOperation struct {
+	types.OperationFee
 	DeltaCollateral types.AssetAmount `json:"delta_collateral"`
 	DeltaDebt       types.AssetAmount `json:"delta_debt"`
 	FundingAccount  types.GrapheneID  `json:"funding_account"`
-	Fee             types.AssetAmount `json:"fee"`
 	Extensions      types.Extensions  `json:"extensions"`
-}
-
-func (p CallOrderUpdateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *CallOrderUpdateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p CallOrderUpdateOperation) Type() types.OperationType {

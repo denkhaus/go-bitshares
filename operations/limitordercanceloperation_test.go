@@ -5,16 +5,6 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
-// op := LimitOrderCancelOperation{
-// 	Extensions:       types.Extensions{},
-// 	Order:            *types.NewGrapheneID("1.7.123"),
-// 	FeePayingAccount: *types.NewGrapheneID("1.2.456"),
-// 	Fee: types.AssetAmount{
-// 		Amount: 1000,
-// 		Asset:  *types.NewGrapheneID("1.3.789"),
-// 	},
-// }
-
 func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 
 	op := LimitOrderCancelOperation{

@@ -14,19 +14,11 @@ func init() {
 }
 
 type AssetFundFeePoolOperation struct {
-	Amount      types.UInt64      `json:"amount"`
-	AssetID     types.GrapheneID  `json:"asset_id"`
-	Extensions  types.Extensions  `json:"extensions"`
-	Fee         types.AssetAmount `json:"fee"`
-	FromAccount types.GrapheneID  `json:"from_account"`
-}
-
-func (p AssetFundFeePoolOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AssetFundFeePoolOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	Amount      types.UInt64     `json:"amount"`
+	AssetID     types.GrapheneID `json:"asset_id"`
+	Extensions  types.Extensions `json:"extensions"`
+	FromAccount types.GrapheneID `json:"from_account"`
 }
 
 func (p AssetFundFeePoolOperation) Type() types.OperationType {

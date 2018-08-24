@@ -35,7 +35,7 @@ func (j *AssetUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"asset_to_update":`)
+	buf.WriteString(`{ "asset_to_update":`)
 
 	{
 
@@ -55,16 +55,6 @@ func (j *AssetUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			return err
 		}
 		buf.Write(obj)
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
 
 	}
 	buf.WriteString(`,"extensions":`)
@@ -109,6 +99,23 @@ func (j *AssetUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -121,26 +128,26 @@ const (
 
 	ffjtAssetUpdateOperationIssuer
 
-	ffjtAssetUpdateOperationFee
-
 	ffjtAssetUpdateOperationExtensions
 
 	ffjtAssetUpdateOperationNewIssuer
 
 	ffjtAssetUpdateOperationNewOptions
+
+	ffjtAssetUpdateOperationFee
 )
 
 var ffjKeyAssetUpdateOperationAssetToUpdate = []byte("asset_to_update")
 
 var ffjKeyAssetUpdateOperationIssuer = []byte("issuer")
 
-var ffjKeyAssetUpdateOperationFee = []byte("fee")
-
 var ffjKeyAssetUpdateOperationExtensions = []byte("extensions")
 
 var ffjKeyAssetUpdateOperationNewIssuer = []byte("new_issuer")
 
 var ffjKeyAssetUpdateOperationNewOptions = []byte("new_options")
+
+var ffjKeyAssetUpdateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AssetUpdateOperation) UnmarshalJSON(input []byte) error {
@@ -250,6 +257,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyAssetUpdateOperationFee, kn) {
+					currentKey = ffjtAssetUpdateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyAssetUpdateOperationNewOptions, kn) {
 					currentKey = ffjtAssetUpdateOperationNewOptions
 					state = fflib.FFParse_want_colon
@@ -264,12 +277,6 @@ mainparse:
 
 				if fflib.EqualFoldRight(ffjKeyAssetUpdateOperationExtensions, kn) {
 					currentKey = ffjtAssetUpdateOperationExtensions
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyAssetUpdateOperationFee, kn) {
-					currentKey = ffjtAssetUpdateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -309,9 +316,6 @@ mainparse:
 				case ffjtAssetUpdateOperationIssuer:
 					goto handle_Issuer
 
-				case ffjtAssetUpdateOperationFee:
-					goto handle_Fee
-
 				case ffjtAssetUpdateOperationExtensions:
 					goto handle_Extensions
 
@@ -320,6 +324,9 @@ mainparse:
 
 				case ffjtAssetUpdateOperationNewOptions:
 					goto handle_NewOptions
+
+				case ffjtAssetUpdateOperationFee:
+					goto handle_Fee
 
 				case ffjtAssetUpdateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -377,26 +384,6 @@ handle_Issuer:
 			err = j.Issuer.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
 			}
 		}
 		state = fflib.FFParse_after_value
@@ -514,6 +501,32 @@ handle_NewOptions:
 		} else {
 
 			err = j.NewOptions.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
 				return err
 			}

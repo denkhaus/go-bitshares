@@ -19,21 +19,13 @@ func init() {
 //If either the selling asset or the receiving asset is white list restricted, the order will only be created if the seller is on the white list of the restricted asset type.
 //Market orders are matched in the order they are included in the block chain.
 type LimitOrderCreateOperation struct {
+	types.OperationFee
 	Seller       types.GrapheneID  `json:"seller"`
-	Fee          types.AssetAmount `json:"fee"`
 	AmountToSell types.AssetAmount `json:"amount_to_sell"`
 	MinToReceive types.AssetAmount `json:"min_to_receive"`
 	Expiration   types.Time        `json:"expiration"`
 	FillOrKill   bool              `json:"fill_or_kill"`
 	Extensions   types.Extensions  `json:"extensions"`
-}
-
-func (p LimitOrderCreateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *LimitOrderCreateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p LimitOrderCreateOperation) Type() types.OperationType {

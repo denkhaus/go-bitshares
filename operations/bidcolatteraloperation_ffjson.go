@@ -7,11 +7,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
 // MarshalJSON marshal bytes to json - template
-func (j *BidColatteralOperation) MarshalJSON() ([]byte, error) {
+func (j *BidCollateralOperation) MarshalJSON() ([]byte, error) {
 	var buf fflib.Buffer
 	if j == nil {
 		buf.WriteString("null")
@@ -25,7 +26,7 @@ func (j *BidColatteralOperation) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalJSONBuf marshal buff to json - template
-func (j *BidColatteralOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
+func (j *BidCollateralOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	if j == nil {
 		buf.WriteString("null")
 		return nil
@@ -34,7 +35,7 @@ func (j *BidColatteralOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"additional_collateral":`)
+	buf.WriteString(`{ "additional_collateral":`)
 
 	{
 
@@ -82,55 +83,62 @@ func (j *BidColatteralOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	} else {
 		buf.WriteString(`null`)
 	}
-	buf.WriteString(`,"fee":`)
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
 
-	{
+			{
 
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
 		}
-
 	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
 
 const (
-	ffjtBidColatteralOperationbase = iota
-	ffjtBidColatteralOperationnosuchkey
+	ffjtBidCollateralOperationbase = iota
+	ffjtBidCollateralOperationnosuchkey
 
-	ffjtBidColatteralOperationAdditionalCollateral
+	ffjtBidCollateralOperationAdditionalCollateral
 
-	ffjtBidColatteralOperationBidder
+	ffjtBidCollateralOperationBidder
 
-	ffjtBidColatteralOperationDebtCovered
+	ffjtBidCollateralOperationDebtCovered
 
-	ffjtBidColatteralOperationExtensions
+	ffjtBidCollateralOperationExtensions
 
-	ffjtBidColatteralOperationFee
+	ffjtBidCollateralOperationFee
 )
 
-var ffjKeyBidColatteralOperationAdditionalCollateral = []byte("additional_collateral")
+var ffjKeyBidCollateralOperationAdditionalCollateral = []byte("additional_collateral")
 
-var ffjKeyBidColatteralOperationBidder = []byte("bidder")
+var ffjKeyBidCollateralOperationBidder = []byte("bidder")
 
-var ffjKeyBidColatteralOperationDebtCovered = []byte("debt_covered")
+var ffjKeyBidCollateralOperationDebtCovered = []byte("debt_covered")
 
-var ffjKeyBidColatteralOperationExtensions = []byte("extensions")
+var ffjKeyBidCollateralOperationExtensions = []byte("extensions")
 
-var ffjKeyBidColatteralOperationFee = []byte("fee")
+var ffjKeyBidCollateralOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
-func (j *BidColatteralOperation) UnmarshalJSON(input []byte) error {
+func (j *BidCollateralOperation) UnmarshalJSON(input []byte) error {
 	fs := fflib.NewFFLexer(input)
 	return j.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
 }
 
 // UnmarshalJSONFFLexer fast json unmarshall - template ffjson
-func (j *BidColatteralOperation) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
+func (j *BidCollateralOperation) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
 	var err error
-	currentKey := ffjtBidColatteralOperationbase
+	currentKey := ffjtBidCollateralOperationbase
 	_ = currentKey
 	tok := fflib.FFTok_init
 	wantedTok := fflib.FFTok_init
@@ -176,7 +184,7 @@ mainparse:
 			kn := fs.Output.Bytes()
 			if len(kn) <= 0 {
 				// "" case. hrm.
-				currentKey = ffjtBidColatteralOperationnosuchkey
+				currentKey = ffjtBidCollateralOperationnosuchkey
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			} else {
@@ -184,77 +192,77 @@ mainparse:
 
 				case 'a':
 
-					if bytes.Equal(ffjKeyBidColatteralOperationAdditionalCollateral, kn) {
-						currentKey = ffjtBidColatteralOperationAdditionalCollateral
+					if bytes.Equal(ffjKeyBidCollateralOperationAdditionalCollateral, kn) {
+						currentKey = ffjtBidCollateralOperationAdditionalCollateral
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'b':
 
-					if bytes.Equal(ffjKeyBidColatteralOperationBidder, kn) {
-						currentKey = ffjtBidColatteralOperationBidder
+					if bytes.Equal(ffjKeyBidCollateralOperationBidder, kn) {
+						currentKey = ffjtBidCollateralOperationBidder
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'd':
 
-					if bytes.Equal(ffjKeyBidColatteralOperationDebtCovered, kn) {
-						currentKey = ffjtBidColatteralOperationDebtCovered
+					if bytes.Equal(ffjKeyBidCollateralOperationDebtCovered, kn) {
+						currentKey = ffjtBidCollateralOperationDebtCovered
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'e':
 
-					if bytes.Equal(ffjKeyBidColatteralOperationExtensions, kn) {
-						currentKey = ffjtBidColatteralOperationExtensions
+					if bytes.Equal(ffjKeyBidCollateralOperationExtensions, kn) {
+						currentKey = ffjtBidCollateralOperationExtensions
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyBidColatteralOperationFee, kn) {
-						currentKey = ffjtBidColatteralOperationFee
+					if bytes.Equal(ffjKeyBidCollateralOperationFee, kn) {
+						currentKey = ffjtBidCollateralOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyBidColatteralOperationFee, kn) {
-					currentKey = ffjtBidColatteralOperationFee
+				if fflib.SimpleLetterEqualFold(ffjKeyBidCollateralOperationFee, kn) {
+					currentKey = ffjtBidCollateralOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffjKeyBidColatteralOperationExtensions, kn) {
-					currentKey = ffjtBidColatteralOperationExtensions
+				if fflib.EqualFoldRight(ffjKeyBidCollateralOperationExtensions, kn) {
+					currentKey = ffjtBidCollateralOperationExtensions
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.AsciiEqualFold(ffjKeyBidColatteralOperationDebtCovered, kn) {
-					currentKey = ffjtBidColatteralOperationDebtCovered
+				if fflib.AsciiEqualFold(ffjKeyBidCollateralOperationDebtCovered, kn) {
+					currentKey = ffjtBidCollateralOperationDebtCovered
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyBidColatteralOperationBidder, kn) {
-					currentKey = ffjtBidColatteralOperationBidder
+				if fflib.SimpleLetterEqualFold(ffjKeyBidCollateralOperationBidder, kn) {
+					currentKey = ffjtBidCollateralOperationBidder
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.AsciiEqualFold(ffjKeyBidColatteralOperationAdditionalCollateral, kn) {
-					currentKey = ffjtBidColatteralOperationAdditionalCollateral
+				if fflib.AsciiEqualFold(ffjKeyBidCollateralOperationAdditionalCollateral, kn) {
+					currentKey = ffjtBidCollateralOperationAdditionalCollateral
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				currentKey = ffjtBidColatteralOperationnosuchkey
+				currentKey = ffjtBidCollateralOperationnosuchkey
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			}
@@ -271,22 +279,22 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
-				case ffjtBidColatteralOperationAdditionalCollateral:
+				case ffjtBidCollateralOperationAdditionalCollateral:
 					goto handle_AdditionalCollateral
 
-				case ffjtBidColatteralOperationBidder:
+				case ffjtBidCollateralOperationBidder:
 					goto handle_Bidder
 
-				case ffjtBidColatteralOperationDebtCovered:
+				case ffjtBidCollateralOperationDebtCovered:
 					goto handle_DebtCovered
 
-				case ffjtBidColatteralOperationExtensions:
+				case ffjtBidCollateralOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtBidColatteralOperationFee:
+				case ffjtBidCollateralOperationFee:
 					goto handle_Fee
 
-				case ffjtBidColatteralOperationnosuchkey:
+				case ffjtBidCollateralOperationnosuchkey:
 					err = fs.SkipField(tok)
 					if err != nil {
 						return fs.WrapErr(err)
@@ -440,7 +448,13 @@ handle_Fee:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Fee = nil
+
 		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
 
 			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,7 +35,7 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"delta_collateral":`)
+	buf.WriteString(`{ "delta_collateral":`)
 
 	{
 
@@ -65,16 +66,6 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 		buf.Write(obj)
 
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	buf.WriteString(`,"extensions":`)
 	if j.Extensions != nil {
 		buf.WriteString(`[`)
@@ -92,6 +83,23 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -106,9 +114,9 @@ const (
 
 	ffjtCallOrderUpdateOperationFundingAccount
 
-	ffjtCallOrderUpdateOperationFee
-
 	ffjtCallOrderUpdateOperationExtensions
+
+	ffjtCallOrderUpdateOperationFee
 )
 
 var ffjKeyCallOrderUpdateOperationDeltaCollateral = []byte("delta_collateral")
@@ -117,9 +125,9 @@ var ffjKeyCallOrderUpdateOperationDeltaDebt = []byte("delta_debt")
 
 var ffjKeyCallOrderUpdateOperationFundingAccount = []byte("funding_account")
 
-var ffjKeyCallOrderUpdateOperationFee = []byte("fee")
-
 var ffjKeyCallOrderUpdateOperationExtensions = []byte("extensions")
+
+var ffjKeyCallOrderUpdateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *CallOrderUpdateOperation) UnmarshalJSON(input []byte) error {
@@ -218,14 +226,14 @@ mainparse:
 
 				}
 
-				if fflib.EqualFoldRight(ffjKeyCallOrderUpdateOperationExtensions, kn) {
-					currentKey = ffjtCallOrderUpdateOperationExtensions
+				if fflib.SimpleLetterEqualFold(ffjKeyCallOrderUpdateOperationFee, kn) {
+					currentKey = ffjtCallOrderUpdateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyCallOrderUpdateOperationFee, kn) {
-					currentKey = ffjtCallOrderUpdateOperationFee
+				if fflib.EqualFoldRight(ffjKeyCallOrderUpdateOperationExtensions, kn) {
+					currentKey = ffjtCallOrderUpdateOperationExtensions
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -274,11 +282,11 @@ mainparse:
 				case ffjtCallOrderUpdateOperationFundingAccount:
 					goto handle_FundingAccount
 
-				case ffjtCallOrderUpdateOperationFee:
-					goto handle_Fee
-
 				case ffjtCallOrderUpdateOperationExtensions:
 					goto handle_Extensions
+
+				case ffjtCallOrderUpdateOperationFee:
+					goto handle_Fee
 
 				case ffjtCallOrderUpdateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -359,26 +367,6 @@ handle_FundingAccount:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_Extensions:
 
 	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
@@ -442,6 +430,32 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

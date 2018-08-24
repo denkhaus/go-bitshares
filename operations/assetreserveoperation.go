@@ -14,18 +14,10 @@ func init() {
 }
 
 type AssetReserveOperation struct {
+	types.OperationFee
 	Payer           types.GrapheneID  `json:"payer"`
 	AmountToReserve types.AssetAmount `json:"amount_to_reserve"`
-	Fee             types.AssetAmount `json:"fee"`
 	Extensions      types.Extensions  `json:"extensions"`
-}
-
-func (p AssetReserveOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AssetReserveOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p AssetReserveOperation) Type() types.OperationType {

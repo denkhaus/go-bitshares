@@ -139,7 +139,7 @@ const (
 	OperationTypeAssetSettleCancel ///
 	OperationTypeAssetClaimFees    ///
 	OperationTypeFBADistribute     ///
-	OperationTypeBidColatteral
+	OperationTypeBidCollateral
 	OperationTypeExecuteBid ///
 )
 

@@ -66,6 +66,9 @@ func (suite *walletAPITest) Test_TransferExtended() {
 		},
 	}
 
+	// logging.SetDebug(true)
+	// defer logging.SetDebug(false)
+
 	fees, err := suite.TestAPI.GetRequiredFees(trx.Operations, AssetTEST)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetRequiredFees")

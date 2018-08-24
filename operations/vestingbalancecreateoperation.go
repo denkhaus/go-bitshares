@@ -14,19 +14,11 @@ func init() {
 }
 
 type VestingBalanceCreateOperation struct {
+	types.OperationFee
 	Amount  types.AssetAmount   `json:"amount"`
 	Creator types.GrapheneID    `json:"creator"`
-	Fee     types.AssetAmount   `json:"fee"`
 	Owner   types.GrapheneID    `json:"owner"`
 	Policy  types.VestingPolicy `json:"policy"`
-}
-
-func (p VestingBalanceCreateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *VestingBalanceCreateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p VestingBalanceCreateOperation) Type() types.OperationType {

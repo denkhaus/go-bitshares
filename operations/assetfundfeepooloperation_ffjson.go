@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,7 +35,7 @@ func (j *AssetFundFeePoolOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"amount":`)
+	buf.WriteString(`{ "amount":`)
 	fflib.FormatBits2(buf, uint64(j.Amount), 10, false)
 	buf.WriteString(`,"asset_id":`)
 
@@ -64,16 +65,6 @@ func (j *AssetFundFeePoolOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	} else {
 		buf.WriteString(`null`)
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	buf.WriteString(`,"from_account":`)
 
 	{
@@ -85,6 +76,23 @@ func (j *AssetFundFeePoolOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 		buf.Write(obj)
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -99,9 +107,9 @@ const (
 
 	ffjtAssetFundFeePoolOperationExtensions
 
-	ffjtAssetFundFeePoolOperationFee
-
 	ffjtAssetFundFeePoolOperationFromAccount
+
+	ffjtAssetFundFeePoolOperationFee
 )
 
 var ffjKeyAssetFundFeePoolOperationAmount = []byte("amount")
@@ -110,9 +118,9 @@ var ffjKeyAssetFundFeePoolOperationAssetID = []byte("asset_id")
 
 var ffjKeyAssetFundFeePoolOperationExtensions = []byte("extensions")
 
-var ffjKeyAssetFundFeePoolOperationFee = []byte("fee")
-
 var ffjKeyAssetFundFeePoolOperationFromAccount = []byte("from_account")
+
+var ffjKeyAssetFundFeePoolOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AssetFundFeePoolOperation) UnmarshalJSON(input []byte) error {
@@ -198,27 +206,27 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyAssetFundFeePoolOperationFee, kn) {
-						currentKey = ffjtAssetFundFeePoolOperationFee
+					if bytes.Equal(ffjKeyAssetFundFeePoolOperationFromAccount, kn) {
+						currentKey = ffjtAssetFundFeePoolOperationFromAccount
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyAssetFundFeePoolOperationFromAccount, kn) {
-						currentKey = ffjtAssetFundFeePoolOperationFromAccount
+					} else if bytes.Equal(ffjKeyAssetFundFeePoolOperationFee, kn) {
+						currentKey = ffjtAssetFundFeePoolOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				}
 
-				if fflib.AsciiEqualFold(ffjKeyAssetFundFeePoolOperationFromAccount, kn) {
-					currentKey = ffjtAssetFundFeePoolOperationFromAccount
+				if fflib.SimpleLetterEqualFold(ffjKeyAssetFundFeePoolOperationFee, kn) {
+					currentKey = ffjtAssetFundFeePoolOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyAssetFundFeePoolOperationFee, kn) {
-					currentKey = ffjtAssetFundFeePoolOperationFee
+				if fflib.AsciiEqualFold(ffjKeyAssetFundFeePoolOperationFromAccount, kn) {
+					currentKey = ffjtAssetFundFeePoolOperationFromAccount
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -267,11 +275,11 @@ mainparse:
 				case ffjtAssetFundFeePoolOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtAssetFundFeePoolOperationFee:
-					goto handle_Fee
-
 				case ffjtAssetFundFeePoolOperationFromAccount:
 					goto handle_FromAccount
+
+				case ffjtAssetFundFeePoolOperationFee:
+					goto handle_Fee
 
 				case ffjtAssetFundFeePoolOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -405,26 +413,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_FromAccount:
 
 	/* handler: j.FromAccount type=types.GrapheneID kind=struct quoted=false*/
@@ -442,6 +430,32 @@ handle_FromAccount:
 			err = j.FromAccount.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

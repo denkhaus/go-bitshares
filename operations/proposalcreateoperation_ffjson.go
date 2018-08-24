@@ -35,7 +35,7 @@ func (j *ProposalCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"expiration_time":`)
+	buf.WriteString(`{ "expiration_time":`)
 
 	{
 
@@ -62,16 +62,6 @@ func (j *ProposalCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 		buf.WriteString(`]`)
 	} else {
 		buf.WriteString(`null`)
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
 	}
 	buf.WriteString(`,"fee_paying_account":`)
 
@@ -109,6 +99,23 @@ func (j *ProposalCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -121,26 +128,26 @@ const (
 
 	ffjtProposalCreateOperationExtensions
 
-	ffjtProposalCreateOperationFee
-
 	ffjtProposalCreateOperationFeePayingAccount
 
 	ffjtProposalCreateOperationReviewPeriodSeconds
 
 	ffjtProposalCreateOperationProposedOps
+
+	ffjtProposalCreateOperationFee
 )
 
 var ffjKeyProposalCreateOperationExpirationTime = []byte("expiration_time")
 
 var ffjKeyProposalCreateOperationExtensions = []byte("extensions")
 
-var ffjKeyProposalCreateOperationFee = []byte("fee")
-
 var ffjKeyProposalCreateOperationFeePayingAccount = []byte("fee_paying_account")
 
 var ffjKeyProposalCreateOperationReviewPeriodSeconds = []byte("review_period_seconds")
 
 var ffjKeyProposalCreateOperationProposedOps = []byte("proposed_ops")
+
+var ffjKeyProposalCreateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *ProposalCreateOperation) UnmarshalJSON(input []byte) error {
@@ -218,13 +225,13 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyProposalCreateOperationFee, kn) {
-						currentKey = ffjtProposalCreateOperationFee
+					if bytes.Equal(ffjKeyProposalCreateOperationFeePayingAccount, kn) {
+						currentKey = ffjtProposalCreateOperationFeePayingAccount
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyProposalCreateOperationFeePayingAccount, kn) {
-						currentKey = ffjtProposalCreateOperationFeePayingAccount
+					} else if bytes.Equal(ffjKeyProposalCreateOperationFee, kn) {
+						currentKey = ffjtProposalCreateOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -247,6 +254,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyProposalCreateOperationFee, kn) {
+					currentKey = ffjtProposalCreateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyProposalCreateOperationProposedOps, kn) {
 					currentKey = ffjtProposalCreateOperationProposedOps
 					state = fflib.FFParse_want_colon
@@ -261,12 +274,6 @@ mainparse:
 
 				if fflib.AsciiEqualFold(ffjKeyProposalCreateOperationFeePayingAccount, kn) {
 					currentKey = ffjtProposalCreateOperationFeePayingAccount
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyProposalCreateOperationFee, kn) {
-					currentKey = ffjtProposalCreateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -306,9 +313,6 @@ mainparse:
 				case ffjtProposalCreateOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtProposalCreateOperationFee:
-					goto handle_Fee
-
 				case ffjtProposalCreateOperationFeePayingAccount:
 					goto handle_FeePayingAccount
 
@@ -317,6 +321,9 @@ mainparse:
 
 				case ffjtProposalCreateOperationProposedOps:
 					goto handle_ProposedOps
+
+				case ffjtProposalCreateOperationFee:
+					goto handle_Fee
 
 				case ffjtProposalCreateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -420,26 +427,6 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -564,6 +551,32 @@ handle_ProposedOps:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

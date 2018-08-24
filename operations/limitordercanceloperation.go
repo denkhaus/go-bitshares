@@ -14,18 +14,10 @@ func init() {
 }
 
 type LimitOrderCancelOperation struct {
-	FeePayingAccount types.GrapheneID  `json:"fee_paying_account"`
-	Order            types.GrapheneID  `json:"order"`
-	Fee              types.AssetAmount `json:"fee"`
-	Extensions       types.Extensions  `json:"extensions"`
-}
-
-func (p LimitOrderCancelOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *LimitOrderCancelOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	FeePayingAccount types.GrapheneID `json:"fee_paying_account"`
+	Order            types.GrapheneID `json:"order"`
+	Extensions       types.Extensions `json:"extensions"`
 }
 
 func (p LimitOrderCancelOperation) Type() types.OperationType {

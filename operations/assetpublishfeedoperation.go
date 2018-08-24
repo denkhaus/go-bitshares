@@ -14,19 +14,11 @@ func init() {
 }
 
 type AssetPublishFeedOperation struct {
-	Publisher  types.GrapheneID  `json:"publisher"`
-	AssetID    types.GrapheneID  `json:"asset_id"`
-	Feed       types.PriceFeed   `json:"feed"`
-	Fee        types.AssetAmount `json:"fee"`
-	Extensions types.Extensions  `json:"extensions"`
-}
-
-func (p AssetPublishFeedOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AssetPublishFeedOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	Publisher  types.GrapheneID `json:"publisher"`
+	AssetID    types.GrapheneID `json:"asset_id"`
+	Feed       types.PriceFeed  `json:"feed"`
+	Extensions types.Extensions `json:"extensions"`
 }
 
 func (p AssetPublishFeedOperation) Type() types.OperationType {

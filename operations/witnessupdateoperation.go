@@ -14,19 +14,11 @@ func init() {
 }
 
 type WitnessUpdateOperation struct {
-	Fee            types.AssetAmount `json:"fee"`
-	NewSigningKey  *types.PublicKey  `json:"new_signing_key"`
-	NewURL         string            `json:"new_url"`
-	Witness        types.GrapheneID  `json:"witness"`
-	WitnessAccount types.GrapheneID  `json:"witness_account"`
-}
-
-func (p WitnessUpdateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *WitnessUpdateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	NewSigningKey  *types.PublicKey `json:"new_signing_key"`
+	NewURL         string           `json:"new_url"`
+	Witness        types.GrapheneID `json:"witness"`
+	WitnessAccount types.GrapheneID `json:"witness_account"`
 }
 
 func (p WitnessUpdateOperation) Type() types.OperationType {

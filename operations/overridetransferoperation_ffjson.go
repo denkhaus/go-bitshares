@@ -35,7 +35,7 @@ func (j *OverrideTransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"amount":`)
+	buf.WriteString(`{ "amount":`)
 
 	{
 
@@ -61,16 +61,6 @@ func (j *OverrideTransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 		buf.WriteString(`]`)
 	} else {
 		buf.WriteString(`null`)
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
 	}
 	buf.WriteString(`,"from":`)
 
@@ -121,6 +111,23 @@ func (j *OverrideTransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 		buf.Write(obj)
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -133,8 +140,6 @@ const (
 
 	ffjtOverrideTransferOperationExtensions
 
-	ffjtOverrideTransferOperationFee
-
 	ffjtOverrideTransferOperationFrom
 
 	ffjtOverrideTransferOperationIssuer
@@ -142,13 +147,13 @@ const (
 	ffjtOverrideTransferOperationMemo
 
 	ffjtOverrideTransferOperationTo
+
+	ffjtOverrideTransferOperationFee
 )
 
 var ffjKeyOverrideTransferOperationAmount = []byte("amount")
 
 var ffjKeyOverrideTransferOperationExtensions = []byte("extensions")
-
-var ffjKeyOverrideTransferOperationFee = []byte("fee")
 
 var ffjKeyOverrideTransferOperationFrom = []byte("from")
 
@@ -157,6 +162,8 @@ var ffjKeyOverrideTransferOperationIssuer = []byte("issuer")
 var ffjKeyOverrideTransferOperationMemo = []byte("memo")
 
 var ffjKeyOverrideTransferOperationTo = []byte("to")
+
+var ffjKeyOverrideTransferOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *OverrideTransferOperation) UnmarshalJSON(input []byte) error {
@@ -237,13 +244,13 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyOverrideTransferOperationFee, kn) {
-						currentKey = ffjtOverrideTransferOperationFee
+					if bytes.Equal(ffjKeyOverrideTransferOperationFrom, kn) {
+						currentKey = ffjtOverrideTransferOperationFrom
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyOverrideTransferOperationFrom, kn) {
-						currentKey = ffjtOverrideTransferOperationFrom
+					} else if bytes.Equal(ffjKeyOverrideTransferOperationFee, kn) {
+						currentKey = ffjtOverrideTransferOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -274,6 +281,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyOverrideTransferOperationFee, kn) {
+					currentKey = ffjtOverrideTransferOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.SimpleLetterEqualFold(ffjKeyOverrideTransferOperationTo, kn) {
 					currentKey = ffjtOverrideTransferOperationTo
 					state = fflib.FFParse_want_colon
@@ -294,12 +307,6 @@ mainparse:
 
 				if fflib.SimpleLetterEqualFold(ffjKeyOverrideTransferOperationFrom, kn) {
 					currentKey = ffjtOverrideTransferOperationFrom
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyOverrideTransferOperationFee, kn) {
-					currentKey = ffjtOverrideTransferOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -339,9 +346,6 @@ mainparse:
 				case ffjtOverrideTransferOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtOverrideTransferOperationFee:
-					goto handle_Fee
-
 				case ffjtOverrideTransferOperationFrom:
 					goto handle_From
 
@@ -353,6 +357,9 @@ mainparse:
 
 				case ffjtOverrideTransferOperationTo:
 					goto handle_To
+
+				case ffjtOverrideTransferOperationFee:
+					goto handle_Fee
 
 				case ffjtOverrideTransferOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -456,26 +463,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_From:
 
 	/* handler: j.From type=types.GrapheneID kind=struct quoted=false*/
@@ -569,6 +556,32 @@ handle_To:
 			err = j.To.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
 			}
 		}
 		state = fflib.FFParse_after_value

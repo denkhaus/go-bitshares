@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -35,7 +36,7 @@ func (j *LimitOrderCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"seller":`)
+	buf.WriteString(`{ "seller":`)
 
 	{
 
@@ -44,16 +45,6 @@ func (j *LimitOrderCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 			return err
 		}
 		buf.Write(obj)
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
 
 	}
 	buf.WriteString(`,"amount_to_sell":`)
@@ -109,6 +100,23 @@ func (j *LimitOrderCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -119,8 +127,6 @@ const (
 
 	ffjtLimitOrderCreateOperationSeller
 
-	ffjtLimitOrderCreateOperationFee
-
 	ffjtLimitOrderCreateOperationAmountToSell
 
 	ffjtLimitOrderCreateOperationMinToReceive
@@ -130,11 +136,11 @@ const (
 	ffjtLimitOrderCreateOperationFillOrKill
 
 	ffjtLimitOrderCreateOperationExtensions
+
+	ffjtLimitOrderCreateOperationFee
 )
 
 var ffjKeyLimitOrderCreateOperationSeller = []byte("seller")
-
-var ffjKeyLimitOrderCreateOperationFee = []byte("fee")
 
 var ffjKeyLimitOrderCreateOperationAmountToSell = []byte("amount_to_sell")
 
@@ -145,6 +151,8 @@ var ffjKeyLimitOrderCreateOperationExpiration = []byte("expiration")
 var ffjKeyLimitOrderCreateOperationFillOrKill = []byte("fill_or_kill")
 
 var ffjKeyLimitOrderCreateOperationExtensions = []byte("extensions")
+
+var ffjKeyLimitOrderCreateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *LimitOrderCreateOperation) UnmarshalJSON(input []byte) error {
@@ -230,13 +238,13 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyLimitOrderCreateOperationFee, kn) {
-						currentKey = ffjtLimitOrderCreateOperationFee
+					if bytes.Equal(ffjKeyLimitOrderCreateOperationFillOrKill, kn) {
+						currentKey = ffjtLimitOrderCreateOperationFillOrKill
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyLimitOrderCreateOperationFillOrKill, kn) {
-						currentKey = ffjtLimitOrderCreateOperationFillOrKill
+					} else if bytes.Equal(ffjKeyLimitOrderCreateOperationFee, kn) {
+						currentKey = ffjtLimitOrderCreateOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -257,6 +265,12 @@ mainparse:
 						goto mainparse
 					}
 
+				}
+
+				if fflib.SimpleLetterEqualFold(ffjKeyLimitOrderCreateOperationFee, kn) {
+					currentKey = ffjtLimitOrderCreateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
 				}
 
 				if fflib.EqualFoldRight(ffjKeyLimitOrderCreateOperationExtensions, kn) {
@@ -289,12 +303,6 @@ mainparse:
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyLimitOrderCreateOperationFee, kn) {
-					currentKey = ffjtLimitOrderCreateOperationFee
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
 				if fflib.EqualFoldRight(ffjKeyLimitOrderCreateOperationSeller, kn) {
 					currentKey = ffjtLimitOrderCreateOperationSeller
 					state = fflib.FFParse_want_colon
@@ -321,9 +329,6 @@ mainparse:
 				case ffjtLimitOrderCreateOperationSeller:
 					goto handle_Seller
 
-				case ffjtLimitOrderCreateOperationFee:
-					goto handle_Fee
-
 				case ffjtLimitOrderCreateOperationAmountToSell:
 					goto handle_AmountToSell
 
@@ -338,6 +343,9 @@ mainparse:
 
 				case ffjtLimitOrderCreateOperationExtensions:
 					goto handle_Extensions
+
+				case ffjtLimitOrderCreateOperationFee:
+					goto handle_Fee
 
 				case ffjtLimitOrderCreateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -370,26 +378,6 @@ handle_Seller:
 			err = j.Seller.UnmarshalJSON(tbuf)
 			if err != nil {
 				return fs.WrapErr(err)
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
 			}
 		}
 		state = fflib.FFParse_after_value
@@ -561,6 +549,32 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
