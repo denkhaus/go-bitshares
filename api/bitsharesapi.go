@@ -796,10 +796,10 @@ func (p *bitsharesAPI) getAPIIDs() (err error) {
 		return errors.Annotate(err, "network")
 	}
 
-	p.cryptoAPIID, err = p.getAPIID("crypto")
-	if err != nil {
-		return errors.Annotate(err, "crypto")
-	}
+	//p.cryptoAPIID, err = p.getAPIID("crypto")
+	//if err != nil {
+	//	return errors.Annotate(err, "crypto")
+	//}
 
 	return nil
 }
