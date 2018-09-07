@@ -215,7 +215,10 @@ func (p *wsClient) receive() {
 
 			logging.DDumpJSON("ws resp <", data)
 
-			if call, ok := p.pending[p.resp.ID]; ok {
+			p.mutex.Lock()
+			call, ok := p.pending[p.resp.ID]
+			p.mutex.Unlock()
+			if ok {
 				p.mutex.Lock()
 				delete(p.pending, p.resp.ID)
 				p.mutex.Unlock()
