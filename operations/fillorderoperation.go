@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &FillOrderOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeFillOrder] = func() types.Operation {
+		op := &FillOrderOperation{}
+		return op
+	}
 }
 
 //virtual order

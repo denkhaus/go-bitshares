@@ -5,8 +5,8 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
-func (suite *operationsAPITest) Test_BidColatteralOperation() {
-	op := BidColatteralOperation{}
+func (suite *operationsAPITest) Test_BidCollateralOperation() {
+	op := BidCollateralOperation{}
 
 	sample, err := data.GetSampleByType(op.Type())
 	if err != nil {

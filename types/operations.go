@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
@@ -11,8 +10,10 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+type GetOpFunc func() Operation
+
 var (
-	OperationMap = make(map[OperationType]Operation)
+	OperationMap = make(map[OperationType]GetOpFunc)
 )
 
 type Operation interface {
@@ -82,12 +83,9 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 
 	descr := fmt.Sprintf("Operation %s", p.Type)
 
-	if op, ok := OperationMap[p.Type]; ok {
+	if getOp, ok := OperationMap[p.Type]; ok {
 
-		// fix for multiple op instance used same variable instance address to json.Unmarshal() when call GetAccountHistory() by pkrss
-		op = reflect.New(reflect.TypeOf(reflect.ValueOf(op).Elem().Interface())).Elem().Addr().Interface().(Operation)
-
-		p.Operation = op
+		p.Operation = getOp()
 		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
 			logging.DDumpUnmarshaled(descr, raw[1])
 			return errors.Annotatef(err, "unmarshal Operation %s", p.Type)

@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &LimitOrderCancelOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeLimitOrderCancel] = func() types.Operation {
+		op := &LimitOrderCancelOperation{}
+		return op
+	}
 }
 
 type LimitOrderCancelOperation struct {

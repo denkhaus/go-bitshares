@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &LimitOrderCreateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeLimitOrderCreate] = func() types.Operation {
+		op := &LimitOrderCreateOperation{}
+		return op
+	}
 }
 
 //LimitOrderCreateOperation instructs the blockchain to attempt to sell one asset for another.
