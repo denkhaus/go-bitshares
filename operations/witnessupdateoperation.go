@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &WitnessUpdateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeWitnessUpdate] = func() types.Operation {
+		op := &WitnessUpdateOperation{}
+		return op
+	}
 }
 
 type WitnessUpdateOperation struct {

@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &OverrideTransferOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeOverrideTransfer] = func() types.Operation {
+		op := &OverrideTransferOperation{}
+		return op
+	}
 }
 
 type OverrideTransferOperation struct {

@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &BidCollateralOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeBidCollateral] = func() types.Operation {
+		op := &BidCollateralOperation{}
+		return op
+	}
 }
 
 type BidCollateralOperation struct {

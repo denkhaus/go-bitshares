@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &AssetSettleOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeAssetSettle] = func() types.Operation {
+		op := &AssetSettleOperation{}
+		return op
+	}
 }
 
 type AssetSettleOperation struct {

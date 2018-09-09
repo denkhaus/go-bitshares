@@ -12,8 +12,10 @@ package operations
 // )
 
 // func init() {
-// 	op := &TransferToBlindOperation{}
-// 	types.OperationMap[op.Type()] = op
+// 	types.OperationMap[types.OperationTypeTransferToBlind] =  func() types.Operation {
+// 		op := &TransferToBlindOperation{}
+// 		return op
+// }
 // }
 
 // type TransferToBlindOperationOutputs []TransferToBlindOperationOutput

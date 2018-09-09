@@ -9,8 +9,10 @@ import (
 )
 
 func init() {
-	op := &WorkerCreateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeWorkerCreate] = func() types.Operation {
+		op := &WorkerCreateOperation{}
+		return op
+	}
 }
 
 type WorkerCreateOperation struct {
