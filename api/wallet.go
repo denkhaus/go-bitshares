@@ -38,6 +38,10 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
 
+	if err != nil {
+		return false, err
+	}
+
 	logging.DDumpJSON("is_locked <", resp)
 
 	return resp.(bool), err
