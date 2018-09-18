@@ -9,28 +9,22 @@ import (
 )
 
 func init() {
-	op := &AccountCreateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeAccountCreate] = func() types.Operation {
+		op := &AccountCreateOperation{}
+		return op
+	}
 }
 
 type AccountCreateOperation struct {
+	types.OperationFee
 	Registrar       types.GrapheneID              `json:"registrar"`
 	Referrer        types.GrapheneID              `json:"referrer"`
 	ReferrerPercent types.UInt16                  `json:"referrer_percent"`
 	Owner           types.Authority               `json:"owner"`
 	Active          types.Authority               `json:"active"`
-	Fee             types.AssetAmount             `json:"fee"`
 	Name            string                        `json:"name"`
 	Extensions      types.AccountCreateExtensions `json:"extensions"`
 	Options         types.AccountOptions          `json:"options"`
-}
-
-func (p AccountCreateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AccountCreateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p AccountCreateOperation) Type() types.OperationType {

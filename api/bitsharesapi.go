@@ -30,7 +30,6 @@ type BitsharesAPI interface {
 	Close() error
 	Connect() error
 	DatabaseAPIID() int
-	CryptoAPIID() int
 	HistoryAPIID() int
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
@@ -89,7 +88,6 @@ type bitsharesAPI struct {
 	password       string
 	databaseAPIID  int
 	historyAPIID   int
-	cryptoAPIID    int
 	broadcastAPIID int
 }
 
@@ -736,10 +734,6 @@ func (p *bitsharesAPI) HistoryAPIID() int {
 	return p.historyAPIID
 }
 
-func (p *bitsharesAPI) CryptoAPIID() int {
-	return p.cryptoAPIID
-}
-
 //CallWsAPI invokes a websocket API call
 func (p *bitsharesAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	return p.wsClient.CallAPI(apiID, method, args...)
@@ -858,7 +852,6 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,
-		cryptoAPIID:    InvalidApiID,
 	}
 
 	api.wsClient = NewSimpleClientProvider(wsEndpointURL, api)
@@ -883,7 +876,6 @@ func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAP
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,
-		cryptoAPIID:    InvalidApiID,
 	}
 
 	pr, err := NewBestNodeClientProvider(startupEndpointURL, api)

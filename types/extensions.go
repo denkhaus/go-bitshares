@@ -22,3 +22,13 @@ func (p Extensions) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
+
+// func (p *Extensions) UnmarshalJSON(s []byte) error {
+// 	var val interface{}
+// 	if err := ffjson.Unmarshal(s, &val); err != nil {
+// 		return errors.Annotate(err, "Unmarshal")
+// 	}
+
+// 	fmt.Printf("extension %+v", val)
+// 	return nil
+// }

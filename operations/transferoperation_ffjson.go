@@ -35,7 +35,7 @@ func (j *TransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"from":`)
+	buf.WriteString(`{ "from":`)
 
 	{
 
@@ -62,16 +62,6 @@ func (j *TransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	{
 
 		err = j.Amount.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
 		if err != nil {
 			return err
 		}
@@ -110,6 +100,23 @@ func (j *TransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -124,11 +131,11 @@ const (
 
 	ffjtTransferOperationAmount
 
-	ffjtTransferOperationFee
-
 	ffjtTransferOperationMemo
 
 	ffjtTransferOperationExtensions
+
+	ffjtTransferOperationFee
 )
 
 var ffjKeyTransferOperationFrom = []byte("from")
@@ -137,11 +144,11 @@ var ffjKeyTransferOperationTo = []byte("to")
 
 var ffjKeyTransferOperationAmount = []byte("amount")
 
-var ffjKeyTransferOperationFee = []byte("fee")
-
 var ffjKeyTransferOperationMemo = []byte("memo")
 
 var ffjKeyTransferOperationExtensions = []byte("extensions")
+
+var ffjKeyTransferOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *TransferOperation) UnmarshalJSON(input []byte) error {
@@ -251,6 +258,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyTransferOperationFee, kn) {
+					currentKey = ffjtTransferOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyTransferOperationExtensions, kn) {
 					currentKey = ffjtTransferOperationExtensions
 					state = fflib.FFParse_want_colon
@@ -259,12 +272,6 @@ mainparse:
 
 				if fflib.SimpleLetterEqualFold(ffjKeyTransferOperationMemo, kn) {
 					currentKey = ffjtTransferOperationMemo
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyTransferOperationFee, kn) {
-					currentKey = ffjtTransferOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -313,14 +320,14 @@ mainparse:
 				case ffjtTransferOperationAmount:
 					goto handle_Amount
 
-				case ffjtTransferOperationFee:
-					goto handle_Fee
-
 				case ffjtTransferOperationMemo:
 					goto handle_Memo
 
 				case ffjtTransferOperationExtensions:
 					goto handle_Extensions
+
+				case ffjtTransferOperationFee:
+					goto handle_Fee
 
 				case ffjtTransferOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -396,26 +403,6 @@ handle_Amount:
 		} else {
 
 			err = j.Amount.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
 				return err
 			}
@@ -515,6 +502,32 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

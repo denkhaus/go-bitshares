@@ -9,31 +9,25 @@ import (
 )
 
 func init() {
-	op := &BidColatteralOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeBidCollateral] = func() types.Operation {
+		op := &BidCollateralOperation{}
+		return op
+	}
 }
 
-type BidColatteralOperation struct {
+type BidCollateralOperation struct {
+	types.OperationFee
 	AdditionalCollateral types.AssetAmount `json:"additional_collateral"`
 	Bidder               types.GrapheneID  `json:"bidder"`
 	DebtCovered          types.AssetAmount `json:"debt_covered"`
 	Extensions           types.Extensions  `json:"extensions"`
-	Fee                  types.AssetAmount `json:"fee"`
 }
 
-func (p BidColatteralOperation) GetFee() types.AssetAmount {
-	return p.Fee
+func (p BidCollateralOperation) Type() types.OperationType {
+	return types.OperationTypeBidCollateral
 }
 
-func (p *BidColatteralOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
-}
-
-func (p BidColatteralOperation) Type() types.OperationType {
-	return types.OperationTypeBidColatteral
-}
-
-func (p BidColatteralOperation) Marshal(enc *util.TypeEncoder) error {
+func (p BidCollateralOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
 	}
@@ -61,9 +55,9 @@ func (p BidColatteralOperation) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-//NewBidColatteralOperation creates a new BidColatteralOperation
-func NewBidColatteralOperation() *BidColatteralOperation {
-	tx := BidColatteralOperation{
+//NewBidCollateralOperation creates a new BidCollateralOperation
+func NewBidCollateralOperation() *BidCollateralOperation {
+	tx := BidCollateralOperation{
 		Extensions: types.Extensions{},
 	}
 	return &tx

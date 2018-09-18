@@ -15,8 +15,8 @@ import (
 
 const (
 	SetSubscribeCallbackSubscriberID = 5
-	SetSubscribeCallbackMsgs         = 8
-	SetSubscribeCallbackDuration     = 30 * time.Second
+	SetSubscribeCallbackMsgs         = 3
+	SetSubscribeCallbackDuration     = 60 * time.Second
 
 	SubscribeToMarketSubscriberID = 4
 	SubscribeToMarketMsgs         = 3
@@ -68,7 +68,7 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 		return util.WaitForCondition(SubscribeToMarketDuration, func() bool {
 			return int(bar.Get()) >= SubscribeToMarketMsgs
 		})
-	}, "not enough incomming notifications during test window")
+	}, "not enough incoming notifications during test window")
 
 	bar.Finish()
 
@@ -105,7 +105,7 @@ func (suite *subscribeTest) Test_SetSubscribeCallback() {
 		return util.WaitForCondition(SetSubscribeCallbackDuration, func() bool {
 			return int(bar.Get()) >= SetSubscribeCallbackMsgs
 		})
-	}, "not enough incomming notifications during test window")
+	}, "not enough incoming notifications during test window")
 
 	bar.Finish()
 

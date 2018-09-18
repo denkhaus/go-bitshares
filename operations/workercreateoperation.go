@@ -9,27 +9,21 @@ import (
 )
 
 func init() {
-	op := &WorkerCreateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeWorkerCreate] = func() types.Operation {
+		op := &WorkerCreateOperation{}
+		return op
+	}
 }
 
 type WorkerCreateOperation struct {
+	types.OperationFee
 	DailyPay      types.UInt64            `json:"daily_pay"`
-	Fee           types.AssetAmount       `json:"fee"`
 	Initializer   types.WorkerInitializer `json:"initializer"`
 	Name          string                  `json:"name"`
 	Owner         types.GrapheneID        `json:"owner"`
 	URL           string                  `json:"url"`
 	WorkBeginDate types.Time              `json:"work_begin_date"`
 	WorkEndDate   types.Time              `json:"work_end_date"`
-}
-
-func (p WorkerCreateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *WorkerCreateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p WorkerCreateOperation) Type() types.OperationType {

@@ -10,8 +10,10 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+type GetOpFunc func() Operation
+
 var (
-	OperationMap = make(map[OperationType]Operation)
+	OperationMap = make(map[OperationType]GetOpFunc)
 )
 
 type Operation interface {
@@ -81,8 +83,9 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 
 	descr := fmt.Sprintf("Operation %s", p.Type)
 
-	if op, ok := OperationMap[p.Type]; ok {
-		p.Operation = op
+	if getOp, ok := OperationMap[p.Type]; ok {
+
+		p.Operation = getOp()
 		if err := ffjson.Unmarshal(raw[1], p.Operation); err != nil {
 			logging.DDumpUnmarshaled(descr, raw[1])
 			return errors.Annotatef(err, "unmarshal Operation %s", p.Type)
@@ -174,15 +177,6 @@ func (p Operations) CombinedFees() AssetAmounts {
 	}
 
 	return amounts
-}
-
-func (p Operations) Types() [][]OperationType {
-	ret := make([][]OperationType, len(p))
-	for idx, op := range p {
-		ret[idx] = []OperationType{op.Type()}
-	}
-
-	return ret
 }
 
 func (p Operations) Envelopes() []OperationEnvelope {

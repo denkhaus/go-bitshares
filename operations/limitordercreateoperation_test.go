@@ -5,23 +5,6 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
-// op := LimitOrderCreateOperation{
-// 	Extensions: types.Extensions{},
-// 	Seller:     *types.NewGrapheneID("1.2.29"),
-// 	FillOrKill: false,
-// 	Fee: types.AssetAmount{
-// 		Amount: 100,
-// 		Asset:  *types.NewGrapheneID("1.3.0"),
-// 	},
-// 	AmountToSell: types.AssetAmount{
-// 		Amount: 100000,
-// 		Asset:  *types.NewGrapheneID("1.3.0"),
-// 	},
-// 	MinToReceive: types.AssetAmount{
-// 		Amount: 10000,
-// 		Asset:  *types.NewGrapheneID("1.3.105"),
-// 	},
-// }
 func (suite *operationsAPITest) Test_LimitOrderCreateOperation() {
 	op := LimitOrderCreateOperation{
 		Extensions: types.Extensions{},

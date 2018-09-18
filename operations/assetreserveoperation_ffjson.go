@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,7 +35,7 @@ func (j *AssetReserveOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"payer":`)
+	buf.WriteString(`{ "payer":`)
 
 	{
 
@@ -50,16 +51,6 @@ func (j *AssetReserveOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	{
 
 		err = j.AmountToReserve.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
 		if err != nil {
 			return err
 		}
@@ -82,6 +73,23 @@ func (j *AssetReserveOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -94,18 +102,18 @@ const (
 
 	ffjtAssetReserveOperationAmountToReserve
 
-	ffjtAssetReserveOperationFee
-
 	ffjtAssetReserveOperationExtensions
+
+	ffjtAssetReserveOperationFee
 )
 
 var ffjKeyAssetReserveOperationPayer = []byte("payer")
 
 var ffjKeyAssetReserveOperationAmountToReserve = []byte("amount_to_reserve")
 
-var ffjKeyAssetReserveOperationFee = []byte("fee")
-
 var ffjKeyAssetReserveOperationExtensions = []byte("extensions")
+
+var ffjKeyAssetReserveOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AssetReserveOperation) UnmarshalJSON(input []byte) error {
@@ -202,14 +210,14 @@ mainparse:
 
 				}
 
-				if fflib.EqualFoldRight(ffjKeyAssetReserveOperationExtensions, kn) {
-					currentKey = ffjtAssetReserveOperationExtensions
+				if fflib.SimpleLetterEqualFold(ffjKeyAssetReserveOperationFee, kn) {
+					currentKey = ffjtAssetReserveOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyAssetReserveOperationFee, kn) {
-					currentKey = ffjtAssetReserveOperationFee
+				if fflib.EqualFoldRight(ffjKeyAssetReserveOperationExtensions, kn) {
+					currentKey = ffjtAssetReserveOperationExtensions
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -249,11 +257,11 @@ mainparse:
 				case ffjtAssetReserveOperationAmountToReserve:
 					goto handle_AmountToReserve
 
-				case ffjtAssetReserveOperationFee:
-					goto handle_Fee
-
 				case ffjtAssetReserveOperationExtensions:
 					goto handle_Extensions
+
+				case ffjtAssetReserveOperationFee:
+					goto handle_Fee
 
 				case ffjtAssetReserveOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -304,26 +312,6 @@ handle_AmountToReserve:
 		} else {
 
 			err = j.AmountToReserve.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
 				return err
 			}
@@ -397,6 +385,32 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -9,25 +9,19 @@ import (
 )
 
 func init() {
-	op := &ProposalCreateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeProposalCreate] = func() types.Operation {
+		op := &ProposalCreateOperation{}
+		return op
+	}
 }
 
 type ProposalCreateOperation struct {
+	types.OperationFee
 	ExpirationTime      types.Time                     `json:"expiration_time"`
 	Extensions          types.Extensions               `json:"extensions"`
-	Fee                 types.AssetAmount              `json:"fee"`
 	FeePayingAccount    types.GrapheneID               `json:"fee_paying_account"`
 	ReviewPeriodSeconds *types.UInt32                  `json:"review_period_seconds,omitempty"`
 	ProposedOps         types.OperationEnvelopeHolders `json:"proposed_ops"`
-}
-
-func (p ProposalCreateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *ProposalCreateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p ProposalCreateOperation) Type() types.OperationType {

@@ -60,9 +60,11 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 
 	suite.RefTx.Operations = types.Operations{
 		&CallOrderUpdateOperation{
-			Fee: types.AssetAmount{
-				Amount: 100,
-				Asset:  *types.NewGrapheneID("1.3.0"),
+			OperationFee: types.OperationFee{
+				Fee: &types.AssetAmount{
+					Amount: 100,
+					Asset:  *types.NewGrapheneID("1.3.0"),
+				},
 			},
 			DeltaDebt: types.AssetAmount{
 				Amount: 10000,

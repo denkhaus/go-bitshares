@@ -9,24 +9,18 @@ import (
 )
 
 func init() {
-	op := &ProposalDeleteOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeProposalDelete] = func() types.Operation {
+		op := &ProposalDeleteOperation{}
+		return op
+	}
 }
 
 type ProposalDeleteOperation struct {
-	Extensions          types.Extensions  `json:"extensions"`
-	Fee                 types.AssetAmount `json:"fee"`
-	FeePayingAccount    types.GrapheneID  `json:"fee_paying_account"`
-	Proposal            types.GrapheneID  `json:"proposal"`
-	UsingOwnerAuthority bool              `json:"using_owner_authority"`
-}
-
-func (p ProposalDeleteOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *ProposalDeleteOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	Extensions          types.Extensions `json:"extensions"`
+	FeePayingAccount    types.GrapheneID `json:"fee_paying_account"`
+	Proposal            types.GrapheneID `json:"proposal"`
+	UsingOwnerAuthority bool             `json:"using_owner_authority"`
 }
 
 func (p ProposalDeleteOperation) Type() types.OperationType {

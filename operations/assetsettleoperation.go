@@ -9,23 +9,17 @@ import (
 )
 
 func init() {
-	op := &AssetSettleOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeAssetSettle] = func() types.Operation {
+		op := &AssetSettleOperation{}
+		return op
+	}
 }
 
 type AssetSettleOperation struct {
+	types.OperationFee
 	Account    types.GrapheneID  `json:"account"`
 	Amount     types.AssetAmount `json:"amount"`
-	Fee        types.AssetAmount `json:"fee"`
 	Extensions types.Extensions  `json:"extensions"`
-}
-
-func (p AssetSettleOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AssetSettleOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p AssetSettleOperation) Type() types.OperationType {

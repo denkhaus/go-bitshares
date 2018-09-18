@@ -218,6 +218,7 @@ func (p *wsClient) receive() {
 			p.mutex.Lock()
 			call, ok := p.pending[p.resp.ID]
 			p.mutex.Unlock()
+      
 			if ok {
 				p.mutex.Lock()
 				delete(p.pending, p.resp.ID)

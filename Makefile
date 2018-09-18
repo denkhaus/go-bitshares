@@ -33,7 +33,6 @@ test_api:
 test_operations:
 	go test -v ./operations -run ^TestOperations$
 
-#
 test_blocks:
 	@echo "this is a long running test, abort with Ctrl + C"
 	go test -v ./tests -timeout 10m -run ^TestBlockRange$

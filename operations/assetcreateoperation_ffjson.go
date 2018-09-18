@@ -37,7 +37,7 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	_ = obj
 	_ = err
 	if j.BitassetOptions != nil {
-		buf.WriteString(`{"bitasset_opts":`)
+		buf.WriteString(`{ "bitasset_opts":`)
 
 		{
 
@@ -48,7 +48,7 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 		}
 	} else {
-		buf.WriteString(`{"bitasset_opts":null`)
+		buf.WriteString(`{ "bitasset_opts":null`)
 	}
 	buf.WriteString(`,"common_options":`)
 
@@ -77,16 +77,6 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	if j.IsPredictionMarket {
 		buf.WriteString(`,"is_prediction_market":true`)
 	} else {
@@ -107,6 +97,23 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	fflib.FormatBits2(buf, uint64(j.Precision), 10, false)
 	buf.WriteString(`,"symbol":`)
 	fflib.WriteJsonString(buf, string(j.Symbol))
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -121,8 +128,6 @@ const (
 
 	ffjtAssetCreateOperationExtensions
 
-	ffjtAssetCreateOperationFee
-
 	ffjtAssetCreateOperationIsPredictionMarket
 
 	ffjtAssetCreateOperationIssuer
@@ -130,6 +135,8 @@ const (
 	ffjtAssetCreateOperationPrecision
 
 	ffjtAssetCreateOperationSymbol
+
+	ffjtAssetCreateOperationFee
 )
 
 var ffjKeyAssetCreateOperationBitassetOptions = []byte("bitasset_opts")
@@ -138,8 +145,6 @@ var ffjKeyAssetCreateOperationCommonOptions = []byte("common_options")
 
 var ffjKeyAssetCreateOperationExtensions = []byte("extensions")
 
-var ffjKeyAssetCreateOperationFee = []byte("fee")
-
 var ffjKeyAssetCreateOperationIsPredictionMarket = []byte("is_prediction_market")
 
 var ffjKeyAssetCreateOperationIssuer = []byte("issuer")
@@ -147,6 +152,8 @@ var ffjKeyAssetCreateOperationIssuer = []byte("issuer")
 var ffjKeyAssetCreateOperationPrecision = []byte("precision")
 
 var ffjKeyAssetCreateOperationSymbol = []byte("symbol")
+
+var ffjKeyAssetCreateOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AssetCreateOperation) UnmarshalJSON(input []byte) error {
@@ -272,6 +279,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyAssetCreateOperationFee, kn) {
+					currentKey = ffjtAssetCreateOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyAssetCreateOperationSymbol, kn) {
 					currentKey = ffjtAssetCreateOperationSymbol
 					state = fflib.FFParse_want_colon
@@ -292,12 +305,6 @@ mainparse:
 
 				if fflib.EqualFoldRight(ffjKeyAssetCreateOperationIsPredictionMarket, kn) {
 					currentKey = ffjtAssetCreateOperationIsPredictionMarket
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyAssetCreateOperationFee, kn) {
-					currentKey = ffjtAssetCreateOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -346,9 +353,6 @@ mainparse:
 				case ffjtAssetCreateOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtAssetCreateOperationFee:
-					goto handle_Fee
-
 				case ffjtAssetCreateOperationIsPredictionMarket:
 					goto handle_IsPredictionMarket
 
@@ -360,6 +364,9 @@ mainparse:
 
 				case ffjtAssetCreateOperationSymbol:
 					goto handle_Symbol
+
+				case ffjtAssetCreateOperationFee:
+					goto handle_Fee
 
 				case ffjtAssetCreateOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -489,26 +496,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_IsPredictionMarket:
 
 	/* handler: j.IsPredictionMarket type=bool kind=bool quoted=false*/
@@ -615,6 +602,32 @@ handle_Symbol:
 			j.Symbol = string(string(outBuf))
 
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

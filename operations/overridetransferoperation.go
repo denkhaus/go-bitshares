@@ -9,26 +9,20 @@ import (
 )
 
 func init() {
-	op := &OverrideTransferOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeOverrideTransfer] = func() types.Operation {
+		op := &OverrideTransferOperation{}
+		return op
+	}
 }
 
 type OverrideTransferOperation struct {
+	types.OperationFee
 	Amount     types.AssetAmount `json:"amount"`
 	Extensions types.Extensions  `json:"extensions"`
-	Fee        types.AssetAmount `json:"fee"`
 	From       types.GrapheneID  `json:"from"`
 	Issuer     types.GrapheneID  `json:"issuer"`
 	Memo       *types.Memo       `json:"memo,omitempty"`
 	To         types.GrapheneID  `json:"to"`
-}
-
-func (p OverrideTransferOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *OverrideTransferOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p OverrideTransferOperation) Type() types.OperationType {

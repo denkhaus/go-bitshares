@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -35,7 +36,7 @@ func (j *AccountUpgradeOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"account_to_upgrade":`)
+	buf.WriteString(`{ "account_to_upgrade":`)
 
 	{
 
@@ -63,21 +64,28 @@ func (j *AccountUpgradeOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	} else {
 		buf.WriteString(`null`)
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	if j.UpgradeToLifetimeMember {
 		buf.WriteString(`,"upgrade_to_lifetime_member":true`)
 	} else {
 		buf.WriteString(`,"upgrade_to_lifetime_member":false`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -90,18 +98,18 @@ const (
 
 	ffjtAccountUpgradeOperationExtensions
 
-	ffjtAccountUpgradeOperationFee
-
 	ffjtAccountUpgradeOperationUpgradeToLifetimeMember
+
+	ffjtAccountUpgradeOperationFee
 )
 
 var ffjKeyAccountUpgradeOperationAccountToUpgrade = []byte("account_to_upgrade")
 
 var ffjKeyAccountUpgradeOperationExtensions = []byte("extensions")
 
-var ffjKeyAccountUpgradeOperationFee = []byte("fee")
-
 var ffjKeyAccountUpgradeOperationUpgradeToLifetimeMember = []byte("upgrade_to_lifetime_member")
+
+var ffjKeyAccountUpgradeOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AccountUpgradeOperation) UnmarshalJSON(input []byte) error {
@@ -198,14 +206,14 @@ mainparse:
 
 				}
 
-				if fflib.AsciiEqualFold(ffjKeyAccountUpgradeOperationUpgradeToLifetimeMember, kn) {
-					currentKey = ffjtAccountUpgradeOperationUpgradeToLifetimeMember
+				if fflib.SimpleLetterEqualFold(ffjKeyAccountUpgradeOperationFee, kn) {
+					currentKey = ffjtAccountUpgradeOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.SimpleLetterEqualFold(ffjKeyAccountUpgradeOperationFee, kn) {
-					currentKey = ffjtAccountUpgradeOperationFee
+				if fflib.AsciiEqualFold(ffjKeyAccountUpgradeOperationUpgradeToLifetimeMember, kn) {
+					currentKey = ffjtAccountUpgradeOperationUpgradeToLifetimeMember
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -245,11 +253,11 @@ mainparse:
 				case ffjtAccountUpgradeOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtAccountUpgradeOperationFee:
-					goto handle_Fee
-
 				case ffjtAccountUpgradeOperationUpgradeToLifetimeMember:
 					goto handle_UpgradeToLifetimeMember
+
+				case ffjtAccountUpgradeOperationFee:
+					goto handle_Fee
 
 				case ffjtAccountUpgradeOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -358,26 +366,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_UpgradeToLifetimeMember:
 
 	/* handler: j.UpgradeToLifetimeMember type=bool kind=bool quoted=false*/
@@ -408,6 +396,32 @@ handle_UpgradeToLifetimeMember:
 			}
 
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

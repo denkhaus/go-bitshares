@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,7 +35,7 @@ func (j *FillOrderOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"order_id":`)
+	buf.WriteString(`{ "order_id":`)
 
 	{
 
@@ -76,16 +77,6 @@ func (j *FillOrderOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
-	}
 	if j.IsMaker {
 		buf.WriteString(`,"is_maker":true`)
 	} else {
@@ -101,6 +92,23 @@ func (j *FillOrderOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -117,11 +125,11 @@ const (
 
 	ffjtFillOrderOperationReceives
 
-	ffjtFillOrderOperationFee
-
 	ffjtFillOrderOperationIsMaker
 
 	ffjtFillOrderOperationFillPrice
+
+	ffjtFillOrderOperationFee
 )
 
 var ffjKeyFillOrderOperationOrderID = []byte("order_id")
@@ -132,11 +140,11 @@ var ffjKeyFillOrderOperationPays = []byte("pays")
 
 var ffjKeyFillOrderOperationReceives = []byte("receives")
 
-var ffjKeyFillOrderOperationFee = []byte("fee")
-
 var ffjKeyFillOrderOperationIsMaker = []byte("is_maker")
 
 var ffjKeyFillOrderOperationFillPrice = []byte("fill_price")
+
+var ffjKeyFillOrderOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *FillOrderOperation) UnmarshalJSON(input []byte) error {
@@ -209,13 +217,13 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyFillOrderOperationFee, kn) {
-						currentKey = ffjtFillOrderOperationFee
+					if bytes.Equal(ffjKeyFillOrderOperationFillPrice, kn) {
+						currentKey = ffjtFillOrderOperationFillPrice
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyFillOrderOperationFillPrice, kn) {
-						currentKey = ffjtFillOrderOperationFillPrice
+					} else if bytes.Equal(ffjKeyFillOrderOperationFee, kn) {
+						currentKey = ffjtFillOrderOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -254,6 +262,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyFillOrderOperationFee, kn) {
+					currentKey = ffjtFillOrderOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.AsciiEqualFold(ffjKeyFillOrderOperationFillPrice, kn) {
 					currentKey = ffjtFillOrderOperationFillPrice
 					state = fflib.FFParse_want_colon
@@ -262,12 +276,6 @@ mainparse:
 
 				if fflib.EqualFoldRight(ffjKeyFillOrderOperationIsMaker, kn) {
 					currentKey = ffjtFillOrderOperationIsMaker
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyFillOrderOperationFee, kn) {
-					currentKey = ffjtFillOrderOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -325,14 +333,14 @@ mainparse:
 				case ffjtFillOrderOperationReceives:
 					goto handle_Receives
 
-				case ffjtFillOrderOperationFee:
-					goto handle_Fee
-
 				case ffjtFillOrderOperationIsMaker:
 					goto handle_IsMaker
 
 				case ffjtFillOrderOperationFillPrice:
 					goto handle_FillPrice
+
+				case ffjtFillOrderOperationFee:
+					goto handle_Fee
 
 				case ffjtFillOrderOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -438,26 +446,6 @@ handle_Receives:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_IsMaker:
 
 	/* handler: j.IsMaker type=bool kind=bool quoted=false*/
@@ -503,6 +491,32 @@ handle_FillPrice:
 		} else {
 
 			err = j.FillPrice.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {
 				return err
 			}

@@ -9,27 +9,21 @@ import (
 )
 
 func init() {
-	op := &FillOrderOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeFillOrder] = func() types.Operation {
+		op := &FillOrderOperation{}
+		return op
+	}
 }
 
 //virtual order
 type FillOrderOperation struct {
+	types.OperationFee
 	OrderID   types.GrapheneID  `json:"order_id"`
 	AccountID types.GrapheneID  `json:"account_id"`
 	Pays      types.AssetAmount `json:"pays"`
 	Receives  types.AssetAmount `json:"receives"`
-	Fee       types.AssetAmount `json:"fee"`
 	IsMaker   bool              `json:"is_maker"`
 	FillPrice types.Price       `json:"fill_price"`
-}
-
-func (p FillOrderOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *FillOrderOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p FillOrderOperation) Type() types.OperationType {

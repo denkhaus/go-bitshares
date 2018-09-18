@@ -12,8 +12,10 @@ package operations
 // )
 
 // func init() {
-// 	op := &TransferToBlindOperation{}
-// 	types.OperationMap[op.Type()] = op
+// 	types.OperationMap[types.OperationTypeTransferToBlind] =  func() types.Operation {
+// 		op := &TransferToBlindOperation{}
+// 		return op
+// }
 // }
 
 // type TransferToBlindOperationOutputs []TransferToBlindOperationOutput
@@ -67,15 +69,11 @@ package operations
 // }
 
 // type TransferToBlindOperation struct {
+//	types.OperationFee
 // 	Amount         types.AssetAmount               `json:"amount"`
 // 	BlindingFactor string                          `json:"blinding_factor"`
-// 	Fee            types.AssetAmount               `json:"fee"`
 // 	From           types.GrapheneID                `json:"from"`
 // 	Outputs        TransferToBlindOperationOutputs `json:"outputs"`
-// }
-
-// func (p *TransferToBlindOperation) ApplyFee(fee types.AssetAmount) {
-// 	p.Fee = fee
 // }
 
 // func (p TransferToBlindOperation) Type() types.OperationType {

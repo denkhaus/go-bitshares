@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -35,7 +36,7 @@ func (j *ProposalDeleteOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"extensions":`)
+	buf.WriteString(`{ "extensions":`)
 	if j.Extensions != nil {
 		buf.WriteString(`[`)
 		for i, v := range j.Extensions {
@@ -51,16 +52,6 @@ func (j *ProposalDeleteOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 		buf.WriteString(`]`)
 	} else {
 		buf.WriteString(`null`)
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
 	}
 	buf.WriteString(`,"fee_paying_account":`)
 
@@ -89,6 +80,23 @@ func (j *ProposalDeleteOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	} else {
 		buf.WriteString(`,"using_owner_authority":false`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -99,24 +107,24 @@ const (
 
 	ffjtProposalDeleteOperationExtensions
 
-	ffjtProposalDeleteOperationFee
-
 	ffjtProposalDeleteOperationFeePayingAccount
 
 	ffjtProposalDeleteOperationProposal
 
 	ffjtProposalDeleteOperationUsingOwnerAuthority
+
+	ffjtProposalDeleteOperationFee
 )
 
 var ffjKeyProposalDeleteOperationExtensions = []byte("extensions")
-
-var ffjKeyProposalDeleteOperationFee = []byte("fee")
 
 var ffjKeyProposalDeleteOperationFeePayingAccount = []byte("fee_paying_account")
 
 var ffjKeyProposalDeleteOperationProposal = []byte("proposal")
 
 var ffjKeyProposalDeleteOperationUsingOwnerAuthority = []byte("using_owner_authority")
+
+var ffjKeyProposalDeleteOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *ProposalDeleteOperation) UnmarshalJSON(input []byte) error {
@@ -189,13 +197,13 @@ mainparse:
 
 				case 'f':
 
-					if bytes.Equal(ffjKeyProposalDeleteOperationFee, kn) {
-						currentKey = ffjtProposalDeleteOperationFee
+					if bytes.Equal(ffjKeyProposalDeleteOperationFeePayingAccount, kn) {
+						currentKey = ffjtProposalDeleteOperationFeePayingAccount
 						state = fflib.FFParse_want_colon
 						goto mainparse
 
-					} else if bytes.Equal(ffjKeyProposalDeleteOperationFeePayingAccount, kn) {
-						currentKey = ffjtProposalDeleteOperationFeePayingAccount
+					} else if bytes.Equal(ffjKeyProposalDeleteOperationFee, kn) {
+						currentKey = ffjtProposalDeleteOperationFee
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
@@ -218,6 +226,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyProposalDeleteOperationFee, kn) {
+					currentKey = ffjtProposalDeleteOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyProposalDeleteOperationUsingOwnerAuthority, kn) {
 					currentKey = ffjtProposalDeleteOperationUsingOwnerAuthority
 					state = fflib.FFParse_want_colon
@@ -232,12 +246,6 @@ mainparse:
 
 				if fflib.AsciiEqualFold(ffjKeyProposalDeleteOperationFeePayingAccount, kn) {
 					currentKey = ffjtProposalDeleteOperationFeePayingAccount
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyProposalDeleteOperationFee, kn) {
-					currentKey = ffjtProposalDeleteOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -268,9 +276,6 @@ mainparse:
 				case ffjtProposalDeleteOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtProposalDeleteOperationFee:
-					goto handle_Fee
-
 				case ffjtProposalDeleteOperationFeePayingAccount:
 					goto handle_FeePayingAccount
 
@@ -279,6 +284,9 @@ mainparse:
 
 				case ffjtProposalDeleteOperationUsingOwnerAuthority:
 					goto handle_UsingOwnerAuthority
+
+				case ffjtProposalDeleteOperationFee:
+					goto handle_Fee
 
 				case ffjtProposalDeleteOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -357,26 +365,6 @@ handle_Extensions:
 				wantVal = false
 			}
 		}
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -462,6 +450,32 @@ handle_UsingOwnerAuthority:
 			}
 
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

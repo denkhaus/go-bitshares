@@ -6,6 +6,7 @@ package operations
 import (
 	"bytes"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -33,7 +34,7 @@ func (j *BalanceClaimOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"balance_to_claim":`)
+	buf.WriteString(`{ "balance_to_claim":`)
 
 	{
 
@@ -76,16 +77,23 @@ func (j *BalanceClaimOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
-	buf.WriteString(`,"fee":`)
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
 
-	{
+			{
 
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
 		}
-
 	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -393,7 +401,13 @@ handle_Fee:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.Fee = nil
+
 		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
 
 			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
 			if err != nil {

@@ -9,29 +9,23 @@ import (
 )
 
 func init() {
-	op := &ProposalUpdateOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeProposalUpdate] = func() types.Operation {
+		op := &ProposalUpdateOperation{}
+		return op
+	}
 }
 
 type ProposalUpdateOperation struct {
+	types.OperationFee
 	ActiveApprovalsToAdd    types.GrapheneIDs `json:"active_approvals_to_add"`
 	ActiveApprovalsToRemove types.GrapheneIDs `json:"active_approvals_to_remove"`
 	Extensions              types.Extensions  `json:"extensions"`
-	Fee                     types.AssetAmount `json:"fee"`
 	FeePayingAccount        types.GrapheneID  `json:"fee_paying_account"`
 	KeyApprovalsToAdd       types.GrapheneIDs `json:"key_approvals_to_add"`
 	KeyApprovalsToRemove    types.GrapheneIDs `json:"key_approvals_to_remove"`
 	OwnerApprovalsToAdd     types.GrapheneIDs `json:"owner_approvals_to_add"`
 	OwnerApprovalsToRemove  types.GrapheneIDs `json:"owner_approvals_to_remove"`
 	Proposal                types.GrapheneID  `json:"proposal"`
-}
-
-func (p ProposalUpdateOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *ProposalUpdateOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p ProposalUpdateOperation) Type() types.OperationType {

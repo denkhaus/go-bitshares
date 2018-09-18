@@ -9,24 +9,18 @@ import (
 )
 
 func init() {
-	op := &AssetUpdateBitassetOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeAssetUpdateBitasset] = func() types.Operation {
+		op := &AssetUpdateBitassetOperation{}
+		return op
+	}
 }
 
 type AssetUpdateBitassetOperation struct {
+	types.OperationFee
 	AssetToUpdate types.GrapheneID      `json:"asset_to_update"`
 	Issuer        types.GrapheneID      `json:"issuer"`
-	Fee           types.AssetAmount     `json:"fee"`
 	Extensions    types.Extensions      `json:"extensions"`
 	NewOptions    types.BitassetOptions `json:"new_options"`
-}
-
-func (p AssetUpdateBitassetOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AssetUpdateBitassetOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
 }
 
 func (p AssetUpdateBitassetOperation) Type() types.OperationType {
@@ -48,7 +42,7 @@ func (p AssetUpdateBitassetOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	if err := enc.Encode(p.AssetToUpdate); err != nil {
-		return errors.Annotate(err, "encode assettoupdate")
+		return errors.Annotate(err, "encode AssetToUpdate")
 	}
 
 	if err := enc.Encode(p.NewOptions); err != nil {

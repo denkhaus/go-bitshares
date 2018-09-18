@@ -9,24 +9,18 @@ import (
 )
 
 func init() {
-	op := &AccountWhitelistOperation{}
-	types.OperationMap[op.Type()] = op
+	types.OperationMap[types.OperationTypeAccountWhitelist] = func() types.Operation {
+		op := &AccountWhitelistOperation{}
+		return op
+	}
 }
 
 type AccountWhitelistOperation struct {
-	AccountToList      types.GrapheneID  `json:"account_to_list"`
-	AuthorizingAccount types.GrapheneID  `json:"authorizing_account"`
-	Extensions         types.Extensions  `json:"extensions"`
-	Fee                types.AssetAmount `json:"fee"`
-	NewListing         types.UInt8       `json:"new_listing"`
-}
-
-func (p AccountWhitelistOperation) GetFee() types.AssetAmount {
-	return p.Fee
-}
-
-func (p *AccountWhitelistOperation) SetFee(fee types.AssetAmount) {
-	p.Fee = fee
+	types.OperationFee
+	AccountToList      types.GrapheneID `json:"account_to_list"`
+	AuthorizingAccount types.GrapheneID `json:"authorizing_account"`
+	Extensions         types.Extensions `json:"extensions"`
+	NewListing         types.UInt8      `json:"new_listing"`
 }
 
 func (p AccountWhitelistOperation) Type() types.OperationType {

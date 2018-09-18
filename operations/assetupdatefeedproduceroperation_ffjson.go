@@ -35,7 +35,7 @@ func (j *AssetUpdateFeedProducersOperation) MarshalJSONBuf(buf fflib.EncodingBuf
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"asset_to_update":`)
+	buf.WriteString(`{ "asset_to_update":`)
 
 	{
 
@@ -62,16 +62,6 @@ func (j *AssetUpdateFeedProducersOperation) MarshalJSONBuf(buf fflib.EncodingBuf
 		buf.WriteString(`]`)
 	} else {
 		buf.WriteString(`null`)
-	}
-	buf.WriteString(`,"fee":`)
-
-	{
-
-		err = j.Fee.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
 	}
 	buf.WriteString(`,"issuer":`)
 
@@ -106,6 +96,23 @@ func (j *AssetUpdateFeedProducersOperation) MarshalJSONBuf(buf fflib.EncodingBuf
 	} else {
 		buf.WriteString(`null`)
 	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -118,22 +125,22 @@ const (
 
 	ffjtAssetUpdateFeedProducersOperationExtensions
 
-	ffjtAssetUpdateFeedProducersOperationFee
-
 	ffjtAssetUpdateFeedProducersOperationIssuer
 
 	ffjtAssetUpdateFeedProducersOperationNewFeedProducers
+
+	ffjtAssetUpdateFeedProducersOperationFee
 )
 
 var ffjKeyAssetUpdateFeedProducersOperationAssetToUpdate = []byte("asset_to_update")
 
 var ffjKeyAssetUpdateFeedProducersOperationExtensions = []byte("extensions")
 
-var ffjKeyAssetUpdateFeedProducersOperationFee = []byte("fee")
-
 var ffjKeyAssetUpdateFeedProducersOperationIssuer = []byte("issuer")
 
 var ffjKeyAssetUpdateFeedProducersOperationNewFeedProducers = []byte("new_feed_producers")
+
+var ffjKeyAssetUpdateFeedProducersOperationFee = []byte("fee")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *AssetUpdateFeedProducersOperation) UnmarshalJSON(input []byte) error {
@@ -238,6 +245,12 @@ mainparse:
 
 				}
 
+				if fflib.SimpleLetterEqualFold(ffjKeyAssetUpdateFeedProducersOperationFee, kn) {
+					currentKey = ffjtAssetUpdateFeedProducersOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
 				if fflib.EqualFoldRight(ffjKeyAssetUpdateFeedProducersOperationNewFeedProducers, kn) {
 					currentKey = ffjtAssetUpdateFeedProducersOperationNewFeedProducers
 					state = fflib.FFParse_want_colon
@@ -246,12 +259,6 @@ mainparse:
 
 				if fflib.EqualFoldRight(ffjKeyAssetUpdateFeedProducersOperationIssuer, kn) {
 					currentKey = ffjtAssetUpdateFeedProducersOperationIssuer
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffjKeyAssetUpdateFeedProducersOperationFee, kn) {
-					currentKey = ffjtAssetUpdateFeedProducersOperationFee
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -291,14 +298,14 @@ mainparse:
 				case ffjtAssetUpdateFeedProducersOperationExtensions:
 					goto handle_Extensions
 
-				case ffjtAssetUpdateFeedProducersOperationFee:
-					goto handle_Fee
-
 				case ffjtAssetUpdateFeedProducersOperationIssuer:
 					goto handle_Issuer
 
 				case ffjtAssetUpdateFeedProducersOperationNewFeedProducers:
 					goto handle_NewFeedProducers
+
+				case ffjtAssetUpdateFeedProducersOperationFee:
+					goto handle_Fee
 
 				case ffjtAssetUpdateFeedProducersOperationnosuchkey:
 					err = fs.SkipField(tok)
@@ -407,26 +414,6 @@ handle_Extensions:
 	state = fflib.FFParse_after_value
 	goto mainparse
 
-handle_Fee:
-
-	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
-
-	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
-		}
-		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
 handle_Issuer:
 
 	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
@@ -520,6 +507,32 @@ handle_NewFeedProducers:
 				wantVal = false
 			}
 		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Fee:
+
+	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
