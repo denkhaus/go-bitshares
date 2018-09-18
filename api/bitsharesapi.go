@@ -65,6 +65,7 @@ type BitsharesAPI interface {
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
 	SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error
 	UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error
+	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (types.AssetAmounts, error)
 
 	//Wallet API functions
 	WalletListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
@@ -422,6 +423,23 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
+	}
+
+	return ret, nil
+}
+
+// Get24Volume
+func (p *bitsharesAPI) Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (types.AssetAmount, error) {
+	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_24_volume", base.ID(), quote.ID())
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("get_24_volume <", resp)
+
+	ret := types.AssetAmount{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return ret, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
 	return ret, nil
