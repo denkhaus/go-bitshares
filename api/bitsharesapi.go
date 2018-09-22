@@ -391,7 +391,7 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 	return ret, nil
 }
 
-//GetDynamicGlobalProperties returns essential runtime properties of bitshares network.
+//GetDynamicGlobalProperties returns essential runtime properties of bitshares network
 func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_dynamic_global_properties", types.EmptyParams)
 	if err != nil {
@@ -426,8 +426,8 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	return ret, nil
 }
 
-// Get24Volume
-func (p *bitsharesAPI) Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (ret types.Volume24, err error) {
+// Get24Volume returns the base:quote assets 24h volume
+func (p *bitsharesAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.Volume24, err error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_24_volume", base.ID(), quote.ID())
 	if err != nil {
 		return
@@ -504,7 +504,7 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 	return ret, nil
 }
 
-//GetLimitOrders the order book for the market base:quote.
+//GetOrderBook returns the OrderBook for the market base:quote.
 func (p *bitsharesAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
 
 	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)

@@ -48,7 +48,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("balance bts >", res)
+	//logging.Dump("balance bts >", res)
 
 	res, err = suite.TestAPI.GetAccountBalances(UserID2)
 	if err != nil {
@@ -56,7 +56,7 @@ func (suite *commonTest) Test_GetAccountBalances() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("balances all >", res)
+	//logging.Dump("balances all >", res)
 }
 
 func (suite *commonTest) Test_GetAccounts() {
@@ -68,7 +68,7 @@ func (suite *commonTest) Test_GetAccounts() {
 	suite.NotNil(res)
 	suite.Len(res, 1)
 
-	//util.Dump("get accounts >", res)
+	//logging.Dump("get accounts >", res)
 }
 
 func (suite *commonTest) Test_GetObjects() {
@@ -90,7 +90,7 @@ func (suite *commonTest) Test_GetObjects() {
 
 	suite.NotNil(res)
 	suite.Len(res, 6)
-	//util.Dump("objects >", res)
+	//logging.Dump("objects >", res)
 }
 
 func (suite *commonTest) Test_GetBlock() {
@@ -100,7 +100,7 @@ func (suite *commonTest) Test_GetBlock() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("get_block >", res)
+	//logging.Dump("get_block >", res)
 }
 
 func (suite *commonTest) Test_GetDynamicGlobalProperties() {
@@ -110,7 +110,7 @@ func (suite *commonTest) Test_GetDynamicGlobalProperties() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("dynamic global properties >", res)
+	//logging.Dump("dynamic global properties >", res)
 }
 
 func (suite *commonTest) Test_GetAccountByName() {
@@ -120,7 +120,7 @@ func (suite *commonTest) Test_GetAccountByName() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("accounts >", res)
+	//logging.Dump("accounts >", res)
 }
 
 func (suite *commonTest) Test_GetTradeHistory() {
@@ -134,7 +134,7 @@ func (suite *commonTest) Test_GetTradeHistory() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("markettrades >", res)
+	//logging.Dump("markettrades >", res)
 }
 
 func (suite *commonTest) Test_GetLimitOrders() {
@@ -144,7 +144,7 @@ func (suite *commonTest) Test_GetLimitOrders() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("limitorders >", res)
+	//logging.Dump("limitorders >", res)
 }
 
 func (suite *commonTest) Test_GetCallOrders() {
@@ -154,7 +154,7 @@ func (suite *commonTest) Test_GetCallOrders() {
 	}
 
 	suite.NotNil(res)
-	//	util.Dump("callorders >", res)
+	//	logging.Dump("callorders >", res)
 }
 
 func (suite *commonTest) Test_GetMarginPositions() {
@@ -164,7 +164,7 @@ func (suite *commonTest) Test_GetMarginPositions() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("marginpositions >", res)
+	//logging.Dump("marginpositions >", res)
 }
 
 func (suite *commonTest) Test_GetSettleOrders() {
@@ -174,7 +174,7 @@ func (suite *commonTest) Test_GetSettleOrders() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("settleorders >", res)
+	//logging.Dump("settleorders >", res)
 }
 
 func (suite *commonTest) Test_ListAssets() {
@@ -185,7 +185,7 @@ func (suite *commonTest) Test_ListAssets() {
 
 	suite.NotNil(res)
 	suite.Len(res, 2)
-	//util.Dump("assets >", res)
+	//logging.Dump("assets >", res)
 }
 
 func (suite *commonTest) Test_GetAccountHistory() {
@@ -200,7 +200,33 @@ func (suite *commonTest) Test_GetAccountHistory() {
 	}
 
 	suite.NotNil(res)
-	//util.Dump("history >", res)
+	//logging.Dump("history >", res)
+}
+
+func (suite *commonTest) Test_GetOrderBook() {
+	res, err := suite.TestAPI.GetOrderBook(AssetUSD, AssetBTS, 10)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetOrderBook")
+	}
+
+	suite.NotNil(res)
+	suite.Len(res.Asks, 10)
+	suite.Len(res.Bids, 10)
+
+	//logging.Dump("test GetOrderBook >", res)
+}
+
+func (suite *commonTest) Test_Get24Volume() {
+	res, err := suite.TestAPI.Get24Volume(AssetUSD, AssetBTS)
+	if err != nil {
+		suite.FailNow(err.Error(), "Get24Volume")
+	}
+
+	suite.NotNil(res)
+	suite.Equal(*AssetUSD, res.Base)
+	suite.Equal(*AssetBTS, res.Quote)
+
+	//logging.Dump("test Get24Volume >", res)
 }
 
 func TestCommon(t *testing.T) {
