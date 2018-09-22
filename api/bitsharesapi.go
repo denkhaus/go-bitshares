@@ -24,7 +24,6 @@ const (
 )
 
 type BitsharesAPI interface {
-
 	//Common functions
 	CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
@@ -64,6 +63,7 @@ type BitsharesAPI interface {
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
 	SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error
 	UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error
+	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (types.Volume24, error)
 
 	//Wallet API functions
 	WalletListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
@@ -423,6 +423,23 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	}
 
 	return ret, nil
+}
+
+// Get24Volume
+func (p *bitsharesAPI) Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (ret types.Volume24, err error) {
+	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_24_volume", base.ID(), quote.ID())
+	if err != nil {
+		return
+	}
+
+	logging.DDumpJSON("get_24_volume <", resp)
+
+	if err = ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		err = errors.Annotate(err, "unmarshal Volume24")
+		return
+	}
+
+	return
 }
 
 //ListAssets retrieves assets
