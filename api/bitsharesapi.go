@@ -52,6 +52,7 @@ type BitsharesAPI interface {
 	GetChainID() (string, error)
 	GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
 	GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error)
+	GetOrderBook(base, quote types.GrapheneObject, depth int) (types.OrderBook, error)
 	GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error)
 	GetObjects(objectIDs ...types.GrapheneObject) ([]interface{}, error)
 	GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error)
@@ -501,6 +502,24 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 	}
 
 	return ret, nil
+}
+
+//GetLimitOrders the order book for the market base:quote.
+func (p *bitsharesAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
+
+	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)
+	if err != nil {
+		return
+	}
+
+	logging.DDumpJSON("get_order_book <", resp)
+
+	if err = ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		err = errors.Annotate(err, "unmarshal LimitOrders")
+		return
+	}
+
+	return
 }
 
 //GetSettleOrders returns SettleOrders type.
