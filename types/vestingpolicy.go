@@ -8,12 +8,16 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+//TODO: CoinSecondsEarned is UInt128! Since golang has no
+//128 bit uint, check marshal and implement this later.
 type CCDVestingPolicy struct {
-	StartClaim     Time   `json:"start_claim"`
-	VestingSeconds UInt64 `json:"vesting_seconds"`
+	StartClaim                  Time   `json:"start_claim"`
+	CoinSecondsEarnedLastUpdate Time   `json:"coin_seconds_earned_last_update"`
+	VestingSeconds              UInt32 `json:"vesting_seconds"`
+	CoinSecondsEarned           UInt64 `json:"coin_seconds_earned"` //UInt128!!
 }
 
-// TODO: is this yet implemented? test fails!
+// TODO: check order!
 func (p CCDVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(p.StartClaim); err != nil {
 		return errors.Annotate(err, "encode StartClaim")
@@ -23,10 +27,17 @@ func (p CCDVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode VestingSeconds")
 	}
 
+	if err := enc.Encode(p.CoinSecondsEarnedLastUpdate); err != nil {
+		return errors.Annotate(err, "encode CoinSecondsEarnedLastUpdate")
+	}
+
+	if err := enc.Encode(p.CoinSecondsEarned); err != nil {
+		return errors.Annotate(err, "encode CoinSecondsEarned")
+	}
+
 	return nil
 }
 
-// test passes
 type LinearVestingPolicy struct {
 	BeginTimestamp         Time   `json:"begin_timestamp"`
 	VestingCliffSeconds    UInt32 `json:"vesting_cliff_seconds"`
@@ -49,7 +60,10 @@ func (p LinearVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type VestingPolicy map[VestingPolicyType]util.TypeMarshaller
+type VestingPolicy struct {
+	typ  VestingPolicyType
+	data util.TypeMarshaller
+}
 
 func (p *VestingPolicy) UnmarshalJSON(data []byte) error {
 	var res []interface{}
@@ -61,45 +75,41 @@ func (p *VestingPolicy) UnmarshalJSON(data []byte) error {
 		return ErrInvalidInputLength
 	}
 
-	(*p) = make(map[VestingPolicyType]util.TypeMarshaller)
-	typ := VestingPolicyType(res[0].(float64))
+	p.typ = VestingPolicyType(res[0].(float64))
 
-	switch typ {
+	switch p.typ {
 	case VestingPolicyTypeLinear:
 		pol := LinearVestingPolicy{}
 		if err := ffjson.Unmarshal(util.ToBytes(res[1]), &pol); err != nil {
 			return errors.Annotate(err, "unmarshal LinearVestingPolicy")
 		}
-		(*p)[0] = pol
+		p.data = pol
 
 	case VestingPolicyTypeCCD:
 		pol := CCDVestingPolicy{}
 		if err := ffjson.Unmarshal(util.ToBytes(res[1]), &pol); err != nil {
 			return errors.Annotate(err, "unmarshal CCDVestingPolicy")
 		}
-		(*p)[0] = pol
+		p.data = pol
 	}
 
 	return nil
 }
 
 func (p VestingPolicy) MarshalJSON() ([]byte, error) {
-	for k, v := range p {
-		return ffjson.Marshal([]interface{}{k, v})
-	}
-
-	return nil, nil
+	return ffjson.Marshal([]interface{}{
+		p.typ,
+		p.data,
+	})
 }
 
 func (p VestingPolicy) Marshal(enc *util.TypeEncoder) error {
-	for k, v := range p {
-		if err := enc.EncodeUVarint(uint64(k)); err != nil {
-			return errors.Annotate(err, "encode PolicyType")
-		}
+	if err := enc.EncodeUVarint(uint64(p.typ)); err != nil {
+		return errors.Annotate(err, "encode PolicyType")
+	}
 
-		if err := enc.Encode(v); err != nil {
-			return errors.Annotate(err, "encode Policy")
-		}
+	if err := enc.Encode(p.data); err != nil {
+		return errors.Annotate(err, "encode Policy")
 	}
 
 	return nil

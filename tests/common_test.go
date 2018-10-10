@@ -71,6 +71,18 @@ func (suite *commonTest) Test_GetAccounts() {
 	//logging.Dump("get accounts >", res)
 }
 
+func (suite *commonTest) Test_GetFullAccounts() {
+	res, err := suite.TestAPI.GetFullAccounts(UserID2)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetFullAccounts")
+	}
+
+	suite.NotNil(res)
+	suite.Len(res, 1)
+
+	//logging.Dump("get full accounts >", res)
+}
+
 func (suite *commonTest) Test_GetObjects() {
 	res, err := suite.TestAPI.GetObjects(
 		UserID1,
@@ -174,7 +186,7 @@ func (suite *commonTest) Test_GetSettleOrders() {
 	}
 
 	suite.NotNil(res)
-	//logging.Dump("settleorders >", res)
+	//logging.Dump("settleorders >", res)logging.SetDebug(true)
 }
 
 func (suite *commonTest) Test_ListAssets() {
