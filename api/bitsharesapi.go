@@ -47,6 +47,7 @@ type BitsharesAPI interface {
 	GetAccountByName(name string) (*types.Account, error)
 	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error)
 	GetAccounts(accountIDs ...types.GrapheneObject) (types.Accounts, error)
+	GetFullAccounts(accountIDs ...types.GrapheneObject) (types.FullAccountInfos, error)
 	GetBlock(number uint64) (*types.Block, error)
 	GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error)
 	GetChainID() (string, error)
@@ -421,6 +422,24 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
+	}
+
+	return ret, nil
+}
+
+//GetFullAccounts retrieves full account information by given AccountIDs
+func (p *bitsharesAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.FullAccountInfos, error) {
+	ids := types.GrapheneObjects(accounts).ToStrings()
+	resp, err := p.wsClient.CallAPI(0, "get_full_accounts", ids, false) //do not subscribe for now
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("get_full_accounts <", resp)
+
+	ret := types.FullAccountInfos{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal FullAccountInfos: "+string(util.ToBytes(resp)))
 	}
 
 	return ret, nil
