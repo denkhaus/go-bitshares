@@ -130,6 +130,7 @@ func (p *wsClient) monitor() {
 				}
 			}
 		default:
+			time.Sleep(time.Millisecond)
 		}
 	}
 }
