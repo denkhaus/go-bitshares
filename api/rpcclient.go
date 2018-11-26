@@ -61,6 +61,7 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 		return nil, errors.Annotate(err, "NewRequest")
 	}
 
+	req.Close = true
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
