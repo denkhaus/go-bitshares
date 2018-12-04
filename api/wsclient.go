@@ -203,10 +203,7 @@ func (p *wsClient) receive() {
 			if err != io.EOF {
 				p.errors <- errors.Annotate(err, "DecodeReader")
 			}
-			if err == syscall.EPIPE {
-				break
-			}
-
+			
 			continue
 		}
 
