@@ -203,7 +203,7 @@ func (p *wsClient) receive() {
 			if err != io.EOF {
 				p.errors <- errors.Annotate(err, "DecodeReader")
 			}
-
+			
 			continue
 		}
 
@@ -313,6 +313,9 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 		p.mutex.Lock()
 		delete(p.pending, call.Request.ID)
 		p.mutex.Unlock()
+		if err == syscall.EPIPE {
+			p.closing.Set()
+		}
 
 		return nil, errors.Annotate(err, "Encode [req]")
 	}
