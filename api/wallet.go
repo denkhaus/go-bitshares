@@ -351,3 +351,23 @@ func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObj
 
 	return ret, nil
 }
+
+func (p *bitsharesAPI) WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
+	if p.rpcClient == nil {
+		return nil, types.ErrRPCClientNotInitialized
+	}
+
+	resp, err := p.rpcClient.CallAPI("get_dynamic_global_properties", types.EmptyParams)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("get_dynamic_global_properties <", resp)
+
+	var ret types.DynamicGlobalProperties
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal DynamicGlobalProperties")
+	}
+
+	return &ret, nil
+}

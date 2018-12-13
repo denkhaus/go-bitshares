@@ -84,6 +84,7 @@ type BitsharesAPI interface {
 	//WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error)
 	WalletGetBlock(number uint64) (*types.Block, error)
 	WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
+	WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
 }
 
 type bitsharesAPI struct {
