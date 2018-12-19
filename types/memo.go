@@ -77,7 +77,16 @@ func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 
 //Decrypt decodes the memo message
 func (p Memo) Decrypt(priv *PrivateKey) (string, error) {
-	sec, err := priv.SharedSecret(&p.To, 16, 16)
+	var counterPartyKey PublicKey
+	myPublicKey := priv.PublicKey()
+	if myPublicKey.Equal(&p.To) {
+		counterPartyKey = p.From
+	} else if myPublicKey.Equal(&p.From) {
+		counterPartyKey = p.To
+	} else {
+		return "", errors.New("Not part of the transfer, cannot decrypt")
+	}
+	sec, err := priv.SharedSecret(&counterPartyKey, 16, 16)
 	if err != nil {
 		return "", errors.Annotate(err, "SharedSecret")
 	}
