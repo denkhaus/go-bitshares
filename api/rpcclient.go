@@ -24,8 +24,6 @@ type rpcClient struct {
 
 	decBuf      *bytes.Buffer
 	endpointURL string
-	req         rpcRequest
-	res         rpcResponseString
 	timeout     int
 }
 
@@ -46,15 +44,17 @@ func (p *rpcClient) Close() error {
 }
 
 func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, error) {
-	p.req.Method = method
-	p.req.ID = uint64(rand.Int63())
-	p.req.Params = args
+	request := rpcRequest{
+		ID:     uint64(rand.Int63()),
+		Method: method,
+		Params: args,
+	}
 
-	if err := p.Encode(&p.req); err != nil {
+	if err := p.Encode(&request); err != nil {
 		return nil, errors.Annotate(err, "Encode")
 	}
 
-	logging.DDumpJSON("rpc req >", p.req)
+	logging.DDumpJSON("rpc req >", request)
 
 	req, err := http.NewRequest("POST", p.endpointURL, p.decBuf)
 	if err != nil {
@@ -70,18 +70,17 @@ func (p *rpcClient) CallAPI(method string, args ...interface{}) (interface{}, er
 	}
 
 	defer resp.Body.Close()
-
-	if err := p.DecodeReader(resp.Body, &p.res); err != nil {
+	var res rpcResponseString
+	if err := p.DecodeReader(resp.Body, &res); err != nil {
 		return nil, errors.Annotate(err, "Decode")
 	}
 
-	if p.res.HasError() {
-		return p.res.Result, p.res.Error
+	if res.HasError() {
+		return res.Result, res.Error
 	}
 
-	logging.DDumpJSON("rpc resp <", p.res.Result)
-
-	return p.res.Result, nil
+	logging.DDumpJSON("rpc resp <", res.Result)
+	return res.Result, nil
 }
 
 //NewRPCClient creates a new RPC Client
