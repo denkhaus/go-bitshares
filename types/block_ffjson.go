@@ -100,18 +100,24 @@ func (j *Block) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	buf.WriteString(`,"signing_key":`)
+	buf.WriteByte(',')
+	if j.SigningKey != nil {
+		if true {
+			buf.WriteString(`"signing_key":`)
 
-	{
+			{
 
-		obj, err = j.SigningKey.MarshalJSON()
-		if err != nil {
-			return err
+				obj, err = j.SigningKey.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
+			}
+			buf.WriteByte(',')
 		}
-		buf.Write(obj)
-
 	}
-	buf.WriteString(`,"transactions":`)
+	buf.WriteString(`"transactions":`)
 	if j.Transactions != nil {
 		buf.WriteString(`[`)
 		for i, v := range j.Transactions {
@@ -629,11 +635,17 @@ handle_SigningKey:
 	{
 		if tok == fflib.FFTok_null {
 
+			j.SigningKey = nil
+
 		} else {
 
 			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
+			}
+
+			if j.SigningKey == nil {
+				j.SigningKey = new(PublicKey)
 			}
 
 			err = j.SigningKey.UnmarshalJSON(tbuf)
