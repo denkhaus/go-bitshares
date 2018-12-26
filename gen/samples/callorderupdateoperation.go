@@ -22,7 +22,9 @@ var sampleDataCallOrderUpdateOperation = `{
     "amount": 2500000,
     "asset_id": "1.3.121"
   },
-  "extensions": [],
+  "extensions":{
+    target_collateral_ratio:1750
+  },
   "fee": {
     "amount": 4000000,
     "asset_id": "1.3.0"
@@ -30,4 +32,5 @@ var sampleDataCallOrderUpdateOperation = `{
   "funding_account": "1.2.188"
 }`
 
+// found this type of extensions but als possible another
 //end of file
