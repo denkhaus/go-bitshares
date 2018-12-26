@@ -503,6 +503,7 @@ func (t Time) IsZero() bool {
 }
 
 type Buffer []byte
+type Buffers []Buffer
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
 	var b string

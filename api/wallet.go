@@ -266,3 +266,88 @@ func (p *bitsharesAPI) WalletSignTransaction(tx *types.SignedTransaction, broadc
 	return &ret, nil
 
 }
+
+func (p *bitsharesAPI) WalletReadMemo(memo *types.Memo) (string, error) {
+	if p.rpcClient == nil {
+		return "", types.ErrRPCClientNotInitialized
+	}
+	resp, err := p.rpcClient.CallAPI("read_memo", memo)
+	if err != nil {
+		return "", err
+	}
+	if msg, ok := resp.(string); ok {
+		return msg, nil
+	}
+	return "", nil
+}
+
+//WalletTransfer2 works just like transfer, except it always broadcasts and returns the transaction ID along with the signed transaction.
+// func (p *bitsharesAPI) WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
+// 	if p.rpcClient == nil {
+// 		return nil, types.ErrRPCClientNotInitialized
+// 	}
+// 	resp, err := p.rpcClient.CallAPI("transfer2", from, to, amount, asset, memo)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := types.SignedTransactionWithTransactionId{}
+// 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+// 		return nil, errors.Annotate(err, "unmarshal Transaction")
+// 	}
+// 	return &ret, nil
+// }
+
+//WalletGetBlock retrieves a block by number
+func (p *bitsharesAPI) WalletGetBlock(number uint64) (*types.Block, error) {
+	if p.rpcClient == nil {
+		return nil, types.ErrRPCClientNotInitialized
+	}
+
+	resp, err := p.rpcClient.CallAPI("get_block", number)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("get_block <", resp)
+
+	ret := types.Block{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Block")
+	}
+
+	return &ret, nil
+}
+
+//WalletGetRelativeAccountHistory gets operations relevant to the specified account referenced by an event numbering specific to the account. The current number of operations for the account can be found in the account statistics (or use 0 for start).
+//
+//Parameters
+//   account_id_or_name	The account ID or name whose history should be queried
+//   stop	Sequence number of earliest operation. 0 is default and will query 'limit' number of operations.
+//   limit	Maximum number of operations to retrieve (must not exceed 100)
+//   start	Sequence number of the most recent operation to retrieve. 0 is default, which will start querying from the most recent operation.
+//
+//Returns
+//   A list of operations performed by account, ordered from most recent to oldest.
+func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error) {
+	if p.rpcClient == nil {
+		return nil, types.ErrRPCClientNotInitialized
+	}
+
+	if limit > GetAccountHistoryLimit {
+		limit = GetAccountHistoryLimit
+	}
+
+	resp, err := p.rpcClient.CallAPI("get_relative_account_history", account.ID(), stop, limit, start)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("get_relative_account_history <", resp)
+
+	ret := types.OperationRelativeHistories{}
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal Histories")
+	}
+
+	return ret, nil
+}
