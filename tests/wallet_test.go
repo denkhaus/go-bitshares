@@ -64,6 +64,17 @@ func (suite *walletAPITest) Test_WalletGetBlock() {
 	//logging.Dump("wallet_get_block <", block)
 }
 
+func (suite *walletAPITest) Test_WalletGetDynamicGlobalProperties() {
+	props, err := suite.FullAPI.WalletGetDynamicGlobalProperties()
+	if err != nil {
+		suite.FailNow(err.Error(), "WalletGetDynamicGlobalProperties")
+	}
+
+	suite.NotNil(props)
+	suite.Equal(props.ID, *types.NewGrapheneID("2.1.0"))
+	//logging.Dump("wallet_get_dynamic_global_properties <", props)
+}
+
 // func (suite *walletAPITest) Test_Transfer2() {
 // 	trx, err := suite.TestAPI.WalletTransfer2(
 // 		TestAccount2ID,

@@ -34,7 +34,7 @@ func (p DynamicGlobalProperties) RefBlockNum() UInt16 {
 func (p DynamicGlobalProperties) RefBlockPrefix() (UInt32, error) {
 	rawBlockID, err := hex.DecodeString(p.HeadBlockID)
 	if err != nil {
-		return 0, errors.Annotatef(err, "decode HeadBlockID: %v", p.HeadBlockID)
+		return 0, errors.Annotatef(err, "DecodeString HeadBlockID: %v", p.HeadBlockID)
 	}
 
 	if len(rawBlockID) < 8 {

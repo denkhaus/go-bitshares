@@ -352,6 +352,14 @@ func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObj
 	return ret, nil
 }
 
+// WalletGetDynamicGlobalProperties returns the block chain’s rapidly-changing properties.
+// The returned object contains information that changes every block
+// interval such as the head block number, the next witness, etc.
+//
+// See
+//   get_global_properties() for less-frequently changing properties
+// Return
+//   the dynamic global properties
 func (p *bitsharesAPI) WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	if p.rpcClient == nil {
 		return nil, types.ErrRPCClientNotInitialized
