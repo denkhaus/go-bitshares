@@ -42,7 +42,8 @@ func (p Memo) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-//Encrypt encodes the memo message
+//Encrypt calculates a shared secret by the senders private key
+//and the recipients public key, then encrypts the given memo message.
 func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 	sec, err := priv.SharedSecret(&p.To, 16, 16)
 	if err != nil {
@@ -54,10 +55,9 @@ func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 		return errors.Annotate(err, "cypherBlock")
 	}
 
-	mode := cipher.NewCBCEncrypter(blk, iv)
-
 	buf := []byte(msg)
 	digest := sha256.Sum256(buf)
+	mode := cipher.NewCBCEncrypter(blk, iv)
 
 	// checksum + msg
 	raw := digest[:4]
@@ -72,12 +72,12 @@ func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 	p.Message = dst
 
 	return nil
-
 }
 
-//Decrypt decodes the memo message
+//Decrypt calculates a shared secret by the receivers private key
+//and the senders public key, then decrypts the given memo message.
 func (p Memo) Decrypt(priv *PrivateKey) (string, error) {
-	sec, err := priv.SharedSecret(&p.To, 16, 16)
+	sec, err := priv.SharedSecret(&p.From, 16, 16)
 	if err != nil {
 		return "", errors.Annotate(err, "SharedSecret")
 	}

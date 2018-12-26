@@ -10,44 +10,49 @@ import (
 
 var testCases = []map[string]string{
 	{
-		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
-		"message": "688fe6c97f78ad2d3c5a82d9aa61bc23",
+		"fromPub": "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"fromWIF": "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+		"toPub":   "GPH631xpqMM35yJAE2tL428en7CS198PuaVtTASd4jJUNYZpyx46y",
+		"toWIF":   "5K69HxC5h72gKvMbPtvRjzSrHuzVMoJbCYPknb9uoNLmo9TLeLS",
+		"message": "6985b28bdc2e148dac0bef2b34f1a5df",
 		"nonce":   "16332877645293003478",
 		"plain":   "I am this!",
-		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
-		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
 	},
 	{
-		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
-		"message": "db7ab7dfefee3ffa2394ec438601ceff",
+		"fromPub": "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"fromWIF": "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+		"toPub":   "GPH7PynRLMpK3HHEBGZGH3A8z2eBA7dnHhJWRmX2nfquhKK353h5z",
+		"toWIF":   "5Jtwby2gtXKTBt5dwNoS9Ffxb9iTmmgZ4cg9qYFrnxZHDK1ECNr",
+		"message": "f1df2daf0a08d4e94a2db63b201317bf",
 		"nonce":   "16332877645293003478",
 		"plain":   "Hello World",
-		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
-		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
 	},
 	{
-		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
-		"message": "01b6616cbd10bdd0743c82c2bd580651f3e852360a739e7d11c45f483871dc45",
+		"fromPub": "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"fromWIF": "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+		"toPub":   "GPH7PynRLMpK3HHEBGZGH3A8z2eBA7dnHhJWRmX2nfquhKK353h5z",
+		"toWIF":   "5Jtwby2gtXKTBt5dwNoS9Ffxb9iTmmgZ4cg9qYFrnxZHDK1ECNr",
+		"message": "28376e1ddef1258f5d696cacc3d016143719a8cf99333d61cba8e7f5441a3ecf",
 		"nonce":   "16332877645293003478",
 		"plain":   "Daniel Larimer",
-		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
-		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
 	},
 	{
-		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
-		"message": "24702af49bc82e06eb74a4acd91b18c389b13a6c9850a0fd3f728f486fe6daf4",
+		"fromPub": "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"fromWIF": "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+		"toPub":   "GPH7PynRLMpK3HHEBGZGH3A8z2eBA7dnHhJWRmX2nfquhKK353h5z",
+		"toWIF":   "5Jtwby2gtXKTBt5dwNoS9Ffxb9iTmmgZ4cg9qYFrnxZHDK1ECNr",
+		"message": "795614c4ff474a8284b472dd3b7ce01a8aa1987198c3acc4b428ae9c53a1d9fe",
 		"nonce":   "16332877645293003478",
 		"plain":   "Thanks you, sir!",
-		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
-		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
 	},
 	{
-		"from":    "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
-		"message": "1566da5b57e8e0fd9f530a352812a4197b8113df6495efdb246909c6ee1ffea6",
+		"fromPub": "GPH7FPzbN7hnRk24T3Nh9MYM1xBaF5xyRYu8WtyTrtLoUG8cUtszM",
+		"fromWIF": "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
+		"toPub":   "GPH7PynRLMpK3HHEBGZGH3A8z2eBA7dnHhJWRmX2nfquhKK353h5z",
+		"toWIF":   "5Jtwby2gtXKTBt5dwNoS9Ffxb9iTmmgZ4cg9qYFrnxZHDK1ECNr",
+		"message": "c8c754c2d8dfde499686c05121ec8d854ebda837f987b7b349d23dffe4121504",
 		"nonce":   "16332877645293003478",
 		"plain":   "äöüß€@$²³",
-		"to":      "GPH6HAMuJRkjGJkj6cZWBbTU13gkUhBep383prqRdExXsZsYTrWT5",
-		"wif":     "5Jpkeq1jiNE8Pe24GxFWTsyWbcP59Qq4cD7qg3Wgd6JFJqJkoG8",
 	},
 }
 
@@ -96,12 +101,12 @@ func Test_MemoDecrypt(t *testing.T) {
 	config.SetCurrentConfig(config.ChainIDGPH)
 
 	for _, tst := range testCases {
-		from, err := NewPublicKeyFromString(tst["from"])
+		from, err := NewPublicKeyFromString(tst["fromPub"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [from]")
 		}
 
-		to, err := NewPublicKeyFromString(tst["to"])
+		to, err := NewPublicKeyFromString(tst["toPub"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [to]")
 		}
@@ -124,7 +129,7 @@ func Test_MemoDecrypt(t *testing.T) {
 			Nonce:   nonce,
 		}
 
-		priv, err := NewPrivateKeyFromWif(tst["wif"])
+		priv, err := NewPrivateKeyFromWif(tst["toWIF"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
 		}
@@ -143,12 +148,12 @@ func Test_MemoEncrypt(t *testing.T) {
 
 	for _, tst := range testCases {
 
-		from, err := NewPublicKeyFromString(tst["from"])
+		from, err := NewPublicKeyFromString(tst["fromPub"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [from]")
 		}
 
-		to, err := NewPublicKeyFromString(tst["to"])
+		to, err := NewPublicKeyFromString(tst["toPub"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPublicKeyFromString [to]")
 		}
@@ -171,7 +176,7 @@ func Test_MemoEncrypt(t *testing.T) {
 			Nonce:   nonce,
 		}
 
-		priv, err := NewPrivateKeyFromWif(tst["wif"])
+		priv, err := NewPrivateKeyFromWif(tst["fromWIF"])
 		if err != nil {
 			assert.FailNow(t, err.Error(), "NewPrivateKeyFromWif")
 		}
