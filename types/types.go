@@ -35,6 +35,7 @@ var (
 	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
 	ErrInvalidDigestLength          = fmt.Errorf("invalid digest length")
 	ErrInvalidPrivateKeyCurve       = fmt.Errorf("invalid PrivateKey curve")
+	ErrCurrentChainConfigIsNotSet   = fmt.Errorf("current chain config is not set")
 )
 
 var (

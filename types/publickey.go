@@ -122,6 +122,10 @@ func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	buf := pub.SerializeCompressed()
 	cnf := config.CurrentConfig()
 
+	if cnf == nil {
+		return nil, ErrCurrentChainConfigIsNotSet
+	}
+
 	chk, err := util.Ripemd160Checksum(buf)
 	if err != nil {
 		return nil, errors.Annotate(err, "Ripemd160Checksum")
