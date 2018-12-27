@@ -17,10 +17,10 @@ func init() {
 
 type CallOrderUpdateOperation struct {
 	types.OperationFee
-	DeltaCollateral types.AssetAmount `json:"delta_collateral"`
-	DeltaDebt       types.AssetAmount `json:"delta_debt"`
-	FundingAccount  types.GrapheneID  `json:"funding_account"`
-	Extensions      types.Extensions  `json:"extensions"`
+	DeltaCollateral types.AssetAmount               `json:"delta_collateral"`
+	DeltaDebt       types.AssetAmount               `json:"delta_debt"`
+	FundingAccount  types.GrapheneID                `json:"funding_account"`
+	Extensions      types.CallOrderUpdateExtensions `json:"extensions"`
 }
 
 func (p CallOrderUpdateOperation) Type() types.OperationType {
@@ -57,7 +57,6 @@ func (p CallOrderUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 
 func NewCallOrderUpdateOperation(acct types.GrapheneID) *CallOrderUpdateOperation {
 	op := CallOrderUpdateOperation{
-		Extensions:     types.Extensions{},
 		FundingAccount: acct,
 	}
 

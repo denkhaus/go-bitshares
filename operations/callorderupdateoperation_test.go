@@ -6,9 +6,7 @@ import (
 )
 
 func (suite *operationsAPITest) Test_CallOrderUpdateOperation() {
-	op := CallOrderUpdateOperation{
-		Extensions: types.Extensions{},
-	}
+	op := CallOrderUpdateOperation{}
 
 	sample, err := data.GetSampleByType(op.Type())
 	if err != nil {
