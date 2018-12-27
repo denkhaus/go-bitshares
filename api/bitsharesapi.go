@@ -75,16 +75,16 @@ type BitsharesAPI interface {
 	WalletBorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
 	WalletBuy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
 	WalletBuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	WalletGetBlock(number uint64) (*types.Block, error)
+	WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
+	WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
+	WalletReadMemo(memo *types.Memo) (string, error)
 	WalletSell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
 	WalletSellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
 	WalletSellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error)
 	WalletSignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error)
 	WalletSerializeTransaction(tx *types.SignedTransaction) (string, error)
-	WalletReadMemo(memo *types.Memo) (string, error)
 	//WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error)
-	WalletGetBlock(number uint64) (*types.Block, error)
-	WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
-	WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
 }
 
 type bitsharesAPI struct {

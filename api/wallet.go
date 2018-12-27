@@ -281,12 +281,13 @@ func (p *bitsharesAPI) WalletReadMemo(memo *types.Memo) (string, error) {
 	return "", nil
 }
 
-//WalletTransfer2 works just like transfer, except it always broadcasts and returns the transaction ID along with the signed transaction.
+//WalletTransfer2 works just like transfer, except it always broadcasts and
+//returns the transaction ID along with the signed transaction.
 // func (p *bitsharesAPI) WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
 // 	if p.rpcClient == nil {
 // 		return nil, types.ErrRPCClientNotInitialized
 // 	}
-// 	resp, err := p.rpcClient.CallAPI("transfer2", from, to, amount, asset, memo)
+// 	resp, err := p.rpcClient.CallAPI("transfer2", from.ID(), to.ID(), amount, asset.ID(), memo)
 // 	if err != nil {
 // 		return nil, err
 // 	}
