@@ -12,8 +12,10 @@ import (
 //long running test
 func Test_LatencyAnalyzerWithTimeout(t *testing.T) {
 	t.Log("create tester")
-	ctx := context.Background()
-	ctx, _ = context.WithTimeout(ctx, 60*time.Second)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
 	lat, err := api.NewLatencyTesterWithContext(ctx, WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewLatencyTester")

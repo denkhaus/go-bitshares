@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -77,11 +76,15 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	buf.WriteByte(',')
 	if j.Fee != nil {
 		if true {
-			/* Struct fall back. type=types.AssetAmount kind=struct */
 			buf.WriteString(`"fee":`)
-			err = buf.Encode(j.Fee)
-			if err != nil {
-				return err
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 			buf.WriteByte(',')
 		}
@@ -401,16 +404,22 @@ handle_Fee:
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
