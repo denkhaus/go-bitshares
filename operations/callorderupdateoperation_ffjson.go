@@ -66,9 +66,9 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 		buf.Write(obj)
 
 	}
+	/* Struct fall back. type=types.CallOrderUpdateExtensions kind=struct */
 	buf.WriteString(`,"extensions":`)
-	/* Interface types must use runtime reflection. type=types.CallOrderUpdateExtensions kind=interface */
-	err = buf.Encode(j.Extensions)
+	err = buf.Encode(&j.Extensions)
 	if err != nil {
 		return err
 	}
@@ -358,10 +358,10 @@ handle_FundingAccount:
 
 handle_Extensions:
 
-	/* handler: j.Extensions type=types.CallOrderUpdateExtensions kind=interface quoted=false*/
+	/* handler: j.Extensions type=types.CallOrderUpdateExtensions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.CallOrderUpdateExtensions kind=interface */
+		/* Falling back. type=types.CallOrderUpdateExtensions kind=struct */
 		tbuf, err := fs.CaptureField(tok)
 		if err != nil {
 			return fs.WrapErr(err)

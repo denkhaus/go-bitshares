@@ -76,7 +76,7 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 			},
 
 			FundingAccount: *types.NewGrapheneID("1.2.29"),
-			Extensions:     types.Extensions{},
+			Extensions:     types.CallOrderUpdateExtensions{},
 		},
 	}
 

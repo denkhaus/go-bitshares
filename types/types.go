@@ -51,6 +51,12 @@ const (
 	WorkerInitializerTypeBurn
 )
 
+type CallOrderUpdateExtensionsType UInt8
+
+const (
+	CallOrderUpdateExtensionsTypeTargetRatio CallOrderUpdateExtensionsType = iota
+)
+
 type AccountCreateExtensionsType UInt8
 
 const (
