@@ -8,43 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetUpdateOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetUpdate] =
 		sampleDataAssetUpdateOperation
 }
-
-var sampleDataAssetUpdateOperation = `{
-  "asset_to_update": "1.3.561",
-  "extensions": [],
-  "fee": {
-    "amount": 100000000,
-    "asset_id": "1.3.0"
-  },
-  "issuer": "1.2.1090",
-  "new_issuer": "1.2.96397",
-  "new_options": {
-    "blacklist_authorities": [],
-    "blacklist_markets": [],
-    "core_exchange_rate": {
-      "base": {
-        "amount": 1,
-        "asset_id": "1.3.0"
-      },
-      "quote": {
-        "amount": 1,
-        "asset_id": "1.3.561"
-      }
-    },
-    "description": "",
-    "extensions": [],
-    "flags": 0,
-    "issuer_permissions": 79,
-    "market_fee_percent": 0,
-    "max_market_fee": 0,
-    "max_supply": "1000000000000000",
-    "whitelist_authorities": [],
-    "whitelist_markets": []
-  }
-}`
 
 //end of file

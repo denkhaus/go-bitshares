@@ -8,53 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataProposalUpdateOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeProposalUpdate] =
 		sampleDataProposalUpdateOperation
 }
-
-var sampleDataProposalUpdateOperation = `{
-  "active_approvals_to_add": [
-    "1.2.90742",
-    "1.2.90743",
-    "1.2.90744",
-    "1.2.90745",
-    "1.2.90746",
-    "1.2.90747",
-    "1.2.90748",
-    "1.2.90749",
-    "1.2.90750",
-    "1.2.90751",
-    "1.2.90752"
-  ],
-  "active_approvals_to_remove": [
-    "1.2.123",
-    "1.2.456",
-  ],
-  "extensions": [],
-  "fee": {
-    "amount": 200000,
-    "asset_id": "1.3.0"
-  },
-  "fee_paying_account": "1.2.90744",
-  "key_approvals_to_add": [
-    "1.2.567",
-    "1.2.890",
-  ],
-  "key_approvals_to_remove": [
-    "1.2.987",
-    "1.2.765",
-    "1.2.543",
-  ],
-  "owner_approvals_to_add": [
-    "1.2.1234",
-    "1.2.4567",
-  ],
-  "owner_approvals_to_remove": [
-    "1.2.7654",
-    "1.2.9876",
-  ],
-  "proposal": "1.10.7"
-}`
 
 //end of file

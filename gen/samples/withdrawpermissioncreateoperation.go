@@ -8,25 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataWithdrawPermissionCreateOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeWithdrawPermissionCreate] =
 		sampleDataWithdrawPermissionCreateOperation
 }
-
-var sampleDataWithdrawPermissionCreateOperation = `{
-  "authorized_account": "1.2.492523",
-  "fee": {
-    "amount": 182095,
-    "asset_id": "1.3.0"
-  },
-  "period_start_time": "2017-12-27T16:00:00",
-  "periods_until_expiration": 3,
-  "withdraw_from_account": "1.2.21561",
-  "withdrawal_limit": {
-    "amount": 1000000,
-    "asset_id": "1.3.0"
-  },
-  "withdrawal_period_sec": 86400
-}`
 
 //end of file

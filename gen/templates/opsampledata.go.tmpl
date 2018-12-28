@@ -3,16 +3,10 @@
 
 package samples
 
-import(
-    "github.com/denkhaus/bitshares/gen/data"
-    "github.com/denkhaus/bitshares/types"
-)
-
 func init(){
-	data.OpSampleMap[types.{{.SampleDataOpType}}] = 
-    {{.SampleDataVarName}}
-}
 
-var {{.SampleDataVarName}} = {{.SampleData}}
+	{{.SampleDataVarName}}[{{.SampleDataIdx}}] = {{.SampleData}}
+    
+}
 
 //end of file

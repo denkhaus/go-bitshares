@@ -8,30 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataOverrideTransferOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeOverrideTransfer] =
 		sampleDataOverrideTransferOperation
 }
-
-var sampleDataOverrideTransferOperation = `{
-  "amount": {
-    "amount": 801000000,
-    "asset_id": "1.3.861"
-  },
-  "extensions": [],
-  "fee": {
-    "amount": 14687182,
-    "asset_id": "1.3.0"
-  },
-  "from": "1.2.229",
-  "issuer": "1.2.96397",
-  "memo": {
-    "from": "BTS5rKLweW7HSiqPsmY2tJLNA1FyPgsiyPxaUqcXjZFcgu44Z6wu9",
-    "message": "36f0e6d222aeff106fbc2cbf76928d932afc491798564342142ff41e0ec1358c",
-    "nonce": "18376162770680335404",
-    "to": "BTS7Y3JwsNmhhFdwRYtBCNnBeJExjmPTrf12Dgabr1Y9KFyUgTbCG"
-  },
-  "to": "1.2.133485"
-}`
 
 //end of file

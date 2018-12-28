@@ -8,19 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAccountUpgradeOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAccountUpgrade] =
 		sampleDataAccountUpgradeOperation
 }
-
-var sampleDataAccountUpgradeOperation = `{
-  "account_to_upgrade": "1.2.1090",
-  "extensions": [],
-  "fee": {
-    "amount": 2000000000,
-    "asset_id": "1.3.0"
-  },
-  "upgrade_to_lifetime_member": true
-}`
 
 //end of file

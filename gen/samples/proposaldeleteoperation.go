@@ -8,20 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataProposalDeleteOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeProposalDelete] =
 		sampleDataProposalDeleteOperation
 }
-
-var sampleDataProposalDeleteOperation = `{
-  "extensions": [],
-  "fee": {
-    "amount": 200000,
-    "asset_id": "1.3.0"
-  },
-  "fee_paying_account": "1.2.1191",
-  "proposal": "1.10.74",
-  "using_owner_authority": false
-}`
 
 //end of file

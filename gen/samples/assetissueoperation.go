@@ -8,29 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetIssueOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetIssue] =
 		sampleDataAssetIssueOperation
 }
-
-var sampleDataAssetIssueOperation = `{
-  "asset_to_issue": {
-    "amount": 100000,
-    "asset_id": "1.3.472"
-  },
-  "extensions": [],
-  "fee": {
-    "amount": 4017968,
-    "asset_id": "1.3.0"
-  },
-  "issue_to_account": "1.2.29495",
-  "issuer": "1.2.32469",
-  "memo": {
-    "from": "BTS549jJCfuBX3ruCyVdPivMendBoX5hYE1LCvLj8TsV7gSb6roWd",
-    "message": "63c6090729bc245e077b1a64a98e9984",
-    "nonce": "6414571559870517861",
-    "to": "BTS8RwSWSFcnzWLBfXuvG4XkqSqeuDaqMzoMr6V5LRX2ietxF8APy"
-  }
-}`
 
 //end of file

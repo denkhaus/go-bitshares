@@ -8,20 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataCustomOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeCustom] =
 		sampleDataCustomOperation
 }
-
-var sampleDataCustomOperation = `{
-  "data": "796f2f48656c6c6f20576f726c6420e29aa1202d20d097d0b4d180d0b0d0b2d181d182d0b2d183d0bbd182d0b520d0bcd0b8d180202d20e4bda0e5a5bde4b896e7958c202d20426f6e6a6f7572206d6f6e6465202d2048616c6c6f2057656c74202d20ceb3ceb5ceb9ceac20cf83cebfcf8520cebacf8ccf83cebccebfcf82202d20e38193e38293e381abe381a1e381afe4b896e7958c202d20ec97acebb3b4ec84b8ec9a9420ec84b8eab384",
-  "fee": {
-    "amount": 200003,
-    "asset_id": "1.3.0"
-  },
-  "id": 0,
-  "payer": "1.2.32084",
-  "required_auths": []
-}`
 
 //end of file

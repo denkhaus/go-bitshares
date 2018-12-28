@@ -6,6 +6,7 @@ import (
 
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/mitchellh/reflectwalk"
 	"github.com/stretchr/objx"
@@ -38,30 +39,34 @@ func NewOperationBlob(data map[string]interface{}) *OperationBlob {
 	return &s
 }
 
-type OpDataStore map[types.OperationType]*OperationBlob
+type OpDataStore map[types.OperationType]map[int]*OperationBlob
 
 //TODO: save last scanned block and reapply
 func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 	if len(m) == 0 {
-		fmt.Printf("init datastore: no sample data loaded\n")
-		return errors.New("no sample data loaded")
+		logging.Warn("init datastore: no sample data loaded")
+		return nil
 	}
-	//TODO: fatal error: concurrent map iteration and map write
-	for typ, data := range m {
-		opData, err := objx.FromJSON(data)
-		if err != nil {
-			return errors.Annotate(err, "FromJSON")
-		}
 
-		ok, err := p.Evaluate(typ, NewOperationBlob(opData), 0)
-		if err != nil {
-			return errors.Annotate(err, "Evaluate")
-		}
+	logging.Info("init datastore")
+	for typ, d := range m {
+		for idx, data := range d {
+			opData, err := objx.FromJSON(data)
+			if err != nil {
+				return errors.Annotate(err, "FromJSON")
+			}
 
-		if ok {
-			ch <- GenData{
-				Type: typ,
-				Data: opData,
+			_, err = p.Insert(typ, NewOperationBlob(opData), 0)
+			if err != nil {
+				return errors.Annotate(err, "Insert")
+			}
+
+			if idx >= 0 {
+				ch <- GenData{
+					Type:      typ,
+					SampleIdx: idx,
+					Data:      opData,
+				}
 			}
 		}
 	}
@@ -69,27 +74,46 @@ func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 	return nil
 }
 
-func (p *OpDataStore) Evaluate(typ types.OperationType, blob *OperationBlob, block uint64) (bool, error) {
+func (p *OpDataStore) Insert(typ types.OperationType, blob *OperationBlob, block uint64) (int, error) {
 	if err := reflectwalk.Walk(blob.data, blob); err != nil {
-		return false, errors.Annotate(err, "Walk")
+		return -1, errors.Annotate(err, "Walk")
 	}
 
-	if bl, ok := (*p)[typ]; ok {
-		if bl.fields < blob.fields {
-			(*p)[typ] = blob
-			fmt.Printf("Block %d: Blob upgraded for type %v: %s\n", block, typ, blob)
-			return true, nil
+	if blobs, ok := (*p)[typ]; ok {
+		var maxFields = 0
+		var maxIdx = -1
+		for idx, bl := range blobs {
+			maxFields = max(bl.fields, maxFields)
+			maxIdx = max(idx, maxIdx)
 		}
+
+		if maxFields < blob.fields {
+			newIdx := maxIdx + 1
+			(*p)[typ][newIdx] = blob
+			logging.Infof("Block %d: Blob upgraded for type %v: %s", block, typ, blob)
+			return newIdx, nil
+		}
+
 	} else {
-		(*p)[typ] = blob
-		fmt.Printf("Block %d: Blob added for type %v: %s\n", block, typ, blob)
-		return true, nil
+		(*p)[typ] = map[int]*OperationBlob{
+			0: blob,
+		}
+
+		logging.Infof("Block %d: Blob added for type %v: %s", block, typ, blob)
+		return 0, nil
 	}
 
-	return false, nil
+	return -1, nil
 }
 
 func NewOpDataStore() *OpDataStore {
 	s := OpDataStore{}
 	return &s
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

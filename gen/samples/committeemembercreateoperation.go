@@ -8,18 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataCommitteeMemberCreateOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeCommitteeMemberCreate] =
 		sampleDataCommitteeMemberCreateOperation
 }
-
-var sampleDataCommitteeMemberCreateOperation = `{
-  "committee_member_account": "1.2.1191",
-  "fee": {
-    "amount": 200000,
-    "asset_id": "1.3.0"
-  },
-  "url": "https://github.com/gileadmcgee/dele-puppy"
-}`
 
 //end of file
