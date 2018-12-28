@@ -26,6 +26,8 @@ const (
 )
 
 func init() {
+	// init is called before the API is initialized,
+	// hence must define current chain config explicitly.
 	config.SetCurrentConfig(config.ChainIDBTS)
 	seller = types.NewGrapheneID(
 		os.Getenv("BTS_TEST_ACCOUNT"),
