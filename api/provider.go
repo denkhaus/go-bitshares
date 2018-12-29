@@ -17,10 +17,10 @@ type ClientProvider interface {
 
 type SimpleClientProvider struct {
 	WebsocketClient
-	api BitsharesAPI
+	api WebsocketAPI
 }
 
-func NewSimpleClientProvider(endpointURL string, api BitsharesAPI) ClientProvider {
+func NewSimpleClientProvider(endpointURL string, api WebsocketAPI) ClientProvider {
 	wsc := NewWebsocketClient(endpointURL)
 	sim := SimpleClientProvider{
 		api:             api,
@@ -44,11 +44,11 @@ type BestNodeClientProvider struct {
 	WebsocketClient
 	mu          deadlock.RWMutex
 	nodeChanged *abool.AtomicBool
-	api         BitsharesAPI
+	api         WebsocketAPI
 	tester      LatencyTester
 }
 
-func NewBestNodeClientProvider(endpointURL string, api BitsharesAPI) (ClientProvider, error) {
+func NewBestNodeClientProvider(endpointURL string, api WebsocketAPI) (ClientProvider, error) {
 	tester, err := NewLatencyTester(endpointURL)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewLatencyTester")

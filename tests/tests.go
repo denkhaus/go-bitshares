@@ -14,12 +14,10 @@ import (
 )
 
 const (
-	WsFullApiUrl = "wss://node.market.rudex.org"
-	//WsFullApiUrl = "wss://bitshares.openledger.info/ws"
-	WsTestApiUrl        = "wss://node.testnet.bitshares.eu/ws"
-	RpcFullApiUrl       = "http://localhost:8095"
-	RpcTestApiUrl       = "http://localhost:8094"
-	RpcTestCustomApiUrl = "http://localhost:8093"
+	WsFullApiUrl  = "wss://node.market.rudex.org"
+	WsTestApiUrl  = "wss://node.testnet.bitshares.eu/ws"
+	RpcFullApiUrl = "http://localhost:8095"
+	RpcTestApiUrl = "http://localhost:8094"
 )
 
 var (
@@ -81,8 +79,8 @@ var (
 	TestAccount3ID            = types.NewGrapheneID("1.2.391614")
 )
 
-func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
-	ref, err := api.WalletSerializeTransaction(tx)
+func CompareTransactions(api api.WalletAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
+	ref, err := api.SerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")
 	}
@@ -96,8 +94,8 @@ func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debu
 	return ref, hex.EncodeToString(buf.Bytes()), nil
 }
 
-func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.BitsharesAPI {
-	api := api.New(wsAPIEndpoint, rpcAPIEndpoint)
+func NewWebsocketTestAPI(t *testing.T, wsAPIEndpoint string) api.WebsocketAPI {
+	api := api.NewWebsocketAPI(wsAPIEndpoint)
 	if err := api.Connect(); err != nil {
 		assert.FailNow(t, err.Error(), "Connect")
 	}
@@ -105,6 +103,15 @@ func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.Bitshare
 	api.OnError(func(err error) {
 		assert.FailNow(t, err.Error(), "OnError")
 	})
+
+	return api
+}
+
+func NewWalletTestAPI(t *testing.T, rpcEndpoint string, chainID string) api.WalletAPI {
+	api := api.NewWalletAPI(rpcEndpoint)
+	if err := api.Connect(chainID); err != nil {
+		assert.FailNow(t, err.Error(), "Connect")
+	}
 
 	return api
 }

@@ -13,12 +13,14 @@ import (
 
 type websocketAPITest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
-	KeyBag  *crypto.KeyBag
+	WebsocketAPI api.WebsocketAPI
+	WalletAPI    api.WalletAPI
+	KeyBag       *crypto.KeyBag
 }
 
 func (suite *websocketAPITest) SetupSuite() {
-	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl, RpcTestApiUrl)
+	suite.WebsocketAPI = NewWebsocketTestAPI(suite.T(), WsTestApiUrl)
+	suite.WalletAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl, config.ChainIDTest)
 
 	suite.KeyBag = crypto.NewKeyBag()
 	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
@@ -31,13 +33,16 @@ func (suite *websocketAPITest) SetupSuite() {
 }
 
 func (suite *websocketAPITest) TearDownSuite() {
-	if err := suite.TestAPI.Close(); err != nil {
-		suite.FailNow(err.Error(), "Close")
+	if err := suite.WebsocketAPI.Close(); err != nil {
+		suite.FailNow(err.Error(), "Close [ws]")
+	}
+	if err := suite.WalletAPI.Close(); err != nil {
+		suite.FailNow(err.Error(), "Close [wallet]")
 	}
 }
 
 func (suite *websocketAPITest) Test_ChainConfig() {
-	res, err := suite.TestAPI.GetChainID()
+	res, err := suite.WebsocketAPI.GetChainID()
 	if err != nil {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
@@ -56,7 +61,7 @@ func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 		To:   *TestAccount1ID,
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
@@ -76,14 +81,14 @@ func (suite *websocketAPITest) Test_SignAndVerify() {
 		To:   *TestAccount1ID,
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
 
 	suite.compareTransaction(trx, false)
 
-	v, err := suite.TestAPI.VerifySignedTransaction(suite.KeyBag, trx)
+	v, err := crypto.VerifySignedTransaction(suite.KeyBag, trx)
 	if err != nil {
 		suite.FailNow(err.Error(), "VerifySignedTransaction")
 	}
@@ -102,7 +107,7 @@ func (suite *websocketAPITest) Test_Transfer() {
 		To:   *TestAccount1ID,
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
@@ -111,13 +116,13 @@ func (suite *websocketAPITest) Test_Transfer() {
 	suite.compareTransaction(trx, false)
 
 	//suite.TestAPI.SetDebug(true)
-	if err := suite.TestAPI.BroadcastTransaction(trx); err != nil {
+	if err := suite.WebsocketAPI.BroadcastTransaction(trx); err != nil {
 		suite.FailNow(err.Error(), "BroadcastTransaction")
 	}
 }
 
 func (suite *websocketAPITest) Test_GetAccountBalances() {
-	res, err := suite.TestAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
+	res, err := suite.WebsocketAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 1")
 	}
@@ -127,7 +132,7 @@ func (suite *websocketAPITest) Test_GetAccountBalances() {
 
 	//util.Dump("test amount TestAccount1 >", res)
 
-	res, err = suite.TestAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
+	res, err = suite.WebsocketAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 2")
 	}
@@ -139,7 +144,7 @@ func (suite *websocketAPITest) Test_GetAccountBalances() {
 }
 
 func (suite *websocketAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {
-	ref, test, err := CompareTransactions(suite.TestAPI, tx, debug)
+	ref, test, err := CompareTransactions(suite.WalletAPI, tx, debug)
 	if err != nil {
 		suite.FailNow(err.Error(), "Compare Transactions")
 	}

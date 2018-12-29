@@ -15,14 +15,13 @@ import (
 
 type commonTest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
+	TestAPI api.WebsocketAPI
 }
 
 func (suite *commonTest) SetupTest() {
-	suite.TestAPI = NewTestAPI(
+	suite.TestAPI = NewWebsocketTestAPI(
 		suite.T(),
 		WsFullApiUrl,
-		RpcFullApiUrl,
 	)
 }
 

@@ -19,7 +19,7 @@ const (
 	SetSubscribeCallbackDuration     = 60 * time.Second
 
 	SubscribeToMarketSubscriberID = 4
-	SubscribeToMarketMsgs         = 3
+	SubscribeToMarketMsgs         = 2
 	SubscribeToMarketDuration     = 90 * time.Second
 )
 
@@ -28,14 +28,13 @@ const (
 // returns the current testing context
 type subscribeTest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
+	TestAPI api.WebsocketAPI
 }
 
 func (suite *subscribeTest) SetupTest() {
-	suite.TestAPI = NewTestAPI(
+	suite.TestAPI = NewWebsocketTestAPI(
 		suite.T(),
 		WsFullApiUrl,
-		RpcFullApiUrl,
 	)
 }
 

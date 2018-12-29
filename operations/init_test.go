@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
@@ -16,22 +17,26 @@ import (
 
 type operationsAPITest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
-	RefTx   *types.SignedTransaction
+	WebsocketAPI api.WebsocketAPI
+	WalletAPI    api.WalletAPI
+	RefTx        *types.SignedTransaction
 }
 
 func (suite *operationsAPITest) SetupTest() {
-	suite.TestAPI = tests.NewTestAPI(
+	suite.WebsocketAPI = tests.NewWebsocketTestAPI(
 		suite.T(),
 		tests.WsFullApiUrl,
-		tests.RpcFullApiUrl,
 	)
-
+	suite.WalletAPI = tests.NewWalletTestAPI(
+		suite.T(),
+		tests.RpcFullApiUrl,
+		config.ChainIDBTS,
+	)
 	suite.RefTx = tests.CreateRefTransaction(suite.T())
 }
 
 func (suite *operationsAPITest) TearDownTest() {
-	if err := suite.TestAPI.Close(); err != nil {
+	if err := suite.WebsocketAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close")
 	}
 }
@@ -41,7 +46,7 @@ func (suite *operationsAPITest) Test_SerializeRefTransaction() {
 }
 
 func (suite *operationsAPITest) Test_WalletSerializeTransaction() {
-	hex, err := suite.TestAPI.WalletSerializeTransaction(suite.RefTx)
+	hex, err := suite.WalletAPI.SerializeTransaction(suite.RefTx)
 	if err != nil {
 		suite.FailNow(err.Error(), "SerializeTransaction")
 	}
@@ -81,15 +86,15 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 		},
 	}
 
-	if err := suite.TestAPI.SignWithKeys(keyBag.Privates(), suite.RefTx); err != nil {
-		suite.FailNow(err.Error(), "SignTransaction")
+	if err := crypto.SignWithKeys(keyBag.Privates(), suite.RefTx); err != nil {
+		suite.FailNow(err.Error(), "SignWithKeys")
 	}
 
 	suite.compareTransaction(0, suite.RefTx, false)
 }
 
 func (suite *operationsAPITest) compareTransaction(sampleIdx int, tx *types.SignedTransaction, debug bool) {
-	ref, test, err := tests.CompareTransactions(suite.TestAPI, tx, debug)
+	ref, test, err := tests.CompareTransactions(suite.WalletAPI, tx, debug)
 	if err != nil {
 		suite.FailNow(err.Error(), "compareTransactions")
 	}
