@@ -74,7 +74,7 @@ func main() {
 	defer close(genChan)
 
 	logging.Info("connect api")
-	api := api.New(tests.WsFullApiUrl, tests.RpcFullApiUrl)
+	api := api.NewWebsocketAPI(tests.WsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		handleError(errors.Annotate(err, "Connect"))
 	}

@@ -126,13 +126,13 @@ const (
 	OperationTypeProposalCreate
 	OperationTypeProposalUpdate
 	OperationTypeProposalDelete
-	OperationTypeWithdrawPermissionCreate              ///
-	OperationTypeWithdrawPermissionUpdate              ///
-	OperationTypeWithdrawPermissionClaim               ///
-	OperationTypeWithdrawPermissionDelete              ///
-	OperationTypeCommitteeMemberCreate                 ///
-	OperationTypeCommitteeMemberUpdate                 ///
-	OperationTypeCommitteeMemberUpdateGlobalParameters ///
+	OperationTypeWithdrawPermissionCreate ///
+	OperationTypeWithdrawPermissionUpdate ///
+	OperationTypeWithdrawPermissionClaim  ///
+	OperationTypeWithdrawPermissionDelete ///
+	OperationTypeCommitteeMemberCreate    ///
+	OperationTypeCommitteeMemberUpdate    ///
+	OperationTypeCommitteeMemberUpdateGlobalParameters
 	OperationTypeVestingBalanceCreate
 	OperationTypeVestingBalanceWithdraw
 	OperationTypeWorkerCreate

@@ -23,7 +23,7 @@ const (
 	GetAccountHistoryLimit = 100
 )
 
-type BitsharesAPI interface {
+type WebsocketAPI interface {
 	//Common functions
 	CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
@@ -35,9 +35,7 @@ type BitsharesAPI interface {
 	OnError(ErrorFunc)
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
-	VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
-	SignWithKeys(types.PrivateKeys, *types.SignedTransaction) error
 
 	//Websocket API functions
 	BroadcastTransaction(tx *types.SignedTransaction) error
@@ -66,30 +64,10 @@ type BitsharesAPI interface {
 	SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error
 	UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error
 	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (types.Volume24, error)
-
-	//Wallet API functions
-	WalletListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
-	WalletLock() error
-	WalletUnlock(password string) error
-	WalletIsLocked() (bool, error)
-	WalletBorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
-	WalletBuy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
-	WalletBuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
-	WalletGetBlock(number uint64) (*types.Block, error)
-	WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
-	WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
-	WalletReadMemo(memo *types.Memo) (string, error)
-	WalletSell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
-	WalletSellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
-	WalletSellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error)
-	WalletSignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error)
-	WalletSerializeTransaction(tx *types.SignedTransaction) (string, error)
-	//WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error)
 }
 
-type bitsharesAPI struct {
+type websocketAPI struct {
 	wsClient       ClientProvider
-	rpcClient      RPCClient
 	username       string
 	password       string
 	databaseAPIID  int
@@ -97,7 +75,7 @@ type bitsharesAPI struct {
 	broadcastAPIID int
 }
 
-func (p *bitsharesAPI) getAPIID(identifier string) (int, error) {
+func (p *websocketAPI) getAPIID(identifier string) (int, error) {
 	resp, err := p.wsClient.CallAPI(1, identifier, types.EmptyParams)
 	if err != nil {
 		return InvalidApiID, errors.Annotate(err, identifier)
@@ -109,7 +87,7 @@ func (p *bitsharesAPI) getAPIID(identifier string) (int, error) {
 }
 
 // login
-func (p *bitsharesAPI) login() (bool, error) {
+func (p *websocketAPI) login() (bool, error) {
 	resp, err := p.wsClient.CallAPI(1, "login", p.username, p.password)
 	if err != nil {
 		return false, err
@@ -121,7 +99,7 @@ func (p *bitsharesAPI) login() (bool, error) {
 }
 
 // SetSubscribeCallback
-func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
+func (p *websocketAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", notifyID, clearFilter)
 	if err != nil {
@@ -132,7 +110,7 @@ func (p *bitsharesAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 }
 
 // SubscribeToMarket
-func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
+func (p *websocketAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.ID(), quote.ID())
 	if err != nil {
@@ -143,7 +121,7 @@ func (p *bitsharesAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject
 }
 
 // UnsubscribeFromMarket
-func (p *bitsharesAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error {
+func (p *websocketAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error {
 	// returns nil if successfull
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.ID(), quote.ID())
 	if err != nil {
@@ -154,7 +132,7 @@ func (p *bitsharesAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote ty
 }
 
 // CancelAllSubscriptions
-func (p *bitsharesAPI) CancelAllSubscriptions() error {
+func (p *websocketAPI) CancelAllSubscriptions() error {
 	// returns nil
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "cancel_all_subscriptions", types.EmptyParams)
 	if err != nil {
@@ -167,7 +145,7 @@ func (p *bitsharesAPI) CancelAllSubscriptions() error {
 //Broadcast a transaction to the network.
 //The transaction will be checked for validity prior to broadcasting.
 //If it fails to apply at the connected node, an error will be thrown and the transaction will not be broadcast.
-func (p *bitsharesAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
+func (p *websocketAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	_, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
 	if err != nil {
 		return err
@@ -178,7 +156,7 @@ func (p *bitsharesAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 
 //SignTransaction signs a given transaction.
 //Required signing keys get selected by API and have to be in keyBag.
-func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) error {
+func (p *websocketAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) error {
 	reqPk, err := p.RequiredSigningKeys(tx)
 	if err != nil {
 		return errors.Annotate(err, "RequiredSigningKeys")
@@ -198,31 +176,9 @@ func (p *bitsharesAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTr
 	return nil
 }
 
-//SignWithKeys signs a given transaction with given private keys.
-func (p *bitsharesAPI) SignWithKeys(keys types.PrivateKeys, tx *types.SignedTransaction) error {
-	signer := crypto.NewTransactionSigner(tx)
-	if err := signer.Sign(keys, config.CurrentConfig()); err != nil {
-		return errors.Annotate(err, "Sign")
-	}
-
-	return nil
-}
-
-//VerifySignedTransaction verifies a signed transaction against all available keys in keyBag.
-//If all required key are found the function returns true, otherwise false.
-func (p *bitsharesAPI) VerifySignedTransaction(keyBag *crypto.KeyBag, tx *types.SignedTransaction) (bool, error) {
-	signer := crypto.NewTransactionSigner(tx)
-	verified, err := signer.Verify(keyBag, config.CurrentConfig())
-	if err != nil {
-		return false, errors.Annotate(err, "Verify")
-	}
-
-	return verified, nil
-}
-
 //BuildSignedTransaction builds a new transaction by given operation(s),
 //applies fees, current block data and signs the transaction.
-func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error) {
+func (p *websocketAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error) {
 	operations := types.Operations(ops)
 	fees, err := p.GetRequiredFees(operations, feeAsset)
 	if err != nil {
@@ -266,7 +222,7 @@ func (p *bitsharesAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 
 //RequiredSigningKeys is a convenience call to retrieve the minimum subset of public keys to sign a transaction.
 //If the transaction is already signed, the result is empty.
-func (p *bitsharesAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.PublicKeys, error) {
+func (p *websocketAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	potPk, err := p.GetPotentialSignatures(tx)
 	if err != nil {
 		return nil, errors.Annotate(err, "GetPotentialSignatures")
@@ -287,7 +243,7 @@ func (p *bitsharesAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.P
 //GetPotentialSignatures will return the set of all public keys that could possibly sign for a given transaction.
 //This call can be used by wallets to filter their set of public keys to just the relevant subset prior to calling
 //GetRequiredSignatures to get the minimum subset.
-func (p *bitsharesAPI) GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error) {
+func (p *websocketAPI) GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_potential_signatures", tx)
 	if err != nil {
 		return nil, err
@@ -304,7 +260,7 @@ func (p *bitsharesAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 }
 
 //GetRequiredSignatures returns the minimum subset of public keys to sign a transaction.
-func (p *bitsharesAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
+func (p *websocketAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_required_signatures", tx, potKeys)
 	if err != nil {
 		return nil, err
@@ -321,7 +277,7 @@ func (p *bitsharesAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKey
 }
 
 //GetBlock returns a Block by block number.
-func (p *bitsharesAPI) GetBlock(number uint64) (*types.Block, error) {
+func (p *websocketAPI) GetBlock(number uint64) (*types.Block, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_block", number)
 	if err != nil {
 		return nil, err
@@ -338,7 +294,7 @@ func (p *bitsharesAPI) GetBlock(number uint64) (*types.Block, error) {
 }
 
 //GetAccountByName returns a Account object by username
-func (p *bitsharesAPI) GetAccountByName(name string) (*types.Account, error) {
+func (p *websocketAPI) GetAccountByName(name string) (*types.Account, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
 		return nil, err
@@ -359,7 +315,7 @@ func (p *bitsharesAPI) GetAccountByName(name string) (*types.Account, error) {
 // stop: ID of the earliest operation to retrieve
 // limit: Maximum number of operations to retrieve (must not exceed 100)
 // start: ID of the most recent operation to retrieve
-func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error) {
+func (p *websocketAPI) GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error) {
 	if limit > GetAccountHistoryLimit {
 		limit = GetAccountHistoryLimit
 	}
@@ -380,7 +336,7 @@ func (p *bitsharesAPI) GetAccountHistory(account types.GrapheneObject, stop type
 }
 
 //GetAccounts returns a list of accounts by accountID(s).
-func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Accounts, error) {
+func (p *websocketAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Accounts, error) {
 	ids := types.GrapheneObjects(accounts).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_accounts", ids)
 	if err != nil {
@@ -398,7 +354,7 @@ func (p *bitsharesAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 }
 
 //GetDynamicGlobalProperties returns essential runtime properties of bitshares network
-func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
+func (p *websocketAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_dynamic_global_properties", types.EmptyParams)
 	if err != nil {
 		return nil, err
@@ -415,7 +371,7 @@ func (p *bitsharesAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalPropert
 }
 
 //GetAccountBalances retrieves AssetAmounts by given AccountID
-func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error) {
+func (p *websocketAPI) GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error) {
 	ids := types.GrapheneObjects(assets).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.ID(), ids)
 	if err != nil {
@@ -433,7 +389,7 @@ func (p *bitsharesAPI) GetAccountBalances(account types.GrapheneObject, assets .
 }
 
 //GetFullAccounts retrieves full account information by given AccountIDs
-func (p *bitsharesAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.FullAccountInfos, error) {
+func (p *websocketAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.FullAccountInfos, error) {
 	ids := types.GrapheneObjects(accounts).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_full_accounts", ids, false) //do not subscribe for now
 	if err != nil {
@@ -451,7 +407,7 @@ func (p *bitsharesAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.
 }
 
 // Get24Volume returns the base:quote assets 24h volume
-func (p *bitsharesAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.Volume24, err error) {
+func (p *websocketAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.Volume24, err error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_24_volume", base.ID(), quote.ID())
 	if err != nil {
 		return
@@ -470,7 +426,7 @@ func (p *bitsharesAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.
 //ListAssets retrieves assets
 //lowerBoundSymbol: Lower bound of symbol names to retrieve
 //limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
-func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error) {
+func (p *websocketAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error) {
 	if limit > AssetsMaxBatchSize || limit == AssetsListAll {
 		limit = AssetsMaxBatchSize
 	}
@@ -491,7 +447,7 @@ func (p *bitsharesAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 }
 
 //GetRequiredFees calculates the required fee for each operation by the specified asset type.
-func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
+func (p *websocketAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Envelopes(), feeAsset.ID())
 	if err != nil {
 		return nil, err
@@ -508,7 +464,7 @@ func (p *bitsharesAPI) GetRequiredFees(ops types.Operations, feeAsset types.Grap
 }
 
 //GetLimitOrders returns LimitOrders type.
-func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error) {
+func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error) {
 	if limit > GetLimitOrdersLimit {
 		limit = GetLimitOrdersLimit
 	}
@@ -529,7 +485,7 @@ func (p *bitsharesAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 }
 
 //GetOrderBook returns the OrderBook for the market base:quote.
-func (p *bitsharesAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
+func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
 
 	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)
 	if err != nil {
@@ -547,7 +503,7 @@ func (p *bitsharesAPI) GetOrderBook(base, quote types.GrapheneObject, depth int)
 }
 
 //GetSettleOrders returns SettleOrders type.
-func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error) {
+func (p *websocketAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error) {
 	if limit > GetSettleOrdersLimit {
 		limit = GetSettleOrdersLimit
 	}
@@ -568,7 +524,7 @@ func (p *bitsharesAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 }
 
 //GetCallOrders returns CallOrders type.
-func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error) {
+func (p *websocketAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error) {
 	if limit > GetCallOrdersLimit {
 		limit = GetCallOrdersLimit
 	}
@@ -589,7 +545,7 @@ func (p *bitsharesAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 }
 
 //GetMarginPositions returns CallOrders type.
-func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
+func (p *websocketAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.ID())
 	if err != nil {
 		return nil, err
@@ -606,7 +562,7 @@ func (p *bitsharesAPI) GetMarginPositions(accountID types.GrapheneObject) (types
 }
 
 //GetTradeHistory returns MarketTrades type.
-func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error) {
+func (p *websocketAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error) {
 	if limit > GetTradeHistoryLimit {
 		limit = GetTradeHistoryLimit
 	}
@@ -627,19 +583,18 @@ func (p *bitsharesAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 }
 
 //GetChainID returns the ID of the chain we are connected to.
-func (p *bitsharesAPI) GetChainID() (string, error) {
+func (p *websocketAPI) GetChainID() (string, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_chain_id", types.EmptyParams)
 	if err != nil {
 		return "", err
 	}
 
 	logging.DDumpJSON("get_chain_id <", resp)
-
 	return resp.(string), nil
 }
 
 //GetObjects returns a list of Graphene Objects by ID.
-func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, error) {
+func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, error) {
 	params := types.GrapheneObjects(ids).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_objects", params)
 	if err != nil {
@@ -748,7 +703,7 @@ func (p *bitsharesAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 }
 
 // CancelOrder cancels an order given by orderID
-func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
+func (p *websocketAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
 	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.ID(), broadcast)
 	if err != nil {
 		return nil, err
@@ -764,47 +719,41 @@ func (p *bitsharesAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) DatabaseAPIID() int {
+func (p *websocketAPI) DatabaseAPIID() int {
 	return p.databaseAPIID
 }
 
-func (p *bitsharesAPI) BroadcastAPIID() int {
+func (p *websocketAPI) BroadcastAPIID() int {
 	return p.broadcastAPIID
 }
 
-func (p *bitsharesAPI) HistoryAPIID() int {
+func (p *websocketAPI) HistoryAPIID() int {
 	return p.historyAPIID
 }
 
 //CallWsAPI invokes a websocket API call
-func (p *bitsharesAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *websocketAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
 	return p.wsClient.CallAPI(apiID, method, args...)
 }
 
 //OnError - hook your notify callback here
-func (p *bitsharesAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
+func (p *websocketAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
 	return p.wsClient.OnNotify(subscriberID, notifyFn)
 }
 
 //OnError - hook your error callback here
-func (p *bitsharesAPI) OnError(errorFn ErrorFunc) {
+func (p *websocketAPI) OnError(errorFn ErrorFunc) {
 	p.wsClient.OnError(errorFn)
 }
 
 //SetCredentials defines username and password for Websocket API login.
-func (p *bitsharesAPI) SetCredentials(username, password string) {
+func (p *websocketAPI) SetCredentials(username, password string) {
 	p.username = username
 	p.password = password
 }
 
 // Connect initializes the API and connects underlying resources
-func (p *bitsharesAPI) Connect() error {
-	if p.rpcClient != nil {
-		if err := p.rpcClient.Connect(); err != nil {
-			return errors.Annotate(err, "Connect [rpc]")
-		}
-	}
-
+func (p *websocketAPI) Connect() error {
 	if p.wsClient != nil {
 		if err := p.wsClient.Connect(); err != nil {
 			return errors.Annotate(err, "Connect [ws]")
@@ -834,7 +783,7 @@ func (p *bitsharesAPI) Connect() error {
 	return nil
 }
 
-func (p *bitsharesAPI) getAPIIDs() (err error) {
+func (p *websocketAPI) getAPIIDs() (err error) {
 	p.databaseAPIID, err = p.getAPIID("database")
 	if err != nil {
 		return errors.Annotate(err, "database")
@@ -854,14 +803,7 @@ func (p *bitsharesAPI) getAPIIDs() (err error) {
 }
 
 //Close shuts the API down and closes underlying resources.
-func (p *bitsharesAPI) Close() error {
-	if p.rpcClient != nil {
-		if err := p.rpcClient.Close(); err != nil {
-			return errors.Annotate(err, "Close [wallet rpc]")
-		}
-		p.rpcClient = nil
-	}
-
+func (p *websocketAPI) Close() error {
 	if p.wsClient != nil {
 		if err := p.wsClient.Close(); err != nil {
 			return errors.Annotate(err, "Close [ws]")
@@ -872,20 +814,10 @@ func (p *bitsharesAPI) Close() error {
 	return nil
 }
 
-//New creates a new BitsharesAPI interface.
-//wsEndpointURL: Is a mandatory websocket node URL.
-//rpcEndpointURL: Is an optional RPC endpoint to your local `cli_wallet`.
-//The use of wallet functions without this argument will throw an error.
-//If you do not use wallet API, provide an empty string.
-func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
-	var rpcClient RPCClient
-
-	if rpcEndpointURL != "" {
-		rpcClient = NewRPCClient(rpcEndpointURL)
-	}
-
-	api := &bitsharesAPI{
-		rpcClient:      rpcClient,
+//NewWebsocketAPI creates a new WebsocketAPI interface.
+//wsEndpointURL: a mandatory websocket node URL.
+func NewWebsocketAPI(wsEndpointURL string) WebsocketAPI {
+	api := &websocketAPI{
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,
@@ -895,21 +827,11 @@ func New(wsEndpointURL, rpcEndpointURL string) BitsharesAPI {
 	return api
 }
 
-//NewWithAutoEndpoint creates a new BitsharesAPI interface with automatic node latency checking.
+//NewWebsocketAPIWithAutoEndpoint creates a new WebsocketAPI interface with automatic node latency checking.
 //It's best to use this API instance type for a long API lifecycle because the latency tester takes time to unleash its magic.
-//startupEndpointURL: Iss a mandatory websocket node URL to startup the latency tester quickly.
-//rpcEndpointURL: Is an optional RPC endpoint to your local `cli_wallet`.
-//The use of wallet functions without this argument
-//will throw an error. If you do not use wallet API, provide an empty string.
-func NewWithAutoEndpoint(startupEndpointURL, rpcEndpointURL string) (BitsharesAPI, error) {
-	var rpcClient RPCClient
-
-	if rpcEndpointURL != "" {
-		rpcClient = NewRPCClient(rpcEndpointURL)
-	}
-
-	api := &bitsharesAPI{
-		rpcClient:      rpcClient,
+//startupEndpointURL: a mandatory websocket node URL to startup the latency tester quickly.
+func NewWebsocketAPIWithAutoEndpoint(startupEndpointURL string) (WebsocketAPI, error) {
+	api := &websocketAPI{
 		databaseAPIID:  InvalidApiID,
 		historyAPIID:   InvalidApiID,
 		broadcastAPIID: InvalidApiID,

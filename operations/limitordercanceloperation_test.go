@@ -16,7 +16,6 @@ func (suite *operationsAPITest) Test_LimitOrderCancelOperation() {
 		suite.FailNow(err.Error(), "GetSamplesByType")
 	}
 
-	
 	for idx, sample := range samples {
 		if err := op.UnmarshalJSON([]byte(sample)); err != nil {
 			suite.FailNow(err.Error(), "UnmarshalJSON")

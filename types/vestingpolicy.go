@@ -27,13 +27,13 @@ func (p CCDVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode VestingSeconds")
 	}
 
-	if err := enc.Encode(p.CoinSecondsEarnedLastUpdate); err != nil {
-		return errors.Annotate(err, "encode CoinSecondsEarnedLastUpdate")
-	}
+	// if err := enc.Encode(p.CoinSecondsEarnedLastUpdate); err != nil {
+	// 	return errors.Annotate(err, "encode CoinSecondsEarnedLastUpdate")
+	// }
 
-	if err := enc.Encode(p.CoinSecondsEarned); err != nil {
-		return errors.Annotate(err, "encode CoinSecondsEarned")
-	}
+	// if err := enc.Encode(p.CoinSecondsEarned); err != nil {
+	// 	return errors.Annotate(err, "encode CoinSecondsEarned")
+	// }
 
 	return nil
 }

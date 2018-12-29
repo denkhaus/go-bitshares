@@ -53,7 +53,7 @@ func Test_LatencyAnalyzerWithClose(t *testing.T) {
 //long running test
 func Test_BestNodeAPI(t *testing.T) {
 	t.Log("startup API")
-	api, err := api.NewWithAutoEndpoint(WsFullApiUrl, RpcFullApiUrl)
+	api, err := api.NewWebsocketAPIWithAutoEndpoint(WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewWithAutoEndpoint")
 	}

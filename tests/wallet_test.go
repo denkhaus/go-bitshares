@@ -8,7 +8,6 @@ import (
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
-	"github.com/denkhaus/bitshares/operations"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/suite"
@@ -16,14 +15,14 @@ import (
 
 type walletAPITest struct {
 	suite.Suite
-	TestAPI    api.BitsharesAPI
+	TestAPI    api.WalletAPI
+	FullAPI    api.WalletAPI
 	TestKeyBag *crypto.KeyBag
-	FullAPI    api.BitsharesAPI
 }
 
 func (suite *walletAPITest) SetupSuite() {
-	suite.FullAPI = NewTestAPI(suite.T(), WsFullApiUrl, RpcFullApiUrl)
-	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl, RpcTestApiUrl)
+	suite.FullAPI = NewWalletTestAPI(suite.T(), RpcFullApiUrl, config.ChainIDBTS)
+	suite.TestAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl, config.ChainIDTest)
 
 	suite.TestKeyBag = crypto.NewKeyBag()
 	if err := suite.TestKeyBag.Add(TestAccount1PrivKeyActive); err != nil {
@@ -34,14 +33,14 @@ func (suite *walletAPITest) SetupSuite() {
 		suite.FailNow(err.Error(), "KeyBag.Add 2")
 	}
 
-	if err := suite.TestAPI.WalletUnlock("123456"); err != nil {
-		suite.FailNow(err.Error(), "WalletUnlock")
+	if err := suite.TestAPI.Unlock("123456"); err != nil {
+		suite.FailNow(err.Error(), "Unlock")
 	}
 }
 
 func (suite *walletAPITest) TearDownSuite() {
-	if err := suite.TestAPI.WalletLock(); err != nil {
-		suite.FailNow(err.Error(), "WalletLock")
+	if err := suite.TestAPI.Lock(); err != nil {
+		suite.FailNow(err.Error(), "Lock")
 	}
 
 	if err := suite.TestAPI.Close(); err != nil {
@@ -53,21 +52,21 @@ func (suite *walletAPITest) TearDownSuite() {
 	}
 }
 
-func (suite *walletAPITest) Test_WalletGetBlock() {
+func (suite *walletAPITest) Test_GetBlock() {
 	config.SetCurrentConfig(config.ChainIDBTS)
-	block, err := suite.FullAPI.WalletGetBlock(33451303)
+	block, err := suite.FullAPI.GetBlock(33451303)
 	if err != nil {
-		suite.FailNow(err.Error(), "WalletGetBlock")
+		suite.FailNow(err.Error(), "GetBlock")
 	}
 
 	suite.Len(block.Transactions, 37)
 	//logging.Dump("wallet_get_block <", block)
 }
 
-func (suite *walletAPITest) Test_WalletGetDynamicGlobalProperties() {
-	props, err := suite.FullAPI.WalletGetDynamicGlobalProperties()
+func (suite *walletAPITest) Test_GetDynamicGlobalProperties() {
+	props, err := suite.FullAPI.GetDynamicGlobalProperties()
 	if err != nil {
-		suite.FailNow(err.Error(), "WalletGetDynamicGlobalProperties")
+		suite.FailNow(err.Error(), "GetDynamicGlobalProperties")
 	}
 
 	suite.NotNil(props)
@@ -76,7 +75,7 @@ func (suite *walletAPITest) Test_WalletGetDynamicGlobalProperties() {
 }
 
 // func (suite *walletAPITest) Test_Transfer2() {
-// 	trx, err := suite.TestAPI.WalletTransfer2(
+// 	trx, err := suite.TestAPI.Transfer2(
 // 		TestAccount2ID,
 // 		TestAccount1ID,
 // 		"10",
@@ -85,28 +84,28 @@ func (suite *walletAPITest) Test_WalletGetDynamicGlobalProperties() {
 // 	)
 
 // 	if err != nil {
-// 		suite.FailNow(err.Error(), "WalletTransfer2")
+// 		suite.FailNow(err.Error(), "Transfer2")
 // 	}
 
 // 	logging.Dump("wallet_transfer2 <", trx)
 
 // }
 
-func (suite *walletAPITest) Test_WalletGetRelativeAccountHistory() {
-	hists, err := suite.TestAPI.WalletGetRelativeAccountHistory(
+func (suite *walletAPITest) Test_GetRelativeAccountHistory() {
+	hists, err := suite.TestAPI.GetRelativeAccountHistory(
 		TestAccount1ID,
 		0, 10, 0,
 	)
 
 	if err != nil {
-		suite.FailNow(err.Error(), "WalletGetRelativeAccountHistory")
+		suite.FailNow(err.Error(), "GetRelativeAccountHistory")
 	}
 
 	suite.Len(hists, 10)
 	//logging.Dump("wallet_get_relative_account_history <", hists)
 }
 
-func (suite *walletAPITest) Test_WalletReadMemo() {
+func (suite *walletAPITest) Test_ReadMemo() {
 	config.SetCurrentConfig(config.ChainIDTest)
 
 	pubKeyA, err := types.NewPublicKeyFromString(TestAccount1PubKeyActive)
@@ -134,61 +133,15 @@ func (suite *walletAPITest) Test_WalletReadMemo() {
 		log.Fatal(errors.Annotate(err, "Encrypt"))
 	}
 
-	msg, err := suite.TestAPI.WalletReadMemo(
+	msg, err := suite.TestAPI.ReadMemo(
 		&memo,
 	)
 
 	if err != nil {
-		suite.FailNow(err.Error(), "WalletReadMemo")
+		suite.FailNow(err.Error(), "ReadMemo")
 	}
 
 	suite.Equal(memoSrc, msg)
-}
-
-func (suite *walletAPITest) Test_TransferExtended() {
-	props, err := suite.TestAPI.GetDynamicGlobalProperties()
-	if err != nil {
-		suite.FailNow(err.Error(), "GetDynamicGlobalProperties")
-	}
-
-	trx, err := types.NewSignedTransactionWithBlockData(props)
-	if err != nil {
-		suite.FailNow(err.Error(), "NewSignedTransactionWithBlockData")
-	}
-
-	trx.Operations = types.Operations{
-		&operations.TransferOperation{
-			Extensions: types.Extensions{},
-			Amount: types.AssetAmount{
-				Amount: 100000,
-				Asset:  *AssetTEST,
-			},
-			From: *TestAccount1ID,
-			To:   *TestAccount2ID,
-		},
-	}
-
-	// logging.SetDebug(true)
-	// defer logging.SetDebug(false)
-
-	fees, err := suite.TestAPI.GetRequiredFees(trx.Operations, AssetTEST)
-	if err != nil {
-		suite.FailNow(err.Error(), "GetRequiredFees")
-	}
-
-	if err := trx.Operations.ApplyFees(fees); err != nil {
-		suite.FailNow(err.Error(), "ApplyFees")
-	}
-
-	suite.compareTransaction(trx, false)
-
-	res, err := suite.TestAPI.WalletSignTransaction(trx, true)
-	if err != nil {
-		suite.FailNow(err.Error(), "WalletSignTransaction")
-	}
-
-	_ = res
-	//logging.Dump("transfer <", res)
 }
 
 func (suite *walletAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {

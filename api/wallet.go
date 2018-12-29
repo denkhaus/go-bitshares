@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 
+	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
@@ -10,32 +11,76 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
-// WalletLock locks the wallet
-func (p *bitsharesAPI) WalletLock() error {
-	if p.rpcClient == nil {
-		return types.ErrRPCClientNotInitialized
+type WalletAPI interface {
+	Close() error
+	Connect(chainID string) error
+	GetBlock(number uint64) (*types.Block, error)
+	GetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
+	GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
+	BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
+	Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
+	BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	IsLocked() (bool, error)
+	ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
+	Lock() error
+	ReadMemo(memo *types.Memo) (string, error)
+	Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
+	SellEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject, minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error)
+	SignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error)
+	SerializeTransaction(tx *types.SignedTransaction) (string, error)
+	//Transfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error)
+	Unlock(password string) error
+}
+
+//NewWalletAPI creates a new WalletAPI interface.
+//rpcEndpointURL: Is an RPC endpoint URL to your local `cli_wallet`.
+func NewWalletAPI(rpcEndpointURL string) WalletAPI {
+	api := &walletAPI{
+		rpcClient: NewRPCClient(rpcEndpointURL),
 	}
 
+	return api
+}
+
+type walletAPI struct {
+	rpcClient RPCClient
+}
+
+func (p *walletAPI) Connect(chainID string) error {
+	if err := config.SetCurrentConfig(chainID); err != nil {
+		return errors.Annotate(err, "SetCurrentConfig")
+	}
+
+	return p.rpcClient.Connect()
+}
+
+//Close shuts the API down and closes underlying resources.
+func (p *walletAPI) Close() error {
+	if p.rpcClient != nil {
+		if err := p.rpcClient.Close(); err != nil {
+			return errors.Annotate(err, "Close [rpc]")
+		}
+		p.rpcClient = nil
+	}
+
+	return nil
+}
+
+// Lock locks the wallet
+func (p *walletAPI) Lock() error {
 	_, err := p.rpcClient.CallAPI("lock", types.EmptyParams)
 	return err
 }
 
-// WalletUnlock unlocks the wallet
-func (p *bitsharesAPI) WalletUnlock(password string) error {
-	if p.rpcClient == nil {
-		return types.ErrRPCClientNotInitialized
-	}
-
+// Unlock unlocks the wallet
+func (p *walletAPI) Unlock(password string) error {
 	_, err := p.rpcClient.CallAPI("unlock", password)
 	return err
 }
 
-// WalletIsLocked checks if wallet is locked.
-func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
-	if p.rpcClient == nil {
-		return false, types.ErrRPCClientNotInitialized
-	}
-
+// IsLocked checks if wallet is locked.
+func (p *walletAPI) IsLocked() (bool, error) {
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
 
 	if err != nil {
@@ -43,11 +88,10 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 	}
 
 	logging.DDumpJSON("is_locked <", resp)
-
 	return resp.(bool), err
 }
 
-// WalletBuy places a limit order attempting to buy one asset with another.
+// Buy places a limit order attempting to buy one asset with another.
 // This API call abstracts away some of the details of the sell_asset call to be more
 // user friendly. All orders placed with buy never timeout and will not be killed if they
 // cannot be filled immediately. If you wish for one of these parameters to be different,
@@ -61,11 +105,7 @@ func (p *bitsharesAPI) WalletIsLocked() (bool, error) {
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	resp, err := p.rpcClient.CallAPI(
 		"buy", account.ID(),
 		base.ID(), quote.ID(),
@@ -86,7 +126,7 @@ func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types
 	return &ret, nil
 }
 
-// WalletSell places a limit order attempting to sell one asset for another.
+// Sell places a limit order attempting to sell one asset for another.
 // This API call abstracts away some of the details of the sell_asset call to be more
 // user friendly. All orders placed with sell never timeout and will not be killed if they
 // cannot be filled immediately. If you wish for one of these parameters to be different,
@@ -100,11 +140,7 @@ func (p *bitsharesAPI) WalletBuy(account types.GrapheneObject, base, quote types
 // @param broadcast true to broadcast the transaction on the network.
 // @returns The signed transaction selling the funds.
 // @returns The error of operation.
-func (p *bitsharesAPI) WalletSell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) Sell(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error) {
 	resp, err := p.rpcClient.CallAPI(
 		"sell", account.ID(),
 		base.ID(), quote.ID(),
@@ -125,32 +161,28 @@ func (p *bitsharesAPI) WalletSell(account types.GrapheneObject, base, quote type
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) WalletBuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
+func (p *walletAPI) BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 	//TODO: use proper precision, avoid rounding
 	minToReceive := fmt.Sprintf("%f", amount)
 	amountToSell := fmt.Sprintf("%f", rate*amount)
 
-	return p.WalletSellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
+	return p.SellAsset(account, amountToSell, quote, minToReceive, base, 0, false, broadcast)
 }
 
-func (p *bitsharesAPI) WalletSellEx(account types.GrapheneObject, base, quote types.GrapheneObject,
+func (p *walletAPI) SellEx(account types.GrapheneObject, base, quote types.GrapheneObject,
 	rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error) {
 
 	//TODO: use proper precision, avoid rounding
 	amountToSell := fmt.Sprintf("%f", amount)
 	minToReceive := fmt.Sprintf("%f", rate*amount)
 
-	return p.WalletSellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
+	return p.SellAsset(account, amountToSell, base, minToReceive, quote, 0, false, broadcast)
 }
 
 // SellAsset
-func (p *bitsharesAPI) WalletSellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
+func (p *walletAPI) SellAsset(account types.GrapheneObject, amountToSell string, symbolToSell types.GrapheneObject,
 	minToReceive string, symbolToReceive types.GrapheneObject, timeout uint32, fillOrKill bool, broadcast bool) (*types.SignedTransaction, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
 	resp, err := p.rpcClient.CallAPI(
 		"sell_asset", account.ID(),
 		amountToSell, symbolToSell.ID(),
@@ -171,18 +203,14 @@ func (p *bitsharesAPI) WalletSellAsset(account types.GrapheneObject, amountToSel
 	return &ret, nil
 }
 
-// WalletBorrowAsset borrows an asset or update the debt/collateral ratio for the loan.
+// BorrowAsset borrows an asset or update the debt/collateral ratio for the loan.
 // @param account: the id of the account associated with the transaction.
 // @param amountToBorrow: the amount of the asset being borrowed. Make this value negative to pay back debt.
 // @param symbolToBorrow: the symbol or id of the asset being borrowed.
 // @param amountOfCollateral: the amount of the backing asset to add to your collateral position. Make this negative to claim back some of your collateral. The backing asset is defined in the bitasset_options for the asset being borrowed.
 // @param broadcast: true to broadcast the transaction on the network
-func (p *bitsharesAPI) WalletBorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
+func (p *walletAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject,
 	amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error) {
-
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
 
 	resp, err := p.rpcClient.CallAPI(
 		"borrow_asset", account.ID(),
@@ -203,12 +231,7 @@ func (p *bitsharesAPI) WalletBorrowAsset(account types.GrapheneObject, amountToB
 	return &ret, nil
 }
 
-func (p *bitsharesAPI) WalletListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error) {
-
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error) {
 	resp, err := p.rpcClient.CallAPI("list_account_balances", account.ID())
 	if err != nil {
 		return nil, err
@@ -227,11 +250,7 @@ func (p *bitsharesAPI) WalletListAccountBalances(account types.GrapheneObject) (
 // SerializeTransaction converts a signed_transaction in JSON form to its binary representation.
 // @param tx the transaction to serialize
 // Returns the binary form of the transaction. It will not be hex encoded, this returns a raw string that may have null characters embedded in it.
-func (p *bitsharesAPI) WalletSerializeTransaction(tx *types.SignedTransaction) (string, error) {
-	if p.rpcClient == nil {
-		return "", types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) SerializeTransaction(tx *types.SignedTransaction) (string, error) {
 	resp, err := p.rpcClient.CallAPI("serialize_transaction", tx)
 	if err != nil {
 		return "", err
@@ -246,11 +265,7 @@ func (p *bitsharesAPI) WalletSerializeTransaction(tx *types.SignedTransaction) (
 // @param tx the transaction to sign
 // @param broadcast bool defines if the transaction should be broadcasted
 // Returns the signed transaction.
-func (p *bitsharesAPI) WalletSignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) SignTransaction(tx *types.SignedTransaction, broadcast bool) (*types.SignedTransaction, error) {
 	resp, err := p.rpcClient.CallAPI("sign_transaction", tx, broadcast)
 	if err != nil {
 		return nil, err
@@ -267,10 +282,7 @@ func (p *bitsharesAPI) WalletSignTransaction(tx *types.SignedTransaction, broadc
 
 }
 
-func (p *bitsharesAPI) WalletReadMemo(memo *types.Memo) (string, error) {
-	if p.rpcClient == nil {
-		return "", types.ErrRPCClientNotInitialized
-	}
+func (p *walletAPI) ReadMemo(memo *types.Memo) (string, error) {
 	resp, err := p.rpcClient.CallAPI("read_memo", memo)
 	if err != nil {
 		return "", err
@@ -281,9 +293,9 @@ func (p *bitsharesAPI) WalletReadMemo(memo *types.Memo) (string, error) {
 	return "", nil
 }
 
-//WalletTransfer2 works just like transfer, except it always broadcasts and
+//Transfer2 works just like transfer, except it always broadcasts and
 //returns the transaction ID along with the signed transaction.
-// func (p *bitsharesAPI) WalletTransfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
+// func (p *walletAPI) Transfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
 // 	if p.rpcClient == nil {
 // 		return nil, types.ErrRPCClientNotInitialized
 // 	}
@@ -298,12 +310,8 @@ func (p *bitsharesAPI) WalletReadMemo(memo *types.Memo) (string, error) {
 // 	return &ret, nil
 // }
 
-//WalletGetBlock retrieves a block by number
-func (p *bitsharesAPI) WalletGetBlock(number uint64) (*types.Block, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+//GetBlock retrieves a block by number
+func (p *walletAPI) GetBlock(number uint64) (*types.Block, error) {
 	resp, err := p.rpcClient.CallAPI("get_block", number)
 	if err != nil {
 		return nil, err
@@ -319,7 +327,7 @@ func (p *bitsharesAPI) WalletGetBlock(number uint64) (*types.Block, error) {
 	return &ret, nil
 }
 
-//WalletGetRelativeAccountHistory gets operations relevant to the specified account referenced by an event numbering specific to the account. The current number of operations for the account can be found in the account statistics (or use 0 for start).
+//GetRelativeAccountHistory gets operations relevant to the specified account referenced by an event numbering specific to the account. The current number of operations for the account can be found in the account statistics (or use 0 for start).
 //
 //Parameters
 //   account_id_or_name	The account ID or name whose history should be queried
@@ -329,11 +337,7 @@ func (p *bitsharesAPI) WalletGetBlock(number uint64) (*types.Block, error) {
 //
 //Returns
 //   A list of operations performed by account, ordered from most recent to oldest.
-func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) GetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error) {
 	if limit > GetAccountHistoryLimit {
 		limit = GetAccountHistoryLimit
 	}
@@ -353,7 +357,7 @@ func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObj
 	return ret, nil
 }
 
-// WalletGetDynamicGlobalProperties returns the block chain’s rapidly-changing properties.
+// GetDynamicGlobalProperties returns the block chain’s rapidly-changing properties.
 // The returned object contains information that changes every block
 // interval such as the head block number, the next witness, etc.
 //
@@ -361,11 +365,7 @@ func (p *bitsharesAPI) WalletGetRelativeAccountHistory(account types.GrapheneObj
 //   get_global_properties() for less-frequently changing properties
 // Return
 //   the dynamic global properties
-func (p *bitsharesAPI) WalletGetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
-	if p.rpcClient == nil {
-		return nil, types.ErrRPCClientNotInitialized
-	}
-
+func (p *walletAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	resp, err := p.rpcClient.CallAPI("get_dynamic_global_properties", types.EmptyParams)
 	if err != nil {
 		return nil, err

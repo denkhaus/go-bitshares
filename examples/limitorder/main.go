@@ -39,7 +39,7 @@ func init() {
 }
 
 func main() {
-	api := api.New(wsFullApiUrl, "")
+	api := api.NewWebsocketAPI(wsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		log.Fatal(errors.Annotate(err, "OnConnect"))
 	}

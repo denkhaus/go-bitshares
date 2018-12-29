@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/types"
@@ -15,21 +14,28 @@ import (
 //OperationBlob simply counts fields and child map elements.
 //The more fields, the more telling is the structure.
 type OperationBlob struct {
-	data   map[string]interface{}
-	fields int
+	data map[string]interface{}
+	rank int
 }
 
-func (p *OperationBlob) Map(m reflect.Value) error {
-	p.fields++
+func (p *OperationBlob) Enter(loc reflectwalk.Location) error {
+	p.rank++
 	return nil
 }
-func (p *OperationBlob) MapElem(m, k, v reflect.Value) error {
-	p.fields++
+func (p *OperationBlob) Exit(loc reflectwalk.Location) error {
 	return nil
 }
 
 func (p *OperationBlob) String() string {
-	return fmt.Sprintf("rank: %d", p.fields)
+	return fmt.Sprintf("rank: %d", p.rank)
+}
+
+func (p *OperationBlob) Analyze() error {
+	if err := reflectwalk.Walk(p.data, p); err != nil {
+		return errors.Annotate(err, "Walk")
+	}
+
+	return nil
 }
 
 func NewOperationBlob(data map[string]interface{}) *OperationBlob {
@@ -41,7 +47,6 @@ func NewOperationBlob(data map[string]interface{}) *OperationBlob {
 
 type OpDataStore map[types.OperationType]map[int]*OperationBlob
 
-//TODO: save last scanned block and reapply
 func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 	if len(m) == 0 {
 		logging.Warn("init datastore: no sample data loaded")
@@ -74,36 +79,40 @@ func (p *OpDataStore) Init(m data.OperationSampleMap, ch chan GenData) error {
 	return nil
 }
 
+func (p *OpDataStore) MustInsert(typ types.OperationType, rank int) int {
+	blobs, ok := (*p)[typ]
+	if ok {
+		for _, bl := range blobs {
+			if bl.rank == rank {
+				return -1
+			}
+		}
+
+		return len(blobs)
+	}
+
+	return 0
+}
+
 func (p *OpDataStore) Insert(typ types.OperationType, blob *OperationBlob, block uint64) (int, error) {
-	if err := reflectwalk.Walk(blob.data, blob); err != nil {
-		return -1, errors.Annotate(err, "Walk")
+	if err := blob.Analyze(); err != nil {
+		return -1, errors.Annotate(err, "Analyze")
 	}
 
-	if blobs, ok := (*p)[typ]; ok {
-		var maxFields = 0
-		var maxIdx = -1
-		for idx, bl := range blobs {
-			maxFields = max(bl.fields, maxFields)
-			maxIdx = max(idx, maxIdx)
-		}
+	idx := p.MustInsert(typ, blob.rank)
+	if idx < 0 {
+		return idx, nil
+	}
 
-		if maxFields < blob.fields {
-			newIdx := maxIdx + 1
-			(*p)[typ][newIdx] = blob
-			logging.Infof("Block %d: Blob upgraded for type %v: %s", block, typ, blob)
-			return newIdx, nil
-		}
-
-	} else {
-		(*p)[typ] = map[int]*OperationBlob{
-			0: blob,
-		}
-
+	if idx == 0 {
+		(*p)[typ] = map[int]*OperationBlob{0: blob}
 		logging.Infof("Block %d: Blob added for type %v: %s", block, typ, blob)
-		return 0, nil
+		return idx, nil
 	}
 
-	return -1, nil
+	(*p)[typ][idx] = blob
+	logging.Infof("Block %d: Blob upgraded for type %v: %s", block, typ, blob)
+	return idx, nil
 }
 
 func NewOpDataStore() *OpDataStore {
