@@ -51,11 +51,11 @@ func (p FeeScheduleParameters) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode length")
 	}
 
-	for _, param := range p {
-		if err := enc.Encode(param); err != nil {
-			return errors.Annotate(err, "encode Parameter")
-		}
-	}
+	// for _, param := range p {
+	// 	if err := enc.Encode(param); err != nil {
+	// 		return errors.Annotate(err, "encode Parameter")
+	// 	}
+	// }
 
 	return nil
 }
@@ -70,9 +70,9 @@ func (p FeeSchedule) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode Parameters")
 	}
 
-	if err := enc.Encode(p.Scale); err != nil {
-		return errors.Annotate(err, "encode Scale")
-	}
+	// if err := enc.Encode(p.Scale); err != nil {
+	// 	return errors.Annotate(err, "encode Scale")
+	// }
 
 	return nil
 }

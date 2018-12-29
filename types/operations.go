@@ -73,10 +73,6 @@ func (p *OperationEnvelope) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "unmarshal raw object")
 	}
 
-	if len(raw) != 2 {
-		return ErrInvalidInputLength
-	}
-
 	if err := ffjson.Unmarshal(raw[0], &p.Type); err != nil {
 		return errors.Annotate(err, "unmarshal OperationType")
 	}

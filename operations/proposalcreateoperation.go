@@ -49,17 +49,17 @@ func (p ProposalCreateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode ProposedOps")
 	}
 
-	if err := enc.Encode(p.ReviewPeriodSeconds != nil); err != nil {
-		return errors.Annotate(err, "encode have ReviewPeriodSeconds")
-	}
+	// if err := enc.Encode(p.ReviewPeriodSeconds != nil); err != nil {
+	// 	return errors.Annotate(err, "encode have ReviewPeriodSeconds")
+	// }
 
-	if err := enc.Encode(p.ReviewPeriodSeconds); err != nil {
-		return errors.Annotate(err, "encode ReviewPeriodSeconds")
-	}
+	// if err := enc.Encode(p.ReviewPeriodSeconds); err != nil {
+	// 	return errors.Annotate(err, "encode ReviewPeriodSeconds")
+	// }
 
-	if err := enc.Encode(p.Extensions); err != nil {
-		return errors.Annotate(err, "encode Extensions")
-	}
+	// if err := enc.Encode(p.Extensions); err != nil {
+	// 	return errors.Annotate(err, "encode Extensions")
+	// }
 
 	return nil
 }
