@@ -6,11 +6,11 @@ import "strconv"
 
 const (
 	_ObjectType_name_0 = "ObjectTypeUndefined"
-	_ObjectType_name_1 = "ObjectTypeBaseObjectTypeAccountObjectTypeAssetObjectTypeForceSettlementObjectTypeCommiteeMemberObjectTypeWitnessObjectTypeLimitOrderObjectTypeCallOrderObjectTypeCustomObjectTypeProposalObjectTypeOperationHistoryObjectTypeWithdrawPermissionObjectTypeVestingBalanceObjectTypeWorkerObjectTypeBalance"
+	_ObjectType_name_1 = "ObjectTypeBaseObjectTypeAccountObjectTypeAssetObjectTypeForceSettlementObjectTypeCommitteeMemberObjectTypeWitnessObjectTypeLimitOrderObjectTypeCallOrderObjectTypeCustomObjectTypeProposalObjectTypeOperationHistoryObjectTypeWithdrawPermissionObjectTypeVestingBalanceObjectTypeWorkerObjectTypeBalance"
 )
 
 var (
-	_ObjectType_index_1 = [...]uint16{0, 14, 31, 46, 71, 95, 112, 132, 151, 167, 185, 211, 239, 263, 279, 296}
+	_ObjectType_index_1 = [...]uint16{0, 14, 31, 46, 71, 96, 113, 133, 152, 168, 186, 212, 240, 264, 280, 297}
 )
 
 func (i ObjectType) String() string {

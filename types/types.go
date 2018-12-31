@@ -166,7 +166,7 @@ const (
 	ObjectTypeAccount
 	ObjectTypeAsset
 	ObjectTypeForceSettlement
-	ObjectTypeCommiteeMember
+	ObjectTypeCommitteeMember
 	ObjectTypeWitness
 	ObjectTypeLimitOrder
 	ObjectTypeCallOrder

@@ -5,7 +5,6 @@ package operations
 import (
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
-	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -18,12 +17,10 @@ func init() {
 
 type CustomOperation struct {
 	types.OperationFee
-
-	// asset                     fee;
-	// account_id_type           payer;
-	// flat_set<account_id_type> required_auths;
-	// uint16_t                  id = 0;
-	// vector<char> data;
+	Payer         types.GrapheneID  `json:"payer"`
+	RequiredAuths types.GrapheneIDs `json:"required_auths"`
+	ID            types.UInt16      `json:"id"`
+	Data          types.Buffer      `json:"data"`
 }
 
 func (p CustomOperation) Type() types.OperationType {
@@ -53,7 +50,18 @@ func (p CustomOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(p.Fee); err != nil {
 		return errors.Annotate(err, "encode Fee")
 	}
-	//(fee)(payer)(required_auths)(id)(data)
-	logging.Warnf("%s is not implemented", p.Type().OperationName())
+	if err := enc.Encode(p.Payer); err != nil {
+		return errors.Annotate(err, "encode Payer")
+	}
+	if err := enc.Encode(p.RequiredAuths); err != nil {
+		return errors.Annotate(err, "encode RequiredAuths")
+	}
+	if err := enc.Encode(p.ID); err != nil {
+		return errors.Annotate(err, "encode ID")
+	}
+	if err := enc.Encode(p.Data); err != nil {
+		return errors.Annotate(err, "encode Data")
+	}
+
 	return nil
 }

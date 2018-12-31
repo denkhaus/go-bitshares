@@ -201,8 +201,8 @@ func (p *GrapheneID) FromString(in string) error {
 				p.objectType = ObjectTypeAsset
 			case ObjectTypeForceSettlement:
 				p.objectType = ObjectTypeForceSettlement
-			case ObjectTypeCommiteeMember:
-				p.objectType = ObjectTypeCommiteeMember
+			case ObjectTypeCommitteeMember:
+				p.objectType = ObjectTypeCommitteeMember
 			case ObjectTypeWitness:
 				p.objectType = ObjectTypeWitness
 			case ObjectTypeLimitOrder:
