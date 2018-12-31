@@ -58,7 +58,16 @@ func (j *CommiteeMember) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	buf.WriteString(`,"total_votes":`)
 	fflib.FormatBits2(buf, uint64(j.TotalVotes), 10, false)
 	buf.WriteString(`,"url":`)
-	fflib.WriteJsonString(buf, string(j.URL))
+
+	{
+
+		obj, err = j.URL.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"vote_id":`)
 
 	{
@@ -355,25 +364,24 @@ handle_TotalVotes:
 
 handle_URL:
 
-	/* handler: j.URL type=string kind=string quoted=false*/
+	/* handler: j.URL type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.URL = string(string(outBuf))
-
+			err = j.URL.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/api"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,7 +54,7 @@ func Test_LatencyAnalyzerWithClose(t *testing.T) {
 //long running test
 func Test_BestNodeAPI(t *testing.T) {
 	t.Log("startup API")
-	api, err := api.NewWebsocketAPIWithAutoEndpoint(WsFullApiUrl)
+	api, err := bitshares.NewWebsocketAPIWithAutoEndpoint(WsFullApiUrl)
 	if err != nil {
 		assert.FailNow(t, err.Error(), "NewWithAutoEndpoint")
 	}

@@ -113,9 +113,3 @@ package operations
 
 // 	return nil
 // }
-
-// //NewTransferToBlindOperation creates a new TransferToBlindOperation
-// func NewTransferToBlindOperation() *TransferToBlindOperation {
-// 	tx := TransferToBlindOperation{}
-// 	return &tx
-// }

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
@@ -27,10 +27,6 @@ import (
 	"github.com/denkhaus/bitshares/gen/samples"
 )
 
-type Unmarshalable interface {
-	UnmarshalJSON(input []byte) error
-}
-
 const (
 	samplesDir    = "samples"
 	operationsDir = "operations"
@@ -44,7 +40,7 @@ var (
 	tb                 = tomb.Tomb{}
 
 	// do not change order here
-	knownTypes = []Unmarshalable{
+	knownTypes = []types.Unmarshalable{
 		//&types.AccountOptions{},
 		// &types.Asset{},
 		&types.AssetAmount{},
@@ -74,7 +70,7 @@ func main() {
 	defer close(genChan)
 
 	logging.Info("connect api")
-	api := api.NewWebsocketAPI(tests.WsFullApiUrl)
+	api := bitshares.NewWebsocketAPI(tests.WsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		handleError(errors.Annotate(err, "Connect"))
 	}

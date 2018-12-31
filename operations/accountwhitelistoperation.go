@@ -55,11 +55,3 @@ func (p AccountWhitelistOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewAccountWhitelistOperation creates a new AccountWhitelistOperation
-func NewAccountWhitelistOperation() *AccountWhitelistOperation {
-	tx := AccountWhitelistOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

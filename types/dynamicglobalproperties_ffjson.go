@@ -93,9 +93,27 @@ func (j *DynamicGlobalProperties) MarshalJSONBuf(buf fflib.EncodingBuffer) error
 	buf.WriteString(`,"dynamic_flags":`)
 	fflib.FormatBits2(buf, uint64(j.DynamicFlags), 10, j.DynamicFlags < 0)
 	buf.WriteString(`,"head_block_id":`)
-	fflib.WriteJsonString(buf, string(j.HeadBlockID))
+
+	{
+
+		obj, err = j.HeadBlockID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"recent_slots_filled":`)
-	fflib.WriteJsonString(buf, string(j.RecentSlotsFilled))
+
+	{
+
+		obj, err = j.RecentSlotsFilled.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"head_block_number":`)
 	fflib.FormatBits2(buf, uint64(j.HeadBlockNumber), 10, false)
 	buf.WriteString(`,"last_irreversible_block_num":`)
@@ -678,25 +696,24 @@ handle_DynamicFlags:
 
 handle_HeadBlockID:
 
-	/* handler: j.HeadBlockID type=string kind=string quoted=false*/
+	/* handler: j.HeadBlockID type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.HeadBlockID = string(string(outBuf))
-
+			err = j.HeadBlockID.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -704,25 +721,24 @@ handle_HeadBlockID:
 
 handle_RecentSlotsFilled:
 
-	/* handler: j.RecentSlotsFilled type=string kind=string quoted=false*/
+	/* handler: j.RecentSlotsFilled type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.RecentSlotsFilled = string(string(outBuf))
-
+			err = j.RecentSlotsFilled.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -1,8 +1,9 @@
-package api
+package bitshares
 
 import (
 	"fmt"
 
+	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
@@ -13,13 +14,14 @@ import (
 
 type WalletAPI interface {
 	Close() error
-	Connect(chainID string) error
+	Connect() error
 	GetBlock(number uint64) (*types.Block, error)
 	GetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error)
 	GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
 	BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
 	Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
 	BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	Info() (*types.Info, error)
 	IsLocked() (bool, error)
 	ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
 	Lock() error
@@ -37,22 +39,31 @@ type WalletAPI interface {
 //rpcEndpointURL: Is an RPC endpoint URL to your local `cli_wallet`.
 func NewWalletAPI(rpcEndpointURL string) WalletAPI {
 	api := &walletAPI{
-		rpcClient: NewRPCClient(rpcEndpointURL),
+		rpcClient: api.NewRPCClient(rpcEndpointURL),
 	}
 
 	return api
 }
 
 type walletAPI struct {
-	rpcClient RPCClient
+	rpcClient api.RPCClient
 }
 
-func (p *walletAPI) Connect(chainID string) error {
-	if err := config.SetCurrentConfig(chainID); err != nil {
+func (p *walletAPI) Connect() error {
+	if err := p.rpcClient.Connect(); err != nil {
+		return errors.Annotate(err, "Connect [rpc]")
+	}
+
+	info, err := p.Info()
+	if err != nil {
+		return errors.Annotate(err, "Info")
+	}
+
+	if err := config.SetCurrentConfig(info.ChainID.String()); err != nil {
 		return errors.Annotate(err, "SetCurrentConfig")
 	}
 
-	return p.rpcClient.Connect()
+	return nil
 }
 
 //Close shuts the API down and closes underlying resources.
@@ -271,7 +282,7 @@ func (p *walletAPI) SignTransaction(tx *types.SignedTransaction, broadcast bool)
 		return nil, err
 	}
 
-	logging.DDumpJSON("wallet sign_transaction <", resp)
+	logging.DDumpJSON("sign_transaction <", resp)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
@@ -292,23 +303,6 @@ func (p *walletAPI) ReadMemo(memo *types.Memo) (string, error) {
 	}
 	return "", nil
 }
-
-//Transfer2 works just like transfer, except it always broadcasts and
-//returns the transaction ID along with the signed transaction.
-// func (p *walletAPI) Transfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
-// 	if p.rpcClient == nil {
-// 		return nil, types.ErrRPCClientNotInitialized
-// 	}
-// 	resp, err := p.rpcClient.CallAPI("transfer2", from.ID(), to.ID(), amount, asset.ID(), memo)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	ret := types.SignedTransactionWithTransactionId{}
-// 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-// 		return nil, errors.Annotate(err, "unmarshal Transaction")
-// 	}
-// 	return &ret, nil
-// }
 
 //GetBlock retrieves a block by number
 func (p *walletAPI) GetBlock(number uint64) (*types.Block, error) {
@@ -380,3 +374,36 @@ func (p *walletAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties
 
 	return &ret, nil
 }
+
+func (p *walletAPI) Info() (*types.Info, error) {
+	resp, err := p.rpcClient.CallAPI("info", types.EmptyParams)
+	if err != nil {
+		return nil, err
+	}
+
+	logging.DDumpJSON("info <", resp)
+
+	var ret types.Info
+	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal info")
+	}
+
+	return &ret, nil
+}
+
+//Transfer2 works just like transfer, except it always broadcasts and
+//returns the transaction ID along with the signed transaction.
+// func (p *walletAPI) Transfer2(from, to types.GrapheneObject, amount string, asset types.GrapheneObject, memo string) (*types.SignedTransactionWithTransactionId, error) {
+// 	if p.rpcClient == nil {
+// 		return nil, types.ErrRPCClientNotInitialized
+// 	}
+// 	resp, err := p.rpcClient.CallAPI("transfer2", from.ID(), to.ID(), amount, asset.ID(), memo)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	ret := types.SignedTransactionWithTransactionId{}
+// 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+// 		return nil, errors.Annotate(err, "unmarshal Transaction")
+// 	}
+// 	return &ret, nil
+// }

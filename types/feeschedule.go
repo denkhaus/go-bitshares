@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
+	sort "github.com/emirpasic/gods/utils"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
 
 type FeeScheduleParameter struct {
 	OperationType OperationType
-	Params        interface{}
+	Params        M
 }
 
 func (p FeeScheduleParameter) MarshalJSON() ([]byte, error) {
@@ -38,9 +40,19 @@ func (p *FeeScheduleParameter) UnmarshalJSON(data []byte) error {
 }
 
 func (p FeeScheduleParameter) Marshal(enc *util.TypeEncoder) error {
-	// if err := enc.Encode(uint8(p.OperationType)); err != nil {
-	// 	return errors.Annotate(err, "encode OperationType")
-	// }
+	if err := enc.Encode(uint8(p.OperationType)); err != nil {
+		return errors.Annotate(err, "encode OperationType")
+	}
+
+	if getOp, ok := OperationMap[p.OperationType]; ok {
+		if err := getOp().MarshalFeeScheduleParams(p.Params, enc); err != nil {
+			return errors.Annotate(err, "MarshalFeeScheduleParams")
+		}
+	} else {
+		logging.Warnf("FeeSchedule marshaling is not yet implemented for %s",
+			p.OperationType.OperationName())
+	}
+
 	return nil
 }
 
@@ -51,11 +63,26 @@ func (p FeeScheduleParameters) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode length")
 	}
 
-	// for _, param := range p {
-	// 	if err := enc.Encode(param); err != nil {
-	// 		return errors.Annotate(err, "encode Parameter")
-	// 	}
-	// }
+	params := make([]interface{}, 0, len(p))
+	for _, pa := range p {
+		params = append(params, pa)
+	}
+
+	sort.Sort(params, func(a, b interface{}) int {
+		aParam := a.(FeeScheduleParameter)
+		bParam := b.(FeeScheduleParameter)
+
+		return sort.Int8Comparator(
+			int8(aParam.OperationType),
+			int8(bParam.OperationType),
+		)
+	})
+
+	for _, p := range params {
+		if err := enc.Encode(p.(FeeScheduleParameter)); err != nil {
+			return errors.Annotate(err, "encode Parameter")
+		}
+	}
 
 	return nil
 }
@@ -70,9 +97,9 @@ func (p FeeSchedule) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode Parameters")
 	}
 
-	// if err := enc.Encode(p.Scale); err != nil {
-	// 	return errors.Annotate(err, "encode Scale")
-	// }
+	if err := enc.Encode(p.Scale); err != nil {
+		return errors.Annotate(err, "encode Scale")
+	}
 
 	return nil
 }

@@ -5,24 +5,25 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/suite"
 )
 
 type walletAPITest struct {
 	suite.Suite
-	TestAPI    api.WalletAPI
-	FullAPI    api.WalletAPI
+	TestAPI    bitshares.WalletAPI
+	FullAPI    bitshares.WalletAPI
 	TestKeyBag *crypto.KeyBag
 }
 
 func (suite *walletAPITest) SetupSuite() {
-	suite.FullAPI = NewWalletTestAPI(suite.T(), RpcFullApiUrl, config.ChainIDBTS)
-	suite.TestAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl, config.ChainIDTest)
+	suite.FullAPI = NewWalletTestAPI(suite.T(), RpcFullApiUrl)
+	suite.TestAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl)
 
 	suite.TestKeyBag = crypto.NewKeyBag()
 	if err := suite.TestKeyBag.Add(TestAccount1PrivKeyActive); err != nil {
@@ -71,7 +72,17 @@ func (suite *walletAPITest) Test_GetDynamicGlobalProperties() {
 
 	suite.NotNil(props)
 	suite.Equal(props.ID, *types.NewGrapheneID("2.1.0"))
-	//logging.Dump("wallet_get_dynamic_global_properties <", props)
+	logging.Dump("wallet_get_dynamic_global_properties <", props)
+}
+
+func (suite *walletAPITest) Test_Info() {
+	props, err := suite.FullAPI.Info()
+	if err != nil {
+		suite.FailNow(err.Error(), "Info")
+	}
+
+	suite.NotNil(props)
+	logging.Dump("wallet_info <", props)
 }
 
 // func (suite *walletAPITest) Test_Transfer2() {

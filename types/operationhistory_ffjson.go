@@ -530,9 +530,27 @@ func (j *OperationRelativeHistory) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 	_ = obj
 	_ = err
 	buf.WriteString(`{"memo":`)
-	fflib.WriteJsonString(buf, string(j.Memo))
+
+	{
+
+		obj, err = j.Memo.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"description":`)
-	fflib.WriteJsonString(buf, string(j.Description))
+
+	{
+
+		obj, err = j.Description.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"op":`)
 
 	{
@@ -711,25 +729,24 @@ mainparse:
 
 handle_Memo:
 
-	/* handler: j.Memo type=string kind=string quoted=false*/
+	/* handler: j.Memo type=types.Buffer kind=slice quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Memo = string(string(outBuf))
-
+			err = j.Memo.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -737,25 +754,24 @@ handle_Memo:
 
 handle_Description:
 
-	/* handler: j.Description type=string kind=string quoted=false*/
+	/* handler: j.Description type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Description = string(string(outBuf))
-
+			err = j.Description.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

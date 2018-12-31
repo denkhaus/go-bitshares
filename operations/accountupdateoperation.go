@@ -28,6 +28,22 @@ func (p AccountUpdateOperation) Type() types.OperationType {
 	return types.OperationTypeAccountUpdate
 }
 
+func (p AccountUpdateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
+}
+
 func (p AccountUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
@@ -70,10 +86,4 @@ func (p AccountUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAccountUpdateOperation creates a new AccountUpdateOperation
-func NewAccountUpdateOperation() *AccountUpdateOperation {
-	tx := AccountUpdateOperation{}
-	return &tx
 }

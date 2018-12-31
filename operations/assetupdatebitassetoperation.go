@@ -55,11 +55,3 @@ func (p AssetUpdateBitassetOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewAssetUpdateBitassetOperation creates a new AssetUpdateBitassetOperation
-func NewAssetUpdateBitassetOperation() *AssetUpdateBitassetOperation {
-	tx := AssetUpdateBitassetOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

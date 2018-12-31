@@ -22,13 +22,33 @@ type AccountCreateOperation struct {
 	ReferrerPercent types.UInt16                  `json:"referrer_percent"`
 	Owner           types.Authority               `json:"owner"`
 	Active          types.Authority               `json:"active"`
-	Name            string                        `json:"name"`
+	Name            types.String                  `json:"name"`
 	Extensions      types.AccountCreateExtensions `json:"extensions"`
 	Options         types.AccountOptions          `json:"options"`
 }
 
 func (p AccountCreateOperation) Type() types.OperationType {
 	return types.OperationTypeAccountCreate
+}
+
+func (p AccountCreateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if bfee, ok := params["basic_fee"]; ok {
+		if err := enc.Encode(types.UInt64(bfee.(float64))); err != nil {
+			return errors.Annotate(err, "encode BasicFee")
+		}
+	}
+	if pfee, ok := params["premium_fee"]; ok {
+		if err := enc.Encode(types.UInt64(pfee.(float64))); err != nil {
+			return errors.Annotate(err, "encode PremiumFee")
+		}
+	}
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p AccountCreateOperation) Marshal(enc *util.TypeEncoder) error {
@@ -73,12 +93,4 @@ func (p AccountCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAccountCreateOperation creates a new AccountCreateOperation
-func NewAccountCreateOperation() *AccountCreateOperation {
-	tx := AccountCreateOperation{
-		Extensions: types.AccountCreateExtensions{},
-	}
-	return &tx
 }

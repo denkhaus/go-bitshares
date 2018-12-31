@@ -10,7 +10,6 @@ import (
 
 	// register operations
 
-	"github.com/denkhaus/bitshares/config"
 	_ "github.com/denkhaus/bitshares/operations"
 	"github.com/denkhaus/logging"
 )
@@ -19,10 +18,10 @@ func TestBlockRange(t *testing.T) {
 	websocketAPI := NewWebsocketTestAPI(t, WsFullApiUrl)
 	defer websocketAPI.Close()
 
-	walletAPI := NewWalletTestAPI(t, RpcFullApiUrl, config.ChainIDBTS)
+	walletAPI := NewWalletTestAPI(t, RpcFullApiUrl)
 	defer walletAPI.Close()
 
-	block := uint64(26880512)
+	block := uint64(26880513)
 
 	for {
 		bl, err := websocketAPI.GetBlock(block)

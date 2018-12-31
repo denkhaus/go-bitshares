@@ -16,7 +16,7 @@ type OperationHistory struct {
 }
 
 type OperationRelativeHistory struct {
-	Memo        string           `json:"memo"`
-	Description string           `json:"description"`
+	Memo        Buffer           `json:"memo"`
+	Description String           `json:"description"`
 	Op          OperationHistory `json:"op"`
 }

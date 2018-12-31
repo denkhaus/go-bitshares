@@ -1,6 +1,7 @@
-package api
+package bitshares
 
 import (
+	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	deadlock "github.com/sasha-s/go-deadlock"
@@ -8,22 +9,22 @@ import (
 )
 
 type ClientProvider interface {
-	OnError(fn ErrorFunc)
+	OnError(fn api.ErrorFunc)
 	Connect() error
-	OnNotify(subscriberID int, fn NotifyFunc) error
+	OnNotify(subscriberID int, fn api.NotifyFunc) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
 }
 
 type SimpleClientProvider struct {
-	WebsocketClient
+	api.WebsocketClient
 	api WebsocketAPI
 }
 
-func NewSimpleClientProvider(endpointURL string, api WebsocketAPI) ClientProvider {
-	wsc := NewWebsocketClient(endpointURL)
+func NewSimpleClientProvider(endpointURL string, ws WebsocketAPI) ClientProvider {
+	wsc := api.NewWebsocketClient(endpointURL)
 	sim := SimpleClientProvider{
-		api:             api,
+		api:             ws,
 		WebsocketClient: wsc,
 	}
 
@@ -41,21 +42,21 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 }
 
 type BestNodeClientProvider struct {
-	WebsocketClient
+	api.WebsocketClient
 	mu          deadlock.RWMutex
 	nodeChanged *abool.AtomicBool
 	api         WebsocketAPI
-	tester      LatencyTester
+	tester      api.LatencyTester
 }
 
-func NewBestNodeClientProvider(endpointURL string, api WebsocketAPI) (ClientProvider, error) {
-	tester, err := NewLatencyTester(endpointURL)
+func NewBestNodeClientProvider(endpointURL string, ws WebsocketAPI) (ClientProvider, error) {
+	tester, err := api.NewLatencyTester(endpointURL)
 	if err != nil {
 		return nil, errors.Annotate(err, "NewLatencyTester")
 	}
 
 	pr := &BestNodeClientProvider{
-		api:             api,
+		api:             ws,
 		tester:          tester,
 		nodeChanged:     abool.NewBool(false),
 		WebsocketClient: tester.TopNodeClient(),

@@ -45,11 +45,38 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"registrar_name":`)
-	fflib.WriteJsonString(buf, string(j.RegistrarName))
+
+	{
+
+		obj, err = j.RegistrarName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"referrer_name":`)
-	fflib.WriteJsonString(buf, string(j.ReferrerName))
+
+	{
+
+		obj, err = j.ReferrerName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"lifetime_referrer_name":`)
-	fflib.WriteJsonString(buf, string(j.LifetimeReferrerName))
+
+	{
+
+		obj, err = j.LifetimeReferrerName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	/* Struct fall back. type=types.VestingBalance kind=struct */
 	buf.WriteString(`,"cashback_balance":`)
 	err = buf.Encode(&j.CashbackBalance)
@@ -543,25 +570,24 @@ handle_Account:
 
 handle_RegistrarName:
 
-	/* handler: j.RegistrarName type=string kind=string quoted=false*/
+	/* handler: j.RegistrarName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.RegistrarName = string(string(outBuf))
-
+			err = j.RegistrarName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -569,25 +595,24 @@ handle_RegistrarName:
 
 handle_ReferrerName:
 
-	/* handler: j.ReferrerName type=string kind=string quoted=false*/
+	/* handler: j.ReferrerName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.ReferrerName = string(string(outBuf))
-
+			err = j.ReferrerName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -595,25 +620,24 @@ handle_ReferrerName:
 
 handle_LifetimeReferrerName:
 
-	/* handler: j.LifetimeReferrerName type=string kind=string quoted=false*/
+	/* handler: j.LifetimeReferrerName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.LifetimeReferrerName = string(string(outBuf))
-
+			err = j.LifetimeReferrerName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

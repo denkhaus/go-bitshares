@@ -49,11 +49,3 @@ func (p AssetSettleOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewAssetSettleOperation creates a new AssetSettleOperation
-func NewAssetSettleOperation() *AssetSettleOperation {
-	tx := AssetSettleOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

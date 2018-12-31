@@ -28,6 +28,22 @@ func (p ProposalCreateOperation) Type() types.OperationType {
 	return types.OperationTypeProposalCreate
 }
 
+func (p ProposalCreateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
+}
+
 func (p ProposalCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
@@ -49,25 +65,17 @@ func (p ProposalCreateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode ProposedOps")
 	}
 
-	// if err := enc.Encode(p.ReviewPeriodSeconds != nil); err != nil {
-	// 	return errors.Annotate(err, "encode have ReviewPeriodSeconds")
-	// }
+	if err := enc.Encode(p.ReviewPeriodSeconds != nil); err != nil {
+		return errors.Annotate(err, "encode have ReviewPeriodSeconds")
+	}
 
-	// if err := enc.Encode(p.ReviewPeriodSeconds); err != nil {
-	// 	return errors.Annotate(err, "encode ReviewPeriodSeconds")
-	// }
+	if err := enc.Encode(p.ReviewPeriodSeconds); err != nil {
+		return errors.Annotate(err, "encode ReviewPeriodSeconds")
+	}
 
-	// if err := enc.Encode(p.Extensions); err != nil {
-	// 	return errors.Annotate(err, "encode Extensions")
-	// }
+	if err := enc.Encode(p.Extensions); err != nil {
+		return errors.Annotate(err, "encode Extensions")
+	}
 
 	return nil
-}
-
-//NewProposalCreateOperation creates a new ProposalCreateOperation
-func NewProposalCreateOperation() *ProposalCreateOperation {
-	tx := ProposalCreateOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

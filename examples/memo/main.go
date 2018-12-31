@@ -61,5 +61,4 @@ func main() {
 	}
 
 	fmt.Printf("decrypted memo is %q\n", memoDst)
-
 }

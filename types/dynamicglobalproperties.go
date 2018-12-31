@@ -18,8 +18,8 @@ type DynamicGlobalProperties struct {
 	NextMaintenanceTime            Time       `json:"next_maintenance_time"`
 	AccountsRegisteredThisInterval int        `json:"accounts_registered_this_interval"`
 	DynamicFlags                   int        `json:"dynamic_flags"`
-	HeadBlockID                    string     `json:"head_block_id"`
-	RecentSlotsFilled              string     `json:"recent_slots_filled"`
+	HeadBlockID                    String     `json:"head_block_id"`
+	RecentSlotsFilled              String     `json:"recent_slots_filled"`
 	HeadBlockNumber                UInt32     `json:"head_block_number"`
 	LastIrreversibleBlockNum       UInt32     `json:"last_irreversible_block_num"`
 	CurrentAslot                   int64      `json:"current_aslot"`
@@ -32,7 +32,7 @@ func (p DynamicGlobalProperties) RefBlockNum() UInt16 {
 }
 
 func (p DynamicGlobalProperties) RefBlockPrefix() (UInt32, error) {
-	rawBlockID, err := hex.DecodeString(p.HeadBlockID)
+	rawBlockID, err := hex.DecodeString(p.HeadBlockID.String())
 	if err != nil {
 		return 0, errors.Annotatef(err, "DecodeString HeadBlockID: %v", p.HeadBlockID)
 	}

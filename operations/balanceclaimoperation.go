@@ -27,6 +27,10 @@ func (p BalanceClaimOperation) Type() types.OperationType {
 	return types.OperationTypeBalanceClaim
 }
 
+func (p BalanceClaimOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	return nil
+}
+
 func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
@@ -53,10 +57,4 @@ func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewBalanceClaimOperation creates a new BalanceClaimOperation
-func NewBalanceClaimOperation() *BalanceClaimOperation {
-	tx := BalanceClaimOperation{}
-	return &tx
 }

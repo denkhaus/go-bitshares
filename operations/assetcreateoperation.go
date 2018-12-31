@@ -3,6 +3,8 @@ package operations
 //go:generate ffjson $GOFILE
 
 import (
+	"strconv"
+
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -28,6 +30,43 @@ type AssetCreateOperation struct {
 
 func (p AssetCreateOperation) Type() types.OperationType {
 	return types.OperationTypeAssetCreate
+}
+
+func (p AssetCreateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if s3, ok := params["symbol3"]; ok {
+		s3Val, err := ToUInt64(s3)
+		if err != nil {
+			return errors.Annotate(err, "ToUint64 [symbol3]")
+		}
+		if err := enc.Encode(s3Val); err != nil {
+			return errors.Annotate(err, "encode Symbol3")
+		}
+	}
+	if s4, ok := params["symbol4"]; ok {
+		s4Val, err := ToUInt64(s4)
+		if err != nil {
+			return errors.Annotate(err, "ToUint64 [symbol4]")
+		}
+		if err := enc.Encode(s4Val); err != nil {
+			return errors.Annotate(err, "encode Symbol4")
+		}
+	}
+	if ls, ok := params["long_symbol"]; ok {
+		lsVal, err := ToUInt64(ls)
+		if err != nil {
+			return errors.Annotate(err, "ToUint64 [LongSymbol]")
+		}
+		if err := enc.Encode(lsVal); err != nil {
+			return errors.Annotate(err, "encode LongSymbol")
+		}
+	}
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p AssetCreateOperation) Marshal(enc *util.TypeEncoder) error {
@@ -74,8 +113,15 @@ func (p AssetCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-//NewAssetCreateOperation creates a new AssetCreateOperation
-func NewAssetCreateOperation() *AssetCreateOperation {
-	tx := AssetCreateOperation{}
-	return &tx
+func ToUInt64(in interface{}) (types.UInt64, error) {
+	inString, ok := in.(string)
+	if ok {
+		inVal, err := strconv.ParseUint(inString, 10, 64)
+		if err != nil {
+			return types.UInt64(0), errors.Annotate(err, "ParseUint")
+		}
+		return types.UInt64(inVal), nil
+	}
+
+	return types.UInt64(in.(float64)), nil
 }

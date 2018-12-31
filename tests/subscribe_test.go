@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/suite"
@@ -28,7 +28,7 @@ const (
 // returns the current testing context
 type subscribeTest struct {
 	suite.Suite
-	TestAPI api.WebsocketAPI
+	TestAPI bitshares.WebsocketAPI
 }
 
 func (suite *subscribeTest) SetupTest() {

@@ -5,7 +5,7 @@ package types
 type Accounts []Account
 type Account struct {
 	ID                            GrapheneID             `json:"id"`
-	Name                          string                 `json:"name"`
+	Name                          String                 `json:"name"`
 	Statistics                    GrapheneID             `json:"statistics"`
 	MembershipExpirationDate      Time                   `json:"membership_expiration_date"`
 	NetworkFeePercentage          UInt64                 `json:"network_fee_percentage"`

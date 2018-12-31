@@ -1,8 +1,9 @@
-package api
+package bitshares
 
 import (
 	"time"
 
+	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/types"
@@ -32,7 +33,7 @@ type WebsocketAPI interface {
 	HistoryAPIID() int
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
-	OnError(ErrorFunc)
+	OnError(api.ErrorFunc)
 	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
@@ -742,7 +743,7 @@ func (p *websocketAPI) OnNotify(subscriberID int, notifyFn func(msg interface{})
 }
 
 //OnError - hook your error callback here
-func (p *websocketAPI) OnError(errorFn ErrorFunc) {
+func (p *websocketAPI) OnError(errorFn api.ErrorFunc) {
 	p.wsClient.OnError(errorFn)
 }
 

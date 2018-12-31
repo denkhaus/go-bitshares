@@ -10,10 +10,10 @@ clean_ffjson_gen:
 	@rm -rf operations/*_ffjson.go ||: 
 
 generate: clean_ffjson_base	
-	-go generate ./...
+	-@go generate ./...
 
 generate_new: clean_ffjson_base clean_ffjson_gen		
-	-go generate ./...
+	-@go generate ./...
 
 init: 
 	@echo "######################## -> install/update dev dependencies"
@@ -25,6 +25,7 @@ init:
 	@go get -u github.com/bradhe/stopwatch
 
 test_api: 
+	@echo "######################## -> test bitshares api"
 	go test -v ./tests -run ^TestCommon$
 	go test -v ./tests -run ^TestSubscribe$
 	go test -v ./tests -run ^TestWalletAPI$
@@ -32,20 +33,21 @@ test_api:
 	go test -v ./types 
 
 test_operations:
-	go test -v ./operations -run ^TestOperations$
+	@echo "######################## -> test operations"
+	@go test -v ./operations -run ^TestOperations$
 
 test_blocks:
 	@echo "this is a long running test, abort with Ctrl + C"
-	go test -v ./tests -timeout 10m -run ^TestBlockRange$
+	@go test -v ./tests -timeout 10m -run ^TestBlockRange$
 
 buildgen:
-	@echo "build btsgen"
+	@echo "######################## -> build btsgen"
 	@go get -u -d ./gen 
 	@go build -o /tmp/btsgen ./gen 
 	@cp /tmp/btsgen $(GOPATH)/bin
 
 opsamples: buildgen
-	@echo "exec btsgen"
+	@echo "######################## -> exec btsgen"
 	@cd gen && btsgen
 
 build: generate
