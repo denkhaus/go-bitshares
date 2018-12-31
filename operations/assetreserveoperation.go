@@ -49,11 +49,3 @@ func (p AssetReserveOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewAssetReserveOperation creates a new AssetReserveOperation
-func NewAssetReserveOperation() *AssetReserveOperation {
-	tx := AssetReserveOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

@@ -21,6 +21,7 @@ type Operation interface {
 	SetFee(fee AssetAmount)
 	GetFee() AssetAmount
 	Type() OperationType
+	MarshalFeeScheduleParams(M, *util.TypeEncoder) error
 }
 
 type OperationResult interface {

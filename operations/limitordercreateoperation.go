@@ -69,11 +69,3 @@ func (p LimitOrderCreateOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-func NewLimitOrderCreateOperation() *LimitOrderCreateOperation {
-	op := LimitOrderCreateOperation{
-		Extensions: types.Extensions{},
-	}
-
-	return &op
-}

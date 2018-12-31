@@ -54,11 +54,3 @@ func (p AssetFundFeePoolOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewAssetFundFeePoolOperation creates a new AssetFundFeePoolOperation
-func NewAssetFundFeePoolOperation() *AssetFundFeePoolOperation {
-	tx := AssetFundFeePoolOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

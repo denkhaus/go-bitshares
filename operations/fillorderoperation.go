@@ -30,6 +30,10 @@ func (p FillOrderOperation) Type() types.OperationType {
 	return types.OperationTypeFillOrder
 }
 
+func (p FillOrderOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	return nil
+}
+
 //TODO: something is still wrong here!
 
 func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
@@ -66,9 +70,4 @@ func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewFillOrderOperation creates a new FillOrderOperation
-func NewFillOrderOperation() *FillOrderOperation {
-	return &FillOrderOperation{}
 }

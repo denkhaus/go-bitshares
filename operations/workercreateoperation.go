@@ -69,9 +69,3 @@ func (p WorkerCreateOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewWorkerCreateOperation creates a new WorkerCreateOperation
-func NewWorkerCreateOperation() *WorkerCreateOperation {
-	tx := WorkerCreateOperation{}
-	return &tx
-}

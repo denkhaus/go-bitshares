@@ -54,11 +54,3 @@ func (p CallOrderUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-func NewCallOrderUpdateOperation(acct types.GrapheneID) *CallOrderUpdateOperation {
-	op := CallOrderUpdateOperation{
-		FundingAccount: acct,
-	}
-
-	return &op
-}

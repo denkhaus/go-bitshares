@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/operations"
@@ -13,14 +13,14 @@ import (
 
 type websocketAPITest struct {
 	suite.Suite
-	WebsocketAPI api.WebsocketAPI
-	WalletAPI    api.WalletAPI
+	WebsocketAPI bitshares.WebsocketAPI
+	WalletAPI    bitshares.WalletAPI
 	KeyBag       *crypto.KeyBag
 }
 
 func (suite *websocketAPITest) SetupSuite() {
 	suite.WebsocketAPI = NewWebsocketTestAPI(suite.T(), WsTestApiUrl)
-	suite.WalletAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl, config.ChainIDTest)
+	suite.WalletAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl)
 
 	suite.KeyBag = crypto.NewKeyBag()
 	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
@@ -30,11 +30,18 @@ func (suite *websocketAPITest) SetupSuite() {
 	if err := suite.KeyBag.Add(TestAccount2PrivKeyActive); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 2")
 	}
+
+	if err := suite.WalletAPI.Unlock("123456"); err != nil {
+		suite.FailNow(err.Error(), "Unlock")
+	}
 }
 
 func (suite *websocketAPITest) TearDownSuite() {
 	if err := suite.WebsocketAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close [ws]")
+	}
+	if err := suite.WalletAPI.Lock(); err != nil {
+		suite.FailNow(err.Error(), "Lock")
 	}
 	if err := suite.WalletAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close [wallet]")

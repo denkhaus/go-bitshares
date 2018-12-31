@@ -23,14 +23,6 @@ func init() {
             "asset_id": "1.3.0"
           },
           "new_parameters": {
-            "account_fee_scale_bitshifts": 0,
-            "accounts_per_fee_scale": 1000,
-            "allow_non_member_whitelists": false,
-            "block_interval": 3,
-            "cashback_vesting_period_seconds": 7776000,
-            "cashback_vesting_threshold": 10000000,
-            "committee_proposal_review_period": 3600,
-            "count_non_member_votes": true,
             "current_fees": {
               "parameters": [
                 [
@@ -45,30 +37,27 @@ func init() {
                   {
                     "fee": 500000
                   }
-                ]                
+                ],
+                [
+                  2,
+                  {
+                    "fee": 0
+                  }
+                ],
+                [
+                  3,
+                  {
+                    "fee": 2000000
+                  }
+                ],
+                [
+                  4,
+                  {}
+                ]
               ],
               "scale": 20000
             },
-            "extensions": [],
-            "fee_liquidation_threshold": 10000000,
-            "lifetime_referrer_percent_of_fee": 3000,
-            "maintenance_interval": 3600,
-            "maintenance_skip_slots": 3,
-            "max_authority_depth": 2,
-            "max_predicate_opcode": 1,
-            "maximum_asset_feed_publishers": 10,
-            "maximum_asset_whitelist_authorities": 10,
-            "maximum_authority_membership": 10,
-            "maximum_block_size": 2097152,
-            "maximum_committee_count": 1001,
-            "maximum_proposal_lifetime": 2419200,
-            "maximum_time_until_expiration": 86400,
-            "maximum_transaction_size": 98304,
-            "maximum_witness_count": 1001,
-            "network_percent_of_fee": 2000,
-            "reserve_percent_of_fee": 2000,
-            "witness_pay_per_block": 150000,
-            "worker_budget_per_day": "50000000000"
+            "extensions": []
           }
         }
       ]

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/operations"
@@ -39,7 +39,7 @@ func init() {
 }
 
 func main() {
-	api := api.NewWebsocketAPI(wsFullApiUrl)
+	api := bitshares.NewWebsocketAPI(wsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		log.Fatal(errors.Annotate(err, "OnConnect"))
 	}

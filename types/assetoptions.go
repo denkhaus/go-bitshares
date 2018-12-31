@@ -12,7 +12,7 @@ type AssetOptions struct {
 	MaxMarketFee         Int64       `json:"max_market_fee"`
 	MarketFeePercent     UInt16      `json:"market_fee_percent"`
 	Flags                UInt16      `json:"flags"`
-	Description          string      `json:"description"`
+	Description          String      `json:"description"`
 	CoreExchangeRate     Price       `json:"core_exchange_rate"`
 	IssuerPermissions    UInt16      `json:"issuer_permissions"`
 	BlacklistAuthorities GrapheneIDs `json:"blacklist_authorities"`

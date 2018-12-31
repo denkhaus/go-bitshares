@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -35,24 +34,40 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
+	buf.WriteString(`{ `)
 	if j.NewSigningKey != nil {
-		buf.WriteString(`{ "new_signing_key":`)
+		if true {
+			buf.WriteString(`"new_signing_key":`)
 
-		{
+			{
 
-			obj, err = j.NewSigningKey.MarshalJSON()
-			if err != nil {
-				return err
+				obj, err = j.NewSigningKey.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
-			buf.Write(obj)
-
+			buf.WriteByte(',')
 		}
-	} else {
-		buf.WriteString(`{ "new_signing_key":null`)
 	}
-	buf.WriteString(`,"new_url":`)
-	fflib.WriteJsonString(buf, string(j.NewURL))
-	buf.WriteString(`,"witness":`)
+	if j.NewURL != nil {
+		if true {
+			buf.WriteString(`"new_url":`)
+
+			{
+
+				obj, err = j.NewURL.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.WriteString(`"witness":`)
 
 	{
 
@@ -77,11 +92,15 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	buf.WriteByte(',')
 	if j.Fee != nil {
 		if true {
-			/* Struct fall back. type=types.AssetAmount kind=struct */
 			buf.WriteString(`"fee":`)
-			err = buf.Encode(j.Fee)
-			if err != nil {
-				return err
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 			buf.WriteByte(',')
 		}
@@ -322,25 +341,30 @@ handle_NewSigningKey:
 
 handle_NewURL:
 
-	/* handler: j.NewURL type=string kind=string quoted=false*/
+	/* handler: j.NewURL type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
+
+			j.NewURL = nil
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.NewURL = string(string(outBuf))
+			if j.NewURL == nil {
+				j.NewURL = new(types.String)
+			}
 
+			err = j.NewURL.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -401,16 +425,22 @@ handle_Fee:
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -14,7 +14,9 @@ import (
 )
 
 const (
-	WsFullApiUrl  = "wss://node.market.rudex.org"
+	WsFullApiUrl = "wss://node.market.rudex.org"
+	//WsFullApiUrl  = "wss://api.bts.blckchnd.com"
+	//WsFullApiUrl  = "wss://dex.rnglab.org"
 	WsTestApiUrl  = "wss://node.testnet.bitshares.eu/ws"
 	RpcFullApiUrl = "http://localhost:8095"
 	RpcTestApiUrl = "http://localhost:8094"
@@ -79,7 +81,7 @@ var (
 	TestAccount3ID            = types.NewGrapheneID("1.2.391614")
 )
 
-func CompareTransactions(api api.WalletAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
+func CompareTransactions(api bitshares.WalletAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
 	ref, err := api.SerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")
@@ -94,8 +96,8 @@ func CompareTransactions(api api.WalletAPI, tx *types.SignedTransaction, debug b
 	return ref, hex.EncodeToString(buf.Bytes()), nil
 }
 
-func NewWebsocketTestAPI(t *testing.T, wsAPIEndpoint string) api.WebsocketAPI {
-	api := api.NewWebsocketAPI(wsAPIEndpoint)
+func NewWebsocketTestAPI(t *testing.T, wsAPIEndpoint string) bitshares.WebsocketAPI {
+	api := bitshares.NewWebsocketAPI(wsAPIEndpoint)
 	if err := api.Connect(); err != nil {
 		assert.FailNow(t, err.Error(), "Connect")
 	}
@@ -107,9 +109,9 @@ func NewWebsocketTestAPI(t *testing.T, wsAPIEndpoint string) api.WebsocketAPI {
 	return api
 }
 
-func NewWalletTestAPI(t *testing.T, rpcEndpoint string, chainID string) api.WalletAPI {
-	api := api.NewWalletAPI(rpcEndpoint)
-	if err := api.Connect(chainID); err != nil {
+func NewWalletTestAPI(t *testing.T, rpcEndpoint string) bitshares.WalletAPI {
+	api := bitshares.NewWalletAPI(rpcEndpoint)
+	if err := api.Connect(); err != nil {
 		assert.FailNow(t, err.Error(), "Connect")
 	}
 

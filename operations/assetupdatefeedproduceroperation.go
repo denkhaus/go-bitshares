@@ -54,11 +54,3 @@ func (p AssetUpdateFeedProducersOperation) Marshal(enc *util.TypeEncoder) error 
 
 	return nil
 }
-
-//NewAssetUpdateFeedProducersOperation creates a new AssetUpdateFeedProducersOperation
-func NewAssetUpdateFeedProducersOperation() *AssetUpdateFeedProducersOperation {
-	tx := AssetUpdateFeedProducersOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

@@ -17,8 +17,8 @@ func init() {
 
 type WitnessUpdateOperation struct {
 	types.OperationFee
-	NewSigningKey  *types.PublicKey `json:"new_signing_key"`
-	NewURL         string           `json:"new_url"`
+	NewSigningKey  *types.PublicKey `json:"new_signing_key,omitempty"`
+	NewURL         *types.String    `json:"new_url,omitempty"`
 	Witness        types.GrapheneID `json:"witness"`
 	WitnessAccount types.GrapheneID `json:"witness_account"`
 }
@@ -44,7 +44,7 @@ func (p WitnessUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode WitnessAccount")
 	}
 
-	if err := enc.Encode(p.NewURL != ""); err != nil {
+	if err := enc.Encode(p.NewURL != nil); err != nil {
 		return errors.Annotate(err, "encode have NewURL")
 	}
 
@@ -61,10 +61,4 @@ func (p WitnessUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewWitnessUpdateOperation creates a new WitnessUpdateOperation
-func NewWitnessUpdateOperation() *WitnessUpdateOperation {
-	tx := WitnessUpdateOperation{}
-	return &tx
 }

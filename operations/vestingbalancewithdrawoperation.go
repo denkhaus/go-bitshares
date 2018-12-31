@@ -49,9 +49,3 @@ func (p VestingBalanceWithdrawOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewVestingBalanceWithdrawOperation creates a new VestingBalanceWithdrawOperation
-func NewVestingBalanceWithdrawOperation() *VestingBalanceWithdrawOperation {
-	tx := VestingBalanceWithdrawOperation{}
-	return &tx
-}

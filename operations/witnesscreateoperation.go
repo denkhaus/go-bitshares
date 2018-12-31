@@ -50,9 +50,3 @@ func (p WitnessCreateOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewWitnessCreateOperation creates a new WitnessCreateOperation
-func NewWitnessCreateOperation() *WitnessCreateOperation {
-	tx := WitnessCreateOperation{}
-	return &tx
-}

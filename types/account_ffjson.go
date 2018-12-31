@@ -46,7 +46,16 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"name":`)
-	fflib.WriteJsonString(buf, string(j.Name))
+
+	{
+
+		obj, err = j.Name.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"statistics":`)
 
 	{
@@ -793,25 +802,24 @@ handle_ID:
 
 handle_Name:
 
-	/* handler: j.Name type=string kind=string quoted=false*/
+	/* handler: j.Name type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Name = string(string(outBuf))
-
+			err = j.Name.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

@@ -54,11 +54,3 @@ func (p ProposalDeleteOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewProposalDeleteOperation creates a new ProposalDeleteOperation
-func NewProposalDeleteOperation() *ProposalDeleteOperation {
-	tx := ProposalDeleteOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

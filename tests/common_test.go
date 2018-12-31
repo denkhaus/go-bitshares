@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +15,7 @@ import (
 
 type commonTest struct {
 	suite.Suite
-	TestAPI api.WebsocketAPI
+	TestAPI bitshares.WebsocketAPI
 }
 
 func (suite *commonTest) SetupTest() {

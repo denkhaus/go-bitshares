@@ -54,11 +54,3 @@ func (p BidCollateralOperation) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-//NewBidCollateralOperation creates a new BidCollateralOperation
-func NewBidCollateralOperation() *BidCollateralOperation {
-	tx := BidCollateralOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
-}

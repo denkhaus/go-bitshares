@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/denkhaus/bitshares/api"
-	"github.com/denkhaus/bitshares/config"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/crypto"
+	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
@@ -17,8 +17,8 @@ import (
 
 type operationsAPITest struct {
 	suite.Suite
-	WebsocketAPI api.WebsocketAPI
-	WalletAPI    api.WalletAPI
+	WebsocketAPI bitshares.WebsocketAPI
+	WalletAPI    bitshares.WalletAPI
 	RefTx        *types.SignedTransaction
 }
 
@@ -30,7 +30,6 @@ func (suite *operationsAPITest) SetupTest() {
 	suite.WalletAPI = tests.NewWalletTestAPI(
 		suite.T(),
 		tests.RpcFullApiUrl,
-		config.ChainIDBTS,
 	)
 	suite.RefTx = tests.CreateRefTransaction(suite.T())
 }
@@ -38,6 +37,30 @@ func (suite *operationsAPITest) SetupTest() {
 func (suite *operationsAPITest) TearDownTest() {
 	if err := suite.WebsocketAPI.Close(); err != nil {
 		suite.FailNow(err.Error(), "Close")
+	}
+}
+
+func (suite *operationsAPITest) OpSamplesTest(op types.Operation) {
+	samples, err := data.GetSamplesByType(op.Type())
+	if err != nil {
+		suite.FailNow(err.Error(), "GetSamplesByType")
+	}
+
+	um, ok := op.(types.Unmarshalable)
+	if !ok {
+		suite.FailNow("test error", "operation %v is not unmarshalable", op)
+	}
+
+	for idx, sample := range samples {
+		if err := um.UnmarshalJSON([]byte(sample)); err != nil {
+			suite.FailNow(err.Error(), "UnmarshalJSON")
+		}
+
+		suite.RefTx.Operations = types.Operations{
+			op,
+		}
+
+		suite.compareTransaction(idx, suite.RefTx, false)
 	}
 }
 

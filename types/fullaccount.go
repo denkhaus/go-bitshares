@@ -18,9 +18,9 @@ type FullAccountInfo struct {
 
 type AccountInfo struct {
 	Account              Account           `json:"account"`
-	RegistrarName        string            `json:"registrar_name"`
-	ReferrerName         string            `json:"referrer_name"`
-	LifetimeReferrerName string            `json:"lifetime_referrer_name"`
+	RegistrarName        String            `json:"registrar_name"`
+	ReferrerName         String            `json:"referrer_name"`
+	LifetimeReferrerName String            `json:"lifetime_referrer_name"`
 	CashbackBalance      VestingBalance    `json:"cashback_balance"`
 	Balances             AccountBalances   `json:"balances"`
 	VestingBalances      VestingBalances   `json:"vesting_balances"`

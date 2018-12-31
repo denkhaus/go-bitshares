@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -46,7 +45,16 @@ func (j *Asset) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"symbol":`)
-	fflib.WriteJsonString(buf, string(j.Symbol))
+
+	{
+
+		obj, err = j.Symbol.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"precision":`)
 	fflib.FormatBits2(buf, uint64(j.Precision), 10, j.Precision < 0)
 	buf.WriteString(`,"issuer":`)
@@ -82,11 +90,15 @@ func (j *Asset) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.AssetOptions kind=struct */
 	buf.WriteString(`,"options":`)
-	err = buf.Encode(&j.Options)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Options.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteByte('}')
 	return nil
@@ -362,25 +374,24 @@ handle_ID:
 
 handle_Symbol:
 
-	/* handler: j.Symbol type=string kind=string quoted=false*/
+	/* handler: j.Symbol type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Symbol = string(string(outBuf))
-
+			err = j.Symbol.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -496,16 +507,16 @@ handle_Options:
 	/* handler: j.Options type=types.AssetOptions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetOptions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Options)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
