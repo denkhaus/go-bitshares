@@ -128,7 +128,7 @@ const (
 	OperationTypeProposalDelete                                             //24
 	OperationTypeWithdrawPermissionCreate                                   //25
 	OperationTypeWithdrawPermissionUpdate                                   ///26
-	OperationTypeWithdrawPermissionClaim                                    ///27
+	OperationTypeWithdrawPermissionClaim                                    //27
 	OperationTypeWithdrawPermissionDelete                                   //28
 	OperationTypeCommitteeMemberCreate                                      ///29
 	OperationTypeCommitteeMemberUpdate                                      ///30
@@ -136,11 +136,11 @@ const (
 	OperationTypeVestingBalanceCreate                                       //32
 	OperationTypeVestingBalanceWithdraw                                     //33
 	OperationTypeWorkerCreate                                               //34
-	OperationTypeCustom                                                     ///35
+	OperationTypeCustom                                                     //35
 	OperationTypeAssert                                                     ///36
 	OperationTypeBalanceClaim                                               //37
 	OperationTypeOverrideTransfer                                           //38
-	OperationTypeTransferToBlind                                            ///39
+	OperationTypeTransferToBlind                                            //39
 	OperationTypeBlindTransfer                                              ///40
 	OperationTypeTransferFromBlind                                          ///41
 	OperationTypeAssetSettleCancel                                          ///42
