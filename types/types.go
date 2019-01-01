@@ -537,8 +537,8 @@ func (p String) String() string {
 	return p.data
 }
 
-type Buffer []byte
 type Buffers []Buffer
+type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
 	var b string
@@ -645,6 +645,18 @@ func (p *Buffer) Decrypt(cipherKey []byte) ([]byte, error) {
 	cipher.NewCFBDecrypter(block, iv).XORKeyStream(buf, buf)
 
 	return buf, nil
+}
+
+type FixedBuffer struct {
+	Buffer
+}
+
+func (p FixedBuffer) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.Bytes()); err != nil {
+		return errors.Annotate(err, "encode bytes")
+	}
+
+	return nil
 }
 
 func BufferFromString(data string) (b Buffer, err error) {

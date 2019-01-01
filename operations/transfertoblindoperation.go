@@ -17,10 +17,10 @@ func init() {
 
 type TransferToBlindOperation struct {
 	types.OperationFee
-	Amount         types.AssetAmount            `json:"amount"`
-	BlindingFactor types.Buffer                 `json:"blinding_factor"`
-	From           types.GrapheneID             `json:"from"`
-	Outputs        types.TransferToBlindOutputs `json:"outputs"`
+	Amount         types.AssetAmount  `json:"amount"`
+	BlindingFactor types.FixedBuffer  `json:"blinding_factor"`
+	From           types.GrapheneID   `json:"from"`
+	Outputs        types.BlindOutputs `json:"outputs"`
 }
 
 func (p TransferToBlindOperation) Type() types.OperationType {

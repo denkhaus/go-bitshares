@@ -1,5 +1,7 @@
 package types
 
+//go:generate ffjson $GOFILE
+
 import (
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -38,9 +40,9 @@ func (p StealthConfirmation) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type TransferToBlindOutputs []TransferToBlindOutput
+type BlindOutputs []BlindOutput
 
-func (p TransferToBlindOutputs) Marshal(enc *util.TypeEncoder) error {
+func (p BlindOutputs) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
 		return errors.Annotate(err, "encode length")
 	}
@@ -54,14 +56,14 @@ func (p TransferToBlindOutputs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type TransferToBlindOutput struct {
-	Commitment          Buffer               `json:"commitment"`
+type BlindOutput struct {
+	Commitment          FixedBuffer          `json:"commitment"`
 	Owner               Authority            `json:"owner"`
 	RangeProof          Buffer               `json:"range_proof"`
 	StealthConfirmation *StealthConfirmation `json:"stealth_memo,omitempty"`
 }
 
-func (p TransferToBlindOutput) Marshal(enc *util.TypeEncoder) error {
+func (p BlindOutput) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(p.Commitment); err != nil {
 		return errors.Annotate(err, "encode Commitment")
 	}
@@ -76,6 +78,38 @@ func (p TransferToBlindOutput) Marshal(enc *util.TypeEncoder) error {
 	}
 	if err := enc.Encode(p.StealthConfirmation); err != nil {
 		return errors.Annotate(err, "encode StealthConfirmation")
+	}
+
+	return nil
+}
+
+type BlindInputs []BlindInput
+
+func (p BlindInputs) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	for _, o := range p {
+		if err := enc.Encode(o); err != nil {
+			return errors.Annotate(err, "encode Input")
+		}
+	}
+
+	return nil
+}
+
+type BlindInput struct {
+	Commitment FixedBuffer `json:"commitment"`
+	Owner      Authority   `json:"owner"`
+}
+
+func (p BlindInput) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.Commitment); err != nil {
+		return errors.Annotate(err, "encode Commitment")
+	}
+	if err := enc.Encode(p.Owner); err != nil {
+		return errors.Annotate(err, "encode Owner")
 	}
 
 	return nil

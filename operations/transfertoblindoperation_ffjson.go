@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -74,10 +73,14 @@ func (j *TransferToBlindOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.TransferToBlindOutput kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -328,7 +331,7 @@ handle_Amount:
 
 handle_BlindingFactor:
 
-	/* handler: j.BlindingFactor type=types.Buffer kind=slice quoted=false*/
+	/* handler: j.BlindingFactor type=types.FixedBuffer kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -378,13 +381,13 @@ handle_From:
 
 handle_Outputs:
 
-	/* handler: j.Outputs type=types.TransferToBlindOutputs kind=slice quoted=false*/
+	/* handler: j.Outputs type=types.BlindOutputs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for TransferToBlindOutputs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for BlindOutputs", tok))
 			}
 		}
 
@@ -392,13 +395,13 @@ handle_Outputs:
 			j.Outputs = nil
 		} else {
 
-			j.Outputs = []types.TransferToBlindOutput{}
+			j.Outputs = []types.BlindOutput{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJOutputs types.TransferToBlindOutput
+				var tmpJOutputs types.BlindOutput
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -419,19 +422,19 @@ handle_Outputs:
 					wantVal = true
 				}
 
-				/* handler: tmpJOutputs type=types.TransferToBlindOutput kind=struct quoted=false*/
+				/* handler: tmpJOutputs type=types.BlindOutput kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.TransferToBlindOutput kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJOutputs)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJOutputs.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.Outputs = append(j.Outputs, tmpJOutputs)
