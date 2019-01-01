@@ -1,7 +1,6 @@
 package operations
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/denkhaus/bitshares"
@@ -119,13 +118,14 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 func (suite *operationsAPITest) compareTransaction(sampleIdx int, tx *types.SignedTransaction, debug bool) {
 	ref, test, err := tests.CompareTransactions(suite.WalletAPI, tx, debug)
 	if err != nil {
-		suite.FailNow(err.Error(), "compareTransactions")
+		suite.FailNow(err.Error(), "compareTransaction")
 	}
 
 	suite.Equal(
 		ref,
 		test,
-		fmt.Sprintf("on sample index %d\n", sampleIdx),
+		"on sample index %d",
+		sampleIdx,
 	)
 }
 

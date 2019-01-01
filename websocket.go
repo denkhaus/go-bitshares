@@ -660,10 +660,10 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 					return nil, errors.Annotate(err, "unmarshal CallOrder")
 				}
 				ret = append(ret, cal)
-			case types.ObjectTypeCommiteeMember:
-				mem := types.CommiteeMember{}
+			case types.ObjectTypeCommitteeMember:
+				mem := types.CommitteeMember{}
 				if err := ffjson.Unmarshal(b, &mem); err != nil {
-					return nil, errors.Annotate(err, "unmarshal CommiteeMember")
+					return nil, errors.Annotate(err, "unmarshal CommitteeMember")
 				}
 				ret = append(ret, mem)
 			case types.ObjectTypeOperationHistory:

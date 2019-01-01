@@ -5,8 +5,8 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,17 +34,25 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=types.AssetAmount kind=struct */
 	buf.WriteString(`{ "delta_collateral":`)
-	err = buf.Encode(&j.DeltaCollateral)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.DeltaCollateral.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.AssetAmount kind=struct */
 	buf.WriteString(`,"delta_debt":`)
-	err = buf.Encode(&j.DeltaDebt)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.DeltaDebt.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"funding_account":`)
 
@@ -57,20 +65,28 @@ func (j *CallOrderUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.CallOrderUpdateExtensions kind=struct */
 	buf.WriteString(`,"extensions":`)
-	err = buf.Encode(&j.Extensions)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Extensions.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteByte(',')
 	if j.Fee != nil {
 		if true {
-			/* Struct fall back. type=types.AssetAmount kind=struct */
 			buf.WriteString(`"fee":`)
-			err = buf.Encode(j.Fee)
-			if err != nil {
-				return err
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 			buf.WriteByte(',')
 		}
@@ -283,16 +299,16 @@ handle_DeltaCollateral:
 	/* handler: j.DeltaCollateral type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.DeltaCollateral)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.DeltaCollateral.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -303,16 +319,16 @@ handle_DeltaDebt:
 	/* handler: j.DeltaDebt type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.DeltaDebt)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.DeltaDebt.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -348,16 +364,16 @@ handle_Extensions:
 	/* handler: j.Extensions type=types.CallOrderUpdateExtensions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.CallOrderUpdateExtensions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Extensions)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Extensions.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -368,16 +384,22 @@ handle_Fee:
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

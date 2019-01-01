@@ -91,7 +91,7 @@ func (suite *commonTest) Test_GetObjects() {
 		// CallOrder1,
 		// SettleOrder1,
 		OperationHistory1,
-		CommiteeMember1,
+		CommitteeMember1,
 		Balance1,
 	)
 

@@ -128,7 +128,7 @@ const (
 	OperationTypeProposalDelete                                             //24
 	OperationTypeWithdrawPermissionCreate                                   //25
 	OperationTypeWithdrawPermissionUpdate                                   ///26
-	OperationTypeWithdrawPermissionClaim                                    ///27
+	OperationTypeWithdrawPermissionClaim                                    //27
 	OperationTypeWithdrawPermissionDelete                                   //28
 	OperationTypeCommitteeMemberCreate                                      ///29
 	OperationTypeCommitteeMemberUpdate                                      ///30
@@ -136,11 +136,11 @@ const (
 	OperationTypeVestingBalanceCreate                                       //32
 	OperationTypeVestingBalanceWithdraw                                     //33
 	OperationTypeWorkerCreate                                               //34
-	OperationTypeCustom                                                     ///35
+	OperationTypeCustom                                                     //35
 	OperationTypeAssert                                                     ///36
 	OperationTypeBalanceClaim                                               //37
 	OperationTypeOverrideTransfer                                           //38
-	OperationTypeTransferToBlind                                            ///39
+	OperationTypeTransferToBlind                                            //39
 	OperationTypeBlindTransfer                                              ///40
 	OperationTypeTransferFromBlind                                          ///41
 	OperationTypeAssetSettleCancel                                          ///42
@@ -166,7 +166,7 @@ const (
 	ObjectTypeAccount
 	ObjectTypeAsset
 	ObjectTypeForceSettlement
-	ObjectTypeCommiteeMember
+	ObjectTypeCommitteeMember
 	ObjectTypeWitness
 	ObjectTypeLimitOrder
 	ObjectTypeCallOrder
@@ -537,8 +537,8 @@ func (p String) String() string {
 	return p.data
 }
 
-type Buffer []byte
 type Buffers []Buffer
+type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
 	var b string
@@ -645,6 +645,18 @@ func (p *Buffer) Decrypt(cipherKey []byte) ([]byte, error) {
 	cipher.NewCFBDecrypter(block, iv).XORKeyStream(buf, buf)
 
 	return buf, nil
+}
+
+type FixedBuffer struct {
+	Buffer
+}
+
+func (p FixedBuffer) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.Bytes()); err != nil {
+		return errors.Annotate(err, "encode bytes")
+	}
+
+	return nil
 }
 
 func BufferFromString(data string) (b Buffer, err error) {

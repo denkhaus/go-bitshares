@@ -47,7 +47,7 @@ var (
 	AssetHERO       = types.NewGrapheneID("1.3.1362")
 
 	SettleOrder1      = types.NewGrapheneID("1.4.1655")       // random SettleOrder ObjectID
-	CommiteeMember1   = types.NewGrapheneID("1.5.15")         // random CommiteeMember ObjectID
+	CommitteeMember1  = types.NewGrapheneID("1.5.15")         // random CommitteeMember ObjectID
 	LimitOrder1       = types.NewGrapheneID("1.7.75961600")   // random LimitOrder ObjectID
 	CallOrder1        = types.NewGrapheneID("1.8.4582")       // random CallOrder ObjectID
 	OperationHistory1 = types.NewGrapheneID("1.11.187698971") // random OperationHistory ObjectID
