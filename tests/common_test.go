@@ -202,8 +202,8 @@ func (suite *commonTest) Test_ListAssets() {
 func (suite *commonTest) Test_GetAccountHistory() {
 
 	user := types.NewAccountID("1.2.96393")
-	start := types.NewAccountTransactionHistoryID("1.11.187698971")
-	stop := types.NewAccountTransactionHistoryID("1.11.187658388")
+	start := types.NewOperationHistoryID("1.11.187698971")
+	stop := types.NewOperationHistoryID("1.11.187658388")
 
 	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
 	if err != nil {
@@ -234,8 +234,8 @@ func (suite *commonTest) Test_Get24Volume() {
 	}
 
 	suite.NotNil(res)
-	suite.Equal(*AssetUSD, res.Base)
-	suite.Equal(*AssetBTS, res.Quote)
+	suite.Equal(AssetUSD.ID(), res.Base.ID())
+	suite.Equal(AssetBTS.ID(), res.Quote.ID())
 
 	//logging.Dump("test Get24Volume >", res)
 }

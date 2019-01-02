@@ -96,19 +96,19 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 			OperationFee: types.OperationFee{
 				Fee: &types.AssetAmount{
 					Amount: 100,
-					Asset:  *types.NewAssetID("1.3.0"),
+					Asset:  types.AssetIDFromObject(tests.AssetBTS),
 				},
 			},
 			DeltaDebt: types.AssetAmount{
 				Amount: 10000,
-				Asset:  *types.NewAssetID("1.3.22"),
+				Asset:  types.AssetIDFromObject(tests.AssetUSD),
 			},
 			DeltaCollateral: types.AssetAmount{
 				Amount: 100000000,
-				Asset:  *types.NewAssetID("1.3.0"),
+				Asset:  types.AssetIDFromObject(tests.AssetBTS),
 			},
 
-			FundingAccount: *types.NewAccountID("1.2.29"),
+			FundingAccount: types.AccountIDFromObject(tests.UserID3),
 			Extensions:     types.CallOrderUpdateExtensions{},
 		},
 	}

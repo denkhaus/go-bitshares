@@ -105,7 +105,7 @@ const (
 	OperationTypeAssetReserve                                               //15
 	OperationTypeAssetFundFeePool                                           //16
 	OperationTypeAssetSettle                                                //17
-	OperationTypeAssetGlobalSettle                                          ///18
+	OperationTypeAssetGlobalSettle                                          //18
 	OperationTypeAssetPublishFeed                                           //19
 	OperationTypeWitnessCreate                                              //20
 	OperationTypeWitnessUpdate                                              //21
@@ -116,19 +116,19 @@ const (
 	OperationTypeWithdrawPermissionUpdate                                   ///26
 	OperationTypeWithdrawPermissionClaim                                    //27
 	OperationTypeWithdrawPermissionDelete                                   //28
-	OperationTypeCommitteeMemberCreate                                      ///29
-	OperationTypeCommitteeMemberUpdate                                      ///30
+	OperationTypeCommitteeMemberCreate                                      //29
+	OperationTypeCommitteeMemberUpdate                                      //30
 	OperationTypeCommitteeMemberUpdateGlobalParameters                      //31
 	OperationTypeVestingBalanceCreate                                       //32
 	OperationTypeVestingBalanceWithdraw                                     //33
 	OperationTypeWorkerCreate                                               //34
 	OperationTypeCustom                                                     //35
-	OperationTypeAssert                                                     ///36
+	OperationTypeAssert                                                     //36
 	OperationTypeBalanceClaim                                               //37
 	OperationTypeOverrideTransfer                                           //38
 	OperationTypeTransferToBlind                                            //39
 	OperationTypeBlindTransfer                                              ///40
-	OperationTypeTransferFromBlind                                          ///41
+	OperationTypeTransferFromBlind                                          //41
 	OperationTypeAssetSettleCancel                                          ///42
 	OperationTypeAssetClaimFees                                             ///43
 	OperationTypeFBADistribute                                              ///44

@@ -62,10 +62,10 @@ func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 1000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
 	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -93,10 +93,10 @@ func (suite *websocketAPITest) Test_TransferExtended() {
 			Extensions: types.Extensions{},
 			Amount: types.AssetAmount{
 				Amount: 100000,
-				Asset:  *AssetTEST,
+				Asset:  types.AssetIDFromObject(AssetTEST),
 			},
-			From: *TestAccount1ID,
-			To:   *TestAccount2ID,
+			From: types.AccountIDFromObject(TestAccount1ID),
+			To:   types.AccountIDFromObject(TestAccount2ID),
 		},
 	}
 
@@ -128,10 +128,10 @@ func (suite *websocketAPITest) Test_SignAndVerify() {
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 1000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
 	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -154,10 +154,10 @@ func (suite *websocketAPITest) Test_Transfer() {
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 100000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
 	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
@@ -173,7 +173,6 @@ func (suite *websocketAPITest) Test_Transfer() {
 		suite.FailNow(err.Error(), "BroadcastTransaction")
 	}
 }
-
 func (suite *websocketAPITest) Test_GetAccountBalances() {
 	res, err := suite.WebsocketAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
 	if err != nil {
