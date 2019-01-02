@@ -16,6 +16,20 @@ import (
 
 type PublicKeys []PublicKey
 
+func (p PublicKeys) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
+		return errors.Annotate(err, "encode length")
+	}
+
+	for _, pub := range p {
+		if err := enc.Encode(pub); err != nil {
+			return errors.Annotate(err, "encode PublicKey")
+		}
+	}
+
+	return nil
+}
+
 type PublicKey struct {
 	key      *btcec.PublicKey
 	prefix   string
