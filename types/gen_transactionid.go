@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p TransactionIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func TransactionIDFromObject(ob GrapheneObject) TransactionID {
+	id, ok := ob.(*TransactionID)
+	if ok {
+		return *id
+	}
+
+	p := TransactionID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeTransaction {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeTransaction'", p.ID()))
+	}
+
+	return p
+}
+
 //NewTransactionID creates an new TransactionID object
-func NewTransactionID(id string) *TransactionID {
+func NewTransactionID(id string) GrapheneObject {
 	gid := new(TransactionID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"TransactionID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeTransaction {
+		logging.Errorf(
+			"TransactionID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeTransaction'", id),
+		)
+		return nil
 	}
 
 	return gid

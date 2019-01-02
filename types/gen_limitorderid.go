@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p LimitOrderIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func LimitOrderIDFromObject(ob GrapheneObject) LimitOrderID {
+	id, ok := ob.(*LimitOrderID)
+	if ok {
+		return *id
+	}
+
+	p := LimitOrderID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeLimitOrder {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeLimitOrder'", p.ID()))
+	}
+
+	return p
+}
+
 //NewLimitOrderID creates an new LimitOrderID object
-func NewLimitOrderID(id string) *LimitOrderID {
+func NewLimitOrderID(id string) GrapheneObject {
 	gid := new(LimitOrderID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"LimitOrderID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeLimitOrder {
+		logging.Errorf(
+			"LimitOrderID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeLimitOrder'", id),
+		)
+		return nil
 	}
 
 	return gid

@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p AccountTransactionHistoryIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func AccountTransactionHistoryIDFromObject(ob GrapheneObject) AccountTransactionHistoryID {
+	id, ok := ob.(*AccountTransactionHistoryID)
+	if ok {
+		return *id
+	}
+
+	p := AccountTransactionHistoryID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeAccountTransactionHistory {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeAccountTransactionHistory'", p.ID()))
+	}
+
+	return p
+}
+
 //NewAccountTransactionHistoryID creates an new AccountTransactionHistoryID object
-func NewAccountTransactionHistoryID(id string) *AccountTransactionHistoryID {
+func NewAccountTransactionHistoryID(id string) GrapheneObject {
 	gid := new(AccountTransactionHistoryID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"AccountTransactionHistoryID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeAccountTransactionHistory {
+		logging.Errorf(
+			"AccountTransactionHistoryID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeAccountTransactionHistory'", id),
+		)
+		return nil
 	}
 
 	return gid

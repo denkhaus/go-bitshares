@@ -40,23 +40,23 @@ func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	if err := enc.Encode(p.Fee); err != nil {
-		return errors.Annotate(err, "encode fee")
+		return errors.Annotate(err, "encode Fee")
 	}
 
 	if err := enc.Encode(p.OrderID); err != nil {
-		return errors.Annotate(err, "encode orderid")
+		return errors.Annotate(err, "encode OrderID")
 	}
 
 	if err := enc.Encode(p.AccountID); err != nil {
-		return errors.Annotate(err, "encode accountid")
+		return errors.Annotate(err, "encode AccountID")
 	}
 
 	if err := enc.Encode(p.Pays); err != nil {
-		return errors.Annotate(err, "encode pays")
+		return errors.Annotate(err, "encode Pays")
 	}
 
 	if err := enc.Encode(p.Receives); err != nil {
-		return errors.Annotate(err, "encode receives")
+		return errors.Annotate(err, "encode Receives")
 	}
 
 	if err := enc.Encode(p.FillPrice); err != nil {

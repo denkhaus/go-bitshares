@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p GlobalPropertyIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func GlobalPropertyIDFromObject(ob GrapheneObject) GlobalPropertyID {
+	id, ok := ob.(*GlobalPropertyID)
+	if ok {
+		return *id
+	}
+
+	p := GlobalPropertyID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeGlobalProperty {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeGlobalProperty'", p.ID()))
+	}
+
+	return p
+}
+
 //NewGlobalPropertyID creates an new GlobalPropertyID object
-func NewGlobalPropertyID(id string) *GlobalPropertyID {
+func NewGlobalPropertyID(id string) GrapheneObject {
 	gid := new(GlobalPropertyID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"GlobalPropertyID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeGlobalProperty {
+		logging.Errorf(
+			"GlobalPropertyID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeGlobalProperty'", id),
+		)
+		return nil
 	}
 
 	return gid

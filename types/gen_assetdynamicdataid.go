@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p AssetDynamicDataIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func AssetDynamicDataIDFromObject(ob GrapheneObject) AssetDynamicDataID {
+	id, ok := ob.(*AssetDynamicDataID)
+	if ok {
+		return *id
+	}
+
+	p := AssetDynamicDataID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeAssetDynamicData {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeAssetDynamicData'", p.ID()))
+	}
+
+	return p
+}
+
 //NewAssetDynamicDataID creates an new AssetDynamicDataID object
-func NewAssetDynamicDataID(id string) *AssetDynamicDataID {
+func NewAssetDynamicDataID(id string) GrapheneObject {
 	gid := new(AssetDynamicDataID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"AssetDynamicDataID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeAssetDynamicData {
+		logging.Errorf(
+			"AssetDynamicDataID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeAssetDynamicData'", id),
+		)
+		return nil
 	}
 
 	return gid

@@ -5,59 +5,34 @@ package samples
 
 func init() {
 
-	sampleDataProposalCreateOperation[5] = `{
-  "expiration_time": "2015-10-20T15:55:00",
+	sampleDataProposalCreateOperation[6] = `{
+  "expiration_time": "2015-12-04T14:55:00",
   "extensions": [],
   "fee": {
-    "amount": 2000005,
+    "amount": 4000000,
     "asset_id": "1.3.0"
   },
   "fee_paying_account": "1.2.90742",
   "proposed_ops": [
     {
       "op": [
-        31,
+        12,
         {
+          "asset_to_update": "1.3.113",
+          "extensions": [],
           "fee": {
-            "amount": 2000000,
+            "amount": 100000000,
             "asset_id": "1.3.0"
           },
-          "new_parameters": {     
-            "extensions": [],       
-            "current_fees": {
-              "parameters": [
-                [
-                  0,
-                  {
-                    "fee": 2000000,
-                    "price_per_kbyte": 1000000
-                  }
-                ],
-                [
-                  1,
-                  {
-                    "fee": 500000
-                  }
-                ],
-                [
-                  2,
-                  {
-                    "fee": 0
-                  }
-                ],
-                [
-                  3,
-                  {
-                    "fee": 2000000
-                  }
-                ],
-                [
-                  4,
-                  {}
-                ]
-              ],
-              "scale": 20000
-            }            
+          "issuer": "1.2.0",
+          "new_options": {
+            "extensions": [],
+            "feed_lifetime_sec": 86400,
+            "force_settlement_delay_sec": 86400,
+            "force_settlement_offset_percent": 0,
+            "maximum_force_settlement_volume": 200,
+            "minimum_feeds": 7,
+            "short_backing_asset": "1.3.0"
           }
         }
       ]

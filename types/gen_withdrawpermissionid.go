@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p WithdrawPermissionIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func WithdrawPermissionIDFromObject(ob GrapheneObject) WithdrawPermissionID {
+	id, ok := ob.(*WithdrawPermissionID)
+	if ok {
+		return *id
+	}
+
+	p := WithdrawPermissionID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeWithdrawPermission {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeWithdrawPermission'", p.ID()))
+	}
+
+	return p
+}
+
 //NewWithdrawPermissionID creates an new WithdrawPermissionID object
-func NewWithdrawPermissionID(id string) *WithdrawPermissionID {
+func NewWithdrawPermissionID(id string) GrapheneObject {
 	gid := new(WithdrawPermissionID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"WithdrawPermissionID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeWithdrawPermission {
+		logging.Errorf(
+			"WithdrawPermissionID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeWithdrawPermission'", id),
+		)
+		return nil
 	}
 
 	return gid

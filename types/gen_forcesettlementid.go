@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p ForceSettlementIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func ForceSettlementIDFromObject(ob GrapheneObject) ForceSettlementID {
+	id, ok := ob.(*ForceSettlementID)
+	if ok {
+		return *id
+	}
+
+	p := ForceSettlementID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeForceSettlement {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeForceSettlement'", p.ID()))
+	}
+
+	return p
+}
+
 //NewForceSettlementID creates an new ForceSettlementID object
-func NewForceSettlementID(id string) *ForceSettlementID {
+func NewForceSettlementID(id string) GrapheneObject {
 	gid := new(ForceSettlementID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"ForceSettlementID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeForceSettlement {
+		logging.Errorf(
+			"ForceSettlementID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeForceSettlement'", id),
+		)
+		return nil
 	}
 
 	return gid

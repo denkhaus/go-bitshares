@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p ChainPropertyIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func ChainPropertyIDFromObject(ob GrapheneObject) ChainPropertyID {
+	id, ok := ob.(*ChainPropertyID)
+	if ok {
+		return *id
+	}
+
+	p := ChainPropertyID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeChainProperty {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeChainProperty'", p.ID()))
+	}
+
+	return p
+}
+
 //NewChainPropertyID creates an new ChainPropertyID object
-func NewChainPropertyID(id string) *ChainPropertyID {
+func NewChainPropertyID(id string) GrapheneObject {
 	gid := new(ChainPropertyID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"ChainPropertyID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeChainProperty {
+		logging.Errorf(
+			"ChainPropertyID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeChainProperty'", id),
+		)
+		return nil
 	}
 
 	return gid

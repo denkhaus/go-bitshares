@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p CustomIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func CustomIDFromObject(ob GrapheneObject) CustomID {
+	id, ok := ob.(*CustomID)
+	if ok {
+		return *id
+	}
+
+	p := CustomID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeCustom {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeCustom'", p.ID()))
+	}
+
+	return p
+}
+
 //NewCustomID creates an new CustomID object
-func NewCustomID(id string) *CustomID {
+func NewCustomID(id string) GrapheneObject {
 	gid := new(CustomID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"CustomID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeCustom {
+		logging.Errorf(
+			"CustomID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeCustom'", id),
+		)
+		return nil
 	}
 
 	return gid

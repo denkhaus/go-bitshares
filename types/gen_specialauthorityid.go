@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p SpecialAuthorityIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func SpecialAuthorityIDFromObject(ob GrapheneObject) SpecialAuthorityID {
+	id, ok := ob.(*SpecialAuthorityID)
+	if ok {
+		return *id
+	}
+
+	p := SpecialAuthorityID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeSpecialAuthority {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeSpecialAuthority'", p.ID()))
+	}
+
+	return p
+}
+
 //NewSpecialAuthorityID creates an new SpecialAuthorityID object
-func NewSpecialAuthorityID(id string) *SpecialAuthorityID {
+func NewSpecialAuthorityID(id string) GrapheneObject {
 	gid := new(SpecialAuthorityID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"SpecialAuthorityID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeSpecialAuthority {
+		logging.Errorf(
+			"SpecialAuthorityID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeSpecialAuthority'", id),
+		)
+		return nil
 	}
 
 	return gid

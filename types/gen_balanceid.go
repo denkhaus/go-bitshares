@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p BalanceIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func BalanceIDFromObject(ob GrapheneObject) BalanceID {
+	id, ok := ob.(*BalanceID)
+	if ok {
+		return *id
+	}
+
+	p := BalanceID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeBalance {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeBalance'", p.ID()))
+	}
+
+	return p
+}
+
 //NewBalanceID creates an new BalanceID object
-func NewBalanceID(id string) *BalanceID {
+func NewBalanceID(id string) GrapheneObject {
 	gid := new(BalanceID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"BalanceID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeBalance {
+		logging.Errorf(
+			"BalanceID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeBalance'", id),
+		)
+		return nil
 	}
 
 	return gid

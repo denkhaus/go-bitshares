@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p CommitteeMemberIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func CommitteeMemberIDFromObject(ob GrapheneObject) CommitteeMemberID {
+	id, ok := ob.(*CommitteeMemberID)
+	if ok {
+		return *id
+	}
+
+	p := CommitteeMemberID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeCommitteeMember {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeCommitteeMember'", p.ID()))
+	}
+
+	return p
+}
+
 //NewCommitteeMemberID creates an new CommitteeMemberID object
-func NewCommitteeMemberID(id string) *CommitteeMemberID {
+func NewCommitteeMemberID(id string) GrapheneObject {
 	gid := new(CommitteeMemberID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"CommitteeMemberID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeCommitteeMember {
+		logging.Errorf(
+			"CommitteeMemberID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeCommitteeMember'", id),
+		)
+		return nil
 	}
 
 	return gid

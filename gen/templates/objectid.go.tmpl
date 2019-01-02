@@ -1,8 +1,11 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/cheekybits/genny/generic"
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -46,11 +49,38 @@ func (p T1IDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func T1IDFromObject(ob GrapheneObject) T1ID {
+	id, ok := ob.(*T1ID)
+	if ok {
+		return *id
+	}
+
+	p := T1ID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeT1 {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeT1'", p.ID()))
+	}
+	
+	return p
+}
+
 //NewT1ID creates an new T1ID object
-func NewT1ID(id string) *T1ID {
+func NewT1ID(id string) GrapheneObject {
 	gid := new(T1ID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"T1ID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeT1 {
+		logging.Errorf(
+			"T1ID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeT1'", id),
+		)
+		return nil
 	}
 
 	return gid

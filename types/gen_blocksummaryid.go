@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p BlockSummaryIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func BlockSummaryIDFromObject(ob GrapheneObject) BlockSummaryID {
+	id, ok := ob.(*BlockSummaryID)
+	if ok {
+		return *id
+	}
+
+	p := BlockSummaryID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeBlockSummary {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeBlockSummary'", p.ID()))
+	}
+
+	return p
+}
+
 //NewBlockSummaryID creates an new BlockSummaryID object
-func NewBlockSummaryID(id string) *BlockSummaryID {
+func NewBlockSummaryID(id string) GrapheneObject {
 	gid := new(BlockSummaryID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"BlockSummaryID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeBlockSummary {
+		logging.Errorf(
+			"BlockSummaryID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeBlockSummary'", id),
+		)
+		return nil
 	}
 
 	return gid

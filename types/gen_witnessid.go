@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p WitnessIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func WitnessIDFromObject(ob GrapheneObject) WitnessID {
+	id, ok := ob.(*WitnessID)
+	if ok {
+		return *id
+	}
+
+	p := WitnessID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeWitness {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeWitness'", p.ID()))
+	}
+
+	return p
+}
+
 //NewWitnessID creates an new WitnessID object
-func NewWitnessID(id string) *WitnessID {
+func NewWitnessID(id string) GrapheneObject {
 	gid := new(WitnessID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"WitnessID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeWitness {
+		logging.Errorf(
+			"WitnessID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeWitness'", id),
+		)
+		return nil
 	}
 
 	return gid

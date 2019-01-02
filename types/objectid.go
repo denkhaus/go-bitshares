@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 )
@@ -25,6 +26,7 @@ type GrapheneObject interface {
 	SpaceType() SpaceType
 	Instance() UInt64
 	Equals(id GrapheneObject) bool
+	Valid() bool
 }
 
 type GrapheneObjects []GrapheneObject
@@ -63,18 +65,6 @@ type ObjectID struct {
 }
 
 func (p ObjectID) Marshal(enc *util.TypeEncoder) error {
-	// if p.ObjectType() == ObjectTypeAsset {
-	// 	return errors.New("id is AssetID")
-	// }
-
-	// if p.ObjectType() == ObjectTypeAccount {
-	// 	return errors.New("id is AccountID")
-	// }
-
-	// if p.ObjectType() == ObjectTypeLimitOrder {
-	// 	return errors.New("id is LimitOrderID")
-	// }
-
 	if err := enc.EncodeUVarint(uint64(p.number)); err != nil {
 		return errors.Annotate(err, "encode number")
 	}
@@ -109,8 +99,33 @@ func (p *ObjectID) UnmarshalJSON(s []byte) error {
 	return nil
 }
 
+func (p *ObjectID) FromObject(ob GrapheneObject) error {
+	return p.Parse(ob.ID())
+}
+
+func (p *ObjectID) MustFromObject(ob GrapheneObject) {
+	if err := p.FromObject(ob); err != nil {
+		panic(errors.Annotate(err, "FromObject"))
+	}
+}
+
+func ObjectIDFromObject(ob GrapheneObject) ObjectID {
+	id, ok := ob.(*ObjectID)
+	if ok {
+		return *id
+	}
+
+	p := ObjectID{}
+	p.MustFromObject(ob)
+	return p
+}
+
 func (p ObjectID) Equals(o GrapheneObject) bool {
 	return p.ID() == o.ID()
+}
+
+func (p ObjectID) Valid() bool {
+	return p.number != 0
 }
 
 //String, ObjectID implements Stringer
@@ -145,7 +160,11 @@ func (p ObjectID) Instance() UInt64 {
 func NewObjectID(id string) GrapheneObject {
 	gid := new(ObjectID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"ObjectID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
 	}
 
 	return gid

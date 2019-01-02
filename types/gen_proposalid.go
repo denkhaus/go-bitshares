@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p ProposalIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func ProposalIDFromObject(ob GrapheneObject) ProposalID {
+	id, ok := ob.(*ProposalID)
+	if ok {
+		return *id
+	}
+
+	p := ProposalID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeProposal {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeProposal'", p.ID()))
+	}
+
+	return p
+}
+
 //NewProposalID creates an new ProposalID object
-func NewProposalID(id string) *ProposalID {
+func NewProposalID(id string) GrapheneObject {
 	gid := new(ProposalID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"ProposalID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeProposal {
+		logging.Errorf(
+			"ProposalID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeProposal'", id),
+		)
+		return nil
 	}
 
 	return gid

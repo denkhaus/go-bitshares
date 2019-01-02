@@ -16,7 +16,11 @@ type AssetAmount struct {
 	Asset  AssetID `json:"asset_id"`
 }
 
-func (p *AssetAmount) Rate(prec float64) float64 {
+func (p AssetAmount) Valid() bool {
+	return p.Asset.Valid() && p.Amount != 0
+}
+
+func (p AssetAmount) Rate(prec float64) float64 {
 	return float64(p.Amount) / math.Pow(10, prec)
 }
 

@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p CallOrderIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func CallOrderIDFromObject(ob GrapheneObject) CallOrderID {
+	id, ok := ob.(*CallOrderID)
+	if ok {
+		return *id
+	}
+
+	p := CallOrderID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeCallOrder {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeCallOrder'", p.ID()))
+	}
+
+	return p
+}
+
 //NewCallOrderID creates an new CallOrderID object
-func NewCallOrderID(id string) *CallOrderID {
+func NewCallOrderID(id string) GrapheneObject {
 	gid := new(CallOrderID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"CallOrderID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeCallOrder {
+		logging.Errorf(
+			"CallOrderID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeCallOrder'", id),
+		)
+		return nil
 	}
 
 	return gid

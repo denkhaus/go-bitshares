@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p AssetBitAssetDataIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func AssetBitAssetDataIDFromObject(ob GrapheneObject) AssetBitAssetDataID {
+	id, ok := ob.(*AssetBitAssetDataID)
+	if ok {
+		return *id
+	}
+
+	p := AssetBitAssetDataID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeAssetBitAssetData {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeAssetBitAssetData'", p.ID()))
+	}
+
+	return p
+}
+
 //NewAssetBitAssetDataID creates an new AssetBitAssetDataID object
-func NewAssetBitAssetDataID(id string) *AssetBitAssetDataID {
+func NewAssetBitAssetDataID(id string) GrapheneObject {
 	gid := new(AssetBitAssetDataID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"AssetBitAssetDataID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeAssetBitAssetData {
+		logging.Errorf(
+			"AssetBitAssetDataID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeAssetBitAssetData'", id),
+		)
+		return nil
 	}
 
 	return gid

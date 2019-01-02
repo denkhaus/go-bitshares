@@ -5,7 +5,10 @@
 package types
 
 import (
+	"fmt"
+
 	"github.com/denkhaus/bitshares/util"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -47,11 +50,38 @@ func (p AccountIDs) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
+func AccountIDFromObject(ob GrapheneObject) AccountID {
+	id, ok := ob.(*AccountID)
+	if ok {
+		return *id
+	}
+
+	p := AccountID{}
+	p.MustFromObject(ob)
+	if p.ObjectType() != ObjectTypeAccount {
+		panic(fmt.Sprintf("invalid ObjectType: %q has no ObjectType 'ObjectTypeAccount'", p.ID()))
+	}
+
+	return p
+}
+
 //NewAccountID creates an new AccountID object
-func NewAccountID(id string) *AccountID {
+func NewAccountID(id string) GrapheneObject {
 	gid := new(AccountID)
 	if err := gid.Parse(id); err != nil {
-		panic(errors.Annotate(err, "Parse"))
+		logging.Errorf(
+			"AccountID parser error %v",
+			errors.Annotate(err, "Parse"),
+		)
+		return nil
+	}
+
+	if gid.ObjectType() != ObjectTypeAccount {
+		logging.Errorf(
+			"AccountID parser error %s",
+			fmt.Sprintf("%q has no ObjectType 'ObjectTypeAccount'", id),
+		)
+		return nil
 	}
 
 	return gid
