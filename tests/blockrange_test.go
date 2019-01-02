@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/bradhe/stopwatch"
+	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/assert"
 
 	// register operations
 
 	_ "github.com/denkhaus/bitshares/operations"
-	"github.com/denkhaus/logging"
 )
 
 func TestBlockRange(t *testing.T) {

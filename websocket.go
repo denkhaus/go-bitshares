@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	InvalidApiID                 = -1
-	AssetsListAll                = -1
-	AssetsMaxBatchSize           = 100
-	GetCallOrdersLimit           = 100
-	GetLimitOrdersLimit          = 100
-	GetForceSettlementOrderLimit = 100
-	GetTradeHistoryLimit         = 100
-	GetAccountHistoryLimit       = 100
+	InvalidApiID                  = -1
+	AssetsListAll                 = -1
+	AssetsMaxBatchSize            = 100
+	GetCallOrdersLimit            = 100
+	GetLimitOrdersLimit           = 100
+	GetForceSettlementOrdersLimit = 100
+	GetTradeHistoryLimit          = 100
+	GetAccountHistoryLimit        = 100
 )
 
 type WebsocketAPI interface {
@@ -58,7 +58,7 @@ type WebsocketAPI interface {
 	GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error)
 	GetRequiredSignatures(tx *types.SignedTransaction, keys types.PublicKeys) (types.PublicKeys, error)
 	GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error)
-	GetForceSettlementOrder(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error)
+	GetForceSettlementOrders(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
@@ -503,10 +503,10 @@ func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int)
 	return
 }
 
-//GetForceSettlementOrder returns ForceSettlementOrders type.
-func (p *websocketAPI) GetForceSettlementOrder(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error) {
-	if limit > GetForceSettlementOrderLimit {
-		limit = GetForceSettlementOrderLimit
+//GetForceSettlementOrders returns ForceSettlementOrders type.
+func (p *websocketAPI) GetForceSettlementOrders(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error) {
+	if limit > GetForceSettlementOrdersLimit {
+		limit = GetForceSettlementOrdersLimit
 	}
 
 	resp, err := p.wsClient.CallAPI(0, "get_settle_orders", assetID.ID(), limit)

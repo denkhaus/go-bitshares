@@ -178,8 +178,8 @@ func (suite *commonTest) Test_GetMarginPositions() {
 	//logging.Dump("marginpositions >", res)
 }
 
-func (suite *commonTest) Test_GetSettleOrders() {
-	res, err := suite.TestAPI.GetSettleOrders(AssetCNY, 50)
+func (suite *commonTest) Test_GetForceSettlementOrders() {
+	res, err := suite.TestAPI.GetForceSettlementOrders(AssetCNY, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetSettleOrders")
 	}
@@ -202,8 +202,8 @@ func (suite *commonTest) Test_ListAssets() {
 func (suite *commonTest) Test_GetAccountHistory() {
 
 	user := types.NewAccountID("1.2.96393")
-	start := types.NewGrapheneID("1.11.187698971")
-	stop := types.NewGrapheneID("1.11.187658388")
+	start := types.NewAccountTransactionHistoryID("1.11.187698971")
+	stop := types.NewAccountTransactionHistoryID("1.11.187658388")
 
 	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
 	if err != nil {

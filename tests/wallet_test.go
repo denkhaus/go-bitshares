@@ -71,7 +71,7 @@ func (suite *walletAPITest) Test_GetDynamicGlobalProperties() {
 	}
 
 	suite.NotNil(props)
-	suite.Equal(props.ID, types.NewGrapheneID("2.1.0"))
+	suite.Equal(props.ID, types.NewDynamicGlobalPropertyID("2.1.0"))
 	logging.Dump("wallet_get_dynamic_global_properties <", props)
 }
 
