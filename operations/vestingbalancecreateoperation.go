@@ -18,8 +18,8 @@ func init() {
 type VestingBalanceCreateOperation struct {
 	types.OperationFee
 	Amount  types.AssetAmount   `json:"amount"`
-	Creator types.GrapheneID    `json:"creator"`
-	Owner   types.GrapheneID    `json:"owner"`
+	Creator types.AccountID     `json:"creator"`
+	Owner   types.AccountID     `json:"owner"`
 	Policy  types.VestingPolicy `json:"policy"`
 }
 

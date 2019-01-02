@@ -1,11 +1,5 @@
 package types
 
-//go:generate stringer -type=OperationType
-//go:generate stringer -type=ObjectType
-//go:generate stringer -type=AssetType
-//go:generate stringer -type=SpaceType
-//go:generate stringer -type=AssetPermission
-
 import (
 	"crypto/aes"
 	"crypto/cipher"
@@ -90,15 +84,7 @@ const (
 	AssetTypePredictionMarket
 )
 
-type SpaceType Int8
-
-const (
-	SpaceTypeUndefined SpaceType = -1
-	SpaceTypeProtocol  SpaceType = iota
-	SpaceTypeImplementation
-)
-
-type OperationType Int8
+type OperationType UInt8
 
 const (
 	OperationTypeTransfer                              OperationType = iota //0
@@ -154,11 +140,14 @@ func (p OperationType) OperationName() string {
 	return fmt.Sprintf("%sOperation", p.String()[13:])
 }
 
-type ObjectType Int8
+type SpaceType UInt8
 
 const (
-	ObjectTypeUndefined ObjectType = -1
+	SpaceTypeProtocol SpaceType = iota + 1
+	SpaceTypeImplementation
 )
+
+type ObjectType UInt8
 
 //for SpaceTypeProtocol
 const (

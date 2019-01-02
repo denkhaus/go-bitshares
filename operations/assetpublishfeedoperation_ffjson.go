@@ -308,7 +308,7 @@ mainparse:
 
 handle_Publisher:
 
-	/* handler: j.Publisher type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Publisher type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -333,7 +333,7 @@ handle_Publisher:
 
 handle_AssetID:
 
-	/* handler: j.AssetID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetID type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

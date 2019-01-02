@@ -200,7 +200,7 @@ func (p AddressAuthsMap) Marshal(enc *util.TypeEncoder) error {
 	return nil
 }
 
-type AccountAuthsMap map[GrapheneID]UInt16
+type AccountAuthsMap map[GrapheneObject]UInt16
 
 func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
 	var res interface{}
@@ -208,7 +208,7 @@ func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "Unmarshal")
 	}
 
-	(*p) = make(map[GrapheneID]UInt16)
+	(*p) = make(map[GrapheneObject]UInt16)
 	auths := res.([]interface{})
 
 	for _, a := range auths {
@@ -227,7 +227,7 @@ func (p *AccountAuthsMap) UnmarshalJSON(data []byte) error {
 			return ErrInvalidInputType
 		}
 
-		(*p)[*NewGrapheneID(acc)] = UInt16(weight)
+		(*p)[NewAccountID(acc)] = UInt16(weight)
 	}
 
 	return nil
@@ -269,8 +269,8 @@ func (p AccountAuthsMap) Marshal(enc *util.TypeEncoder) error {
 type NoSpecialAuthority struct{}
 
 type TopHoldersSpecialAuthority struct {
-	Asset         GrapheneID `json:"asset"`
-	NumTopHolders UInt8      `json:"num_top_holders"`
+	Asset         AssetID `json:"asset"`
+	NumTopHolders UInt8   `json:"num_top_holders"`
 }
 
 func (p TopHoldersSpecialAuthority) Marshal(enc *util.TypeEncoder) error {

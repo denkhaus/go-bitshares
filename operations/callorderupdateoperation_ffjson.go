@@ -336,7 +336,7 @@ handle_DeltaDebt:
 
 handle_FundingAccount:
 
-	/* handler: j.FundingAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.FundingAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

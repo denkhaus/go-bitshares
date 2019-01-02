@@ -18,8 +18,8 @@ func init() {
 //virtual order
 type FillOrderOperation struct {
 	types.OperationFee
-	OrderID   types.GrapheneID  `json:"order_id"`
-	AccountID types.GrapheneID  `json:"account_id"`
+	OrderID   types.ObjectID    `json:"order_id"`
+	AccountID types.AccountID   `json:"account_id"`
 	Pays      types.AssetAmount `json:"pays"`
 	Receives  types.AssetAmount `json:"receives"`
 	IsMaker   bool              `json:"is_maker"`
@@ -33,8 +33,6 @@ func (p FillOrderOperation) Type() types.OperationType {
 func (p FillOrderOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
 	return nil
 }
-
-//TODO: something is still wrong here!
 
 func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {

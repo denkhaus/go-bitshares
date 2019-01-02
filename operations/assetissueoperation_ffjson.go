@@ -67,21 +67,23 @@ func (j *AssetIssueOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
+	buf.WriteByte(',')
 	if j.Memo != nil {
-		buf.WriteString(`,"memo":`)
+		if true {
+			buf.WriteString(`"memo":`)
 
-		{
+			{
 
-			err = j.Memo.MarshalJSONBuf(buf)
-			if err != nil {
-				return err
+				err = j.Memo.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
-
+			buf.WriteByte(',')
 		}
-	} else {
-		buf.WriteString(`,"memo":null`)
 	}
-	buf.WriteString(`,"extensions":`)
+	buf.WriteString(`"extensions":`)
 	if j.Extensions != nil {
 		buf.WriteString(`[`)
 		for i, v := range j.Extensions {
@@ -343,7 +345,7 @@ mainparse:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -368,7 +370,7 @@ handle_Issuer:
 
 handle_IssueToAccount:
 
-	/* handler: j.IssueToAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.IssueToAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

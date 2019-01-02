@@ -4,23 +4,14 @@ package types
 
 import "strconv"
 
-const (
-	_ObjectType_name_0 = "ObjectTypeUndefined"
-	_ObjectType_name_1 = "ObjectTypeBaseObjectTypeAccountObjectTypeAssetObjectTypeForceSettlementObjectTypeCommitteeMemberObjectTypeWitnessObjectTypeLimitOrderObjectTypeCallOrderObjectTypeCustomObjectTypeProposalObjectTypeOperationHistoryObjectTypeWithdrawPermissionObjectTypeVestingBalanceObjectTypeWorkerObjectTypeBalance"
-)
+const _ObjectType_name = "ObjectTypeBaseObjectTypeAccountObjectTypeAssetObjectTypeForceSettlementObjectTypeCommitteeMemberObjectTypeWitnessObjectTypeLimitOrderObjectTypeCallOrderObjectTypeCustomObjectTypeProposalObjectTypeOperationHistoryObjectTypeWithdrawPermissionObjectTypeVestingBalanceObjectTypeWorkerObjectTypeBalance"
 
-var (
-	_ObjectType_index_1 = [...]uint16{0, 14, 31, 46, 71, 96, 113, 133, 152, 168, 186, 212, 240, 264, 280, 297}
-)
+var _ObjectType_index = [...]uint16{0, 14, 31, 46, 71, 96, 113, 133, 152, 168, 186, 212, 240, 264, 280, 297}
 
 func (i ObjectType) String() string {
-	switch {
-	case i == -1:
-		return _ObjectType_name_0
-	case 1 <= i && i <= 15:
-		i -= 1
-		return _ObjectType_name_1[_ObjectType_index_1[i]:_ObjectType_index_1[i+1]]
-	default:
-		return "ObjectType(" + strconv.FormatInt(int64(i), 10) + ")"
+	i -= 1
+	if i >= ObjectType(len(_ObjectType_index)-1) {
+		return "ObjectType(" + strconv.FormatInt(int64(i+1), 10) + ")"
 	}
+	return _ObjectType_name[_ObjectType_index[i]:_ObjectType_index[i+1]]
 }

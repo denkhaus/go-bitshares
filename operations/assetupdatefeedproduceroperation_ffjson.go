@@ -323,7 +323,7 @@ mainparse:
 
 handle_AssetToUpdate:
 
-	/* handler: j.AssetToUpdate type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToUpdate type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -416,7 +416,7 @@ handle_Extensions:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -441,13 +441,13 @@ handle_Issuer:
 
 handle_NewFeedProducers:
 
-	/* handler: j.NewFeedProducers type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.NewFeedProducers type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -455,13 +455,13 @@ handle_NewFeedProducers:
 			j.NewFeedProducers = nil
 		} else {
 
-			j.NewFeedProducers = []types.GrapheneID{}
+			j.NewFeedProducers = []types.AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJNewFeedProducers types.GrapheneID
+				var tmpJNewFeedProducers types.AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -482,7 +482,7 @@ handle_NewFeedProducers:
 					wantVal = true
 				}
 
-				/* handler: tmpJNewFeedProducers type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJNewFeedProducers type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {

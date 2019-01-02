@@ -96,7 +96,16 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	buf.WriteString(`,"precision":`)
 	fflib.FormatBits2(buf, uint64(j.Precision), 10, false)
 	buf.WriteString(`,"symbol":`)
-	fflib.WriteJsonString(buf, string(j.Symbol))
+
+	{
+
+		obj, err = j.Symbol.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteByte(',')
 	if j.Fee != nil {
 		if true {
@@ -533,7 +542,7 @@ handle_IsPredictionMarket:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -583,25 +592,24 @@ handle_Precision:
 
 handle_Symbol:
 
-	/* handler: j.Symbol type=string kind=string quoted=false*/
+	/* handler: j.Symbol type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Symbol = string(string(outBuf))
-
+			err = j.Symbol.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

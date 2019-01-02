@@ -19,8 +19,8 @@ type WitnessUpdateOperation struct {
 	types.OperationFee
 	NewSigningKey  *types.PublicKey `json:"new_signing_key,omitempty"`
 	NewURL         *types.String    `json:"new_url,omitempty"`
-	Witness        types.GrapheneID `json:"witness"`
-	WitnessAccount types.GrapheneID `json:"witness_account"`
+	Witness        types.WitnessID  `json:"witness"`
+	WitnessAccount types.AccountID  `json:"witness_account"`
 }
 
 func (p WitnessUpdateOperation) Type() types.OperationType {

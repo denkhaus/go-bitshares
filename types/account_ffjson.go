@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -174,11 +173,15 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`null`)
 	}
-	/* Struct fall back. type=types.AccountOptions kind=struct */
 	buf.WriteString(`,"options":`)
-	err = buf.Encode(&j.Options)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Options.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"registrar":`)
 
@@ -224,17 +227,25 @@ func (j *Account) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"owner":`)
-	err = buf.Encode(&j.Owner)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Owner.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
-	/* Struct fall back. type=types.Authority kind=struct */
 	buf.WriteString(`,"active":`)
-	err = buf.Encode(&j.Active)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.Active.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"owner_special_authority":`)
 
@@ -777,7 +788,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -827,7 +838,7 @@ handle_Name:
 
 handle_Statistics:
 
-	/* handler: j.Statistics type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Statistics type=types.ObjectID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -977,13 +988,13 @@ handle_TopNControlFlags:
 
 handle_WhitelistingAccounts:
 
-	/* handler: j.WhitelistingAccounts type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.WhitelistingAccounts type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -991,13 +1002,13 @@ handle_WhitelistingAccounts:
 			j.WhitelistingAccounts = nil
 		} else {
 
-			j.WhitelistingAccounts = []GrapheneID{}
+			j.WhitelistingAccounts = []AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJWhitelistingAccounts GrapheneID
+				var tmpJWhitelistingAccounts AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1018,7 +1029,7 @@ handle_WhitelistingAccounts:
 					wantVal = true
 				}
 
-				/* handler: tmpJWhitelistingAccounts type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJWhitelistingAccounts type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {
@@ -1050,13 +1061,13 @@ handle_WhitelistingAccounts:
 
 handle_BlacklistingAccounts:
 
-	/* handler: j.BlacklistingAccounts type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.BlacklistingAccounts type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -1064,13 +1075,13 @@ handle_BlacklistingAccounts:
 			j.BlacklistingAccounts = nil
 		} else {
 
-			j.BlacklistingAccounts = []GrapheneID{}
+			j.BlacklistingAccounts = []AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJBlacklistingAccounts GrapheneID
+				var tmpJBlacklistingAccounts AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1091,7 +1102,7 @@ handle_BlacklistingAccounts:
 					wantVal = true
 				}
 
-				/* handler: tmpJBlacklistingAccounts type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJBlacklistingAccounts type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {
@@ -1123,13 +1134,13 @@ handle_BlacklistingAccounts:
 
 handle_WhitelistedAccounts:
 
-	/* handler: j.WhitelistedAccounts type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.WhitelistedAccounts type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -1137,13 +1148,13 @@ handle_WhitelistedAccounts:
 			j.WhitelistedAccounts = nil
 		} else {
 
-			j.WhitelistedAccounts = []GrapheneID{}
+			j.WhitelistedAccounts = []AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJWhitelistedAccounts GrapheneID
+				var tmpJWhitelistedAccounts AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1164,7 +1175,7 @@ handle_WhitelistedAccounts:
 					wantVal = true
 				}
 
-				/* handler: tmpJWhitelistedAccounts type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJWhitelistedAccounts type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {
@@ -1196,13 +1207,13 @@ handle_WhitelistedAccounts:
 
 handle_BlacklistedAccounts:
 
-	/* handler: j.BlacklistedAccounts type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.BlacklistedAccounts type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -1210,13 +1221,13 @@ handle_BlacklistedAccounts:
 			j.BlacklistedAccounts = nil
 		} else {
 
-			j.BlacklistedAccounts = []GrapheneID{}
+			j.BlacklistedAccounts = []AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJBlacklistedAccounts GrapheneID
+				var tmpJBlacklistedAccounts AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1237,7 +1248,7 @@ handle_BlacklistedAccounts:
 					wantVal = true
 				}
 
-				/* handler: tmpJBlacklistedAccounts type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJBlacklistedAccounts type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {
@@ -1272,16 +1283,16 @@ handle_Options:
 	/* handler: j.Options type=types.AccountOptions kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AccountOptions kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Options)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Options.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1289,7 +1300,7 @@ handle_Options:
 
 handle_Registrar:
 
-	/* handler: j.Registrar type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Registrar type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1314,7 +1325,7 @@ handle_Registrar:
 
 handle_Referrer:
 
-	/* handler: j.Referrer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Referrer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1339,7 +1350,7 @@ handle_Referrer:
 
 handle_LifetimeReferrer:
 
-	/* handler: j.LifetimeReferrer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.LifetimeReferrer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1364,7 +1375,7 @@ handle_LifetimeReferrer:
 
 handle_CashbackVB:
 
-	/* handler: j.CashbackVB type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.CashbackVB type=types.VestingBalanceID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1392,16 +1403,16 @@ handle_Owner:
 	/* handler: j.Owner type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Owner)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Owner.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -1412,16 +1423,16 @@ handle_Active:
 	/* handler: j.Active type=types.Authority kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Authority kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Active)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.Active.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

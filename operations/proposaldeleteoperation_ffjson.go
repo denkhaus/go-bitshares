@@ -372,7 +372,7 @@ handle_Extensions:
 
 handle_FeePayingAccount:
 
-	/* handler: j.FeePayingAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.FeePayingAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -397,7 +397,7 @@ handle_FeePayingAccount:
 
 handle_Proposal:
 
-	/* handler: j.Proposal type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Proposal type=types.ProposalID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

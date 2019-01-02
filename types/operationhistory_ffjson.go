@@ -319,7 +319,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.OperationHistoryID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

@@ -311,7 +311,7 @@ mainparse:
 
 handle_AssetToSettle:
 
-	/* handler: j.AssetToSettle type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToSettle type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -404,7 +404,7 @@ handle_Extensions:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

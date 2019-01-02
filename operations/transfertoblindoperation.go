@@ -19,7 +19,7 @@ type TransferToBlindOperation struct {
 	types.OperationFee
 	Amount         types.AssetAmount  `json:"amount"`
 	BlindingFactor types.FixedBuffer  `json:"blinding_factor"`
-	From           types.GrapheneID   `json:"from"`
+	From           types.AccountID    `json:"from"`
 	Outputs        types.BlindOutputs `json:"outputs"`
 }
 

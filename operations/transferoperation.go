@@ -17,8 +17,8 @@ func init() {
 
 type TransferOperation struct {
 	types.OperationFee
-	From       types.GrapheneID  `json:"from"`
-	To         types.GrapheneID  `json:"to"`
+	From       types.AccountID   `json:"from"`
+	To         types.AccountID   `json:"to"`
 	Amount     types.AssetAmount `json:"amount"`
 	Memo       *types.Memo       `json:"memo,omitempty"`
 	Extensions types.Extensions  `json:"extensions"`

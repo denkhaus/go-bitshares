@@ -372,7 +372,7 @@ handle_NewURL:
 
 handle_Witness:
 
-	/* handler: j.Witness type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Witness type=types.WitnessID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -397,7 +397,7 @@ handle_Witness:
 
 handle_WitnessAccount:
 
-	/* handler: j.WitnessAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.WitnessAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

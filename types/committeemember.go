@@ -7,11 +7,11 @@ import (
 
 //go:generate ffjson $GOFILE
 type CommitteeMember struct {
-	ID                     GrapheneID `json:"id"`
-	CommitteeMemberAccount GrapheneID `json:"committee_member_account"`
-	TotalVotes             UInt64     `json:"total_votes"`
-	URL                    String     `json:"url"`
-	VoteID                 VoteID     `json:"vote_id"`
+	ID                     CommitteeMemberID `json:"id"`
+	CommitteeMemberAccount AccountID         `json:"committee_member_account"`
+	TotalVotes             UInt64            `json:"total_votes"`
+	URL                    String            `json:"url"`
+	VoteID                 VoteID            `json:"vote_id"`
 }
 
 func (p CommitteeMember) Marshal(enc *util.TypeEncoder) error {

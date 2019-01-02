@@ -17,9 +17,9 @@ func init() {
 
 type WithdrawPermissionDeleteOperation struct {
 	types.OperationFee
-	AuthorizedAccount    types.GrapheneID `json:"authorized_account"`
-	WithdrawFromAccount  types.GrapheneID `json:"withdraw_from_account"`
-	WithdrawalPermission types.GrapheneID `json:"withdrawal_permission"`
+	AuthorizedAccount    types.AccountID            `json:"authorized_account"`
+	WithdrawFromAccount  types.AccountID            `json:"withdraw_from_account"`
+	WithdrawalPermission types.WithdrawPermissionID `json:"withdrawal_permission"`
 }
 
 func (p WithdrawPermissionDeleteOperation) Type() types.OperationType {

@@ -10,6 +10,7 @@ clean_ffjson_gen:
 	@rm -rf operations/*_ffjson.go ||: 
 
 generate: clean_ffjson_base	
+	-@go generate types/gen.go
 	-@go generate ./...
 
 generate_new: clean_ffjson_base clean_ffjson_gen		

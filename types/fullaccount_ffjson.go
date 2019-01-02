@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -77,11 +76,15 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	/* Struct fall back. type=types.VestingBalance kind=struct */
 	buf.WriteString(`,"cashback_balance":`)
-	err = buf.Encode(&j.CashbackBalance)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.CashbackBalance.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"balances":`)
 	if j.Balances != nil {
@@ -111,10 +114,14 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.VestingBalance kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -128,10 +135,14 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.LimitOrder kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -166,10 +177,14 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.SettleOrder kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -648,16 +663,16 @@ handle_CashbackBalance:
 	/* handler: j.CashbackBalance type=types.VestingBalance kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.VestingBalance kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.CashbackBalance)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.CashbackBalance.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -777,16 +792,16 @@ handle_VestingBalances:
 				/* handler: tmpJVestingBalances type=types.VestingBalance kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.VestingBalance kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJVestingBalances)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJVestingBalances.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.VestingBalances = append(j.VestingBalances, tmpJVestingBalances)
@@ -845,16 +860,16 @@ handle_LimitOrders:
 				/* handler: tmpJLimitOrders type=types.LimitOrder kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.LimitOrder kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJLimitOrders)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJLimitOrders.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.LimitOrders = append(j.LimitOrders, tmpJLimitOrders)
@@ -937,13 +952,13 @@ handle_CallOrders:
 
 handle_SettleOrders:
 
-	/* handler: j.SettleOrders type=types.SettleOrders kind=slice quoted=false*/
+	/* handler: j.SettleOrders type=types.ForceSettlementOrders kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for SettleOrders", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ForceSettlementOrders", tok))
 			}
 		}
 
@@ -951,13 +966,13 @@ handle_SettleOrders:
 			j.SettleOrders = nil
 		} else {
 
-			j.SettleOrders = []SettleOrder{}
+			j.SettleOrders = []ForceSettlementOrder{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJSettleOrders SettleOrder
+				var tmpJSettleOrders ForceSettlementOrder
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -978,19 +993,19 @@ handle_SettleOrders:
 					wantVal = true
 				}
 
-				/* handler: tmpJSettleOrders type=types.SettleOrder kind=struct quoted=false*/
+				/* handler: tmpJSettleOrders type=types.ForceSettlementOrder kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.SettleOrder kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJSettleOrders)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJSettleOrders.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.SettleOrders = append(j.SettleOrders, tmpJSettleOrders)
@@ -1025,13 +1040,13 @@ handle_Statistics:
 
 handle_Assets:
 
-	/* handler: j.Assets type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.Assets type=types.AssetIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AssetIDs", tok))
 			}
 		}
 
@@ -1039,13 +1054,13 @@ handle_Assets:
 			j.Assets = nil
 		} else {
 
-			j.Assets = []GrapheneID{}
+			j.Assets = []AssetID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJAssets GrapheneID
+				var tmpJAssets AssetID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1066,7 +1081,7 @@ handle_Assets:
 					wantVal = true
 				}
 
-				/* handler: tmpJAssets type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJAssets type=types.AssetID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {

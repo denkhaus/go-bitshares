@@ -53,7 +53,6 @@ type OperationEnvelope struct {
 }
 
 func (p OperationEnvelope) Marshal(enc *util.TypeEncoder) error {
-	// type is marshaled by operation
 	if err := enc.Encode(p.Operation); err != nil {
 		return errors.Annotate(err, "encode Operation")
 	}
@@ -154,13 +153,14 @@ func (p Operations) ApplyFees(fees AssetAmounts) error {
 
 func (p Operations) CombinedFees() AssetAmounts {
 	amounts := make(AssetAmounts, 0)
-	feeMap := make(map[GrapheneID]Int64)
+	feeMap := make(map[AssetID]Int64)
 	for _, op := range p {
 		f := op.GetFee()
-		if fee, ok := feeMap[f.Asset]; ok {
-			feeMap[f.Asset] = fee + f.Amount
+		id := f.Asset
+		if fee, ok := feeMap[id]; ok {
+			feeMap[id] = fee + f.Amount
 		} else {
-			feeMap[f.Asset] = f.Amount
+			feeMap[id] = f.Amount
 		}
 	}
 

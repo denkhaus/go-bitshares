@@ -17,8 +17,8 @@ func init() {
 
 type AssetPublishFeedOperation struct {
 	types.OperationFee
-	Publisher  types.GrapheneID `json:"publisher"`
-	AssetID    types.GrapheneID `json:"asset_id"`
+	Publisher  types.AccountID  `json:"publisher"`
+	AssetID    types.AssetID    `json:"asset_id"`
 	Feed       types.PriceFeed  `json:"feed"`
 	Extensions types.Extensions `json:"extensions"`
 }

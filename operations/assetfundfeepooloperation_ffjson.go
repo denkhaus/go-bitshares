@@ -322,7 +322,7 @@ handle_Amount:
 
 handle_AssetID:
 
-	/* handler: j.AssetID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetID type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -415,7 +415,7 @@ handle_Extensions:
 
 handle_FromAccount:
 
-	/* handler: j.FromAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.FromAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

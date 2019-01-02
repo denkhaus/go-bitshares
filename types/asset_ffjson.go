@@ -349,7 +349,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -429,7 +429,7 @@ handle_Precision:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -454,7 +454,7 @@ handle_Issuer:
 
 handle_DynamicAssetDataID:
 
-	/* handler: j.DynamicAssetDataID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.DynamicAssetDataID type=types.AssetDynamicDataID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -479,7 +479,7 @@ handle_DynamicAssetDataID:
 
 handle_BitassetDataID:
 
-	/* handler: j.BitassetDataID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.BitassetDataID type=types.AssetBitAssetDataID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

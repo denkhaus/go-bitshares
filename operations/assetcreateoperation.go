@@ -23,9 +23,9 @@ type AssetCreateOperation struct {
 	CommonOptions      types.AssetOptions     `json:"common_options"`
 	Extensions         types.Extensions       `json:"extensions"`
 	IsPredictionMarket bool                   `json:"is_prediction_market"`
-	Issuer             types.GrapheneID       `json:"issuer"`
+	Issuer             types.AccountID        `json:"issuer"`
 	Precision          types.UInt8            `json:"precision"`
-	Symbol             string                 `json:"symbol"`
+	Symbol             types.String           `json:"symbol"`
 }
 
 func (p AssetCreateOperation) Type() types.OperationType {

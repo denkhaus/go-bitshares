@@ -17,10 +17,10 @@ func init() {
 
 type CustomOperation struct {
 	types.OperationFee
-	Payer         types.GrapheneID  `json:"payer"`
-	RequiredAuths types.GrapheneIDs `json:"required_auths"`
-	ID            types.UInt16      `json:"id"`
-	Data          types.Buffer      `json:"data"`
+	Payer         types.AccountID  `json:"payer"`
+	RequiredAuths types.AccountIDs `json:"required_auths"`
+	ID            types.UInt16     `json:"id"`
+	Data          types.Buffer     `json:"data"`
 }
 
 func (p CustomOperation) Type() types.OperationType {

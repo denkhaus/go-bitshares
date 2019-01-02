@@ -17,7 +17,7 @@ func init() {
 
 type AssetSettleOperation struct {
 	types.OperationFee
-	Account    types.GrapheneID  `json:"account"`
+	Account    types.AccountID   `json:"account"`
 	Amount     types.AssetAmount `json:"amount"`
 	Extensions types.Extensions  `json:"extensions"`
 }

@@ -17,7 +17,7 @@ func init() {
 
 type AccountUpdateOperation struct {
 	types.OperationFee
-	Account    types.GrapheneID              `json:"account"`
+	Account    types.AccountID               `json:"account"`
 	Active     *types.Authority              `json:"active,omitempty"`
 	Extensions types.AccountUpdateExtensions `json:"extensions"`
 	NewOptions *types.AccountOptions         `json:"new_options,omitempty"`

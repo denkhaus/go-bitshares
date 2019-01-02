@@ -434,7 +434,7 @@ handle_Extensions:
 
 handle_FeePayingAccount:
 
-	/* handler: j.FeePayingAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.FeePayingAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

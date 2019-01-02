@@ -307,7 +307,7 @@ mainparse:
 
 handle_Payer:
 
-	/* handler: j.Payer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Payer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -332,13 +332,13 @@ handle_Payer:
 
 handle_RequiredAuths:
 
-	/* handler: j.RequiredAuths type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.RequiredAuths type=types.AccountIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AccountIDs", tok))
 			}
 		}
 
@@ -346,13 +346,13 @@ handle_RequiredAuths:
 			j.RequiredAuths = nil
 		} else {
 
-			j.RequiredAuths = []types.GrapheneID{}
+			j.RequiredAuths = []types.AccountID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJRequiredAuths types.GrapheneID
+				var tmpJRequiredAuths types.AccountID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -373,7 +373,7 @@ handle_RequiredAuths:
 					wantVal = true
 				}
 
-				/* handler: tmpJRequiredAuths type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJRequiredAuths type=types.AccountID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {

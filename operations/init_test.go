@@ -8,6 +8,7 @@ import (
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
 
 	// importing this initializes sample data fetching
@@ -42,6 +43,10 @@ func (suite *operationsAPITest) TearDownTest() {
 func (suite *operationsAPITest) OpSamplesTest(op types.Operation) {
 	samples, err := data.GetSamplesByType(op.Type())
 	if err != nil {
+		if err == data.ErrNoSampleDataAvailable {
+			logging.Warnf("no sample data available for %s", op.Type())
+			return
+		}
 		suite.FailNow(err.Error(), "GetSamplesByType")
 	}
 
@@ -91,19 +96,19 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 			OperationFee: types.OperationFee{
 				Fee: &types.AssetAmount{
 					Amount: 100,
-					Asset:  *types.NewGrapheneID("1.3.0"),
+					Asset:  *types.NewAssetID("1.3.0"),
 				},
 			},
 			DeltaDebt: types.AssetAmount{
 				Amount: 10000,
-				Asset:  *types.NewGrapheneID("1.3.22"),
+				Asset:  *types.NewAssetID("1.3.22"),
 			},
 			DeltaCollateral: types.AssetAmount{
 				Amount: 100000000,
-				Asset:  *types.NewGrapheneID("1.3.0"),
+				Asset:  *types.NewAssetID("1.3.0"),
 			},
 
-			FundingAccount: *types.NewGrapheneID("1.2.29"),
+			FundingAccount: *types.NewAccountID("1.2.29"),
 			Extensions:     types.CallOrderUpdateExtensions{},
 		},
 	}

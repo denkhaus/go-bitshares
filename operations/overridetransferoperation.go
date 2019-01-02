@@ -19,10 +19,10 @@ type OverrideTransferOperation struct {
 	types.OperationFee
 	Amount     types.AssetAmount `json:"amount"`
 	Extensions types.Extensions  `json:"extensions"`
-	From       types.GrapheneID  `json:"from"`
-	Issuer     types.GrapheneID  `json:"issuer"`
+	From       types.AccountID   `json:"from"`
+	Issuer     types.AccountID   `json:"issuer"`
 	Memo       *types.Memo       `json:"memo,omitempty"`
-	To         types.GrapheneID  `json:"to"`
+	To         types.AccountID   `json:"to"`
 }
 
 func (p OverrideTransferOperation) Type() types.OperationType {

@@ -356,7 +356,7 @@ handle_BlindingFactor:
 
 handle_From:
 
-	/* handler: j.From type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.From type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

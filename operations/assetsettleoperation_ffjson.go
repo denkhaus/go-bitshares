@@ -276,7 +276,7 @@ mainparse:
 
 handle_Account:
 
-	/* handler: j.Account type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Account type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

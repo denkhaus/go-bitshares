@@ -411,7 +411,7 @@ mainparse:
 
 handle_Registrar:
 
-	/* handler: j.Registrar type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Registrar type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -436,7 +436,7 @@ handle_Registrar:
 
 handle_Referrer:
 
-	/* handler: j.Referrer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Referrer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

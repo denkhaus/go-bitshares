@@ -17,8 +17,8 @@ func init() {
 
 type CommitteeMemberCreateOperation struct {
 	types.OperationFee
-	CommitteeMemberAccount types.GrapheneID `json:"committee_member_account"`
-	URL                    types.String     `json:"url"`
+	CommitteeMemberAccount types.AccountID `json:"committee_member_account"`
+	URL                    types.String    `json:"url"`
 }
 
 func (p CommitteeMemberCreateOperation) Type() types.OperationType {

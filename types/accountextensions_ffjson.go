@@ -994,7 +994,7 @@ mainparse:
 
 handle_AssetToBuy:
 
-	/* handler: j.AssetToBuy type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToBuy type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1019,7 +1019,7 @@ handle_AssetToBuy:
 
 handle_AssetToBuyIssuer:
 
-	/* handler: j.AssetToBuyIssuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToBuyIssuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -1044,13 +1044,13 @@ handle_AssetToBuyIssuer:
 
 handle_Markets:
 
-	/* handler: j.Markets type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.Markets type=types.AssetIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AssetIDs", tok))
 			}
 		}
 
@@ -1058,13 +1058,13 @@ handle_Markets:
 			j.Markets = nil
 		} else {
 
-			j.Markets = []GrapheneID{}
+			j.Markets = []AssetID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJMarkets GrapheneID
+				var tmpJMarkets AssetID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1085,7 +1085,7 @@ handle_Markets:
 					wantVal = true
 				}
 
-				/* handler: tmpJMarkets type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJMarkets type=types.AssetID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {

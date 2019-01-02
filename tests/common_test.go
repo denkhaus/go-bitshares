@@ -105,7 +105,7 @@ func (suite *commonTest) Test_GetObjects() {
 }
 
 func (suite *commonTest) Test_GetBlock() {
-	res, err := suite.TestAPI.GetBlock(33217575) //26867161)
+	res, err := suite.TestAPI.GetBlock(33217575)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetBlock")
 	}
@@ -201,7 +201,7 @@ func (suite *commonTest) Test_ListAssets() {
 
 func (suite *commonTest) Test_GetAccountHistory() {
 
-	user := types.NewGrapheneID("1.2.96393")
+	user := types.NewAccountID("1.2.96393")
 	start := types.NewGrapheneID("1.11.187698971")
 	stop := types.NewGrapheneID("1.11.187658388")
 

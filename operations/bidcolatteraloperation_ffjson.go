@@ -330,7 +330,7 @@ handle_AdditionalCollateral:
 
 handle_Bidder:
 
-	/* handler: j.Bidder type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Bidder type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

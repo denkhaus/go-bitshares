@@ -465,7 +465,7 @@ handle_Extensions:
 
 handle_From:
 
-	/* handler: j.From type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.From type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -490,7 +490,7 @@ handle_From:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -541,7 +541,7 @@ handle_Memo:
 
 handle_To:
 
-	/* handler: j.To type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.To type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

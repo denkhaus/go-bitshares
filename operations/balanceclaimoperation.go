@@ -17,9 +17,9 @@ func init() {
 
 type BalanceClaimOperation struct {
 	types.OperationFee
-	BalanceToClaim   types.GrapheneID  `json:"balance_to_claim"`
+	BalanceToClaim   types.BalanceID   `json:"balance_to_claim"`
 	BalanceOwnerKey  types.PublicKey   `json:"balance_owner_key"`
-	DepositToAccount types.GrapheneID  `json:"deposit_to_account"`
+	DepositToAccount types.AccountID   `json:"deposit_to_account"`
 	TotalClaimed     types.AssetAmount `json:"total_claimed"`
 }
 

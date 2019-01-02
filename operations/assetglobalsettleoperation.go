@@ -17,9 +17,9 @@ func init() {
 
 type AssetGlobalSettleOperation struct {
 	types.OperationFee
-	AssetToSettle types.GrapheneID `json:"asset_to_settle"`
+	AssetToSettle types.AssetID    `json:"asset_to_settle"`
 	Extensions    types.Extensions `json:"extensions"`
-	Issuer        types.GrapheneID `json:"issuer"`
+	Issuer        types.AccountID  `json:"issuer"`
 	SettlePrice   types.Price      `json:"settle_price"`
 }
 

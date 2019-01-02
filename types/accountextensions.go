@@ -18,9 +18,9 @@ func (p NullExtension) Marshal(enc *util.TypeEncoder) error {
 }
 
 type BuybackOptions struct {
-	AssetToBuy       GrapheneID  `json:"asset_to_buy"`
-	AssetToBuyIssuer GrapheneID  `json:"asset_to_buy_issuer"`
-	Markets          GrapheneIDs `json:"markets"`
+	AssetToBuy       AssetID   `json:"asset_to_buy"`
+	AssetToBuyIssuer AccountID `json:"asset_to_buy_issuer"`
+	Markets          AssetIDs  `json:"markets"`
 }
 
 func (p BuybackOptions) Marshal(enc *util.TypeEncoder) error {

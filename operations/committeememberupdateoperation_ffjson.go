@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -35,11 +34,15 @@ func (j *CommitteeMemberUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer
 	var obj []byte
 	_ = obj
 	_ = err
-	/* Struct fall back. type=types.CommitteeMember kind=struct */
 	buf.WriteString(`{ "committee_member":`)
-	err = buf.Encode(&j.CommitteeMember)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.CommitteeMember.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteString(`,"committee_member_account":`)
 
@@ -274,16 +277,16 @@ handle_CommitteeMember:
 	/* handler: j.CommitteeMember type=types.CommitteeMember kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.CommitteeMember kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.CommitteeMember)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.CommitteeMember.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -291,7 +294,7 @@ handle_CommitteeMember:
 
 handle_CommitteeMemberAccount:
 
-	/* handler: j.CommitteeMemberAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.CommitteeMemberAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

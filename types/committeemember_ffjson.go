@@ -289,7 +289,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.CommitteeMemberID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -314,7 +314,7 @@ handle_ID:
 
 handle_CommitteeMemberAccount:
 
-	/* handler: j.CommitteeMemberAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.CommitteeMemberAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

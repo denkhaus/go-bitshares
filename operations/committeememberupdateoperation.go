@@ -18,7 +18,7 @@ func init() {
 type CommitteeMemberUpdateOperation struct {
 	types.OperationFee
 	CommitteeMember        types.CommitteeMember `json:"committee_member"`
-	CommitteeMemberAccount types.GrapheneID      `json:"committee_member_account"`
+	CommitteeMemberAccount types.AccountID       `json:"committee_member_account"`
 	NewURL                 *types.String         `json:"new_url,omitempty"`
 }
 

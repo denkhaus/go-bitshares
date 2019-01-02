@@ -300,7 +300,7 @@ mainparse:
 
 handle_AccountToList:
 
-	/* handler: j.AccountToList type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AccountToList type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -325,7 +325,7 @@ handle_AccountToList:
 
 handle_AuthorizingAccount:
 
-	/* handler: j.AuthorizingAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AuthorizingAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

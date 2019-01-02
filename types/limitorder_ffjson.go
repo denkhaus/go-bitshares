@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -71,11 +70,15 @@ func (j *LimitOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	fflib.FormatBits2(buf, uint64(j.ForSale), 10, false)
 	buf.WriteString(`,"deferred_fee":`)
 	fflib.FormatBits2(buf, uint64(j.DeferredFee), 10, false)
-	/* Struct fall back. type=types.Price kind=struct */
 	buf.WriteString(`,"sell_price":`)
-	err = buf.Encode(&j.SellPrice)
-	if err != nil {
-		return err
+
+	{
+
+		err = j.SellPrice.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
 	}
 	buf.WriteByte('}')
 	return nil
@@ -305,7 +308,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.LimitOrderID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -330,7 +333,7 @@ handle_ID:
 
 handle_Seller:
 
-	/* handler: j.Seller type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Seller type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -433,16 +436,16 @@ handle_SellPrice:
 	/* handler: j.SellPrice type=types.Price kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.Price kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.SellPrice)
-		if err != nil {
-			return fs.WrapErr(err)
+		} else {
+
+			err = j.SellPrice.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

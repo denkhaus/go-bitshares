@@ -18,8 +18,8 @@ func init() {
 type ProposalDeleteOperation struct {
 	types.OperationFee
 	Extensions          types.Extensions `json:"extensions"`
-	FeePayingAccount    types.GrapheneID `json:"fee_paying_account"`
-	Proposal            types.GrapheneID `json:"proposal"`
+	FeePayingAccount    types.AccountID  `json:"fee_paying_account"`
+	Proposal            types.ProposalID `json:"proposal"`
 	UsingOwnerAuthority bool             `json:"using_owner_authority"`
 }
 

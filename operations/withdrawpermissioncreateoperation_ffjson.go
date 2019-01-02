@@ -341,7 +341,7 @@ mainparse:
 
 handle_AuthorizedAccount:
 
-	/* handler: j.AuthorizedAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AuthorizedAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -416,7 +416,7 @@ handle_PeriodsUntilExpiration:
 
 handle_WithdrawFromAccount:
 
-	/* handler: j.WithdrawFromAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.WithdrawFromAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

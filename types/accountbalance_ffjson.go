@@ -284,7 +284,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.AccountBalanceID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -309,7 +309,7 @@ handle_ID:
 
 handle_Owner:
 
-	/* handler: j.Owner type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Owner type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -334,7 +334,7 @@ handle_Owner:
 
 handle_AssetType:
 
-	/* handler: j.AssetType type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetType type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

@@ -349,7 +349,7 @@ handle_MemoKey:
 
 handle_VotingAccount:
 
-	/* handler: j.VotingAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.VotingAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

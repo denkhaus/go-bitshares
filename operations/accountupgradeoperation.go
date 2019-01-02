@@ -17,7 +17,7 @@ func init() {
 
 type AccountUpgradeOperation struct {
 	types.OperationFee
-	AccountToUpgrade        types.GrapheneID `json:"account_to_upgrade"`
+	AccountToUpgrade        types.AccountID  `json:"account_to_upgrade"`
 	Extensions              types.Extensions `json:"extensions"`
 	UpgradeToLifetimeMember bool             `json:"upgrade_to_lifetime_member"`
 }

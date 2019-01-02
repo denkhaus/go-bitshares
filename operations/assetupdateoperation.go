@@ -17,10 +17,10 @@ func init() {
 
 type AssetUpdateOperation struct {
 	types.OperationFee
-	AssetToUpdate types.GrapheneID   `json:"asset_to_update"`
-	Issuer        types.GrapheneID   `json:"issuer"`
+	AssetToUpdate types.AssetID      `json:"asset_to_update"`
+	Issuer        types.AccountID    `json:"issuer"`
 	Extensions    types.Extensions   `json:"extensions"`
-	NewIssuer     *types.GrapheneID  `json:"new_issuer"`
+	NewIssuer     *types.AccountID   `json:"new_issuer"`
 	NewOptions    types.AssetOptions `json:"new_options"`
 }
 

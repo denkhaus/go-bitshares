@@ -5,7 +5,6 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -74,10 +73,14 @@ func (j *TransferFromBlindOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) er
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.BlindInput kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -331,7 +334,7 @@ handle_Amount:
 
 handle_To:
 
-	/* handler: j.To type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.To type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -425,16 +428,16 @@ handle_BlindInputs:
 				/* handler: tmpJBlindInputs type=types.BlindInput kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.BlindInput kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJBlindInputs)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJBlindInputs.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.BlindInputs = append(j.BlindInputs, tmpJBlindInputs)

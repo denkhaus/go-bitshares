@@ -274,7 +274,7 @@ mainparse:
 
 handle_Base:
 
-	/* handler: j.Base type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Base type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -324,7 +324,7 @@ handle_BaseVolume:
 
 handle_Quote:
 
-	/* handler: j.Quote type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Quote type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

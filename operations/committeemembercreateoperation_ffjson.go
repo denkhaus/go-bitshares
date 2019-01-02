@@ -241,7 +241,7 @@ mainparse:
 
 handle_CommitteeMemberAccount:
 
-	/* handler: j.CommitteeMemberAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.CommitteeMemberAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

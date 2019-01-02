@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	InvalidApiID           = -1
-	AssetsListAll          = -1
-	AssetsMaxBatchSize     = 100
-	GetCallOrdersLimit     = 100
-	GetLimitOrdersLimit    = 100
-	GetSettleOrdersLimit   = 100
-	GetTradeHistoryLimit   = 100
-	GetAccountHistoryLimit = 100
+	InvalidApiID                 = -1
+	AssetsListAll                = -1
+	AssetsMaxBatchSize           = 100
+	GetCallOrdersLimit           = 100
+	GetLimitOrdersLimit          = 100
+	GetForceSettlementOrderLimit = 100
+	GetTradeHistoryLimit         = 100
+	GetAccountHistoryLimit       = 100
 )
 
 type WebsocketAPI interface {
@@ -58,7 +58,7 @@ type WebsocketAPI interface {
 	GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error)
 	GetRequiredSignatures(tx *types.SignedTransaction, keys types.PublicKeys) (types.PublicKeys, error)
 	GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error)
-	GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error)
+	GetForceSettlementOrder(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
 	SetSubscribeCallback(notifyID int, clearFilter bool) error
@@ -503,10 +503,10 @@ func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int)
 	return
 }
 
-//GetSettleOrders returns SettleOrders type.
-func (p *websocketAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) (types.SettleOrders, error) {
-	if limit > GetSettleOrdersLimit {
-		limit = GetSettleOrdersLimit
+//GetForceSettlementOrder returns ForceSettlementOrders type.
+func (p *websocketAPI) GetForceSettlementOrder(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error) {
+	if limit > GetForceSettlementOrderLimit {
+		limit = GetForceSettlementOrderLimit
 	}
 
 	resp, err := p.wsClient.CallAPI(0, "get_settle_orders", assetID.ID(), limit)
@@ -516,9 +516,9 @@ func (p *websocketAPI) GetSettleOrders(assetID types.GrapheneObject, limit int) 
 
 	logging.DDumpJSON("get_settle_orders <", resp)
 
-	ret := types.SettleOrders{}
+	ret := types.ForceSettlementOrders{}
 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal SettleOrders")
+		return nil, errors.Annotate(err, "unmarshal ForceSettlementOrders")
 	}
 
 	return ret, nil
@@ -606,7 +606,7 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 
 	data := resp.([]interface{})
 	ret := make([]interface{}, 0)
-	id := types.GrapheneID{}
+	id := types.ObjectID{}
 
 	for _, obj := range data {
 		if obj == nil {
@@ -627,9 +627,9 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 		// ObjectTypeWithdrawPermission
 		// ObjectTypeVestingBalance
 		// ObjectTypeWorker
-		switch id.Space() {
+		switch id.SpaceType() {
 		case types.SpaceTypeProtocol:
-			switch id.Type() {
+			switch id.ObjectType() {
 			case types.ObjectTypeAccount:
 				acc := types.Account{}
 				if err := ffjson.Unmarshal(b, &acc); err != nil {
@@ -643,9 +643,9 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				}
 				ret = append(ret, ass)
 			case types.ObjectTypeForceSettlement:
-				set := types.SettleOrder{}
+				set := types.ForceSettlementOrder{}
 				if err := ffjson.Unmarshal(b, &set); err != nil {
-					return nil, errors.Annotate(err, "unmarshal SettleOrder")
+					return nil, errors.Annotate(err, "unmarshal ForceSettlementOrder")
 				}
 				ret = append(ret, set)
 			case types.ObjectTypeLimitOrder:
@@ -680,12 +680,12 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				ret = append(ret, bal)
 
 			default:
-				logging.DDumpUnmarshaled(id.Type().String(), b)
+				logging.DDumpUnmarshaled(id.ObjectType().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 
 		case types.SpaceTypeImplementation:
-			switch id.Type() {
+			switch id.ObjectType() {
 			case types.ObjectTypeAssetBitAssetData:
 				bit := types.BitAssetData{}
 				if err := ffjson.Unmarshal(b, &bit); err != nil {
@@ -694,7 +694,7 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 				ret = append(ret, bit)
 
 			default:
-				logging.DDumpUnmarshaled(id.Type().String(), b)
+				logging.DDumpUnmarshaled(id.ObjectType().String(), b)
 				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
 			}
 		}

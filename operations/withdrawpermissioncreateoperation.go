@@ -17,10 +17,10 @@ func init() {
 
 type WithdrawPermissionCreateOperation struct {
 	types.OperationFee
-	AuthorizedAccount      types.GrapheneID  `json:"authorized_account"`
+	AuthorizedAccount      types.AccountID   `json:"authorized_account"`
 	PeriodStartTime        types.Time        `json:"period_start_time"`
 	PeriodsUntilExpiration types.UInt32      `json:"periods_until_expiration"`
-	WithdrawFromAccount    types.GrapheneID  `json:"withdraw_from_account"`
+	WithdrawFromAccount    types.AccountID   `json:"withdraw_from_account"`
 	WithdrawalLimit        types.AssetAmount `json:"withdrawal_limit"`
 	WithdrawalPeriodSec    types.UInt32      `json:"withdrawal_period_sec"`
 }

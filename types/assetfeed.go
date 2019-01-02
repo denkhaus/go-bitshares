@@ -10,7 +10,7 @@ import (
 type AssetFeeds []AssetFeed
 
 type AssetFeed struct {
-	ProviderID GrapheneID
+	ProviderID AccountID
 	DateTime   Time
 	FeedInfo   PriceFeed
 }

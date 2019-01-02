@@ -301,7 +301,7 @@ mainparse:
 
 handle_BalanceToClaim:
 
-	/* handler: j.BalanceToClaim type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.BalanceToClaim type=types.BalanceID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -351,7 +351,7 @@ handle_BalanceOwnerKey:
 
 handle_DepositToAccount:
 
-	/* handler: j.DepositToAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.DepositToAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

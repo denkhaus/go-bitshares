@@ -366,7 +366,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.AccountStatisticsID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -391,7 +391,7 @@ handle_ID:
 
 handle_MostRecentOp:
 
-	/* handler: j.MostRecentOp type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.MostRecentOp type=types.AccountTransactionHistoryID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -416,7 +416,7 @@ handle_MostRecentOp:
 
 handle_Owner:
 
-	/* handler: j.Owner type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Owner type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

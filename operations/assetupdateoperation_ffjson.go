@@ -344,7 +344,7 @@ mainparse:
 
 handle_AssetToUpdate:
 
-	/* handler: j.AssetToUpdate type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToUpdate type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -369,7 +369,7 @@ handle_AssetToUpdate:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -462,7 +462,7 @@ handle_Extensions:
 
 handle_NewIssuer:
 
-	/* handler: j.NewIssuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.NewIssuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -477,7 +477,7 @@ handle_NewIssuer:
 			}
 
 			if j.NewIssuer == nil {
-				j.NewIssuer = new(types.GrapheneID)
+				j.NewIssuer = new(types.AccountID)
 			}
 
 			err = j.NewIssuer.UnmarshalJSON(tbuf)

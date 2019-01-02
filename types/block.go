@@ -3,7 +3,7 @@ package types
 //go:generate ffjson $GOFILE
 
 type Block struct {
-	Witness               GrapheneID         `json:"witness"`
+	Witness               WitnessID          `json:"witness"`
 	TransactionMerkleRoot Buffer             `json:"transaction_merkle_root"`
 	WitnessSignature      Buffer             `json:"witness_signature"`
 	Previous              Buffer             `json:"previous"`

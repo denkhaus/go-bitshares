@@ -19,7 +19,7 @@ type ProposalCreateOperation struct {
 	types.OperationFee
 	ExpirationTime      types.Time                     `json:"expiration_time"`
 	Extensions          types.Extensions               `json:"extensions"`
-	FeePayingAccount    types.GrapheneID               `json:"fee_paying_account"`
+	FeePayingAccount    types.AccountID                `json:"fee_paying_account"`
 	ReviewPeriodSeconds *types.UInt32                  `json:"review_period_seconds,omitempty"`
 	ProposedOps         types.OperationEnvelopeHolders `json:"proposed_ops"`
 }

@@ -4,23 +4,14 @@ package types
 
 import "strconv"
 
-const (
-	_SpaceType_name_0 = "SpaceTypeUndefined"
-	_SpaceType_name_1 = "SpaceTypeProtocolSpaceTypeImplementation"
-)
+const _SpaceType_name = "SpaceTypeProtocolSpaceTypeImplementation"
 
-var (
-	_SpaceType_index_1 = [...]uint8{0, 17, 40}
-)
+var _SpaceType_index = [...]uint8{0, 17, 40}
 
 func (i SpaceType) String() string {
-	switch {
-	case i == -1:
-		return _SpaceType_name_0
-	case 1 <= i && i <= 2:
-		i -= 1
-		return _SpaceType_name_1[_SpaceType_index_1[i]:_SpaceType_index_1[i+1]]
-	default:
-		return "SpaceType(" + strconv.FormatInt(int64(i), 10) + ")"
+	i -= 1
+	if i >= SpaceType(len(_SpaceType_index)-1) {
+		return "SpaceType(" + strconv.FormatInt(int64(i+1), 10) + ")"
 	}
+	return _SpaceType_name[_SpaceType_index[i]:_SpaceType_index[i+1]]
 }
