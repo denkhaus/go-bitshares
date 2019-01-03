@@ -14,6 +14,7 @@ generate: clean_ffjson_base
 	-@go generate ./...
 
 generate_new: clean_ffjson_base clean_ffjson_gen		
+	-@go generate types/gen.go
 	-@go generate ./...
 
 init: 

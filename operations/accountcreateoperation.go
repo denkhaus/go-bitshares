@@ -53,43 +53,34 @@ func (p AccountCreateOperation) MarshalFeeScheduleParams(params types.M, enc *ut
 
 func (p AccountCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
-		return errors.Annotate(err, "encode OperationType")
+		return errors.Annotate(err, "encode Type")
 	}
-
 	if err := enc.Encode(p.Fee); err != nil {
-		return errors.Annotate(err, "encode fee")
+		return errors.Annotate(err, "encode Fee")
 	}
-
 	if err := enc.Encode(p.Registrar); err != nil {
-		return errors.Annotate(err, "encode registrar")
+		return errors.Annotate(err, "encode Registrar")
 	}
-
 	if err := enc.Encode(p.Referrer); err != nil {
-		return errors.Annotate(err, "encode referrer")
+		return errors.Annotate(err, "encode Referrer")
 	}
-
 	if err := enc.Encode(p.ReferrerPercent); err != nil {
-		return errors.Annotate(err, "encode referrer percent")
+		return errors.Annotate(err, "encode ReferrerPercent")
 	}
-
 	if err := enc.Encode(p.Name); err != nil {
-		return errors.Annotate(err, "encode name")
+		return errors.Annotate(err, "encode Name")
 	}
-
 	if err := enc.Encode(p.Owner); err != nil {
-		return errors.Annotate(err, "encode owner")
+		return errors.Annotate(err, "encode Owner")
 	}
-
 	if err := enc.Encode(p.Active); err != nil {
-		return errors.Annotate(err, "encode active")
+		return errors.Annotate(err, "encode Active")
 	}
-
 	if err := enc.Encode(p.Options); err != nil {
-		return errors.Annotate(err, "encode options")
+		return errors.Annotate(err, "encode Options")
 	}
-
 	if err := enc.Encode(p.Extensions); err != nil {
-		return errors.Annotate(err, "encode extensions")
+		return errors.Annotate(err, "encode Extensions")
 	}
 
 	return nil

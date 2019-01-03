@@ -3,5 +3,5 @@ package samples
 //keep this file to avoid "no *.go files in samples directory" error
 
 var (
-	LastScannedBlock uint64 = 3297496
+	LastScannedBlock uint64 = 4726108
 )

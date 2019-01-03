@@ -62,15 +62,11 @@ func (j *BitAssetData) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`,"is_prediction_market":false`)
 	}
+	/* Struct fall back. type=types.Price kind=struct */
 	buf.WriteString(`,"settlement_price":`)
-
-	{
-
-		err = j.SettlementPrice.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.SettlementPrice)
+	if err != nil {
+		return err
 	}
 	buf.WriteString(`,"feeds":`)
 	if j.Feeds != nil {
@@ -104,15 +100,11 @@ func (j *BitAssetData) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
+	/* Struct fall back. type=types.PriceFeed kind=struct */
 	buf.WriteString(`,"current_feed":`)
-
-	{
-
-		err = j.CurrentFeed.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.CurrentFeed)
+	if err != nil {
+		return err
 	}
 	buf.WriteString(`,"force_settled_volume":`)
 	fflib.FormatBits2(buf, uint64(j.ForcedSettledVolume), 10, false)
@@ -488,16 +480,16 @@ handle_SettlementPrice:
 	/* handler: j.SettlementPrice type=types.Price kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.SettlementPrice.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.Price kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.SettlementPrice)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value
@@ -601,16 +593,16 @@ handle_CurrentFeed:
 	/* handler: j.CurrentFeed type=types.PriceFeed kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.CurrentFeed.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.PriceFeed kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.CurrentFeed)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value

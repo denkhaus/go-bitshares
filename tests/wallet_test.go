@@ -71,8 +71,8 @@ func (suite *walletAPITest) Test_GetDynamicGlobalProperties() {
 	}
 
 	suite.NotNil(props)
-	suite.Equal(props.ID, types.NewDynamicGlobalPropertyID("2.1.0"))
-	logging.Dump("wallet_get_dynamic_global_properties <", props)
+	suite.Equal(props.ID.String(), "2.1.0")
+	//logging.Dump("wallet_get_dynamic_global_properties <", props)
 }
 
 func (suite *walletAPITest) Test_Info() {
