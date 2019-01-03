@@ -130,7 +130,7 @@ const (
 	OperationTypeBlindTransfer                                              ///40
 	OperationTypeTransferFromBlind                                          //41
 	OperationTypeAssetSettleCancel                                          ///42
-	OperationTypeAssetClaimFees                                             ///43
+	OperationTypeAssetClaimFees                                             //43
 	OperationTypeFBADistribute                                              ///44
 	OperationTypeBidCollateral                                              //45
 	OperationTypeExecuteBid                                                 ///46

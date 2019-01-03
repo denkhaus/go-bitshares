@@ -156,7 +156,7 @@ api.OnError(func(err error) {
 - [ ] OperationTypeBlindTransfer     
 - [ ] OperationTypeTransferFromBlind 
 - [ ] OperationTypeAssetSettleCancel 
-- [ ] OperationTypeAssetClaimFees    
+- [x] OperationTypeAssetClaimFees    
 - [ ] OperationTypeFBADistribute     
 - [x] OperationTypeBidColatteral
 - [ ] OperationTypeExecuteBid 
