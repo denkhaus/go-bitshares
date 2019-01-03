@@ -8,23 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataBalanceClaimOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeBalanceClaim] =
 		sampleDataBalanceClaimOperation
 }
-
-var sampleDataBalanceClaimOperation = `{
-  "balance_owner_key": "BTS5WtDkcF6DzuAjk9Uf7Azp4R7m2AdVmLnKy5VAHqksYjRJe25x8",
-  "balance_to_claim": "1.15.14463",
-  "deposit_to_account": "1.2.1310",
-  "fee": {
-    "amount": 0,
-    "asset_id": "1.3.0"
-  },
-  "total_claimed": {
-    "amount": 21928,
-    "asset_id": "1.3.0"
-  }
-}`
 
 //end of file

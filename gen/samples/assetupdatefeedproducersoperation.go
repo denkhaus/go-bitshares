@@ -8,22 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetUpdateFeedProducersOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetUpdateFeedProducers] =
 		sampleDataAssetUpdateFeedProducersOperation
 }
-
-var sampleDataAssetUpdateFeedProducersOperation = `{
-  "asset_to_update": "1.3.804",
-  "extensions": [],
-  "fee": {
-    "amount": 100000000,
-    "asset_id": "1.3.0"
-  },
-  "issuer": "1.2.96994",
-  "new_feed_producers": [
-    "1.2.100876"
-  ]
-}`
 
 //end of file

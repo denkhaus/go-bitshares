@@ -16,7 +16,7 @@ generate_new: clean_ffjson_base clean_ffjson_gen
 	-go generate ./...
 
 init: 
-	@echo "######################## -> install dependencies"
+	@echo "######################## -> install/update dev dependencies"
 	@go get -u golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx

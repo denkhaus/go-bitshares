@@ -1,6 +1,7 @@
 package operations
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/denkhaus/bitshares/api"
@@ -36,7 +37,7 @@ func (suite *operationsAPITest) TearDownTest() {
 }
 
 func (suite *operationsAPITest) Test_SerializeRefTransaction() {
-	suite.compareTransaction(suite.RefTx, false)
+	suite.compareTransaction(0, suite.RefTx, false)
 }
 
 func (suite *operationsAPITest) Test_WalletSerializeTransaction() {
@@ -76,7 +77,7 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 			},
 
 			FundingAccount: *types.NewGrapheneID("1.2.29"),
-			Extensions:     types.Extensions{},
+			Extensions:     types.CallOrderUpdateExtensions{},
 		},
 	}
 
@@ -84,16 +85,20 @@ func (suite *operationsAPITest) Test_SampleOperation() {
 		suite.FailNow(err.Error(), "SignTransaction")
 	}
 
-	suite.compareTransaction(suite.RefTx, false)
+	suite.compareTransaction(0, suite.RefTx, false)
 }
 
-func (suite *operationsAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {
+func (suite *operationsAPITest) compareTransaction(sampleIdx int, tx *types.SignedTransaction, debug bool) {
 	ref, test, err := tests.CompareTransactions(suite.TestAPI, tx, debug)
 	if err != nil {
 		suite.FailNow(err.Error(), "compareTransactions")
 	}
 
-	suite.Equal(ref, test)
+	suite.Equal(
+		ref,
+		test,
+		fmt.Sprintf("on sample index %d\n", sampleIdx),
+	)
 }
 
 func TestOperations(t *testing.T) {

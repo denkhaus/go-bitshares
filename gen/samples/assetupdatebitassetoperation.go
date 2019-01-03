@@ -8,28 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetUpdateBitassetOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetUpdateBitasset] =
 		sampleDataAssetUpdateBitassetOperation
 }
-
-var sampleDataAssetUpdateBitassetOperation = `{
-  "asset_to_update": "1.3.734",
-  "extensions": [],
-  "fee": {
-    "amount": 100000000,
-    "asset_id": "1.3.0"
-  },
-  "issuer": "1.2.121",
-  "new_options": {
-    "extensions": [],
-    "feed_lifetime_sec": 7200,
-    "force_settlement_delay_sec": 86400,
-    "force_settlement_offset_percent": 200,
-    "maximum_force_settlement_volume": 200,
-    "minimum_feeds": 7,
-    "short_backing_asset": "1.3.0"
-  }
-}`
 
 //end of file

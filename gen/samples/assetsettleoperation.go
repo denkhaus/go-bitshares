@@ -8,22 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetSettleOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetSettle] =
 		sampleDataAssetSettleOperation
 }
-
-var sampleDataAssetSettleOperation = `{
-  "account": "1.2.35213",
-  "amount": {
-    "amount": 2000000,
-    "asset_id": "1.3.113"
-  },
-  "extensions": [],
-  "fee": {
-    "amount": 20000000,
-    "asset_id": "1.3.0"
-  }
-}`
 
 //end of file

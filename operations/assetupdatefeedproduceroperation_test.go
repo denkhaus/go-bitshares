@@ -10,18 +10,21 @@ func (suite *operationsAPITest) Test_AssetUpdateFeedProducersOperation() {
 		Extensions: types.Extensions{},
 	}
 
-	sample, err := data.GetSampleByType(op.Type())
+	samples, err := data.GetSamplesByType(op.Type())
 	if err != nil {
-		suite.FailNow(err.Error(), "GetSampleByType")
+		suite.FailNow(err.Error(), "GetSamplesByType")
 	}
 
-	if err := op.UnmarshalJSON([]byte(sample)); err != nil {
-		suite.FailNow(err.Error(), "UnmarshalJSON")
-	}
+	
+	for idx, sample := range samples {
+		if err := op.UnmarshalJSON([]byte(sample)); err != nil {
+			suite.FailNow(err.Error(), "UnmarshalJSON")
+		}
 
-	suite.RefTx.Operations = types.Operations{
-		types.Operation(&op),
-	}
+		suite.RefTx.Operations = types.Operations{
+			types.Operation(&op),
+		}
 
-	suite.compareTransaction(suite.RefTx, false)
+		suite.compareTransaction(idx, suite.RefTx, false)
+	}
 }

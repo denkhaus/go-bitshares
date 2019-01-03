@@ -8,19 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataLimitOrderCancelOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeLimitOrderCancel] =
 		sampleDataLimitOrderCancelOperation
 }
-
-var sampleDataLimitOrderCancelOperation = `{
-  "extensions": [],
-  "fee": {
-    "amount": 0,
-    "asset_id": "1.3.0"
-  },
-  "fee_paying_account": "1.2.23568",
-  "order": "1.7.1227"
-}`
 
 //end of file

@@ -17,24 +17,30 @@ import (
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/gojson"
+	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/stretchr/objx"
-	"gopkg.in/tomb.v2"
+	tomb "gopkg.in/tomb.v2"
 
 	// importing this initializes sample data fetching
-	_ "github.com/denkhaus/bitshares/gen/samples"
+	"github.com/denkhaus/bitshares/gen/samples"
 )
 
 type Unmarshalable interface {
 	UnmarshalJSON(input []byte) error
 }
 
+const (
+	samplesDir    = "samples"
+	operationsDir = "operations"
+)
+
 var (
 	sampleDataTemplate *template.Template
-	samplesDir         = "samples"
-	operationsDir      = "operations"
-	genChan            = make(chan GenData, 40)
+	sampleMainTemplate *template.Template
+	sampleMetaTemplate *template.Template
+	genChan            = make(chan GenData, 200)
 	tb                 = tomb.Tomb{}
 
 	// do not change order here
@@ -58,14 +64,16 @@ var (
 )
 
 type GenData struct {
-	Type types.OperationType
-	Data objx.Map
+	Type      types.OperationType
+	Block     int
+	SampleIdx int
+	Data      objx.Map
 }
 
 func main() {
-
 	defer close(genChan)
 
+	logging.Info("connect api")
 	api := api.New(tests.WsFullApiUrl, tests.RpcFullApiUrl)
 	if err := api.Connect(); err != nil {
 		handleError(errors.Annotate(err, "Connect"))
@@ -76,9 +84,23 @@ func main() {
 	})
 
 	//init templates
-	tmpl, err := template.ParseFiles("templates/opsampledata.go.tmpl")
+	logging.Info("parse templates")
+
+	tmpl, err := template.ParseFiles("templates/meta.go.tmpl")
 	if err != nil {
-		handleError(errors.Annotate(err, "ParseFiles"))
+		handleError(errors.Annotate(err, "ParseFiles [meta]"))
+	}
+	sampleMetaTemplate = tmpl
+
+	tmpl, err = template.ParseFiles("templates/opsamplemain.go.tmpl")
+	if err != nil {
+		handleError(errors.Annotate(err, "ParseFiles [main]"))
+	}
+	sampleMainTemplate = tmpl
+
+	tmpl, err = template.ParseFiles("templates/opsampledata.go.tmpl")
+	if err != nil {
+		handleError(errors.Annotate(err, "ParseFiles [data]"))
 	}
 	sampleDataTemplate = tmpl
 
@@ -93,9 +115,9 @@ func main() {
 	}
 
 	//TODO: save last scanned block and reapply
-	block := uint64(20435987)
+	block := uint64(samples.LastScannedBlock)
 
-	fmt.Println("loop blocks")
+	logging.Infof("loop blocks, starting from %d", block)
 
 	for tb.Alive() {
 		resp, err := api.CallWsAPI(0, "get_block", block)
@@ -104,8 +126,8 @@ func main() {
 		}
 
 		m := objx.New(resp)
-
 		trxs := m.Get("transactions")
+
 		// enumerate Transactions
 		trxs.EachInter(func(_ int, trx interface{}) bool {
 			ops := objx.New(trx).Get("operations")
@@ -116,15 +138,16 @@ func main() {
 				opData := objx.New(op[1])
 
 				blob := NewOperationBlob(opData)
-				ok, err := dataStore.Evaluate(opType, blob, block)
+				idx, err := dataStore.Insert(opType, blob, block)
 				if err != nil {
 					handleError(errors.Annotate(err, "Evaluate"))
 				}
 
-				if ok && tb.Alive() {
+				if idx >= 0 && tb.Alive() {
 					genChan <- GenData{
-						Type: opType,
-						Data: opData,
+						Type:      opType,
+						SampleIdx: idx,
+						Data:      opData,
 					}
 				}
 
@@ -133,6 +156,10 @@ func main() {
 
 			return true
 		})
+
+		if err := generateMetaFile(block); err != nil {
+			handleError(errors.Annotate(err, "generateMetaFile"))
+		}
 
 		block++
 	}
@@ -150,9 +177,9 @@ func generate(ch chan GenData) error {
 				return errors.Annotate(err, "generateSampleData")
 			}
 
-			if err := generateOpData(data); err != nil {
-				return errors.Annotate(err, "generateOpData")
-			}
+			// if err := generateOpData(data); err != nil {
+			// 	return errors.Annotate(err, "generateOpData")
+			// }
 
 		case <-tb.Dying():
 			return nil
@@ -162,54 +189,103 @@ func generate(ch chan GenData) error {
 }
 
 func generateOpData(d GenData) error {
-	s, err := data.GetSampleByType(d.Type)
+	samples, err := data.GetSamplesByType(d.Type)
 	if err != nil {
 		return errors.Annotate(err, "GetSampleByType")
 	}
 
-	sample, err := strconv.Unquote(s)
-	if err != nil {
-		return errors.Annotate(err, "Unquote")
+	for _, s := range samples {
+		sample, err := strconv.Unquote(s)
+		if err != nil {
+			return errors.Annotate(err, "Unquote")
+		}
+
+		//fmt.Printf("generate struct by sample %+v\n", sample)
+
+		buf, err := gojson.GenerateWithTypeGuessing(
+			strings.NewReader(sample),
+			gojson.ParseJson, d.Type.OperationName(),
+			"operations", []string{"json"}, true, true,
+			guessStructType,
+		)
+
+		if err != nil {
+			return errors.Annotate(err, "GenerateWithTypeGuessing")
+		}
+
+		fmt.Println("generated struct ", string(buf))
 	}
 
-	//fmt.Printf("generate struct by sample %+v\n", sample)
-
-	buf, err := gojson.GenerateWithTypeGuessing(
-		strings.NewReader(sample),
-		gojson.ParseJson, d.Type.OperationName(),
-		"operations", []string{"json"}, true, true,
-		guessStructType,
-	)
-
-	if err != nil {
-		return errors.Annotate(err, "GenerateWithTypeGuessing")
-	}
-
-	fmt.Println("generated struct ", string(buf))
 	return nil
 }
 
-func generateSampleData(d GenData) error {
+func generateSampleDataFile(d GenData, sampleData string) error {
 	opName := d.Type.OperationName()
 
-	sampleDataJSON, err := json.MarshalIndent(d.Data, "", "  ")
-	if err != nil {
-		return errors.Annotate(err, "MarshalIndent")
-	}
-
-	sampleData := fmt.Sprintf("`%s`", sampleDataJSON)
-
-	//update sample map too
-	data.OpSampleMap[d.Type] = sampleData
-
 	buf := bytes.NewBuffer(nil)
-	err = sampleDataTemplate.Execute(buf, struct {
+	err := sampleDataTemplate.Execute(buf, struct {
 		SampleDataOpType  string
 		SampleData        interface{}
 		SampleDataVarName string
+		SampleDataIdx     int
 	}{
 		SampleDataOpType:  d.Type.String(),
 		SampleData:        template.HTML(sampleData),
+		SampleDataVarName: fmt.Sprintf("sampleData%s", opName),
+		SampleDataIdx:     d.SampleIdx,
+	})
+
+	if err != nil {
+		return errors.Annotate(err, "Execute")
+	}
+
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Annotate(err, "Source")
+	}
+
+	fileName := strings.ToLower(fmt.Sprintf("%s/%s_%d.go", samplesDir, opName, d.SampleIdx))
+	if err := ioutil.WriteFile(fileName, formatted, 0622); err != nil {
+		return errors.Annotate(err, "WriteFile")
+	}
+
+	return nil
+}
+
+func generateMetaFile(block uint64) error {
+	buf := bytes.NewBuffer(nil)
+	err := sampleMetaTemplate.Execute(buf, struct {
+		LastScannedBlock uint64
+	}{
+		LastScannedBlock: block,
+	})
+
+	if err != nil {
+		return errors.Annotate(err, "Execute")
+	}
+
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Annotate(err, "Source")
+	}
+
+	fileName := strings.ToLower(fmt.Sprintf("%s/meta.go", samplesDir))
+	if err := ioutil.WriteFile(fileName, formatted, 0622); err != nil {
+		return errors.Annotate(err, "WriteFile")
+	}
+
+	return nil
+}
+
+func generateSampleMainFile(d GenData) error {
+	opName := d.Type.OperationName()
+
+	buf := bytes.NewBuffer(nil)
+	err := sampleMainTemplate.Execute(buf, struct {
+		SampleDataOpType  string
+		SampleDataVarName string
+	}{
+		SampleDataOpType:  d.Type.String(),
 		SampleDataVarName: fmt.Sprintf("sampleData%s", opName),
 	})
 
@@ -225,6 +301,34 @@ func generateSampleData(d GenData) error {
 	fileName := strings.ToLower(fmt.Sprintf("%s/%s.go", samplesDir, opName))
 	if err := ioutil.WriteFile(fileName, formatted, 0622); err != nil {
 		return errors.Annotate(err, "WriteFile")
+	}
+
+	return nil
+}
+
+func generateSampleData(d GenData) error {
+
+	if d.SampleIdx == 0 {
+		if err := generateSampleMainFile(d); err != nil {
+			return errors.Annotate(err, "generateSampleMainFile")
+		}
+	}
+
+	sampleDataJSON, err := json.MarshalIndent(d.Data, "", "  ")
+	if err != nil {
+		return errors.Annotate(err, "MarshalIndent")
+	}
+
+	sampleData := fmt.Sprintf("`%s`", sampleDataJSON)
+
+	//update sample map too
+	if data.OpSampleMap[d.Type] == nil {
+		data.OpSampleMap[d.Type] = make(map[int]string)
+	}
+	data.OpSampleMap[d.Type][d.SampleIdx] = sampleData
+
+	if err := generateSampleDataFile(d, sampleData); err != nil {
+		return errors.Annotate(err, "generateSampleDataFile")
 	}
 
 	return nil

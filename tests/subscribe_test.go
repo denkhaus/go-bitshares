@@ -49,8 +49,11 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 	fmt.Printf("SubscribeToMarket: wait %s for %d incoming notifications\n",
 		SubscribeToMarketDuration, SubscribeToMarketMsgs)
 
-	if err := suite.TestAPI.SubscribeToMarket(SubscribeToMarketSubscriberID,
-		AssetBTS, AssetCNY); err != nil {
+	if err := suite.TestAPI.SubscribeToMarket(
+		SubscribeToMarketSubscriberID,
+		AssetBTS,
+		AssetUSD,
+	); err != nil {
 		suite.FailNow(err.Error(), "SubscribeToMarket")
 	}
 
@@ -73,7 +76,10 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 	bar.Finish()
 
 	fmt.Println("Call UnsubscribeFromMarket")
-	if err := suite.TestAPI.UnsubscribeFromMarket(AssetBTS, AssetCNY); err != nil {
+	if err := suite.TestAPI.UnsubscribeFromMarket(
+		AssetBTS,
+		AssetUSD,
+	); err != nil {
 		suite.FailNow(err.Error(), "UnsubscribeFromMarket")
 	}
 }

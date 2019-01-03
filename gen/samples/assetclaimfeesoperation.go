@@ -8,22 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetClaimFeesOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetClaimFees] =
 		sampleDataAssetClaimFeesOperation
 }
-
-var sampleDataAssetClaimFeesOperation = `{
-  "amount_to_claim": {
-    "amount": 2500,
-    "asset_id": "1.3.801"
-  },
-  "extensions": [],
-  "fee": {
-    "amount": 2000000,
-    "asset_id": "1.3.0"
-  },
-  "issuer": "1.2.1191"
-}`
 
 //end of file

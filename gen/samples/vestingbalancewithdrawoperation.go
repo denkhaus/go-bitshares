@@ -8,22 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataVestingBalanceWithdrawOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeVestingBalanceWithdraw] =
 		sampleDataVestingBalanceWithdrawOperation
 }
-
-var sampleDataVestingBalanceWithdrawOperation = `{
-  "amount": {
-    "amount": 406050000,
-    "asset_id": "1.3.0"
-  },
-  "fee": {
-    "amount": 200000,
-    "asset_id": "1.3.0"
-  },
-  "owner": "1.2.23043",
-  "vesting_balance": "1.13.48"
-}`
 
 //end of file

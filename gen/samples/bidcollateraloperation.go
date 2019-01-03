@@ -8,26 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataBidCollateralOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeBidCollateral] =
 		sampleDataBidCollateralOperation
 }
-
-var sampleDataBidCollateralOperation = `{
-  "additional_collateral": {
-    "amount": 500000000,
-    "asset_id": "1.3.0"
-  },
-  "bidder": "1.2.20148",
-  "debt_covered": {
-    "amount": "500000000000",
-    "asset_id": "1.3.1259"
-  },
-  "extensions": [],
-  "fee": {
-    "amount": 1213,
-    "asset_id": "1.3.0"
-  }
-}`
 
 //end of file

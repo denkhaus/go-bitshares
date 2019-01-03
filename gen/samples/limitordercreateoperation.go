@@ -8,28 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataLimitOrderCreateOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeLimitOrderCreate] =
 		sampleDataLimitOrderCreateOperation
 }
-
-var sampleDataLimitOrderCreateOperation = `{
-  "amount_to_sell": {
-    "amount": 2500000,
-    "asset_id": "1.3.121"
-  },
-  "expiration": "2020-10-21T17:53:42",
-  "extensions": [],
-  "fee": {
-    "amount": 382,
-    "asset_id": "1.3.121"
-  },
-  "fill_or_kill": false,
-  "min_to_receive": {
-    "amount": "6872500000",
-    "asset_id": "1.3.0"
-  },
-  "seller": "1.2.188"
-}`
 
 //end of file

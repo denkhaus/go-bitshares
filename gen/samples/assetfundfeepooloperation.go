@@ -8,20 +8,13 @@ import (
 	"github.com/denkhaus/bitshares/types"
 )
 
+var (
+	sampleDataAssetFundFeePoolOperation = make(map[int]string)
+)
+
 func init() {
 	data.OpSampleMap[types.OperationTypeAssetFundFeePool] =
 		sampleDataAssetFundFeePoolOperation
 }
-
-var sampleDataAssetFundFeePoolOperation = `{
-  "amount": 100000000,
-  "asset_id": "1.3.110",
-  "extensions": [],
-  "fee": {
-    "amount": 200000,
-    "asset_id": "1.3.0"
-  },
-  "from_account": "1.2.23043"
-}`
 
 //end of file
