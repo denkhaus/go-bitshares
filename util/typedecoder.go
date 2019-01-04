@@ -52,11 +52,11 @@ func (p *TypeDecoder) Decode(v interface{}) error {
 		return errors.New("v must be a pointer to a valid decode target")
 	}
 
-	trg := val.Elem().Interface()
-	if m, ok := trg.(TypeUnmarshaler); ok {
+	if m, ok := v.(TypeUnmarshaler); ok {
 		return m.Unmarshal(p)
 	}
 
+	trg := val.Elem().Interface()
 	switch trg.(type) {
 	case int8:
 		return p.DecodeNumber(v)

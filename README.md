@@ -1,9 +1,7 @@
 # bitshares
 
 A Bitshares API consuming a websocket connection to an active full node or a RPC connection to your `cli_wallet`. 
-Look for several examples in [examples](/examples) and [tests](/tests) folder. This is work in progress and may have breaking changes. 
-No additional cgo dependencies for transaction signing required. 
-Use it at your own risk. 
+Look for several examples in [examples](/examples) and [tests](/tests) folder. This is work in progress. To mitigate breaking changes, please use tagged branches. New tagged branches will be created for breaking changes. No additional cgo dependencies for transaction signing required. Use it at your own risk. 
 
 ## install
 
@@ -79,7 +77,7 @@ If you need wallet functions, use:
 rpcApiUrl    := "http://localhost:8095" 
 api := bitshares.NewWalletAPI(rpcApiUrl)
 
-if err := api.connect(); err != nil{
+if err := api.Connect(); err != nil{
 	log.Fatal(err)
 }
 
@@ -131,7 +129,7 @@ api.OnError(func(err error) {
 - [x] OperationTypeAssetReserve
 - [x] OperationTypeAssetFundFeePool
 - [x] OperationTypeAssetSettle
-- [ ] OperationTypeAssetGlobalSettle 
+- [x] OperationTypeAssetGlobalSettle 
 - [x] OperationTypeAssetPublishFeed
 - [x] OperationTypeWitnessCreate
 - [x] OperationTypeWitnessUpdate
@@ -142,19 +140,19 @@ api.OnError(func(err error) {
 - [ ] OperationTypeWithdrawPermissionUpdate              
 - [ ] OperationTypeWithdrawPermissionClaim               
 - [x] OperationTypeWithdrawPermissionDelete              
-- [ ] OperationTypeCommitteeMemberCreate                 
-- [ ] OperationTypeCommitteeMemberUpdate                 
+- [x] OperationTypeCommitteeMemberCreate                 
+- [x] OperationTypeCommitteeMemberUpdate                 
 - [x] OperationTypeCommitteeMemberUpdateGlobalParameters 
 - [x] OperationTypeVestingBalanceCreate
 - [x] OperationTypeVestingBalanceWithdraw
 - [x] OperationTypeWorkerCreate
-- [ ] OperationTypeCustom 
+- [x] OperationTypeCustom 
 - [ ] OperationTypeAssert 
 - [x] OperationTypeBalanceClaim
 - [x] OperationTypeOverrideTransfer
-- [ ] OperationTypeTransferToBlind   
+- [x] OperationTypeTransferToBlind   
 - [ ] OperationTypeBlindTransfer     
-- [ ] OperationTypeTransferFromBlind 
+- [x] OperationTypeTransferFromBlind 
 - [ ] OperationTypeAssetSettleCancel 
 - [x] OperationTypeAssetClaimFees    
 - [ ] OperationTypeFBADistribute     

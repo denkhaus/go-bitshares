@@ -30,11 +30,11 @@ init:
 
 test_api: 
 	@echo "######################## -> test bitshares api"
-	go test -v ./tests -run ^TestCommon$
-	go test -v ./tests -run ^TestSubscribe$
-	go test -v ./tests -run ^TestWalletAPI$
-	go test -v ./tests -run ^TestWebsocketAPI$
-	go test -v ./types 
+	-go test -v ./tests -run ^TestCommon$
+	-go test -v ./tests -run ^TestSubscribe$
+	-go test -v ./tests -run ^TestWalletAPI$
+	-go test -v ./tests -run ^TestWebsocketAPI$
+	-go test -v ./types 
 
 test_operations:
 	@echo "######################## -> test operations"
