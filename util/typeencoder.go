@@ -9,9 +9,14 @@ import (
 	"github.com/juju/errors"
 )
 
-type TypeMarshaller interface {
+type TypeMarshaler interface {
 	Marshal(enc *TypeEncoder) error
 }
+
+type TypeUnmarshaler interface {
+	Unmarshal(dec *TypeDecoder) error
+}
+
 type TypeEncoder struct {
 	w io.Writer
 }
@@ -53,7 +58,7 @@ func (p *TypeEncoder) Encode(v interface{}) error {
 		return nil
 	}
 
-	if m, ok := v.(TypeMarshaller); ok {
+	if m, ok := v.(TypeMarshaler); ok {
 		return m.Marshal(p)
 	}
 

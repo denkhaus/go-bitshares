@@ -17,7 +17,8 @@ var (
 )
 
 type GrapheneObject interface {
-	util.TypeMarshaller
+	util.TypeMarshaler
+	util.TypeUnmarshaler
 	UnmarshalJSON(s []byte) error
 	MarshalJSON() ([]byte, error)
 	ID() string

@@ -62,7 +62,7 @@ func (p LinearVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 
 type VestingPolicy struct {
 	typ  VestingPolicyType
-	data util.TypeMarshaller
+	data util.TypeMarshaler
 }
 
 func (p *VestingPolicy) UnmarshalJSON(data []byte) error {

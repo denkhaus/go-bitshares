@@ -17,7 +17,7 @@ var (
 )
 
 type Operation interface {
-	util.TypeMarshaller
+	util.TypeMarshaler
 	SetFee(fee AssetAmount)
 	GetFee() AssetAmount
 	Type() OperationType
