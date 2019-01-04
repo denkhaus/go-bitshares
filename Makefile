@@ -46,13 +46,13 @@ test_blocks:
 
 buildgen:
 	@echo "######################## -> build btsgen"
-	@go get -u -d ./gen 
-	@go build -o /tmp/btsgen ./gen 
+	@cd ./gen && go get -u -d
+	@cd ./gen && go build -o /tmp/btsgen
 	@cp /tmp/btsgen $(GOPATH)/bin
 
 opsamples: buildgen
 	@echo "######################## -> exec btsgen"
-	@cd gen && btsgen
+	@cd ./gen && btsgen
 
 build: generate
 	go build -o /tmp/go-tmpbuild ./operations 

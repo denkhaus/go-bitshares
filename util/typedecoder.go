@@ -8,7 +8,11 @@ import (
 	"github.com/juju/errors"
 )
 
-type TypeUnmarshaller interface {
+var (
+	ErrCannotDecodeNilValue = errors.New("cannot decode nil value")
+)
+
+type TypeUnmarshaler interface {
 	Unmarshal(enc *TypeDecoder) error
 }
 
@@ -40,7 +44,7 @@ func (p *TypeDecoder) DecodeNumber(v interface{}) error {
 
 func (p *TypeDecoder) Decode(v interface{}) error {
 	if v == nil {
-		return nil
+		return ErrCannotDecodeNilValue
 	}
 
 	val := reflect.ValueOf(v)
@@ -49,7 +53,7 @@ func (p *TypeDecoder) Decode(v interface{}) error {
 	}
 
 	trg := val.Elem().Interface()
-	if m, ok := trg.(TypeUnmarshaller); ok {
+	if m, ok := trg.(TypeUnmarshaler); ok {
 		return m.Unmarshal(p)
 	}
 

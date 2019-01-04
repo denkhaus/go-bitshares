@@ -9,12 +9,12 @@ import (
 	"github.com/juju/errors"
 )
 
+var (
+	ErrCannotEncodeNilValue = errors.New("cannot encode nil value")
+)
+
 type TypeMarshaler interface {
 	Marshal(enc *TypeEncoder) error
-}
-
-type TypeUnmarshaler interface {
-	Unmarshal(dec *TypeDecoder) error
 }
 
 type TypeEncoder struct {
@@ -50,7 +50,7 @@ func (p *TypeEncoder) EncodeNumber(v interface{}) error {
 
 func (p *TypeEncoder) Encode(v interface{}) error {
 	if v == nil {
-		return nil
+		return ErrCannotEncodeNilValue
 	}
 
 	val := reflect.ValueOf(v)
