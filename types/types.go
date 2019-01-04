@@ -506,19 +506,24 @@ func (p String) MarshalJSON() ([]byte, error) {
 	return ffjson.Marshal(p.data)
 }
 
-func (p *String) UnmarshalJSON(data []byte) error {
-	if err := ffjson.Unmarshal(data, &p.data); err != nil {
-		return errors.Annotate(err, "Unmarshal")
-	}
-
-	return nil
-}
-
 func (p String) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.EncodeString(p.data); err != nil {
 		return errors.Annotate(err, "encode data")
 	}
+	return nil
+}
 
+func (p *String) UnmarshalJSON(data []byte) error {
+	if err := ffjson.Unmarshal(data, &p.data); err != nil {
+		return errors.Annotate(err, "Unmarshal")
+	}
+	return nil
+}
+
+func (p *String) Unmarshal(dec *util.TypeDecoder) error {
+	if err := dec.DecodeString(&p.data); err != nil {
+		return errors.Annotate(err, "decode data")
+	}
 	return nil
 }
 
