@@ -44,12 +44,12 @@ func (p *KeyBag) Unmarshal(dec *util.TypeDecoder) error {
 	}
 
 	for i := len; i > 0; i-- {
-		key := &types.PrivateKey{}
+		key := types.PrivateKey{}
 		if err := dec.Decode(&key); err != nil {
 			return errors.Annotate(err, "decode key")
 		}
 
-		p.keys = append(p.keys, key)
+		p.keys = append(p.keys, &key)
 	}
 
 	return nil
