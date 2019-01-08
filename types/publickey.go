@@ -14,6 +14,10 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+var (
+	nullKeyBytes = bytes.Repeat([]byte{0x0}, 33)
+)
+
 type PublicKeys []PublicKey
 
 func (p PublicKeys) Marshal(enc *util.TypeEncoder) error {
@@ -32,6 +36,7 @@ func (p PublicKeys) Marshal(enc *util.TypeEncoder) error {
 
 type PublicKey struct {
 	key      *btcec.PublicKey
+	addr     *Address
 	prefix   string
 	checksum []byte
 }
@@ -53,6 +58,7 @@ func (p *PublicKey) UnmarshalJSON(data []byte) error {
 		return errors.Annotate(err, "NewPublicKeyFromString")
 	}
 
+	p.addr = nil
 	p.key = pub.key
 	p.prefix = pub.prefix
 	p.checksum = pub.checksum
@@ -67,30 +73,47 @@ func (p PublicKey) Marshal(enc *util.TypeEncoder) error {
 	return enc.Encode(p.Bytes())
 }
 
-func (p *PublicKey) ToAddress() (*Address, error) {
-	return NewAddress(p)
+func (p *PublicKey) ToAddress() (a *Address, err error) {
+	if p.addr == nil {
+		p.addr, err = NewAddress(p)
+	}
+	return p.addr, err
 }
 
 func (p PublicKey) Bytes() []byte {
-	return p.key.SerializeCompressed()
+	if p.key != nil {
+		return p.key.SerializeCompressed()
+	}
+	return nullKeyBytes
 }
 
 func (p PublicKey) Equal(pub *PublicKey) bool {
-	return p.key.IsEqual(pub.key)
+	if p.key != nil && pub.key != nil {
+		return p.key.IsEqual(pub.key)
+	}
+
+	return p.key == nil && pub.key == nil
 }
 
 func (p PublicKey) ToECDSA() *ecdsa.PublicKey {
-	return p.key.ToECDSA()
+	if p.key != nil {
+		return p.key.ToECDSA()
+	}
+	return nil
 }
 
 // MaxSharedKeyLength returns the maximum length of the shared key the
 // public key can produce.
 func (p PublicKey) MaxSharedKeyLength() int {
-	return (p.key.ToECDSA().Curve.Params().BitSize + 7) / 8
+	if p.key != nil {
+		return (p.key.ToECDSA().Curve.Params().BitSize + 7) / 8
+	}
+
+	return 0
 }
 
-//NewPublicKey creates a new PublicKey from string
-//e.g.("BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR")
+// NewPublicKeyFromString creates a new PublicKey from string
+// e.g.("BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR")
 func NewPublicKeyFromString(key string) (*PublicKey, error) {
 	cnf := config.CurrentConfig()
 	if cnf == nil {
@@ -121,13 +144,18 @@ func NewPublicKeyFromString(key string) (*PublicKey, error) {
 		return nil, ErrInvalidPublicKey
 	}
 
-	pub, err := btcec.ParsePubKey(keyBytes, btcec.S256())
-	if err != nil {
-		return nil, errors.Annotate(err, "ParsePubKey")
+	var pubKey *btcec.PublicKey
+	if !bytes.Equal(keyBytes, nullKeyBytes) {
+		p, err := btcec.ParsePubKey(keyBytes, btcec.S256())
+		if err != nil {
+			return nil, errors.Annotate(err, "ParsePubKey")
+		}
+		pubKey = p
 	}
 
 	k := PublicKey{
-		key:      pub,
+		key:      pubKey,
+		addr:     nil,
 		prefix:   prefix,
 		checksum: chk1,
 	}
@@ -150,6 +178,7 @@ func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	k := PublicKey{
 		key:      pub,
 		prefix:   cnf.Prefix(),
+		addr:     nil,
 		checksum: chk,
 	}
 
