@@ -93,8 +93,11 @@ func (p PublicKey) MaxSharedKeyLength() int {
 //e.g.("BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR")
 func NewPublicKeyFromString(key string) (*PublicKey, error) {
 	cnf := config.CurrentConfig()
-	prefixChain := cnf.Prefix()
+	if cnf == nil {
+		return nil, ErrCurrentChainConfigIsNotSet
+	}
 
+	prefixChain := cnf.Prefix()
 	prefix := key[:len(prefixChain)]
 
 	if prefix != prefixChain {
@@ -135,7 +138,6 @@ func NewPublicKeyFromString(key string) (*PublicKey, error) {
 func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	buf := pub.SerializeCompressed()
 	cnf := config.CurrentConfig()
-
 	if cnf == nil {
 		return nil, ErrCurrentChainConfigIsNotSet
 	}

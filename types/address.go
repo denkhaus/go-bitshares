@@ -12,6 +12,7 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+//Addresses are shortened non-reversable hashes of a public key. The full PublicKey is preferred.
 type Address struct {
 	prefix   string
 	data     []byte
@@ -78,8 +79,11 @@ func NewAddress(pub *PublicKey) (*Address, error) {
 //e.g.("BTSFN9r6VYzBK8EKtMewfNbfiGCr56pHDBFi")
 func NewAddressFromString(add string) (*Address, error) {
 	cnf := config.CurrentConfig()
-	prefixChain := cnf.Prefix()
+	if cnf == nil {
+		return nil, ErrCurrentChainConfigIsNotSet
+	}
 
+	prefixChain := cnf.Prefix()
 	prefix := add[:len(prefixChain)]
 
 	if prefix != prefixChain {
