@@ -19,14 +19,14 @@ generate_new: clean_ffjson_base clean_ffjson_gen
 
 init: 
 	@echo "######################## -> install/update dev dependencies"
-	@go get -u golang.org/x/tools/cmd/stringer
-	@go get -u github.com/cheekybits/genny
-	@go get -u github.com/pquerna/ffjson
-	@go get -u github.com/mitchellh/reflectwalk
-	@go get -u github.com/stretchr/objx
-	@go get -u github.com/stretchr/testify
-	@go get -u github.com/cespare/reflex
-	@go get -u github.com/bradhe/stopwatch
+	@GO111MODULE=on go get -u golang.org/x/tools/cmd/stringer
+	@GO111MODULE=on go get -u github.com/cheekybits/genny
+	@GO111MODULE=on go get -u github.com/pquerna/ffjson
+	@GO111MODULE=on go get -u github.com/mitchellh/reflectwalk
+	@GO111MODULE=on go get -u github.com/stretchr/objx
+	@GO111MODULE=on go get -u github.com/stretchr/testify
+	@GO111MODULE=on go get -u github.com/cespare/reflex
+	@GO111MODULE=on go get -u github.com/bradhe/stopwatch
 
 test_api: 
 	@echo "######################## -> test bitshares api"
