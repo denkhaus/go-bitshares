@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,14 +35,57 @@ func (j *AccountTransferOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) erro
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{ `)
-	if j.Fee != nil {
-		if true {
-			/* Struct fall back. type=types.AssetAmount kind=struct */
-			buf.WriteString(`"fee":`)
-			err = buf.Encode(j.Fee)
+	buf.WriteString(`{ "account_id":`)
+
+	{
+
+		obj, err = j.AccountID.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
+	buf.WriteString(`,"new_owner":`)
+
+	{
+
+		obj, err = j.NewOwner.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
+	buf.WriteString(`,"extensions":`)
+	if j.Extensions != nil {
+		buf.WriteString(`[`)
+		for i, v := range j.Extensions {
+			if i != 0 {
+				buf.WriteString(`,`)
+			}
+			/* Interface types must use runtime reflection. type=interface {} kind=interface */
+			err = buf.Encode(v)
 			if err != nil {
 				return err
+			}
+		}
+		buf.WriteString(`]`)
+	} else {
+		buf.WriteString(`null`)
+	}
+	buf.WriteByte(',')
+	if j.Fee != nil {
+		if true {
+			buf.WriteString(`"fee":`)
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 			buf.WriteByte(',')
 		}
@@ -55,8 +99,20 @@ const (
 	ffjtAccountTransferOperationbase = iota
 	ffjtAccountTransferOperationnosuchkey
 
+	ffjtAccountTransferOperationAccountID
+
+	ffjtAccountTransferOperationNewOwner
+
+	ffjtAccountTransferOperationExtensions
+
 	ffjtAccountTransferOperationFee
 )
+
+var ffjKeyAccountTransferOperationAccountID = []byte("account_id")
+
+var ffjKeyAccountTransferOperationNewOwner = []byte("new_owner")
+
+var ffjKeyAccountTransferOperationExtensions = []byte("extensions")
 
 var ffjKeyAccountTransferOperationFee = []byte("fee")
 
@@ -121,6 +177,22 @@ mainparse:
 			} else {
 				switch kn[0] {
 
+				case 'a':
+
+					if bytes.Equal(ffjKeyAccountTransferOperationAccountID, kn) {
+						currentKey = ffjtAccountTransferOperationAccountID
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'e':
+
+					if bytes.Equal(ffjKeyAccountTransferOperationExtensions, kn) {
+						currentKey = ffjtAccountTransferOperationExtensions
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
 				case 'f':
 
 					if bytes.Equal(ffjKeyAccountTransferOperationFee, kn) {
@@ -129,10 +201,36 @@ mainparse:
 						goto mainparse
 					}
 
+				case 'n':
+
+					if bytes.Equal(ffjKeyAccountTransferOperationNewOwner, kn) {
+						currentKey = ffjtAccountTransferOperationNewOwner
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
 				}
 
 				if fflib.SimpleLetterEqualFold(ffjKeyAccountTransferOperationFee, kn) {
 					currentKey = ffjtAccountTransferOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffjKeyAccountTransferOperationExtensions, kn) {
+					currentKey = ffjtAccountTransferOperationExtensions
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.AsciiEqualFold(ffjKeyAccountTransferOperationNewOwner, kn) {
+					currentKey = ffjtAccountTransferOperationNewOwner
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.AsciiEqualFold(ffjKeyAccountTransferOperationAccountID, kn) {
+					currentKey = ffjtAccountTransferOperationAccountID
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -154,6 +252,15 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
+				case ffjtAccountTransferOperationAccountID:
+					goto handle_AccountID
+
+				case ffjtAccountTransferOperationNewOwner:
+					goto handle_NewOwner
+
+				case ffjtAccountTransferOperationExtensions:
+					goto handle_Extensions
+
 				case ffjtAccountTransferOperationFee:
 					goto handle_Fee
 
@@ -171,21 +278,145 @@ mainparse:
 		}
 	}
 
+handle_AccountID:
+
+	/* handler: j.AccountID type=types.AccountID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			err = j.AccountID.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_NewOwner:
+
+	/* handler: j.NewOwner type=types.AccountID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			err = j.NewOwner.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Extensions:
+
+	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			j.Extensions = nil
+		} else {
+
+			j.Extensions = []interface{}{}
+
+			wantVal := true
+
+			for {
+
+				var tmpJExtensions interface{}
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmpJExtensions type=interface {} kind=interface quoted=false*/
+
+				{
+					/* Falling back. type=interface {} kind=interface */
+					tbuf, err := fs.CaptureField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
+
+					err = json.Unmarshal(tbuf, &tmpJExtensions)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
+				}
+
+				j.Extensions = append(j.Extensions, tmpJExtensions)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
 handle_Fee:
 
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

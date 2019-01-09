@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	pubKeyA, err := types.NewPublicKeyFromString(pubKeyAString)
 	if err != nil {

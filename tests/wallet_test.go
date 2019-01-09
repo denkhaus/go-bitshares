@@ -54,7 +54,7 @@ func (suite *walletAPITest) TearDownSuite() {
 }
 
 func (suite *walletAPITest) Test_GetBlock() {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 	block, err := suite.FullAPI.GetBlock(33451303)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetBlock")
@@ -117,7 +117,7 @@ func (suite *walletAPITest) Test_GetRelativeAccountHistory() {
 }
 
 func (suite *walletAPITest) Test_ReadMemo() {
-	config.SetCurrentConfig(config.ChainIDTest)
+	config.SetCurrent(config.ChainIDTest)
 
 	pubKeyA, err := types.NewPublicKeyFromString(TestAccount1PubKeyActive)
 	if err != nil {

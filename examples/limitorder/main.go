@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	bts    = types.NewGrapheneID("1.3.0")
-	cny    = types.NewGrapheneID("1.3.113")
+	bts    = types.NewAssetID("1.3.0")
+	cny    = types.NewAssetID("1.3.113")
 	keyBag *crypto.KeyBag
-	seller *types.GrapheneID
+	seller types.GrapheneObject
 )
 
 const (
@@ -28,8 +28,8 @@ const (
 func init() {
 	// init is called before the API is initialized,
 	// hence must define current chain config explicitly.
-	config.SetCurrentConfig(config.ChainIDBTS)
-	seller = types.NewGrapheneID(
+	config.SetCurrent(config.ChainIDBTS)
+	seller = types.NewAccountID(
 		os.Getenv("BTS_TEST_ACCOUNT"),
 	)
 	keyBag = crypto.NewKeyBag()
@@ -50,20 +50,19 @@ func main() {
 
 	op := operations.LimitOrderCreateOperation{
 		FillOrKill: false,
-		Seller:     *seller,
+		Seller:     types.AccountIDFromObject(seller),
 		Extensions: types.Extensions{},
 		AmountToSell: types.AssetAmount{
 			Amount: 100,
-			Asset:  *bts,
+			Asset:  types.AssetIDFromObject(bts),
 		},
 		MinToReceive: types.AssetAmount{
 			Amount: 1000000,
-			Asset:  *cny,
+			Asset:  types.AssetIDFromObject(cny),
 		},
 	}
 
 	op.Expiration.Set(24 * time.Hour)
-
 	tx, err := api.BuildSignedTransaction(keyBag, bts, &op)
 	if err != nil {
 		log.Fatal(errors.Annotate(err, "BuildSignedTransaction"))

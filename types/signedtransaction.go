@@ -63,7 +63,6 @@ func (p SignedTransaction) Marshal(enc *util.TypeEncoder) error {
 //SerializeTrx serializes the transaction wihout signatures.
 func (p SignedTransaction) SerializeTrx() ([]byte, error) {
 	var b bytes.Buffer
-
 	enc := util.NewTypeEncoder(&b)
 	if err := enc.Encode(p.Transaction); err != nil {
 		return nil, errors.Annotate(err, "encode Transaction")
@@ -75,7 +74,6 @@ func (p SignedTransaction) SerializeTrx() ([]byte, error) {
 //ToHex returns th hex representation of the underlying transaction + signatures.
 func (p SignedTransaction) ToHex() (string, error) {
 	var b bytes.Buffer
-
 	enc := util.NewTypeEncoder(&b)
 	if err := enc.Encode(p); err != nil {
 		return "", errors.Annotate(err, "encode SignedTransaction")
@@ -86,11 +84,14 @@ func (p SignedTransaction) ToHex() (string, error) {
 
 //Digest calculates ths sha256 hash of the transaction.
 func (tx SignedTransaction) Digest(chain *config.ChainConfig) ([]byte, error) {
-	writer := sha256.New()
+	if chain == nil {
+		return nil, ErrChainConfigIsUndefined
+	}
 
-	rawChainID, err := hex.DecodeString(chain.ID())
+	writer := sha256.New()
+	rawChainID, err := hex.DecodeString(chain.ID)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to decode chain ID: %v", chain.ID())
+		return nil, errors.Annotatef(err, "failed to decode chain ID: %v", chain.ID)
 	}
 
 	//	digestChainID := sha256.Sum256(rawChainID)

@@ -12,7 +12,7 @@ var addresses = []string{
 }
 
 func TestAddress(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	for _, add := range addresses {
 		address, err := NewAddressFromString(add)

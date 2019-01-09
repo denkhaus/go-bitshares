@@ -130,6 +130,7 @@ func (b KeyBag) Privates() (out types.PrivateKeys) {
 
 	return
 }
+
 func (b KeyBag) PrivatesByPublics(pubKeys types.PublicKeys) (out types.PrivateKeys) {
 	for _, pub := range pubKeys {
 		for _, k := range b.keys {

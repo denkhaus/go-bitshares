@@ -9,7 +9,7 @@ import (
 //SignWithKeys signs a given transaction with given private keys.
 func SignWithKeys(keys types.PrivateKeys, tx *types.SignedTransaction) error {
 	signer := NewTransactionSigner(tx)
-	if err := signer.Sign(keys, config.CurrentConfig()); err != nil {
+	if err := signer.Sign(keys, config.Current()); err != nil {
 		return errors.Annotate(err, "Sign")
 	}
 
@@ -20,7 +20,7 @@ func SignWithKeys(keys types.PrivateKeys, tx *types.SignedTransaction) error {
 //If all required keys are found the function returns true, otherwise false.
 func VerifySignedTransaction(keyBag *KeyBag, tx *types.SignedTransaction) (bool, error) {
 	signer := NewTransactionSigner(tx)
-	verified, err := signer.Verify(keyBag, config.CurrentConfig())
+	verified, err := signer.Verify(keyBag, config.Current())
 	if err != nil {
 		return false, errors.Annotate(err, "Verify")
 	}

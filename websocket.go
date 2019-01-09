@@ -170,7 +170,7 @@ func (p *websocketAPI) SignTransaction(keyBag *crypto.KeyBag, tx *types.SignedTr
 		return types.ErrNoSigningKeyFound
 	}
 
-	if err := signer.Sign(privKeys, config.CurrentConfig()); err != nil {
+	if err := signer.Sign(privKeys, config.Current()); err != nil {
 		return errors.Annotate(err, "Sign")
 	}
 
@@ -214,7 +214,7 @@ func (p *websocketAPI) BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset ty
 		return nil, types.ErrNoSigningKeyFound
 	}
 
-	if err := signer.Sign(privKeys, config.CurrentConfig()); err != nil {
+	if err := signer.Sign(privKeys, config.Current()); err != nil {
 		return nil, errors.Annotate(err, "Sign")
 	}
 
@@ -777,8 +777,8 @@ func (p *websocketAPI) Connect() error {
 		return errors.Annotate(err, "GetChainID")
 	}
 
-	if err := config.SetCurrentConfig(chainID); err != nil {
-		return errors.Annotate(err, "SetCurrentConfig")
+	if err := config.SetCurrent(chainID); err != nil {
+		return errors.Annotate(err, "SetCurrent")
 	}
 
 	return nil

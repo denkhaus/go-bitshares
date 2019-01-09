@@ -78,12 +78,12 @@ func NewAddress(pub *PublicKey) (*Address, error) {
 // NewAddressFromString creates a new Address from string
 // e.g.("BTSFN9r6VYzBK8EKtMewfNbfiGCr56pHDBFi")
 func NewAddressFromString(add string) (*Address, error) {
-	cnf := config.CurrentConfig()
+	cnf := config.Current()
 	if cnf == nil {
-		return nil, ErrCurrentChainConfigIsNotSet
+		return nil, ErrChainConfigIsUndefined
 	}
 
-	prefixChain := cnf.Prefix()
+	prefixChain := cnf.Prefix
 	prefix := add[:len(prefixChain)]
 
 	if prefix != prefixChain {

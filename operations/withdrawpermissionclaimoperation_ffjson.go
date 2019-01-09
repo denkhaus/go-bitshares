@@ -5,8 +5,8 @@ package operations
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
@@ -34,14 +34,76 @@ func (j *WithdrawPermissionClaimOperation) MarshalJSONBuf(buf fflib.EncodingBuff
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{ `)
+	buf.WriteString(`{ "withdraw_permission":`)
+
+	{
+
+		obj, err = j.WithdrawPermission.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
+	buf.WriteString(`,"withdraw_from_account":`)
+
+	{
+
+		obj, err = j.WithdrawFromAccount.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
+	buf.WriteString(`,"withdraw_to_account":`)
+
+	{
+
+		obj, err = j.WithdrawToAccount.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
+	buf.WriteString(`,"amount_to_withdraw":`)
+
+	{
+
+		err = j.AmountToWithdraw.MarshalJSONBuf(buf)
+		if err != nil {
+			return err
+		}
+
+	}
+	buf.WriteByte(',')
+	if j.Memo != nil {
+		if true {
+			buf.WriteString(`"memo":`)
+
+			{
+
+				err = j.Memo.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+			buf.WriteByte(',')
+		}
+	}
 	if j.Fee != nil {
 		if true {
-			/* Struct fall back. type=types.AssetAmount kind=struct */
 			buf.WriteString(`"fee":`)
-			err = buf.Encode(j.Fee)
-			if err != nil {
-				return err
+
+			{
+
+				err = j.Fee.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 			buf.WriteByte(',')
 		}
@@ -55,8 +117,28 @@ const (
 	ffjtWithdrawPermissionClaimOperationbase = iota
 	ffjtWithdrawPermissionClaimOperationnosuchkey
 
+	ffjtWithdrawPermissionClaimOperationWithdrawPermission
+
+	ffjtWithdrawPermissionClaimOperationWithdrawFromAccount
+
+	ffjtWithdrawPermissionClaimOperationWithdrawToAccount
+
+	ffjtWithdrawPermissionClaimOperationAmountToWithdraw
+
+	ffjtWithdrawPermissionClaimOperationMemo
+
 	ffjtWithdrawPermissionClaimOperationFee
 )
+
+var ffjKeyWithdrawPermissionClaimOperationWithdrawPermission = []byte("withdraw_permission")
+
+var ffjKeyWithdrawPermissionClaimOperationWithdrawFromAccount = []byte("withdraw_from_account")
+
+var ffjKeyWithdrawPermissionClaimOperationWithdrawToAccount = []byte("withdraw_to_account")
+
+var ffjKeyWithdrawPermissionClaimOperationAmountToWithdraw = []byte("amount_to_withdraw")
+
+var ffjKeyWithdrawPermissionClaimOperationMemo = []byte("memo")
 
 var ffjKeyWithdrawPermissionClaimOperationFee = []byte("fee")
 
@@ -121,6 +203,14 @@ mainparse:
 			} else {
 				switch kn[0] {
 
+				case 'a':
+
+					if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationAmountToWithdraw, kn) {
+						currentKey = ffjtWithdrawPermissionClaimOperationAmountToWithdraw
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
 				case 'f':
 
 					if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationFee, kn) {
@@ -129,10 +219,66 @@ mainparse:
 						goto mainparse
 					}
 
+				case 'm':
+
+					if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationMemo, kn) {
+						currentKey = ffjtWithdrawPermissionClaimOperationMemo
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'w':
+
+					if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationWithdrawPermission, kn) {
+						currentKey = ffjtWithdrawPermissionClaimOperationWithdrawPermission
+						state = fflib.FFParse_want_colon
+						goto mainparse
+
+					} else if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationWithdrawFromAccount, kn) {
+						currentKey = ffjtWithdrawPermissionClaimOperationWithdrawFromAccount
+						state = fflib.FFParse_want_colon
+						goto mainparse
+
+					} else if bytes.Equal(ffjKeyWithdrawPermissionClaimOperationWithdrawToAccount, kn) {
+						currentKey = ffjtWithdrawPermissionClaimOperationWithdrawToAccount
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
 				}
 
 				if fflib.SimpleLetterEqualFold(ffjKeyWithdrawPermissionClaimOperationFee, kn) {
 					currentKey = ffjtWithdrawPermissionClaimOperationFee
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.SimpleLetterEqualFold(ffjKeyWithdrawPermissionClaimOperationMemo, kn) {
+					currentKey = ffjtWithdrawPermissionClaimOperationMemo
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.AsciiEqualFold(ffjKeyWithdrawPermissionClaimOperationAmountToWithdraw, kn) {
+					currentKey = ffjtWithdrawPermissionClaimOperationAmountToWithdraw
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.AsciiEqualFold(ffjKeyWithdrawPermissionClaimOperationWithdrawToAccount, kn) {
+					currentKey = ffjtWithdrawPermissionClaimOperationWithdrawToAccount
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.AsciiEqualFold(ffjKeyWithdrawPermissionClaimOperationWithdrawFromAccount, kn) {
+					currentKey = ffjtWithdrawPermissionClaimOperationWithdrawFromAccount
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffjKeyWithdrawPermissionClaimOperationWithdrawPermission, kn) {
+					currentKey = ffjtWithdrawPermissionClaimOperationWithdrawPermission
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
@@ -154,6 +300,21 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
+				case ffjtWithdrawPermissionClaimOperationWithdrawPermission:
+					goto handle_WithdrawPermission
+
+				case ffjtWithdrawPermissionClaimOperationWithdrawFromAccount:
+					goto handle_WithdrawFromAccount
+
+				case ffjtWithdrawPermissionClaimOperationWithdrawToAccount:
+					goto handle_WithdrawToAccount
+
+				case ffjtWithdrawPermissionClaimOperationAmountToWithdraw:
+					goto handle_AmountToWithdraw
+
+				case ffjtWithdrawPermissionClaimOperationMemo:
+					goto handle_Memo
+
 				case ffjtWithdrawPermissionClaimOperationFee:
 					goto handle_Fee
 
@@ -171,21 +332,148 @@ mainparse:
 		}
 	}
 
+handle_WithdrawPermission:
+
+	/* handler: j.WithdrawPermission type=types.WithdrawPermissionID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			err = j.WithdrawPermission.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_WithdrawFromAccount:
+
+	/* handler: j.WithdrawFromAccount type=types.AccountID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			err = j.WithdrawFromAccount.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_WithdrawToAccount:
+
+	/* handler: j.WithdrawToAccount type=types.AccountID kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			err = j.WithdrawToAccount.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_AmountToWithdraw:
+
+	/* handler: j.AmountToWithdraw type=types.AssetAmount kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			err = j.AmountToWithdraw.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Memo:
+
+	/* handler: j.Memo type=types.Memo kind=struct quoted=false*/
+
+	{
+		if tok == fflib.FFTok_null {
+
+			j.Memo = nil
+
+		} else {
+
+			if j.Memo == nil {
+				j.Memo = new(types.Memo)
+			}
+
+			err = j.Memo.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
+		}
+		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
 handle_Fee:
 
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		/* Falling back. type=types.AssetAmount kind=struct */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Fee)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Fee = nil
+
+		} else {
+
+			if j.Fee == nil {
+				j.Fee = new(types.AssetAmount)
+			}
+
+			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+			if err != nil {
+				return err
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

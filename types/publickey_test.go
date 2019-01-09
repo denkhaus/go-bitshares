@@ -26,19 +26,20 @@ var keys = []string{
 }
 
 func TestNewPublicKey(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 	for _, k := range keys {
 		key, err := NewPublicKeyFromString(k)
 		if err != nil {
 			assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
 		}
 
+		assert.NotNil(t, key)
 		assert.Equal(t, k, key.String())
 	}
 }
 
 func TestNullPublicKey(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 	key, err := NewPublicKeyFromString(BTSNullKey)
 	if err != nil {
 		assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
@@ -46,5 +47,4 @@ func TestNullPublicKey(t *testing.T) {
 
 	assert.NotNil(t, key)
 	assert.Equal(t, BTSNullKey, key.String())
-
 }

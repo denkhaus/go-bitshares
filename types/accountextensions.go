@@ -27,15 +27,12 @@ func (p BuybackOptions) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(uint8(AccountCreateExtensionsBuyback)); err != nil {
 		return errors.Annotate(err, "encode AccountCreateExtensionsBuyback")
 	}
-
 	if err := enc.Encode(p.AssetToBuy); err != nil {
 		return errors.Annotate(err, "encode AssetToBuy")
 	}
-
 	if err := enc.Encode(p.AssetToBuyIssuer); err != nil {
 		return errors.Annotate(err, "encode AssetToBuyIssuer")
 	}
-
 	if err := enc.Encode(p.Markets); err != nil {
 		return errors.Annotate(err, "encode Markets")
 	}

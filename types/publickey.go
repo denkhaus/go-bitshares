@@ -48,7 +48,6 @@ func (p PublicKey) String() string {
 
 func (p *PublicKey) UnmarshalJSON(data []byte) error {
 	var key string
-
 	if err := ffjson.Unmarshal(data, &key); err != nil {
 		return errors.Annotate(err, "Unmarshal")
 	}
@@ -115,12 +114,12 @@ func (p PublicKey) MaxSharedKeyLength() int {
 // NewPublicKeyFromString creates a new PublicKey from string
 // e.g.("BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR")
 func NewPublicKeyFromString(key string) (*PublicKey, error) {
-	cnf := config.CurrentConfig()
+	cnf := config.Current()
 	if cnf == nil {
-		return nil, ErrCurrentChainConfigIsNotSet
+		return nil, ErrChainConfigIsUndefined
 	}
 
-	prefixChain := cnf.Prefix()
+	prefixChain := cnf.Prefix
 	prefix := key[:len(prefixChain)]
 
 	if prefix != prefixChain {
@@ -165,9 +164,9 @@ func NewPublicKeyFromString(key string) (*PublicKey, error) {
 
 func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 	buf := pub.SerializeCompressed()
-	cnf := config.CurrentConfig()
+	cnf := config.Current()
 	if cnf == nil {
-		return nil, ErrCurrentChainConfigIsNotSet
+		return nil, ErrChainConfigIsUndefined
 	}
 
 	chk, err := util.Ripemd160Checksum(buf)
@@ -177,7 +176,7 @@ func NewPublicKey(pub *btcec.PublicKey) (*PublicKey, error) {
 
 	k := PublicKey{
 		key:      pub,
-		prefix:   cnf.Prefix(),
+		prefix:   cnf.Prefix,
 		addr:     nil,
 		checksum: chk,
 	}

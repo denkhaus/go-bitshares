@@ -29,7 +29,7 @@ var (
 	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
 	ErrInvalidDigestLength          = fmt.Errorf("invalid digest length")
 	ErrInvalidPrivateKeyCurve       = fmt.Errorf("invalid PrivateKey curve")
-	ErrCurrentChainConfigIsNotSet   = fmt.Errorf("current chain config is not set")
+	ErrChainConfigIsUndefined       = fmt.Errorf("chain config is undefined")
 )
 
 var (
@@ -96,7 +96,7 @@ const (
 	OperationTypeAccountUpdate                                              //6
 	OperationTypeAccountWhitelist                                           //7
 	OperationTypeAccountUpgrade                                             //8
-	OperationTypeAccountTransfer                                            ///9
+	OperationTypeAccountTransfer                                            //9
 	OperationTypeAssetCreate                                                //10
 	OperationTypeAssetUpdate                                                //11
 	OperationTypeAssetUpdateBitasset                                        //12
@@ -113,7 +113,7 @@ const (
 	OperationTypeProposalUpdate                                             //23
 	OperationTypeProposalDelete                                             //24
 	OperationTypeWithdrawPermissionCreate                                   //25
-	OperationTypeWithdrawPermissionUpdate                                   ///26
+	OperationTypeWithdrawPermissionUpdate                                   //26
 	OperationTypeWithdrawPermissionClaim                                    //27
 	OperationTypeWithdrawPermissionDelete                                   //28
 	OperationTypeCommitteeMemberCreate                                      //29

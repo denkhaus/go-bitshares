@@ -59,8 +59,8 @@ func (p *walletAPI) Connect() error {
 		return errors.Annotate(err, "Info")
 	}
 
-	if err := config.SetCurrentConfig(info.ChainID.String()); err != nil {
-		return errors.Annotate(err, "SetCurrentConfig")
+	if err := config.SetCurrent(info.ChainID.String()); err != nil {
+		return errors.Annotate(err, "SetCurrent")
 	}
 
 	return nil

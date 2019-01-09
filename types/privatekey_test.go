@@ -23,7 +23,7 @@ var data = [][]string{
 }
 
 func Test_PrivatePublic(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	for _, k := range privKeys {
 		wif := k[0]
@@ -40,7 +40,7 @@ func Test_PrivatePublic(t *testing.T) {
 }
 
 func TestDecode(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	for _, k := range data {
 		wif := k[0]
@@ -56,7 +56,7 @@ func TestDecode(t *testing.T) {
 }
 
 func TestMarshalUnmarshal(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	for _, k := range data {
 		wif := k[0]

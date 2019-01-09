@@ -5,7 +5,6 @@ package operations
 import (
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
-	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 )
 
@@ -18,19 +17,17 @@ func init() {
 
 type WithdrawPermissionUpdateOperation struct {
 	types.OperationFee
-
-	// asset                         fee;
-	// account_id_type               withdraw_from_account;
-	// account_id_type               authorized_account;
-	// withdraw_permission_id_type   permission_to_update;
-	// asset                         withdrawal_limit;
-	// uint32_t                      withdrawal_period_sec = 0;
-	// time_point_sec                period_start_time;
-	// uint32_t                      periods_until_expiration = 0;
+	WithdrawFromAccount    types.AccountID            `json:"withdraw_from_account"`
+	AuthorizedAccount      types.AccountID            `json:"authorized_account"`
+	PermissionToUpdate     types.WithdrawPermissionID `json:"permission_to_update"`
+	WithdrawalLimit        types.AssetAmount          `json:"withdrawal_limit"`
+	WithdrawalPeriodSec    types.UInt32               `json:"withdrawal_period_sec"`
+	PeriodStartTime        types.Time                 `json:"period_start_time"`
+	PeriodsUntilExpiration types.UInt32               `json:"periods_until_expiration"`
 }
 
 func (p WithdrawPermissionUpdateOperation) Type() types.OperationType {
-	return types.OperationTypeWithdrawPermissionCreate
+	return types.OperationTypeWithdrawPermissionUpdate
 }
 
 func (p WithdrawPermissionUpdateOperation) Marshal(enc *util.TypeEncoder) error {
@@ -40,10 +37,27 @@ func (p WithdrawPermissionUpdateOperation) Marshal(enc *util.TypeEncoder) error 
 	if err := enc.Encode(p.Fee); err != nil {
 		return errors.Annotate(err, "encode Fee")
 	}
+	if err := enc.Encode(p.WithdrawFromAccount); err != nil {
+		return errors.Annotate(err, "encode WithdrawFromAccount")
+	}
+	if err := enc.Encode(p.AuthorizedAccount); err != nil {
+		return errors.Annotate(err, "encode AuthorizedAccount")
+	}
+	if err := enc.Encode(p.PermissionToUpdate); err != nil {
+		return errors.Annotate(err, "encode PermissionToUpdate")
+	}
+	if err := enc.Encode(p.WithdrawalLimit); err != nil {
+		return errors.Annotate(err, "encode WithdrawalLimit")
+	}
+	if err := enc.Encode(p.WithdrawalPeriodSec); err != nil {
+		return errors.Annotate(err, "encode WithdrawalPeriodSec")
+	}
+	if err := enc.Encode(p.PeriodStartTime); err != nil {
+		return errors.Annotate(err, "encode PeriodStartTime")
+	}
+	if err := enc.Encode(p.PeriodsUntilExpiration); err != nil {
+		return errors.Annotate(err, "encode PeriodsUntilExpiration")
+	}
 
-	// (fee)(withdraw_from_account)(authorized_account)
-	//   (permission_to_update)(withdrawal_limit)(withdrawal_period_sec)(period_start_time)(periods_until_expiration)
-
-	logging.Warnf("%s is not implemented", p.Type().OperationName())
 	return nil
 }
