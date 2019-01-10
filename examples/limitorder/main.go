@@ -72,5 +72,5 @@ func main() {
 		log.Fatal(errors.Annotate(err, "BroadcastTransaction"))
 	}
 
-	fmt.Println("operation successfull broadcasted")
+	fmt.Println("operation successful broadcasted")
 }

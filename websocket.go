@@ -101,7 +101,7 @@ func (p *websocketAPI) login() (bool, error) {
 
 // SetSubscribeCallback
 func (p *websocketAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
-	// returns nil if successfull
+	// returns nil if successful
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", notifyID, clearFilter)
 	if err != nil {
 		return err
@@ -112,7 +112,7 @@ func (p *websocketAPI) SetSubscribeCallback(notifyID int, clearFilter bool) erro
 
 // SubscribeToMarket
 func (p *websocketAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
-	// returns nil if successfull
+	// returns nil if successful
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.ID(), quote.ID())
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (p *websocketAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject
 
 // UnsubscribeFromMarket
 func (p *websocketAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error {
-	// returns nil if successfull
+	// returns nil if successful
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.ID(), quote.ID())
 	if err != nil {
 		return err
