@@ -2,6 +2,7 @@ package api
 
 import (
 	"io"
+	"math"
 	"net"
 	"os"
 	"syscall"
@@ -285,6 +286,10 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 	}
 
 	p.mutex.Lock()
+	if p.currentID == math.MaxUint64 {
+		p.currentID = 0
+	}
+
 	p.currentID++
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
