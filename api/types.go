@@ -38,12 +38,6 @@ type rpcRequest struct {
 	ID     uint64        `json:"id"`
 }
 
-func (p *rpcRequest) reset() {
-	p.ID = 0
-	p.Params = nil
-	p.Method = ""
-}
-
 type ResponseErrorContext struct {
 	Level      string `json:"level"`
 	File       string `json:"file"`
@@ -76,7 +70,6 @@ func (p ResponseError) Error() string {
 	return p.Message
 }
 
-//wallet API uses string id ???
 type rpcResponseString struct {
 	ID     string        `json:"id"`
 	Result interface{}   `json:"result,omitempty"`
@@ -93,47 +86,11 @@ type rpcResponse struct {
 	Error  ResponseError `json:"error"`
 }
 
-func (p rpcResponse) Is(in interface{}) bool {
-	if data, ok := in.(map[string]interface{}); ok {
-		if _, ok := data["id"]; ok {
-			if _, ok := data["result"]; ok {
-				return true
-			}
-			if _, ok := data["error"]; ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (p rpcResponse) HasError() bool {
 	return p.Error.Code != 0
 }
 
-func (p *rpcResponse) reset() {
-	p.Error = ResponseError{}
-	p.Result = nil
-	p.ID = 0
-}
-
 type rpcNotify struct {
-	Method string      `json:"method"`
-	Params interface{} `json:"params"`
-}
-
-func (p rpcNotify) Is(in interface{}) bool {
-	if data, ok := in.(map[string]interface{}); ok {
-		if _, ok := data["method"]; ok {
-			if _, ok := data["params"]; ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (p *rpcNotify) reset() {
-	p.Method = ""
-	p.Params = nil
+	Method string        `json:"method"`
+	Params []interface{} `json:"params"`
 }

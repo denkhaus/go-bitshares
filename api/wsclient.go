@@ -28,8 +28,6 @@ type wsClient struct {
 	*ffjson.Encoder
 	conn        *websocket.Conn
 	url         string
-	resp        rpcResponse // unmarshal target
-	notify      rpcNotify   // unmarshal target
 	onError     ErrorFunc
 	errors      chan error
 	closing     *abool.AtomicBool
@@ -111,7 +109,6 @@ func (p *wsClient) IsConnected() bool {
 	if p.shutdown.IsSet() || p.closing.IsSet() {
 		return false
 	}
-
 	return p.conn != nil
 }
 
@@ -133,37 +130,6 @@ func (p *wsClient) monitor() {
 			time.Sleep(time.Millisecond)
 		}
 	}
-}
-
-func (p *wsClient) handleCustomData(data map[string]interface{}) error {
-	logging.DDumpJSON("ws notify <", data)
-
-	switch {
-	case p.notify.Is(data):
-		p.notify.reset()
-		err := mapstructure.Decode(data, &p.notify)
-		if err != nil {
-			return errors.Annotate(err, "Decode [notify]")
-		}
-
-		params := p.notify.Params.([]interface{})
-		subscriberID := int(params[0].(float64))
-
-		var fn NotifyFunc
-		p.mutexNotify.Lock()
-		fn = p.notifyFns[subscriberID]
-		p.mutexNotify.Unlock()
-
-		if fn != nil {
-			if err := fn(params[1]); err != nil {
-				return errors.Annotate(err, "handle notify")
-			}
-		}
-	default:
-		return errors.Errorf("unhandled custom data: %v", data)
-	}
-
-	return nil
 }
 
 func (p *wsClient) mustEndReceive(err error) bool {
@@ -190,10 +156,8 @@ func (p *wsClient) mustEndReceive(err error) bool {
 
 func (p *wsClient) receive() {
 	defer p.wg.Done()
-
 	for !p.closing.IsSet() {
-		//TODO: is there a faster way to distinguish between RPCResponse and RPCNotify data
-		var data map[string]interface{}
+		var data interface{}
 		if err := p.DecodeReader(p.conn, &data); err != nil {
 			if p.mustEndReceive(err) {
 				break
@@ -203,41 +167,62 @@ func (p *wsClient) receive() {
 			if err != io.EOF {
 				p.errors <- errors.Annotate(err, "DecodeReader")
 			}
-
 			continue
 		}
 
-		if p.resp.Is(data) {
-			p.resp.reset()
-			if err := mapstructure.Decode(data, &p.resp); err != nil {
-				p.errors <- errors.Annotate(err, "Decode [resp]")
-				continue
-			}
+		var resp rpcResponse
+		if err := mapstructure.Decode(data, &resp); err != nil {
+			p.errors <- errors.Annotate(err, "Decode [resp]")
+			continue
+		}
 
-			logging.DDumpJSON("ws resp <", data)
+		p.mutex.Lock()
+		call, ok := p.pending[resp.ID]
+		p.mutex.Unlock()
 
+		if ok {
 			p.mutex.Lock()
-			call, ok := p.pending[p.resp.ID]
+			delete(p.pending, resp.ID)
 			p.mutex.Unlock()
 
-			if ok {
-				p.mutex.Lock()
-				delete(p.pending, p.resp.ID)
-				p.mutex.Unlock()
+			logging.DDumpJSON("ws resp <", resp)
 
-				call.Reply = p.resp.Result
-				if p.resp.HasError() {
-					call.Error = p.resp.Error
-				}
+			if resp.HasError() {
+				call.Error = resp.Error
+			}
 
-				call.done()
-			} else {
-				p.errors <- errors.Errorf("no corresponding call found for incoming rpc data %v", p.resp)
+			call.Reply = resp.Result
+			call.done()
+		} else {
+			var notify rpcNotify
+			if err := mapstructure.Decode(data, &notify); err != nil {
+				p.errors <- errors.Annotate(err, "Decode [notify]")
 				continue
 			}
-		} else if err := p.handleCustomData(data); err != nil {
-			p.errors <- errors.Annotate(err, "handleCustomData")
-			continue
+
+			logging.DDumpJSON("ws notify <", notify)
+
+			parms := notify.Params
+			subscriberID := int(parms[0].(float64))
+
+			p.mutexNotify.Lock()
+			fn, ok := p.notifyFns[subscriberID]
+			p.mutexNotify.Unlock()
+
+			if !ok {
+				p.errors <- errors.Errorf(
+					"a notify hook for subscriber ID %d is undefined",
+					subscriberID,
+				)
+				continue
+			}
+
+			if fn != nil {
+				if err := fn(parms[1]); err != nil {
+					p.errors <- errors.Annotate(err, "handle notify")
+					continue
+				}
+			}
 		}
 	}
 
@@ -254,7 +239,10 @@ func (p *wsClient) receive() {
 
 func (p *wsClient) OnNotify(subscriberID int, fn NotifyFunc) error {
 	if _, ok := p.notifyFns[subscriberID]; ok {
-		return errors.Errorf("a notify hook for subscriberID %d is already defined", subscriberID)
+		return errors.Errorf(
+			"a notify hook for subscriber ID %d is already defined",
+			subscriberID,
+		)
 	}
 
 	p.mutexNotify.Lock()
@@ -269,13 +257,11 @@ func (p *wsClient) OnError(fn ErrorFunc) {
 }
 
 func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
-	param := []interface{}{
+	call, err := p.Call("call", []interface{}{
 		apiID,
 		method,
 		args,
-	}
-
-	call, err := p.Call("call", param)
+	})
 	if err != nil {
 		return nil, errors.Annotate(err, "Call")
 	}

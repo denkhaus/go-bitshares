@@ -127,7 +127,6 @@ func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 			"database",
 			"history",
 			"network_broadcast",
-			"crypto",
 		},
 	}
 
