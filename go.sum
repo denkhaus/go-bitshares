@@ -70,5 +70,7 @@ golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33 h1:I6FyU15t786LL7oL/hn43zqTu
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/tools v0.0.0-20190109164158-98df4c70bed4 h1:ok1qKKemQduMdzDH4xkrbE4sYWw8q3RutRrpXy1dJOU=
 golang.org/x/tools v0.0.0-20190109164158-98df4c70bed4/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20190111181022-4b7be70d8ad9 h1:h2jOx8c4bcpcDW9FJZZBDCrFNd+ptD+PnhTTQ4fQSOM=
+golang.org/x/tools v0.0.0-20190111181022-4b7be70d8ad9/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 h1:yiW+nvdHb9LVqSHQBXfZCieqV4fzYhNBql77zY0ykqs=
 gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637/go.mod h1:BHsqpu/nsuzkT5BpiH1EMZPLyqSMM8JbIavyFACoFNk=

@@ -11,7 +11,7 @@ import (
 type ClientProvider interface {
 	OnError(fn api.ErrorFunc)
 	Connect() error
-	OnNotify(subscriberID int, fn api.NotifyFunc) error
+	OnSubscribe(subscriberID uint64, fn api.SubscribeCallback) error
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
 }

@@ -1,20 +1,23 @@
 package api
 
-import "log"
+//go:generate ffjson $GOFILE
 
-type NotifyFunc func(msg interface{}) error
+import (
+	"log"
+)
+
+type SubscribeCallback func(msg interface{}) error
 type ErrorFunc func(error)
 
 type WebsocketClient interface {
 	IsConnected() bool
 	OnError(fn ErrorFunc)
-	OnNotify(subscriberID int, fn NotifyFunc) error
+	OnSubscribe(subscriberID uint64, fn SubscribeCallback) error
 	Call(method string, args []interface{}) (*RPCCall, error)
 	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
 	Close() error
 	Connect() error
 }
-
 type RPCCall struct {
 	Method  string
 	Request rpcRequest
@@ -81,16 +84,12 @@ func (p rpcResponseString) HasError() bool {
 }
 
 type rpcResponse struct {
-	ID     uint64        `json:"id"`
-	Result interface{}   `json:"result"`
-	Error  ResponseError `json:"error"`
+	ID     uint64         `json:"id"`
+	Result interface{}    `json:"result,omitempty"`
+	Error  *ResponseError `json:"error,omitempty"`
 }
 
-func (p rpcResponse) HasError() bool {
-	return p.Error.Code != 0
-}
-
-type rpcNotify struct {
+type rpcSubscriptionResponse struct {
 	Method string        `json:"method"`
 	Params []interface{} `json:"params"`
 }

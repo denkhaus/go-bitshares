@@ -12,7 +12,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
 	// init operations
-	_ "github.com/denkhaus/bitshares/operations"
+	//_ "github.com/denkhaus/bitshares/operations"
 )
 
 const (
@@ -36,7 +36,7 @@ type WebsocketAPI interface {
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
 	OnError(api.ErrorFunc)
-	OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error
+	OnSubscribe(subscriberID uint64, notifyFn func(msg interface{}) error) error
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
 
@@ -740,8 +740,8 @@ func (p *websocketAPI) CallWsAPI(apiID int, method string, args ...interface{}) 
 }
 
 //OnError - hook your notify callback here
-func (p *websocketAPI) OnNotify(subscriberID int, notifyFn func(msg interface{}) error) error {
-	return p.wsClient.OnNotify(subscriberID, notifyFn)
+func (p *websocketAPI) OnSubscribe(subscriberID uint64, notifyFn func(msg interface{}) error) error {
+	return p.wsClient.OnSubscribe(subscriberID, notifyFn)
 }
 
 //OnError - hook your error callback here

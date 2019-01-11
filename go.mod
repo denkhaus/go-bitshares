@@ -23,6 +23,6 @@ require (
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
-	golang.org/x/tools v0.0.0-20190109164158-98df4c70bed4 // indirect
+	golang.org/x/tools v0.0.0-20190111181022-4b7be70d8ad9 // indirect
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637
 )

@@ -57,13 +57,13 @@ func (suite *subscribeTest) Test_SubscribeToMarket() {
 	}
 
 	bar := pb.StartNew(SubscribeToMarketMsgs).Prefix("wait for data")
-	err := suite.TestAPI.OnNotify(SubscribeToMarketSubscriberID, func(msg interface{}) error {
+	err := suite.TestAPI.OnSubscribe(SubscribeToMarketSubscriberID, func(msg interface{}) error {
 		bar.Increment()
 		return nil
 	})
 
 	if err != nil {
-		suite.FailNow(err.Error(), "OnNotify")
+		suite.FailNow(err.Error(), "OnSubscribe")
 	}
 
 	suite.Condition(func() bool {
@@ -97,13 +97,13 @@ func (suite *subscribeTest) Test_SetSubscribeCallback() {
 	}
 
 	bar := pb.StartNew(SetSubscribeCallbackMsgs).Prefix("wait for data")
-	err = suite.TestAPI.OnNotify(SetSubscribeCallbackSubscriberID, func(msg interface{}) error {
+	err = suite.TestAPI.OnSubscribe(SetSubscribeCallbackSubscriberID, func(msg interface{}) error {
 		bar.Increment()
 		return nil
 	})
 
 	if err != nil {
-		log.Fatal(errors.Annotate(err, "OnNotify"))
+		log.Fatal(errors.Annotate(err, "OnSubscribe"))
 	}
 
 	suite.Condition(func() bool {

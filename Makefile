@@ -4,16 +4,21 @@ clean_ffjson_base:
 	@rm -f types/*_ffjson_expose.go ||:
 	@rm -rf operations/ffjson-inception* ||:
 	@rm -f operations/*_ffjson_expose.go ||:
+	@rm -rf api/ffjson-inception* ||:
+	@rm -f api/*_ffjson_expose.go ||:
 
 clean_ffjson_gen:
-	@rm -f types/*_ffjson.go ||: 
-	@rm -rf operations/*_ffjson.go ||: 
+	@rm -rf types/*_ffjson.go ||: 
+	@rm -rf operations/*_ffjson.go ||:
+	@rm -rf api/*_ffjson.go ||: 
 
-generate: clean_ffjson_base	
+generate: clean_ffjson_base
+	@echo "######################## -> generate"
 	-@go generate types/gen.go
 	-@go generate ./...
 
-generate_new: clean_ffjson_base clean_ffjson_gen		
+generate_new: clean_ffjson_base clean_ffjson_gen
+	@echo "######################## -> generate new"		
 	-@go generate types/gen.go
 	-@go generate ./...
 
@@ -55,6 +60,7 @@ opsamples: buildgen
 	@cd ./gen && btsgen
 
 build: generate
+	@echo "######################## -> build"
 	go build -o /tmp/go-tmpbuild ./operations 
 
 watch:
