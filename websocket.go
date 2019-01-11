@@ -11,6 +11,8 @@ import (
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
+	// init operations
+	_ "github.com/denkhaus/bitshares/operations"
 )
 
 const (
