@@ -13,12 +13,14 @@ type ErrorFunc func(error)
 type WebsocketClient interface {
 	IsConnected() bool
 	OnError(fn ErrorFunc)
-	OnSubscribe(subscriberID uint64, fn SubscribeCallback) error
+	OnSubscribe(ID uint64, fn SubscribeCallback) error
 	Call(method string, args []interface{}) (*RPCCall, error)
 	CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error
 	Connect() error
 }
+
+// ffjson: skip
 type RPCCall struct {
 	Method  string
 	Request rpcRequest
@@ -36,6 +38,7 @@ func (call *RPCCall) done() {
 	}
 }
 
+// ffjson: skip
 type rpcRequest struct {
 	Method string        `json:"method"`
 	Params []interface{} `json:"params"`
@@ -51,6 +54,7 @@ type ResponseErrorContext struct {
 	ThreadName string `json:"thread_name"`
 	Timestamp  string `json:"timestamp"`
 }
+
 type ResponseErrorStack struct {
 	Context ResponseErrorContext `json:"context"`
 	Format  string               `json:"format"`

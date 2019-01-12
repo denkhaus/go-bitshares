@@ -13,8 +13,9 @@ clean_ffjson_gen:
 	@rm -rf api/*_ffjson.go ||: 
 
 generate: clean_ffjson_base
-	@echo "######################## -> generate"
+	@echo "######################## -> generate ObjectIDs"
 	-@go generate types/gen.go
+	@echo "######################## -> generate ffjson stuff"
 	-@go generate ./...
 
 generate_new: clean_ffjson_base clean_ffjson_gen
@@ -33,6 +34,9 @@ init:
 	@GO111MODULE=on go get -u github.com/cespare/reflex
 	@GO111MODULE=on go get -u github.com/bradhe/stopwatch
 
+
+test: test_operations test_api
+
 test_api: 
 	@echo "######################## -> test bitshares api"
 	-go test -v ./tests -run ^TestCommon$
@@ -43,7 +47,7 @@ test_api:
 
 test_operations:
 	@echo "######################## -> test operations"
-	@go test -v ./operations -run ^TestOperations$
+	@go test -v ./tests -run ^TestOperations$
 
 test_blocks:
 	@echo "this is a long running test, abort with Ctrl + C"

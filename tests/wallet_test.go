@@ -9,7 +9,6 @@ import (
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/suite"
 )
@@ -82,7 +81,7 @@ func (suite *walletAPITest) Test_Info() {
 	}
 
 	suite.NotNil(props)
-	logging.Dump("wallet_info <", props)
+	//logging.Dump("wallet_info <", props)
 }
 
 // func (suite *walletAPITest) Test_Transfer2() {

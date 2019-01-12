@@ -1,6 +1,7 @@
 package bitshares
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/denkhaus/bitshares/api"
@@ -11,8 +12,9 @@ import (
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
+
 	// init operations
-	//_ "github.com/denkhaus/bitshares/operations"
+	_ "github.com/denkhaus/bitshares/operations"
 )
 
 const (
@@ -28,7 +30,7 @@ const (
 
 type WebsocketAPI interface {
 	//Common functions
-	CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error)
+	CallWsAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error
 	Connect() error
 	DatabaseAPIID() int
@@ -266,7 +268,7 @@ func (p *websocketAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 
 	ret := types.PublicKeys{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal PublicKeys")
+		return nil, errors.Annotate(err, "Unmarshal [PublicKeys]")
 	}
 
 	return ret, nil
@@ -283,7 +285,7 @@ func (p *websocketAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKey
 
 	ret := types.PublicKeys{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal PublicKeys")
+		return nil, errors.Annotate(err, "Unmarshal [PublicKeys]")
 	}
 
 	return ret, nil
@@ -300,7 +302,7 @@ func (p *websocketAPI) GetBlock(number uint64) (*types.Block, error) {
 
 	ret := types.Block{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Block")
+		return nil, errors.Annotate(err, "Unmarshal [Block]")
 	}
 
 	return &ret, nil
@@ -317,7 +319,7 @@ func (p *websocketAPI) GetAccountByName(name string) (*types.Account, error) {
 
 	ret := types.Account{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Account")
+		return nil, errors.Annotate(err, "Unmarshal [Account]")
 	}
 
 	return &ret, nil
@@ -342,7 +344,7 @@ func (p *websocketAPI) GetAccountHistory(account types.GrapheneObject, stop type
 
 	ret := types.OperationHistories{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Histories")
+		return nil, errors.Annotate(err, "Unmarshal [Histories]")
 	}
 
 	return ret, nil
@@ -360,7 +362,7 @@ func (p *websocketAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 
 	ret := types.Accounts{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Accounts")
+		return nil, errors.Annotate(err, "Unmarshal [Accounts]")
 	}
 
 	return ret, nil
@@ -377,7 +379,7 @@ func (p *websocketAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalPropert
 
 	var ret types.DynamicGlobalProperties
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal DynamicGlobalProperties")
+		return nil, errors.Annotate(err, "Unmarshal [DynamicGlobalProperties]")
 	}
 
 	return &ret, nil
@@ -395,7 +397,7 @@ func (p *websocketAPI) GetAccountBalances(account types.GrapheneObject, assets .
 
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
+		return nil, errors.Annotate(err, "Unmarshal [AssetAmounts]")
 	}
 
 	return ret, nil
@@ -413,7 +415,7 @@ func (p *websocketAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.
 
 	ret := types.FullAccountInfos{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal FullAccountInfos: "+string(*resp))
+		return nil, errors.Annotate(err, "Unmarshal [FullAccountInfos]")
 	}
 
 	return ret, nil
@@ -429,7 +431,7 @@ func (p *websocketAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.
 	logging.DDumpJSON("get_24_volume <", resp)
 
 	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
-		err = errors.Annotate(err, "unmarshal Volume24")
+		err = errors.Annotate(err, "Unmarshal [Volume24]")
 		return
 	}
 
@@ -453,7 +455,7 @@ func (p *websocketAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 
 	ret := types.Assets{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Assets")
+		return nil, errors.Annotate(err, "Unmarshal [Assets]")
 	}
 
 	return ret, nil
@@ -470,7 +472,7 @@ func (p *websocketAPI) GetRequiredFees(ops types.Operations, feeAsset types.Grap
 
 	ret := types.AssetAmounts{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
+		return nil, errors.Annotate(err, "Unmarshal [AssetAmounts]")
 	}
 
 	return ret, nil
@@ -491,7 +493,7 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 
 	ret := types.LimitOrders{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal LimitOrders")
+		return nil, errors.Annotate(err, "Unmarshal [LimitOrders]")
 	}
 
 	return ret, nil
@@ -507,7 +509,7 @@ func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int)
 	logging.DDumpJSON("get_order_book <", resp)
 
 	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
-		err = errors.Annotate(err, "unmarshal LimitOrders")
+		err = errors.Annotate(err, "Unmarshal [LimitOrders]")
 		return
 	}
 
@@ -529,7 +531,7 @@ func (p *websocketAPI) GetForceSettlementOrders(assetID types.GrapheneObject, li
 
 	ret := types.ForceSettlementOrders{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal ForceSettlementOrders")
+		return nil, errors.Annotate(err, "Unmarshal [ForceSettlementOrders]")
 	}
 
 	return ret, nil
@@ -550,7 +552,7 @@ func (p *websocketAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 
 	ret := types.CallOrders{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal CallOrders")
+		return nil, errors.Annotate(err, "Unmarshal [CallOrders]")
 	}
 
 	return ret, nil
@@ -567,7 +569,7 @@ func (p *websocketAPI) GetMarginPositions(accountID types.GrapheneObject) (types
 
 	ret := types.CallOrders{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal CallOrders")
+		return nil, errors.Annotate(err, "Unmarshal [CallOrders]")
 	}
 
 	return ret, nil
@@ -588,7 +590,7 @@ func (p *websocketAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 
 	ret := types.MarketTrades{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal MarketTrades")
+		return nil, errors.Annotate(err, "Unmarshal [MarketTrades]")
 	}
 
 	return ret, nil
@@ -653,49 +655,49 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 			case types.ObjectTypeAccount:
 				acc := types.Account{}
 				if err := ffjson.Unmarshal(b, &acc); err != nil {
-					return nil, errors.Annotate(err, "unmarshal Account")
+					return nil, errors.Annotate(err, "Unmarshal [Account]")
 				}
 				ret = append(ret, acc)
 			case types.ObjectTypeAsset:
 				ass := types.Asset{}
 				if err := ffjson.Unmarshal(b, &ass); err != nil {
-					return nil, errors.Annotate(err, "unmarshal Asset")
+					return nil, errors.Annotate(err, "Unmarshal [Asset]")
 				}
 				ret = append(ret, ass)
 			case types.ObjectTypeForceSettlement:
 				set := types.ForceSettlementOrder{}
 				if err := ffjson.Unmarshal(b, &set); err != nil {
-					return nil, errors.Annotate(err, "unmarshal ForceSettlementOrder")
+					return nil, errors.Annotate(err, "Unmarshal [ForceSettlementOrder]")
 				}
 				ret = append(ret, set)
 			case types.ObjectTypeLimitOrder:
 				lim := types.LimitOrder{}
 				if err := ffjson.Unmarshal(b, &lim); err != nil {
-					return nil, errors.Annotate(err, "unmarshal LimitOrder")
+					return nil, errors.Annotate(err, "Unmarshal [LimitOrder]")
 				}
 				ret = append(ret, lim)
 			case types.ObjectTypeCallOrder:
 				cal := types.CallOrder{}
 				if err := ffjson.Unmarshal(b, &cal); err != nil {
-					return nil, errors.Annotate(err, "unmarshal CallOrder")
+					return nil, errors.Annotate(err, "Unmarshal [CallOrder]")
 				}
 				ret = append(ret, cal)
 			case types.ObjectTypeCommitteeMember:
 				mem := types.CommitteeMember{}
 				if err := ffjson.Unmarshal(b, &mem); err != nil {
-					return nil, errors.Annotate(err, "unmarshal CommitteeMember")
+					return nil, errors.Annotate(err, "Unmarshal [CommitteeMember]")
 				}
 				ret = append(ret, mem)
 			case types.ObjectTypeOperationHistory:
 				hist := types.OperationHistory{}
-				if err := ffjson.Unmarshal(b, &hist); err != nil {
-					return nil, errors.Annotate(err, "unmarshal OperationHistory")
+				if err := hist.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [OperationHistory]")
 				}
 				ret = append(ret, hist)
 			case types.ObjectTypeBalance:
 				bal := types.Balance{}
 				if err := ffjson.Unmarshal(b, &bal); err != nil {
-					return nil, errors.Annotate(err, "unmarshal Balance")
+					return nil, errors.Annotate(err, "Unmarshal [Balance]")
 				}
 				ret = append(ret, bal)
 
@@ -709,7 +711,7 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 			case types.ObjectTypeAssetBitAssetData:
 				bit := types.BitAssetData{}
 				if err := ffjson.Unmarshal(b, &bit); err != nil {
-					return nil, errors.Annotate(err, "unmarshal BitAssetData")
+					return nil, errors.Annotate(err, "Unmarshal [BitAssetData]")
 				}
 				ret = append(ret, bit)
 
@@ -734,26 +736,29 @@ func (p *websocketAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 
 	ret := types.SignedTransaction{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+		return nil, errors.Annotate(err, "Unmarshal [Transaction]")
 	}
 
 	return &ret, nil
 }
 
+//DatabaseAPIID returns the database API ID
 func (p *websocketAPI) DatabaseAPIID() int {
 	return p.databaseAPIID
 }
 
+//BroadcastAPIID returns the broadcast API ID
 func (p *websocketAPI) BroadcastAPIID() int {
 	return p.broadcastAPIID
 }
 
+//HistoryAPIID returns the history API ID
 func (p *websocketAPI) HistoryAPIID() int {
 	return p.historyAPIID
 }
 
 //CallWsAPI invokes a websocket API call
-func (p *websocketAPI) CallWsAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *websocketAPI) CallWsAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error) {
 	return p.wsClient.CallAPI(apiID, method, args...)
 }
 

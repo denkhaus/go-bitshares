@@ -16,6 +16,7 @@ import (
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
+	"github.com/pquerna/ffjson/ffjson"
 	"github.com/stretchr/objx"
 	tomb "gopkg.in/tomb.v2"
 
@@ -96,7 +97,12 @@ func main() {
 			handleError(errors.Annotate(err, "GetBlock"))
 		}
 
-		m := objx.New(resp)
+		var data map[string]interface{}
+		if ffjson.Unmarshal(*resp, &data); err != nil {
+			handleError(errors.Annotate(err, "Unmarshal [resp]"))
+		}
+
+		m := objx.New(data)
 		trxs := m.Get("transactions")
 
 		// enumerate Transactions
