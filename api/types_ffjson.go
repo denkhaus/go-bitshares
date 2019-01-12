@@ -46,11 +46,20 @@ func (j *RPCCall) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		}
 
 	}
-	buf.WriteString(`,"Reply":`)
-	/* Interface types must use runtime reflection. type=interface {} kind=interface */
-	err = buf.Encode(j.Reply)
-	if err != nil {
-		return err
+	if j.Reply != nil {
+		buf.WriteString(`,"Reply":`)
+
+		{
+
+			obj, err = j.Reply.MarshalJSON()
+			if err != nil {
+				return err
+			}
+			buf.Write(obj)
+
+		}
+	} else {
+		buf.WriteString(`,"Reply":null`)
 	}
 	buf.WriteString(`,"Error":`)
 	/* Interface types must use runtime reflection. type=error kind=interface */
@@ -317,19 +326,30 @@ handle_Request:
 
 handle_Reply:
 
-	/* handler: j.Reply type=interface {} kind=interface quoted=false*/
+	/* handler: j.Reply type=json.RawMessage kind=slice quoted=false*/
 
 	{
-		/* Falling back. type=interface {} kind=interface */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Reply)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Reply = nil
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			if j.Reply == nil {
+				j.Reply = new(json.RawMessage)
+			}
+
+			err = j.Reply.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -2256,13 +2276,20 @@ func (j *rpcResponse) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	fflib.FormatBits2(buf, uint64(j.ID), 10, false)
 	buf.WriteByte(',')
 	if j.Result != nil {
-		buf.WriteString(`"result":`)
-		/* Interface types must use runtime reflection. type=interface {} kind=interface */
-		err = buf.Encode(j.Result)
-		if err != nil {
-			return err
+		if true {
+			buf.WriteString(`"result":`)
+
+			{
+
+				obj, err = j.Result.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
+			}
+			buf.WriteByte(',')
 		}
-		buf.WriteByte(',')
 	}
 	if j.Error != nil {
 		if true {
@@ -2478,19 +2505,30 @@ handle_ID:
 
 handle_Result:
 
-	/* handler: j.Result type=interface {} kind=interface quoted=false*/
+	/* handler: j.Result type=json.RawMessage kind=slice quoted=false*/
 
 	{
-		/* Falling back. type=interface {} kind=interface */
-		tbuf, err := fs.CaptureField(tok)
-		if err != nil {
-			return fs.WrapErr(err)
-		}
+		if tok == fflib.FFTok_null {
 
-		err = json.Unmarshal(tbuf, &j.Result)
-		if err != nil {
-			return fs.WrapErr(err)
+			j.Result = nil
+
+		} else {
+
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
+
+			if j.Result == nil {
+				j.Result = new(json.RawMessage)
+			}
+
+			err = j.Result.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

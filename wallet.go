@@ -6,7 +6,6 @@ import (
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
@@ -93,13 +92,17 @@ func (p *walletAPI) Unlock(password string) error {
 // IsLocked checks if wallet is locked.
 func (p *walletAPI) IsLocked() (bool, error) {
 	resp, err := p.rpcClient.CallAPI("is_locked", types.EmptyParams)
-
 	if err != nil {
 		return false, err
 	}
 
 	logging.DDumpJSON("is_locked <", resp)
-	return resp.(bool), err
+
+	var ret bool
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return false, errors.Annotate(err, "Unmarshal [ret]")
+	}
+	return ret, nil
 }
 
 // Buy places a limit order attempting to buy one asset with another.
@@ -130,8 +133,8 @@ func (p *walletAPI) Buy(account types.GrapheneObject, base, quote types.Graphene
 	logging.DDumpJSON("buy <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Transaction")
 	}
 
 	return &ret, nil
@@ -165,8 +168,8 @@ func (p *walletAPI) Sell(account types.GrapheneObject, base, quote types.Graphen
 	logging.DDumpJSON("sell <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Transaction")
 	}
 
 	return &ret, nil
@@ -207,8 +210,8 @@ func (p *walletAPI) SellAsset(account types.GrapheneObject, amountToSell string,
 	logging.DDumpJSON("sell_asset <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Transaction")
 	}
 
 	return &ret, nil
@@ -235,8 +238,8 @@ func (p *walletAPI) BorrowAsset(account types.GrapheneObject, amountToBorrow str
 	logging.DDumpJSON("borrow_asset <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Transaction")
 	}
 
 	return &ret, nil
@@ -251,8 +254,8 @@ func (p *walletAPI) ListAccountBalances(account types.GrapheneObject) (types.Ass
 	logging.DDumpJSON("list_account_balances <", resp)
 
 	ret := types.AssetAmounts{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal AssetAmounts")
 	}
 
 	return ret, nil
@@ -269,7 +272,11 @@ func (p *walletAPI) SerializeTransaction(tx *types.SignedTransaction) (string, e
 
 	logging.DDumpJSON("serialize_transaction <", resp)
 
-	return resp.(string), nil
+	var ret string
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return "", errors.Annotate(err, "Unmarshal [ret]")
+	}
+	return ret, nil
 }
 
 // SignTransaction signs a transaction
@@ -285,8 +292,8 @@ func (p *walletAPI) SignTransaction(tx *types.SignedTransaction, broadcast bool)
 	logging.DDumpJSON("sign_transaction <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Transaction")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Transaction")
 	}
 
 	return &ret, nil
@@ -298,10 +305,15 @@ func (p *walletAPI) ReadMemo(memo *types.Memo) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if msg, ok := resp.(string); ok {
-		return msg, nil
+
+	logging.DDumpJSON("read_memo <", resp)
+
+	var ret string
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return "", errors.Annotate(err, "Unmarshal [ret]")
 	}
-	return "", nil
+
+	return ret, nil
 }
 
 //GetBlock retrieves a block by number
@@ -314,8 +326,8 @@ func (p *walletAPI) GetBlock(number uint64) (*types.Block, error) {
 	logging.DDumpJSON("get_block <", resp)
 
 	ret := types.Block{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Block")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Block")
 	}
 
 	return &ret, nil
@@ -344,8 +356,8 @@ func (p *walletAPI) GetRelativeAccountHistory(account types.GrapheneObject, stop
 	logging.DDumpJSON("get_relative_account_history <", resp)
 
 	ret := types.OperationRelativeHistories{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal Histories")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal Histories")
 	}
 
 	return ret, nil
@@ -368,8 +380,8 @@ func (p *walletAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties
 	logging.DDumpJSON("get_dynamic_global_properties <", resp)
 
 	var ret types.DynamicGlobalProperties
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal DynamicGlobalProperties")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal DynamicGlobalProperties")
 	}
 
 	return &ret, nil
@@ -384,8 +396,8 @@ func (p *walletAPI) Info() (*types.Info, error) {
 	logging.DDumpJSON("info <", resp)
 
 	var ret types.Info
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal info")
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal info")
 	}
 
 	return &ret, nil
@@ -402,8 +414,8 @@ func (p *walletAPI) Info() (*types.Info, error) {
 // 		return nil, err
 // 	}
 // 	ret := types.SignedTransactionWithTransactionId{}
-// 	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-// 		return nil, errors.Annotate(err, "unmarshal Transaction")
+// 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+// 		return nil, errors.Annotate(err, "Unmarshal Transaction")
 // 	}
 // 	return &ret, nil
 // }

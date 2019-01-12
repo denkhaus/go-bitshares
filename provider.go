@@ -1,6 +1,8 @@
 package bitshares
 
 import (
+	"encoding/json"
+
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
@@ -12,7 +14,7 @@ type ClientProvider interface {
 	OnError(fn api.ErrorFunc)
 	Connect() error
 	OnSubscribe(subscriberID uint64, fn api.SubscribeCallback) error
-	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
+	CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error
 }
 
@@ -31,7 +33,7 @@ func NewSimpleClientProvider(endpointURL string, ws WebsocketAPI) ClientProvider
 	return &sim
 }
 
-func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error) {
 	if !p.WebsocketClient.IsConnected() {
 		if err := p.api.Connect(); err != nil {
 			return nil, errors.Annotate(err, "Connect [api]")
@@ -107,7 +109,7 @@ func (p *BestNodeClientProvider) needsReconnect() bool {
 		!p.WebsocketClient.IsConnected()
 }
 
-func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *BestNodeClientProvider) CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error) {
 	//ensure reliable connection
 	if p.needsReconnect() {
 		// either way unsignal nodeChanged

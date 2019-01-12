@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -13,6 +14,11 @@ import (
 )
 
 func ToBytes(in interface{}) []byte {
+	if msg, ok := in.(*json.RawMessage); ok {
+		b, _ := msg.MarshalJSON()
+		return b
+	}
+
 	b, err := ffjson.Marshal(in)
 	if err != nil {
 		panic("ToBytes: unable to marshal input")

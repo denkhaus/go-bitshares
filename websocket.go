@@ -81,12 +81,17 @@ type websocketAPI struct {
 func (p *websocketAPI) getAPIID(identifier string) (int, error) {
 	resp, err := p.wsClient.CallAPI(1, identifier, types.EmptyParams)
 	if err != nil {
-		return InvalidApiID, errors.Annotate(err, identifier)
+		return InvalidApiID, errors.Annotatef(err, "CallAPI %s", identifier)
 	}
 
 	logging.DDumpJSON("getApiID <", resp)
 
-	return int(resp.(float64)), nil
+	var id int
+	if err := ffjson.Unmarshal(*resp, &id); err != nil {
+		return InvalidApiID, errors.Annotate(err, "Unmarshal [id]")
+	}
+
+	return id, nil
 }
 
 // login
@@ -98,7 +103,12 @@ func (p *websocketAPI) login() (bool, error) {
 
 	logging.DDumpJSON("login <", resp)
 
-	return resp.(bool), nil
+	var success bool
+	if err := ffjson.Unmarshal(*resp, &success); err != nil {
+		return false, errors.Annotate(err, "Unmarshal [success]")
+	}
+
+	return success, nil
 }
 
 // SetSubscribeCallback
@@ -255,7 +265,7 @@ func (p *websocketAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 	logging.DDumpJSON("get_potential_signatures <", resp)
 
 	ret := types.PublicKeys{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal PublicKeys")
 	}
 
@@ -272,7 +282,7 @@ func (p *websocketAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKey
 	logging.DDumpJSON("get_required_signatures <", resp)
 
 	ret := types.PublicKeys{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal PublicKeys")
 	}
 
@@ -289,7 +299,7 @@ func (p *websocketAPI) GetBlock(number uint64) (*types.Block, error) {
 	logging.DDumpJSON("get_block <", resp)
 
 	ret := types.Block{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Block")
 	}
 
@@ -306,7 +316,7 @@ func (p *websocketAPI) GetAccountByName(name string) (*types.Account, error) {
 	logging.DDumpJSON("get_account_by_name <", resp)
 
 	ret := types.Account{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Account")
 	}
 
@@ -331,7 +341,7 @@ func (p *websocketAPI) GetAccountHistory(account types.GrapheneObject, stop type
 	logging.DDumpJSON("get_account_history <", resp)
 
 	ret := types.OperationHistories{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Histories")
 	}
 
@@ -349,7 +359,7 @@ func (p *websocketAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 	logging.DDumpJSON("get_accounts <", resp)
 
 	ret := types.Accounts{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Accounts")
 	}
 
@@ -366,7 +376,7 @@ func (p *websocketAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalPropert
 	logging.DDumpJSON("get_dynamic_global_properties <", resp)
 
 	var ret types.DynamicGlobalProperties
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal DynamicGlobalProperties")
 	}
 
@@ -384,7 +394,7 @@ func (p *websocketAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	logging.DDumpJSON("get_account_balances <", resp)
 
 	ret := types.AssetAmounts{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
@@ -402,8 +412,8 @@ func (p *websocketAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.
 	logging.DDumpJSON("get_full_accounts <", resp)
 
 	ret := types.FullAccountInfos{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
-		return nil, errors.Annotate(err, "unmarshal FullAccountInfos: "+string(util.ToBytes(resp)))
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "unmarshal FullAccountInfos: "+string(*resp))
 	}
 
 	return ret, nil
@@ -418,7 +428,7 @@ func (p *websocketAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.
 
 	logging.DDumpJSON("get_24_volume <", resp)
 
-	if err = ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
 		err = errors.Annotate(err, "unmarshal Volume24")
 		return
 	}
@@ -442,7 +452,7 @@ func (p *websocketAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 	logging.DDumpJSON("list_assets <", resp)
 
 	ret := types.Assets{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Assets")
 	}
 
@@ -459,7 +469,7 @@ func (p *websocketAPI) GetRequiredFees(ops types.Operations, feeAsset types.Grap
 	logging.DDumpJSON("get_required_fees <", resp)
 
 	ret := types.AssetAmounts{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal AssetAmounts")
 	}
 
@@ -480,7 +490,7 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 	logging.DDumpJSON("get_limit_orders <", resp)
 
 	ret := types.LimitOrders{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal LimitOrders")
 	}
 
@@ -489,7 +499,6 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 
 //GetOrderBook returns the OrderBook for the market base:quote.
 func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
-
 	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)
 	if err != nil {
 		return
@@ -497,7 +506,7 @@ func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int)
 
 	logging.DDumpJSON("get_order_book <", resp)
 
-	if err = ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
 		err = errors.Annotate(err, "unmarshal LimitOrders")
 		return
 	}
@@ -519,7 +528,7 @@ func (p *websocketAPI) GetForceSettlementOrders(assetID types.GrapheneObject, li
 	logging.DDumpJSON("get_settle_orders <", resp)
 
 	ret := types.ForceSettlementOrders{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal ForceSettlementOrders")
 	}
 
@@ -540,7 +549,7 @@ func (p *websocketAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 	logging.DDumpJSON("get_call_orders <", resp)
 
 	ret := types.CallOrders{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal CallOrders")
 	}
 
@@ -557,7 +566,7 @@ func (p *websocketAPI) GetMarginPositions(accountID types.GrapheneObject) (types
 	logging.DDumpJSON("get_margin_positions <", resp)
 
 	ret := types.CallOrders{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal CallOrders")
 	}
 
@@ -578,7 +587,7 @@ func (p *websocketAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 	logging.DDumpJSON("get_trade_history <", resp)
 
 	ret := types.MarketTrades{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal MarketTrades")
 	}
 
@@ -593,7 +602,12 @@ func (p *websocketAPI) GetChainID() (string, error) {
 	}
 
 	logging.DDumpJSON("get_chain_id <", resp)
-	return resp.(string), nil
+
+	var id string
+	if err := ffjson.Unmarshal(*resp, &id); err != nil {
+		return "", errors.Annotate(err, "Unmarshal [id]")
+	}
+	return id, nil
 }
 
 //GetObjects returns a list of Graphene Objects by ID.
@@ -601,12 +615,16 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 	params := types.GrapheneObjects(ids).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_objects", params)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_objects <", resp)
 
-	data := resp.([]interface{})
+	var data []interface{}
+	if err := ffjson.Unmarshal(*resp, &data); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [data]")
+	}
+
 	ret := make([]interface{}, 0)
 	id := types.ObjectID{}
 
@@ -715,7 +733,7 @@ func (p *websocketAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool)
 	logging.DDumpJSON("cancel_order <", resp)
 
 	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(util.ToBytes(resp), &ret); err != nil {
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "unmarshal Transaction")
 	}
 

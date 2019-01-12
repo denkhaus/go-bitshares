@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"io"
 	"math"
 	"net"
@@ -261,7 +262,7 @@ func (p *wsClient) OnError(fn ErrorFunc) {
 	p.onError = fn
 }
 
-func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (interface{}, error) {
+func (p *wsClient) CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error) {
 	call, err := p.Call("call", []interface{}{
 		apiID,
 		method,
