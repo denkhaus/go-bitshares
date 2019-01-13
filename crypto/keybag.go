@@ -80,6 +80,22 @@ func (b *KeyBag) Remove(pub string) bool {
 	return false
 }
 
+func (b KeyBag) EncryptMemo(memo *types.Memo, msg string) error {
+	priv := b.Private(&memo.From)
+	if priv == nil {
+		return errors.Errorf(
+			"private key related to %q not found in KeyBag",
+			memo.From,
+		)
+	}
+
+	if err := memo.Encrypt(priv, msg); err != nil {
+		return errors.Annotate(err, "Encrypt")
+	}
+
+	return nil
+}
+
 func (b *KeyBag) ImportFromFile(path string) error {
 	inFile, err := os.Open(path)
 	if err != nil {
@@ -105,6 +121,7 @@ func (b *KeyBag) ImportFromFile(path string) error {
 	return nil
 }
 
+// Public returns a collection of public keys in bag.
 func (b KeyBag) Publics() (out types.PublicKeys) {
 	for _, k := range b.keys {
 		pub := k.PublicKey()
@@ -113,22 +130,29 @@ func (b KeyBag) Publics() (out types.PublicKeys) {
 	return
 }
 
-func (b KeyBag) PublicPresent(pub *types.PublicKey) bool {
-	for _, k := range b.keys {
-		if k.PublicKey().Equal(pub) {
-			return true
-		}
-	}
-	return false
-}
-
+// Privates returns a collection of private keys in bag.
 func (b KeyBag) Privates() (out types.PrivateKeys) {
 	for _, k := range b.keys {
 		priv := k
 		out = append(out, *priv)
 	}
-
 	return
+}
+
+// Present checks if a private key associated with the given public key is present
+func (b KeyBag) Present(pub *types.PublicKey) bool {
+	return b.Private(pub) != nil
+}
+
+//Private returns the private key associated with the given public key
+func (b KeyBag) Private(pub *types.PublicKey) *types.PrivateKey {
+	for _, k := range b.keys {
+		if k.PublicKey().Equal(pub) {
+			priv := *k
+			return &priv
+		}
+	}
+	return nil
 }
 
 func (b KeyBag) PrivatesByPublics(pubKeys types.PublicKeys) (out types.PrivateKeys) {

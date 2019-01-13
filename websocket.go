@@ -7,6 +7,7 @@ import (
 	"github.com/denkhaus/bitshares/api"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
+	"github.com/denkhaus/bitshares/operations"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
@@ -44,8 +45,8 @@ type WebsocketAPI interface {
 
 	//Websocket API functions
 	BroadcastTransaction(tx *types.SignedTransaction) error
+	BroadcastTransactionSynchronous(tx *types.SignedTransaction) (*types.BroadcastResponse, error)
 	CancelAllSubscriptions() error
-	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error)
 	GetAccountBalances(account types.GrapheneObject, assets ...types.GrapheneObject) (types.AssetAmounts, error)
 	GetAccountByName(name string) (*types.Account, error)
 	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error)
@@ -68,12 +69,14 @@ type WebsocketAPI interface {
 	GetTicker(base, quote types.GrapheneObject) (*types.MarketTicker, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
 	GetTransaction(blockNum uint64, trxInBlock uint32) (*types.SignedTransaction, error)
+	LimitOrderCancel(keyBag *crypto.KeyBag, feePayingAccount, orderID, feeAsset types.GrapheneObject) error
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
 	LookupAssetSymbols(symbols ...string) (types.Assets, error)
 	SetSubscribeCallback(ID uint64, clearFilter bool) error
 	SubscribeToBlockApplied(onBlockApplied api.BlockAppliedCallback) error
 	SubscribeToMarket(base, quote types.GrapheneObject, onMarketData api.SubscribeCallback) error
 	SubscribeToPendingTransactions(onPendingTransaction api.SubscribeCallback) error
+	Transfer(keyBag *crypto.KeyBag, from, to, feeAsset types.GrapheneObject, amount types.AssetAmount, memo string) error
 	UnsubscribeFromMarket(base, quote types.GrapheneObject) error
 	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (*types.Volume24, error)
 }
@@ -189,9 +192,9 @@ func (p *websocketAPI) CancelAllSubscriptions() error {
 	return nil
 }
 
-//Broadcast a transaction to the network.
-//The transaction will be checked for validity prior to broadcasting.
-//If it fails to apply at the connected node, an error will be thrown and the transaction will not be broadcast.
+// BroadcastTransaction broadcasts a transaction to the network.
+// The transaction will be checked for validity prior to broadcasting. If it fails to apply at the connected node,
+// an error will be thrown and the transaction will not be broadcast.
 func (p *websocketAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	_, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
 	if err != nil {
@@ -199,6 +202,24 @@ func (p *websocketAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	}
 
 	return nil
+}
+
+// BroadcastTransactionSynchronous broadcasts a transaction to the network.
+// The transaction will be checked for validity prior to broadcasting. If it fails to apply at the connected node,
+// an error will be thrown and the transaction will not be broadcast. This version of broadcast transaction registers a callback method
+// that will be called when the transaction is included into a block. The callback method includes the transaction id, block number, and transaction number in the block.
+func (p *websocketAPI) BroadcastTransactionSynchronous(tx *types.SignedTransaction) (*types.BroadcastResponse, error) {
+	resp, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction_synchronous", tx)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	var ret types.BroadcastResponse
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [BroadcastResponse]")
+	}
+
+	return &ret, nil
 }
 
 //SignTransaction signs a given transaction.
@@ -619,6 +640,27 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 	return ret, nil
 }
 
+// LimitOrderCancel cancels a certain limit order given by orderID. Fees are paid in feeAsset.
+// The transaction is signed with private keys in keyBag.
+func (p *websocketAPI) LimitOrderCancel(keyBag *crypto.KeyBag, feePayingAccount, orderID, feeAsset types.GrapheneObject) error {
+	op := operations.LimitOrderCancelOperation{
+		FeePayingAccount: types.AccountIDFromObject(feePayingAccount),
+		Order:            types.LimitOrderIDFromObject(orderID),
+		Extensions:       types.Extensions{},
+	}
+
+	trx, err := p.BuildSignedTransaction(keyBag, feeAsset, &op)
+	if err != nil {
+		return errors.Annotate(err, "BuildSignedTransaction")
+	}
+
+	if err := p.BroadcastTransaction(trx); err != nil {
+		return errors.Annotate(err, "BroadcastTransaction")
+	}
+
+	return nil
+}
+
 //GetOrderBook returns the OrderBook for the market base:quote.
 func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (*types.OrderBook, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)
@@ -890,21 +932,36 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 	return ret, nil
 }
 
-// CancelOrder cancels an order given by orderID
-func (p *websocketAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
-	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.ID(), broadcast)
+// Transfer transfers a certain amount between two accounts. Fees are paid in feeAsset.
+// The transaction is signed with private keys in keyBag.
+func (p *websocketAPI) Transfer(keyBag *crypto.KeyBag, from, to, feeAsset types.GrapheneObject, amount types.AssetAmount, memo string) error {
+	op := operations.TransferOperation{
+		Amount:     amount,
+		Extensions: types.Extensions{},
+		From:       types.AccountIDFromObject(from),
+		To:         types.AccountIDFromObject(to),
+	}
+
+	if memo != "" {
+		builder := p.NewMemoBuilder(from, to, memo)
+		m, err := builder.Encrypt(keyBag)
+		if err != nil {
+			return errors.Annotate(err, "Encrypt [memo]")
+		}
+
+		op.Memo = m
+	}
+
+	trx, err := p.BuildSignedTransaction(keyBag, feeAsset, &op)
 	if err != nil {
-		return nil, errors.Annotate(err, "CallAPI")
+		return errors.Annotate(err, "BuildSignedTransaction")
 	}
 
-	logging.DDumpJSON("cancel_order <", resp)
-
-	ret := types.SignedTransaction{}
-	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
-		return nil, errors.Annotate(err, "Unmarshal [Transaction]")
+	if err := p.BroadcastTransaction(trx); err != nil {
+		return errors.Annotate(err, "BroadcastTransaction")
 	}
 
-	return &ret, nil
+	return nil
 }
 
 //DatabaseAPIID returns the database API ID
