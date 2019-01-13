@@ -13,7 +13,7 @@ import (
 type ClientProvider interface {
 	OnError(fn api.ErrorFunc)
 	Connect() error
-	OnSubscribe(subscriberID uint64, fn api.SubscribeCallback) error
+	Subscribe(apiID int, method string, fn api.SubscribeCallback, args ...interface{}) (*json.RawMessage, error)
 	CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error
 }

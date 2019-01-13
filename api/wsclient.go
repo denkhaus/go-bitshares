@@ -31,7 +31,8 @@ type wsClient struct {
 	conn           *websocket.Conn
 	closing        *abool.AtomicBool
 	shutdown       *abool.AtomicBool
-	currentID      uint64
+	requestID      uint64
+	subscribeID    uint64
 	wg             sync.WaitGroup
 	mutex          sync.Mutex // protects the following
 	pending        map[uint64]*RPCCall
@@ -225,7 +226,7 @@ func (p *wsClient) receive() {
 
 			if fn != nil {
 				if err := fn(parms[1]); err != nil {
-					p.errors <- errors.Annotate(err, "handle notify")
+					p.errors <- errors.Annotate(err, "subscribe callback error")
 					continue
 				}
 			}
@@ -243,19 +244,21 @@ func (p *wsClient) receive() {
 	}
 }
 
-func (p *wsClient) OnSubscribe(subscriberID uint64, fn SubscribeCallback) error {
-	if _, ok := p.subscrFns[subscriberID]; ok {
-		return errors.Errorf(
-			"hook for subscriber ID %d is already defined",
-			subscriberID,
-		)
+func (p *wsClient) Subscribe(apiID int, method string, fn SubscribeCallback, args ...interface{}) (*json.RawMessage, error) {
+	p.mutexSubscribe.Lock()
+	if p.subscribeID == math.MaxUint64 {
+		p.subscribeID = 0
 	}
 
-	p.mutexSubscribe.Lock()
-	p.subscrFns[subscriberID] = fn
+	p.subscribeID++
+	p.subscrFns[p.subscribeID] = fn
 	p.mutexSubscribe.Unlock()
 
-	return nil
+	return p.CallAPI(
+		apiID, method,
+		append([]interface{}{
+			p.subscribeID,
+		}, args...)...)
 }
 
 func (p *wsClient) OnError(fn ErrorFunc) {
@@ -285,17 +288,17 @@ func (p *wsClient) Call(method string, args []interface{}) (*RPCCall, error) {
 		Request: rpcRequest{
 			Method: method,
 			Params: args,
-			ID:     p.currentID,
+			ID:     p.requestID,
 		},
 		Done: make(chan *RPCCall, 200),
 	}
 
 	p.mutex.Lock()
-	if p.currentID == math.MaxUint64 {
-		p.currentID = 0
+	if p.requestID == math.MaxUint64 {
+		p.requestID = 0
 	}
 
-	p.currentID++
+	p.requestID++
 	p.pending[call.Request.ID] = call
 	p.mutex.Unlock()
 

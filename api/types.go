@@ -8,12 +8,13 @@ import (
 )
 
 type SubscribeCallback func(msg interface{}) error
+type BlockAppliedCallback func(blockID string) error
 type ErrorFunc func(error)
 
 type WebsocketClient interface {
 	IsConnected() bool
 	OnError(fn ErrorFunc)
-	OnSubscribe(ID uint64, fn SubscribeCallback) error
+	Subscribe(apiID int, method string, fn SubscribeCallback, args ...interface{}) (*json.RawMessage, error)
 	Call(method string, args []interface{}) (*RPCCall, error)
 	CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error

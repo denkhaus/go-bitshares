@@ -38,7 +38,7 @@ type WebsocketAPI interface {
 	BroadcastAPIID() int
 	SetCredentials(username, password string)
 	OnError(api.ErrorFunc)
-	OnSubscribe(subscriberID uint64, notifyFn func(msg interface{}) error) error
+	Subscribe(apiID int, method string, fn api.SubscribeCallback, args ...interface{}) (*json.RawMessage, error)
 	BuildSignedTransaction(keyBag *crypto.KeyBag, feeAsset types.GrapheneObject, ops ...types.Operation) (*types.SignedTransaction, error)
 	SignTransaction(keyBag *crypto.KeyBag, trx *types.SignedTransaction) error
 
@@ -50,25 +50,32 @@ type WebsocketAPI interface {
 	GetAccountByName(name string) (*types.Account, error)
 	GetAccountHistory(account types.GrapheneObject, stop types.GrapheneObject, limit int, start types.GrapheneObject) (types.OperationHistories, error)
 	GetAccounts(accountIDs ...types.GrapheneObject) (types.Accounts, error)
-	GetFullAccounts(accountIDs ...types.GrapheneObject) (types.FullAccountInfos, error)
 	GetBlock(number uint64) (*types.Block, error)
+	GetBlockHeader(block uint64) (*types.BlockHeader, error)
 	GetCallOrders(assetID types.GrapheneObject, limit int) (types.CallOrders, error)
 	GetChainID() (string, error)
 	GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error)
+	GetForceSettlementOrders(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error)
+	GetFullAccounts(accountIDs ...types.GrapheneObject) (types.FullAccountInfos, error)
 	GetLimitOrders(base, quote types.GrapheneObject, limit int) (types.LimitOrders, error)
-	GetOrderBook(base, quote types.GrapheneObject, depth int) (types.OrderBook, error)
+	GetOrderBook(base, quote types.GrapheneObject, depth int) (*types.OrderBook, error)
 	GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error)
 	GetObjects(objectIDs ...types.GrapheneObject) ([]interface{}, error)
 	GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error)
+	GetRecentTransactionByID(transactionID uint32) (*types.SignedTransaction, error)
 	GetRequiredSignatures(tx *types.SignedTransaction, keys types.PublicKeys) (types.PublicKeys, error)
 	GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error)
-	GetForceSettlementOrders(assetID types.GrapheneObject, limit int) (types.ForceSettlementOrders, error)
+	GetTicker(base, quote types.GrapheneObject) (*types.MarketTicker, error)
 	GetTradeHistory(base, quote types.GrapheneObject, toTime, fromTime time.Time, limit int) (types.MarketTrades, error)
+	GetTransaction(blockNum uint64, trxInBlock uint32) (*types.SignedTransaction, error)
 	ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error)
-	SetSubscribeCallback(notifyID int, clearFilter bool) error
-	SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error
-	UnsubscribeFromMarket(base types.GrapheneObject, quote types.GrapheneObject) error
-	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (types.Volume24, error)
+	LookupAssetSymbols(symbols ...string) (types.Assets, error)
+	SetSubscribeCallback(ID uint64, clearFilter bool) error
+	SubscribeToBlockApplied(onBlockApplied api.BlockAppliedCallback) error
+	SubscribeToMarket(base, quote types.GrapheneObject, onMarketData api.SubscribeCallback) error
+	SubscribeToPendingTransactions(onPendingTransaction api.SubscribeCallback) error
+	UnsubscribeFromMarket(base, quote types.GrapheneObject) error
+	Get24Volume(base types.GrapheneObject, quote types.GrapheneObject) (*types.Volume24, error)
 }
 
 type websocketAPI struct {
@@ -100,7 +107,7 @@ func (p *websocketAPI) getAPIID(identifier string) (int, error) {
 func (p *websocketAPI) login() (bool, error) {
 	resp, err := p.wsClient.CallAPI(1, "login", p.username, p.password)
 	if err != nil {
-		return false, err
+		return false, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("login <", resp)
@@ -113,26 +120,51 @@ func (p *websocketAPI) login() (bool, error) {
 	return success, nil
 }
 
-// SetSubscribeCallback
-func (p *websocketAPI) SetSubscribeCallback(notifyID int, clearFilter bool) error {
-	// returns nil if successful
-	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", notifyID, clearFilter)
+// SetSubscribeCallback - To simplify development a global subscription callback can be registered.
+// Every notification initiated by the full node will carry a particular id as defined by the user with the identifier parameter.
+func (p *websocketAPI) SetSubscribeCallback(ID uint64, clearFilter bool) error {
+
+	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", ID, clearFilter)
 	if err != nil {
-		return err
+		return errors.Annotate(err, "CallAPI")
 	}
 
 	return nil
 }
 
-// SubscribeToMarket
-func (p *websocketAPI) SubscribeToMarket(notifyID int, base types.GrapheneObject, quote types.GrapheneObject) error {
-	// returns nil if successful
-	_, err := p.wsClient.CallAPI(p.databaseAPIID, "subscribe_to_market", notifyID, base.ID(), quote.ID())
-	if err != nil {
-		return err
-	}
+// SubscribeToPendingTransactions - Notifications for incoming unconfirmed transactions.
+func (p *websocketAPI) SubscribeToPendingTransactions(onPendingTransaction api.SubscribeCallback) error {
+	_, err := p.wsClient.Subscribe(p.databaseAPIID, "set_pending_transaction_callback",
+		onPendingTransaction,
+	)
 
-	return nil
+	return err
+}
+
+// SubscribeToBlockApplied gives a notification whenever the block blockid is applied to the blockchain.
+func (p *websocketAPI) SubscribeToBlockApplied(onBlockApplied api.BlockAppliedCallback) error {
+	_, err := p.wsClient.Subscribe(p.databaseAPIID, "set_block_applied_callback",
+		func(in interface{}) error {
+			for _, id := range in.([]interface{}) {
+				if err := onBlockApplied(id.(string)); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	)
+
+	return err
+}
+
+// SubscribeToMarket subscribes to market changes in market base:quote and sends notifications by callback.
+func (p *websocketAPI) SubscribeToMarket(base, quote types.GrapheneObject, onMarketData api.SubscribeCallback) error {
+	_, err := p.wsClient.Subscribe(p.databaseAPIID, "subscribe_to_market",
+		onMarketData, base.ID(), quote.ID(),
+	)
+
+	return err
 }
 
 // UnsubscribeFromMarket
@@ -140,7 +172,7 @@ func (p *websocketAPI) UnsubscribeFromMarket(base types.GrapheneObject, quote ty
 	// returns nil if successful
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "unsubscribe_from_market", base.ID(), quote.ID())
 	if err != nil {
-		return err
+		return errors.Annotate(err, "CallAPI")
 	}
 
 	return nil
@@ -151,7 +183,7 @@ func (p *websocketAPI) CancelAllSubscriptions() error {
 	// returns nil
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "cancel_all_subscriptions", types.EmptyParams)
 	if err != nil {
-		return err
+		return errors.Annotate(err, "CallAPI")
 	}
 
 	return nil
@@ -163,7 +195,7 @@ func (p *websocketAPI) CancelAllSubscriptions() error {
 func (p *websocketAPI) BroadcastTransaction(tx *types.SignedTransaction) error {
 	_, err := p.wsClient.CallAPI(p.broadcastAPIID, "broadcast_transaction", tx)
 	if err != nil {
-		return err
+		return errors.Annotate(err, "CallAPI")
 	}
 
 	return nil
@@ -261,7 +293,7 @@ func (p *websocketAPI) RequiredSigningKeys(tx *types.SignedTransaction) (types.P
 func (p *websocketAPI) GetPotentialSignatures(tx *types.SignedTransaction) (types.PublicKeys, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_potential_signatures", tx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_potential_signatures <", resp)
@@ -274,11 +306,48 @@ func (p *websocketAPI) GetPotentialSignatures(tx *types.SignedTransaction) (type
 	return ret, nil
 }
 
+// GetTransaction used to fetch an individual transaction.
+func (p *websocketAPI) GetTransaction(blockNum uint64, trxInBlock uint32) (*types.SignedTransaction, error) {
+	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_transaction", blockNum, trxInBlock)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("get_transaction <", resp)
+
+	ret := types.SignedTransaction{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [Transaction]")
+	}
+
+	return &ret, nil
+}
+
+// GetRecentTransactionByID
+// If the transaction has not expired, this method will return the transaction for the given ID or
+// it will return nil if it is not known. Just because it is not known does not mean
+// it wasn’t included in the blockchain.
+func (p *websocketAPI) GetRecentTransactionByID(transactionID uint32) (*types.SignedTransaction, error) {
+	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_recent_transaction_by_id", transactionID)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("get_recent_transaction_by_id <", resp)
+
+	ret := types.SignedTransaction{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [Transaction]")
+	}
+
+	return &ret, nil
+}
+
 //GetRequiredSignatures returns the minimum subset of public keys to sign a transaction.
 func (p *websocketAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKeys types.PublicKeys) (types.PublicKeys, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_required_signatures", tx, potKeys)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_required_signatures <", resp)
@@ -291,11 +360,11 @@ func (p *websocketAPI) GetRequiredSignatures(tx *types.SignedTransaction, potKey
 	return ret, nil
 }
 
-//GetBlock returns a Block by block number.
-func (p *websocketAPI) GetBlock(number uint64) (*types.Block, error) {
-	resp, err := p.wsClient.CallAPI(0, "get_block", number)
+//GetBlock returns a Block by number.
+func (p *websocketAPI) GetBlock(block uint64) (*types.Block, error) {
+	resp, err := p.wsClient.CallAPI(0, "get_block", block)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_block <", resp)
@@ -308,11 +377,45 @@ func (p *websocketAPI) GetBlock(number uint64) (*types.Block, error) {
 	return &ret, nil
 }
 
+// GetBlockHeader returns block header by number.
+func (p *websocketAPI) GetBlockHeader(block uint64) (*types.BlockHeader, error) {
+	resp, err := p.wsClient.CallAPI(0, "get_block_header", block)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("get_block_header <", resp)
+
+	ret := types.BlockHeader{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [BlockHeader]")
+	}
+
+	return &ret, nil
+}
+
+// GetTicker returns the ticker for the market base:quote for the last 24 h
+func (p *websocketAPI) GetTicker(base, quote types.GrapheneObject) (*types.MarketTicker, error) {
+	resp, err := p.wsClient.CallAPI(0, "get_ticker", base.ID(), quote.ID())
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("get_ticker <", resp)
+
+	ret := types.MarketTicker{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [MarketTicker]")
+	}
+
+	return &ret, nil
+}
+
 //GetAccountByName returns a Account object by username
 func (p *websocketAPI) GetAccountByName(name string) (*types.Account, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_account_by_name", name)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_account_by_name <", resp)
@@ -337,7 +440,7 @@ func (p *websocketAPI) GetAccountHistory(account types.GrapheneObject, stop type
 
 	resp, err := p.wsClient.CallAPI(p.historyAPIID, "get_account_history", account.ID(), stop.ID(), limit, start.ID())
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_account_history <", resp)
@@ -355,7 +458,7 @@ func (p *websocketAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 	ids := types.GrapheneObjects(accounts).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_accounts", ids)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_accounts <", resp)
@@ -372,12 +475,12 @@ func (p *websocketAPI) GetAccounts(accounts ...types.GrapheneObject) (types.Acco
 func (p *websocketAPI) GetDynamicGlobalProperties() (*types.DynamicGlobalProperties, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_dynamic_global_properties", types.EmptyParams)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_dynamic_global_properties <", resp)
 
-	var ret types.DynamicGlobalProperties
+	ret := types.DynamicGlobalProperties{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
 		return nil, errors.Annotate(err, "Unmarshal [DynamicGlobalProperties]")
 	}
@@ -390,7 +493,7 @@ func (p *websocketAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	ids := types.GrapheneObjects(assets).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_account_balances", account.ID(), ids)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_account_balances <", resp)
@@ -403,12 +506,12 @@ func (p *websocketAPI) GetAccountBalances(account types.GrapheneObject, assets .
 	return ret, nil
 }
 
-//GetFullAccounts retrieves full account information by given AccountIDs
+// GetFullAccounts retrieves full account information by given AccountIDs
 func (p *websocketAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.FullAccountInfos, error) {
 	ids := types.GrapheneObjects(accounts).ToStrings()
 	resp, err := p.wsClient.CallAPI(0, "get_full_accounts", ids, false) //do not subscribe for now
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_full_accounts <", resp)
@@ -422,36 +525,53 @@ func (p *websocketAPI) GetFullAccounts(accounts ...types.GrapheneObject) (types.
 }
 
 // Get24Volume returns the base:quote assets 24h volume
-func (p *websocketAPI) Get24Volume(base, quote types.GrapheneObject) (ret types.Volume24, err error) {
+func (p *websocketAPI) Get24Volume(base, quote types.GrapheneObject) (*types.Volume24, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_24_volume", base.ID(), quote.ID())
 	if err != nil {
-		return
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_24_volume <", resp)
 
+	ret := types.Volume24{}
 	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
-		err = errors.Annotate(err, "Unmarshal [Volume24]")
-		return
+		return nil, errors.Annotate(err, "Unmarshal [Volume24]")
 	}
 
-	return
+	return &ret, nil
 }
 
-//ListAssets retrieves assets
-//lowerBoundSymbol: Lower bound of symbol names to retrieve
-//limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
+// ListAssets retrieves assets
+// lowerBoundSymbol: Lower bound of symbol names to retrieve
+// limit: Maximum number of assets to fetch, if the constant AssetsListAll is passed, all existing assets will be retrieved.
 func (p *websocketAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Assets, error) {
-	if limit > AssetsMaxBatchSize || limit == AssetsListAll {
+	if limit > AssetsMaxBatchSize {
 		limit = AssetsMaxBatchSize
 	}
 
 	resp, err := p.wsClient.CallAPI(0, "list_assets", lowerBoundSymbol, limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("list_assets <", resp)
+
+	ret := types.Assets{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [Assets]")
+	}
+
+	return ret, nil
+}
+
+// LookupAssetSymbols get assets corresponding to the provided symbols or IDs
+func (p *websocketAPI) LookupAssetSymbols(symbols ...string) (types.Assets, error) {
+	resp, err := p.wsClient.CallAPI(0, "lookup_asset_symbols", symbols)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("lookup_asset_symbols <", resp)
 
 	ret := types.Assets{}
 	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
@@ -465,7 +585,7 @@ func (p *websocketAPI) ListAssets(lowerBoundSymbol string, limit int) (types.Ass
 func (p *websocketAPI) GetRequiredFees(ops types.Operations, feeAsset types.GrapheneObject) (types.AssetAmounts, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_required_fees", ops.Envelopes(), feeAsset.ID())
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_required_fees <", resp)
@@ -486,7 +606,7 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 
 	resp, err := p.wsClient.CallAPI(0, "get_limit_orders", base.ID(), quote.ID(), limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_limit_orders <", resp)
@@ -500,20 +620,20 @@ func (p *websocketAPI) GetLimitOrders(base, quote types.GrapheneObject, limit in
 }
 
 //GetOrderBook returns the OrderBook for the market base:quote.
-func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (ret types.OrderBook, err error) {
+func (p *websocketAPI) GetOrderBook(base, quote types.GrapheneObject, depth int) (*types.OrderBook, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_order_book", base.ID(), quote.ID(), depth)
 	if err != nil {
-		return
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_order_book <", resp)
 
+	ret := types.OrderBook{}
 	if err = ffjson.Unmarshal(*resp, &ret); err != nil {
-		err = errors.Annotate(err, "Unmarshal [LimitOrders]")
-		return
+		return nil, errors.Annotate(err, "Unmarshal [OrderBook]")
 	}
 
-	return
+	return &ret, nil
 }
 
 //GetForceSettlementOrders returns ForceSettlementOrders type.
@@ -524,7 +644,7 @@ func (p *websocketAPI) GetForceSettlementOrders(assetID types.GrapheneObject, li
 
 	resp, err := p.wsClient.CallAPI(0, "get_settle_orders", assetID.ID(), limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_settle_orders <", resp)
@@ -545,7 +665,7 @@ func (p *websocketAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 
 	resp, err := p.wsClient.CallAPI(0, "get_call_orders", assetID.ID(), limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_call_orders <", resp)
@@ -562,7 +682,7 @@ func (p *websocketAPI) GetCallOrders(assetID types.GrapheneObject, limit int) (t
 func (p *websocketAPI) GetMarginPositions(accountID types.GrapheneObject) (types.CallOrders, error) {
 	resp, err := p.wsClient.CallAPI(0, "get_margin_positions", accountID.ID())
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_margin_positions <", resp)
@@ -583,7 +703,7 @@ func (p *websocketAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 
 	resp, err := p.wsClient.CallAPI(0, "get_trade_history", base.ID(), quote.ID(), toTime, fromTime, limit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_trade_history <", resp)
@@ -600,7 +720,7 @@ func (p *websocketAPI) GetTradeHistory(base, quote types.GrapheneObject, toTime,
 func (p *websocketAPI) GetChainID() (string, error) {
 	resp, err := p.wsClient.CallAPI(p.databaseAPIID, "get_chain_id", types.EmptyParams)
 	if err != nil {
-		return "", err
+		return "", errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("get_chain_id <", resp)
@@ -609,6 +729,7 @@ func (p *websocketAPI) GetChainID() (string, error) {
 	if err := ffjson.Unmarshal(*resp, &id); err != nil {
 		return "", errors.Annotate(err, "Unmarshal [id]")
 	}
+
 	return id, nil
 }
 
@@ -647,77 +768,121 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 		// ObjectTypeCustom
 		// ObjectTypeProposal
 		// ObjectTypeWithdrawPermission
-		// ObjectTypeVestingBalance
 		// ObjectTypeWorker
 		switch id.SpaceType() {
 		case types.SpaceTypeProtocol:
 			switch id.ObjectType() {
+			case types.ObjectTypeVestingBalance:
+				t := types.VestingBalance{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [VestingBalance]")
+				}
+				ret = append(ret, t)
 			case types.ObjectTypeAccount:
-				acc := types.Account{}
-				if err := ffjson.Unmarshal(b, &acc); err != nil {
+				t := types.Account{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [Account]")
 				}
-				ret = append(ret, acc)
+				ret = append(ret, t)
 			case types.ObjectTypeAsset:
-				ass := types.Asset{}
-				if err := ffjson.Unmarshal(b, &ass); err != nil {
+				t := types.Asset{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [Asset]")
 				}
-				ret = append(ret, ass)
+				ret = append(ret, t)
 			case types.ObjectTypeForceSettlement:
-				set := types.ForceSettlementOrder{}
-				if err := ffjson.Unmarshal(b, &set); err != nil {
+				t := types.ForceSettlementOrder{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [ForceSettlementOrder]")
 				}
-				ret = append(ret, set)
+				ret = append(ret, t)
 			case types.ObjectTypeLimitOrder:
-				lim := types.LimitOrder{}
-				if err := ffjson.Unmarshal(b, &lim); err != nil {
+				t := types.LimitOrder{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [LimitOrder]")
 				}
-				ret = append(ret, lim)
+				ret = append(ret, t)
 			case types.ObjectTypeCallOrder:
-				cal := types.CallOrder{}
-				if err := ffjson.Unmarshal(b, &cal); err != nil {
+				t := types.CallOrder{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [CallOrder]")
 				}
-				ret = append(ret, cal)
+				ret = append(ret, t)
 			case types.ObjectTypeCommitteeMember:
-				mem := types.CommitteeMember{}
-				if err := ffjson.Unmarshal(b, &mem); err != nil {
+				t := types.CommitteeMember{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [CommitteeMember]")
 				}
-				ret = append(ret, mem)
+				ret = append(ret, t)
 			case types.ObjectTypeOperationHistory:
-				hist := types.OperationHistory{}
-				if err := hist.UnmarshalJSON(b); err != nil {
+				t := types.OperationHistory{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [OperationHistory]")
 				}
-				ret = append(ret, hist)
+				ret = append(ret, t)
 			case types.ObjectTypeBalance:
-				bal := types.Balance{}
-				if err := ffjson.Unmarshal(b, &bal); err != nil {
+				t := types.Balance{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [Balance]")
 				}
-				ret = append(ret, bal)
+				ret = append(ret, t)
 
 			default:
 				logging.DDumpUnmarshaled(id.ObjectType().String(), b)
-				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
+				return nil, errors.Errorf("unable to parse Object with ID %s", id)
 			}
 
+			// TODO: implement
+			// ObjectTypeGlobalProperty
+			// ObjectTypeAssetDynamicData
+			// ObjectTypeBlockSummary
+			// ObjectTypeAccountTransactionHistory
+			// ObjectTypeBlindedBalance
+			// ObjectTypeChainProperty
+			// ObjectTypeWitnessSchedule
+			// ObjectTypeBudgetRecord
 		case types.SpaceTypeImplementation:
 			switch id.ObjectType() {
+			case types.ObjectTypeSpecialAuthority:
+				t := types.SpecialAuthority{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [SpecialAuthority]")
+				}
+				ret = append(ret, t)
+			case types.ObjectTypeTransaction:
+				t := types.Transaction{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [Transaction]")
+				}
+				ret = append(ret, t)
+			case types.ObjectTypeDynamicGlobalProperty:
+				t := types.DynamicGlobalProperties{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [DynamicGlobalProperties]")
+				}
+				ret = append(ret, t)
+			case types.ObjectTypeAccountStatistics:
+				t := types.AccountStatistics{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [AccountStatistics]")
+				}
+				ret = append(ret, t)
+			case types.ObjectTypeAccountBalance:
+				t := types.AccountBalance{}
+				if err := t.UnmarshalJSON(b); err != nil {
+					return nil, errors.Annotate(err, "Unmarshal [AccountBalance]")
+				}
+				ret = append(ret, t)
 			case types.ObjectTypeAssetBitAssetData:
-				bit := types.BitAssetData{}
-				if err := ffjson.Unmarshal(b, &bit); err != nil {
+				t := types.BitAssetData{}
+				if err := t.UnmarshalJSON(b); err != nil {
 					return nil, errors.Annotate(err, "Unmarshal [BitAssetData]")
 				}
-				ret = append(ret, bit)
+				ret = append(ret, t)
 
 			default:
 				logging.DDumpUnmarshaled(id.ObjectType().String(), b)
-				return nil, errors.Errorf("unable to parse GrapheneObject with ID %s", id)
+				return nil, errors.Errorf("unable to parse Object with ID %s", id)
 			}
 		}
 	}
@@ -729,7 +894,7 @@ func (p *websocketAPI) GetObjects(ids ...types.GrapheneObject) ([]interface{}, e
 func (p *websocketAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
 	resp, err := p.wsClient.CallAPI(0, "cancel_order", orderID.ID(), broadcast)
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "CallAPI")
 	}
 
 	logging.DDumpJSON("cancel_order <", resp)
@@ -762,9 +927,9 @@ func (p *websocketAPI) CallWsAPI(apiID int, method string, args ...interface{}) 
 	return p.wsClient.CallAPI(apiID, method, args...)
 }
 
-//OnError - hook your notify callback here
-func (p *websocketAPI) OnSubscribe(subscriberID uint64, notifyFn func(msg interface{}) error) error {
-	return p.wsClient.OnSubscribe(subscriberID, notifyFn)
+//Subscribe - hook your subscribe callback here
+func (p *websocketAPI) Subscribe(apiID int, method string, fn api.SubscribeCallback, args ...interface{}) (*json.RawMessage, error) {
+	return p.wsClient.Subscribe(apiID, method, fn, args...)
 }
 
 //OnError - hook your error callback here
@@ -841,7 +1006,7 @@ func (p *websocketAPI) Close() error {
 }
 
 //NewWebsocketAPI creates a new WebsocketAPI interface.
-//wsEndpointURL: a mandatory websocket node URL.
+//wsEndpointURL: a websocket node endpoint URL.
 func NewWebsocketAPI(wsEndpointURL string) WebsocketAPI {
 	api := &websocketAPI{
 		databaseAPIID:  InvalidApiID,
@@ -855,7 +1020,7 @@ func NewWebsocketAPI(wsEndpointURL string) WebsocketAPI {
 
 //NewWebsocketAPIWithAutoEndpoint creates a new WebsocketAPI interface with automatic node latency checking.
 //It's best to use this API instance type for a long API lifecycle because the latency tester takes time to unleash its magic.
-//startupEndpointURL: a mandatory websocket node URL to startup the latency tester quickly.
+//startupEndpointURL: a websocket node endpoint URL to startup the latency tester quickly.
 func NewWebsocketAPIWithAutoEndpoint(startupEndpointURL string) (WebsocketAPI, error) {
 	api := &websocketAPI{
 		databaseAPIID:  InvalidApiID,

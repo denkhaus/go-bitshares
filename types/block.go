@@ -2,6 +2,14 @@ package types
 
 //go:generate ffjson $GOFILE
 
+type BlockHeader struct {
+	TransactionMerkleRoot Buffer     `json:"transaction_merkle_root"`
+	Previous              Buffer     `json:"previous"`
+	TimeStamp             Time       `json:"timestamp"`
+	Witness               WitnessID  `json:"witness"`
+	Extensions            Extensions `json:"extensions"`
+}
+
 type Block struct {
 	Witness               WitnessID          `json:"witness"`
 	TransactionMerkleRoot Buffer             `json:"transaction_merkle_root"`

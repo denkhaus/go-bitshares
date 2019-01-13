@@ -1,5 +1,7 @@
 package types
 
+//go:generate ffjson $GOFILE
+
 import (
 	"time"
 

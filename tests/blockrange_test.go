@@ -21,7 +21,7 @@ func TestBlockRange(t *testing.T) {
 	walletAPI := NewWalletTestAPI(t, RpcFullApiUrl)
 	defer walletAPI.Close()
 
-	block := uint64(26880513)
+	block := uint64(26881053)
 
 	for {
 		bl, err := websocketAPI.GetBlock(block)

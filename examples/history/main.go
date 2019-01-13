@@ -42,7 +42,7 @@ func main() {
 
 		nObjects := len(hist)
 		//don't repeat the last object over and over
-		if nObjects == 1 {
+		if nObjects <= 1 {
 			break
 		}
 

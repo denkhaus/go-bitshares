@@ -265,7 +265,7 @@ func (p TopHoldersSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
 }
 
 type OwnerSpecialAuthority struct {
-	SpecialAuth
+	SpecialAuthority
 }
 
 func (p OwnerSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
@@ -273,15 +273,15 @@ func (p OwnerSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode AccountCreateExtensionsOwnerSpecial")
 	}
 
-	if err := enc.Encode(p.SpecialAuth); err != nil {
-		return errors.Annotate(err, "encode SpecialAuth")
+	if err := enc.Encode(p.SpecialAuthority); err != nil {
+		return errors.Annotate(err, "encode SpecialAuthority")
 	}
 
 	return nil
 }
 
 type ActiveSpecialAuthority struct {
-	SpecialAuth
+	SpecialAuthority
 }
 
 func (p ActiveSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
@@ -289,19 +289,19 @@ func (p ActiveSpecialAuthority) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode AccountCreateExtensionsActiveSpecial")
 	}
 
-	if err := enc.Encode(p.SpecialAuth); err != nil {
-		return errors.Annotate(err, "encode SpecialAuths")
+	if err := enc.Encode(p.SpecialAuthority); err != nil {
+		return errors.Annotate(err, "encode SpecialAuthority")
 	}
 
 	return nil
 }
 
-type SpecialAuth struct {
+type SpecialAuthority struct {
 	Type SpecialAuthorityType
 	Auth interface{}
 }
 
-func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
+func (p *SpecialAuthority) UnmarshalJSON(data []byte) error {
 	raw := make([]json.RawMessage, 2)
 	if err := ffjson.Unmarshal(data, &raw); err != nil {
 		return errors.Annotate(err, "unmarshal RawData")
@@ -325,14 +325,14 @@ func (p *SpecialAuth) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p SpecialAuth) MarshalJSON() ([]byte, error) {
+func (p SpecialAuthority) MarshalJSON() ([]byte, error) {
 	return ffjson.Marshal([]interface{}{
 		p.Type,
 		p.Auth,
 	})
 }
 
-func (p SpecialAuth) Marshal(enc *util.TypeEncoder) error {
+func (p SpecialAuthority) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(uint8(p.Type)); err != nil {
 		return errors.Annotate(err, "encode Type")
 	}

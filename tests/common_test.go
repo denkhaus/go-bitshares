@@ -7,6 +7,7 @@ import (
 	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
 
 	//import operations to initialize types.OperationMap
@@ -82,6 +83,16 @@ func (suite *commonTest) Test_GetFullAccounts() {
 	//logging.Dump("get full accounts >", res)
 }
 
+func (suite *commonTest) Test_GetTicker() {
+	res, err := suite.TestAPI.GetTicker(AssetCNY, AssetBTS)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetTicker")
+	}
+
+	suite.NotNil(res)
+	logging.Dump("get_ticker >", res)
+}
+
 func (suite *commonTest) Test_GetObjects() {
 	res, err := suite.TestAPI.GetObjects(
 		UserID1,
@@ -112,6 +123,27 @@ func (suite *commonTest) Test_GetBlock() {
 
 	suite.NotNil(res)
 	//logging.Dump("get_block >", res)
+}
+
+func (suite *commonTest) Test_GetBlockHeader() {
+	res, err := suite.TestAPI.GetBlockHeader(33217575)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetBlockHeader")
+	}
+
+	suite.NotNil(res)
+	//logging.Dump("get_block_header >", res)
+}
+
+func (suite *commonTest) Test_GetTransaction() {
+	res, err := suite.TestAPI.GetTransaction(33217575, 1)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetTransaction")
+	}
+
+	suite.NotNil(res)
+	suite.Equal(res.RefBlockNum, types.UInt16(56357))
+	//logging.Dump("get_transaction >", res)
 }
 
 func (suite *commonTest) Test_GetDynamicGlobalProperties() {
