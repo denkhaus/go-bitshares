@@ -3,6 +3,17 @@ package types
 //go:generate ffjson $GOFILE
 
 type Accounts []Account
+
+func (p Accounts) Lookup(ID GrapheneObject) *Account {
+	for _, acct := range p {
+		if acct.ID.Equals(ID) {
+			return &acct
+		}
+	}
+
+	return nil
+}
+
 type Account struct {
 	ID                            AccountID              `json:"id"`
 	Name                          String                 `json:"name"`

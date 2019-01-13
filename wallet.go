@@ -20,6 +20,7 @@ type WalletAPI interface {
 	BorrowAsset(account types.GrapheneObject, amountToBorrow string, symbolToBorrow types.GrapheneObject, amountOfCollateral string, broadcast bool) (*types.SignedTransaction, error)
 	Buy(account types.GrapheneObject, base, quote types.GrapheneObject, rate string, amount string, broadcast bool) (*types.SignedTransaction, error)
 	BuyEx(account types.GrapheneObject, base, quote types.GrapheneObject, rate float64, amount float64, broadcast bool) (*types.SignedTransaction, error)
+	CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error)
 	Info() (*types.Info, error)
 	IsLocked() (bool, error)
 	ListAccountBalances(account types.GrapheneObject) (types.AssetAmounts, error)
@@ -316,7 +317,7 @@ func (p *walletAPI) ReadMemo(memo *types.Memo) (string, error) {
 	return ret, nil
 }
 
-//GetBlock retrieves a block by number
+//GetBlock retrieves a certain block by number
 func (p *walletAPI) GetBlock(number uint64) (*types.Block, error) {
 	resp, err := p.rpcClient.CallAPI("get_block", number)
 	if err != nil {
@@ -333,15 +334,33 @@ func (p *walletAPI) GetBlock(number uint64) (*types.Block, error) {
 	return &ret, nil
 }
 
-//GetRelativeAccountHistory gets operations relevant to the specified account referenced by an event numbering specific to the account. The current number of operations for the account can be found in the account statistics (or use 0 for start).
+// CancelOrder cancels an order given by orderID
+func (p *walletAPI) CancelOrder(orderID types.GrapheneObject, broadcast bool) (*types.SignedTransaction, error) {
+	resp, err := p.rpcClient.CallAPI("cancel_order", orderID.ID(), broadcast)
+	if err != nil {
+		return nil, errors.Annotate(err, "CallAPI")
+	}
+
+	logging.DDumpJSON("cancel_order <", resp)
+
+	ret := types.SignedTransaction{}
+	if err := ffjson.Unmarshal(*resp, &ret); err != nil {
+		return nil, errors.Annotate(err, "Unmarshal [Transaction]")
+	}
+
+	return &ret, nil
+}
+
+// GetRelativeAccountHistory gets operations relevant to the specified account referenced by
+// an event numbering specific to the account. The current number of operations for the account can be found in the account statistics (or use 0 for start).
 //
-//Parameters
+// Parameters
 //   account_id_or_name	The account ID or name whose history should be queried
 //   stop	Sequence number of earliest operation. 0 is default and will query 'limit' number of operations.
 //   limit	Maximum number of operations to retrieve (must not exceed 100)
 //   start	Sequence number of the most recent operation to retrieve. 0 is default, which will start querying from the most recent operation.
 //
-//Returns
+// Returns
 //   A list of operations performed by account, ordered from most recent to oldest.
 func (p *walletAPI) GetRelativeAccountHistory(account types.GrapheneObject, stop int64, limit int, start int64) (types.OperationRelativeHistories, error) {
 	if limit > GetAccountHistoryLimit {

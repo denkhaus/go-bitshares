@@ -84,7 +84,7 @@ func (tx *TransactionSigner) Verify(keyBag *KeyBag, chain *config.ChainConfig) (
 	}
 
 	for _, pub := range pubKeysFound {
-		if !keyBag.PublicPresent(pub) {
+		if !keyBag.Present(pub) {
 			return false, nil
 		}
 	}
