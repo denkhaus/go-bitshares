@@ -46,7 +46,7 @@ func (p *rpcClient) Close() error {
 func (p *rpcClient) CallAPI(method string, args ...interface{}) (*json.RawMessage, error) {
 	req := rpcRequest{
 		Method: method,
-		ID:     uint64(rand.Int63()),
+		ID:     uint64(rand.Uint64()),
 		Params: args,
 	}
 

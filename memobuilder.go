@@ -48,7 +48,7 @@ func (p *MemoBuilder) Encrypt(keyBag *crypto.KeyBag) (*types.Memo, error) {
 	memo := types.Memo{
 		From:  from.Options.MemoKey,
 		To:    to.Options.MemoKey,
-		Nonce: types.UInt64(rand.Int63()),
+		Nonce: types.UInt64(rand.Uint64()),
 	}
 
 	if err := keyBag.EncryptMemo(&memo, p.memo); err != nil {
