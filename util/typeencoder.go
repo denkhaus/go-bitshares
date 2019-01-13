@@ -124,7 +124,7 @@ func (p *TypeEncoder) EncodeStringSlice(v []string) error {
 
 func (p *TypeEncoder) EncodeString(v string) error {
 	if err := p.EncodeUVarint(uint64(len(v))); err != nil {
-		return errors.Annotatef(err, "EncodeUVarint [string length]", v)
+		return errors.Annotate(err, "EncodeUVarint [string length]")
 	}
 
 	return p.writeString(v)

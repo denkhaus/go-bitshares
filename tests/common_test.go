@@ -7,7 +7,6 @@ import (
 	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
 
 	//import operations to initialize types.OperationMap
@@ -60,25 +59,25 @@ func (suite *commonTest) Test_GetAccountBalances() {
 }
 
 func (suite *commonTest) Test_GetAccounts() {
-	res, err := suite.TestAPI.GetAccounts(UserID2) //, UserID3, UserID4)
+	res, err := suite.TestAPI.GetAccounts(UserID2, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccounts")
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 1)
+	suite.Len(res, 3)
 
 	//logging.Dump("get accounts >", res)
 }
 
 func (suite *commonTest) Test_GetFullAccounts() {
-	res, err := suite.TestAPI.GetFullAccounts(UserID2)
+	res, err := suite.TestAPI.GetFullAccounts(UserID2, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetFullAccounts")
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 1)
+	suite.Len(res, 3)
 
 	//logging.Dump("get full accounts >", res)
 }
@@ -90,7 +89,7 @@ func (suite *commonTest) Test_GetTicker() {
 	}
 
 	suite.NotNil(res)
-	logging.Dump("get_ticker >", res)
+	//logging.Dump("get_ticker >", res)
 }
 
 func (suite *commonTest) Test_GetObjects() {
