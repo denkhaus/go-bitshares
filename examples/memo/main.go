@@ -34,7 +34,7 @@ func main() {
 	memo := types.Memo{
 		From:  *pubKeyA,
 		To:    *pubKeyB,
-		Nonce: types.UInt64(rand.Int63()),
+		Nonce: types.UInt64(rand.Uint64()),
 	}
 
 	privKeyA, err := types.NewPrivateKeyFromWif(privKeyAWif)
