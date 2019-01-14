@@ -12,6 +12,7 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+//RPCClient allows you to access wallett functions
 type RPCClient interface {
 	CallAPI(method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error

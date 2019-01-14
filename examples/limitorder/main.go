@@ -29,11 +29,20 @@ func init() {
 	// init is called before the API is initialized,
 	// hence must define current chain config explicitly.
 	config.SetCurrent(config.ChainIDBTS)
-	seller = types.NewAccountID(
-		os.Getenv("BTS_TEST_ACCOUNT"),
-	)
+
+	sellerAcctID := os.Getenv("BTS_TEST_ACCOUNT")
+	if sellerAcctID == "" {
+		log.Fatalf("please set env var %q", "BTS_TEST_ACCOUNT")
+	}
+	seller = types.NewAccountID(sellerAcctID)
+
+	testWIF := os.Getenv("BTS_TEST_WIF")
+	if sellerAcctID == "" {
+		log.Fatalf("please set env var %q", "BTS_TEST_WIF")
+	}
+
 	keyBag = crypto.NewKeyBag()
-	if err := keyBag.Add(os.Getenv("BTS_TEST_WIF")); err != nil {
+	if err := keyBag.Add(testWIF); err != nil {
 		log.Fatal(errors.Annotate(err, "Add [wif]"))
 	}
 }
