@@ -362,6 +362,10 @@ func (num UInt64) Marshal(enc *util.TypeEncoder) error {
 	return enc.EncodeNumber(uint64(num))
 }
 
+func (num UInt64) String() string {
+	return strconv.FormatUint(uint64(num), 10)
+}
+
 type Int8 int8
 
 func (num *Int8) UnmarshalJSON(data []byte) error {

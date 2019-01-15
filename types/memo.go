@@ -8,8 +8,8 @@ import (
 	"crypto/cipher"
 	"crypto/sha256"
 	"crypto/sha512"
+	"encoding/base64"
 	"encoding/hex"
-	"strconv"
 
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -69,8 +69,15 @@ func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 
 	dst := make([]byte, len(raw))
 	mode.CryptBlocks(dst, raw)
-	p.Message = dst
 
+	//to base64
+	b64 := make([]byte, base64.StdEncoding.EncodedLen(len(dst)))
+	base64.StdEncoding.Encode(b64, dst)
+	// to hex
+	ret := make([]byte, hex.EncodedLen(len(b64)))
+	hex.Encode(ret, b64)
+
+	p.Message = ret
 	return nil
 }
 
@@ -115,49 +122,48 @@ func (p Memo) Decrypt(priv *PrivateKey) (string, error) {
 	return string(msg), nil
 }
 
-// func (p Memo) cypherBlock(sec []byte) ([]byte, cipher.Block, error) {
-// 	//ss := sha512.Sum512(sec)
-
-// 	var seed []byte
-// 	seed = append(seed, []byte(strconv.FormatUint(uint64(p.Nonce), 10))...)
-// 	seed = append(seed, []byte(hex.EncodeToString(sec[:]))...) //[]byte(hex.EncodeToString(ss[:]))...)
-
-// 	sd := sha512.Sum512(seed)
-// 	hash := hex.EncodeToString(sd[:])
-
-// 	iv, err := hex.DecodeString(string(hash[64:96]))
-// 	if err != nil {
-// 		return nil, nil, errors.Annotate(err, "DecodeString [iv]")
-// 	}
-
-// 	key, err := hex.DecodeString(string(hash[:64]))
-// 	if err != nil {
-// 		return nil, nil, errors.Annotate(err, "DecodeString [key]")
-// 	}
-
-// 	blk, err := aes.NewCipher(key)
-// 	if err != nil {
-// 		return nil, nil, errors.Annotate(err, "NewCipher")
-// 	}
-
-// 	return iv, blk, nil
-// }
-
 func (p Memo) cypherBlock(sec []byte) ([]byte, cipher.Block, error) {
-	ss := sha512.Sum512(sec)
-
-	var seed []byte
-	seed = append(seed, []byte(strconv.FormatUint(uint64(p.Nonce), 10))...)
-	seed = append(seed, []byte(hex.EncodeToString(ss[:]))...)
+	var seed = append(
+		[]byte(p.Nonce.String()),
+		[]byte(hex.EncodeToString(sec))...,
+	)
 
 	sd := sha512.Sum512(seed)
-	blk, err := aes.NewCipher(sd[0:32])
+	hash := hex.EncodeToString(sd[:])
+
+	iv, err := hex.DecodeString(string(hash[64:96]))
+	if err != nil {
+		return nil, nil, errors.Annotate(err, "DecodeString [iv]")
+	}
+
+	key, err := hex.DecodeString(string(hash[:64]))
+	if err != nil {
+		return nil, nil, errors.Annotate(err, "DecodeString [key]")
+	}
+
+	blk, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, nil, errors.Annotate(err, "NewCipher")
 	}
 
-	return sd[32:48], blk, nil
+	return iv, blk, nil
 }
+
+// func (p Memo) cypherBlock(sec []byte) ([]byte, cipher.Block, error) {
+// 	ss := sha512.Sum512(sec)
+
+// 	var seed []byte
+// 	seed = append(seed, []byte(strconv.FormatUint(uint64(p.Nonce), 10))...)
+// 	seed = append(seed, []byte(hex.EncodeToString(ss[:]))...)
+
+// 	sd := sha512.Sum512(seed)
+// 	blk, err := aes.NewCipher(sd[0:32])
+// 	if err != nil {
+// 		return nil, nil, errors.Annotate(err, "NewCipher")
+// 	}
+
+// 	return sd[32:48], blk, nil
+// }
 
 func unpad(buf []byte) []byte {
 	b := buf[len(buf)-1:][0]
