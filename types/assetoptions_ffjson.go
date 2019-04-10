@@ -973,26 +973,21 @@ handle_Extensions:
 	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
-			j.Extensions = nil
+
 		} else {
-			b := make([]byte, base64.StdEncoding.DecodedLen(fs.Output.Len()))
-			n, err := base64.StdEncoding.Decode(b, fs.Output.Bytes())
+
+			tbuf, err := fs.CaptureField(tok)
 			if err != nil {
 				return fs.WrapErr(err)
 			}
 
-			v := reflect.ValueOf(&j.Extensions).Elem()
-			v.SetBytes(b[0:n])
-
+			err = j.Extensions.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
