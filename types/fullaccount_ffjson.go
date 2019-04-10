@@ -5,6 +5,7 @@ package types
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -76,15 +77,11 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
+	/* Struct fall back. type=types.VestingBalance kind=struct */
 	buf.WriteString(`,"cashback_balance":`)
-
-	{
-
-		err = j.CashbackBalance.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.CashbackBalance)
+	if err != nil {
+		return err
 	}
 	buf.WriteString(`,"balances":`)
 	if j.Balances != nil {
@@ -114,14 +111,10 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-
-			{
-
-				err = v.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
-
+			/* Struct fall back. type=types.VestingBalance kind=struct */
+			err = buf.Encode(&v)
+			if err != nil {
+				return err
 			}
 		}
 		buf.WriteString(`]`)
@@ -135,14 +128,10 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-
-			{
-
-				err = v.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
-
+			/* Struct fall back. type=types.LimitOrder kind=struct */
+			err = buf.Encode(&v)
+			if err != nil {
+				return err
 			}
 		}
 		buf.WriteString(`]`)
@@ -663,16 +652,16 @@ handle_CashbackBalance:
 	/* handler: j.CashbackBalance type=types.VestingBalance kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.CashbackBalance.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.VestingBalance kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.CashbackBalance)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value
@@ -792,16 +781,16 @@ handle_VestingBalances:
 				/* handler: tmpJVestingBalances type=types.VestingBalance kind=struct quoted=false*/
 
 				{
-					if tok == fflib.FFTok_null {
-
-					} else {
-
-						err = tmpJVestingBalances.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-						if err != nil {
-							return err
-						}
+					/* Falling back. type=types.VestingBalance kind=struct */
+					tbuf, err := fs.CaptureField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
 					}
-					state = fflib.FFParse_after_value
+
+					err = json.Unmarshal(tbuf, &tmpJVestingBalances)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
 				}
 
 				j.VestingBalances = append(j.VestingBalances, tmpJVestingBalances)
@@ -860,16 +849,16 @@ handle_LimitOrders:
 				/* handler: tmpJLimitOrders type=types.LimitOrder kind=struct quoted=false*/
 
 				{
-					if tok == fflib.FFTok_null {
-
-					} else {
-
-						err = tmpJLimitOrders.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-						if err != nil {
-							return err
-						}
+					/* Falling back. type=types.LimitOrder kind=struct */
+					tbuf, err := fs.CaptureField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
 					}
-					state = fflib.FFParse_after_value
+
+					err = json.Unmarshal(tbuf, &tmpJLimitOrders)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
 				}
 
 				j.LimitOrders = append(j.LimitOrders, tmpJLimitOrders)

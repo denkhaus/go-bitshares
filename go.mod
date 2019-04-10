@@ -24,12 +24,13 @@ require (
 	github.com/pquerna/ffjson v0.0.0-20181028064349-e517b90714f7
 	github.com/sasha-s/go-deadlock v0.2.0
 	github.com/sirupsen/logrus v1.2.0 // indirect
-	github.com/stretchr/objx v0.1.1
+	github.com/stretchr/objx v0.2.0
 	github.com/stretchr/testify v1.3.0
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
-	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
-	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
-	golang.org/x/tools v0.0.0-20190111214448-fc1d57b08d7b // indirect
+	golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5
+	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
+	golang.org/x/sys v0.0.0-20190405154228-4b34438f7a67 // indirect
+	golang.org/x/tools v0.0.0-20190409223705-96f2e7ef861b // indirect
 	gopkg.in/VividCortex/ewma.v1 v1.1.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/cheggaaa/pb.v2 v2.0.6 // indirect

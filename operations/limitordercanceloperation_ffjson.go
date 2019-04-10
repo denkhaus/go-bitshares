@@ -5,10 +5,11 @@ package operations
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/denkhaus/bitshares/types"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
+	"reflect"
 )
 
 // MarshalJSON marshal bytes to json - template
@@ -59,33 +60,24 @@ func (j *LimitOrderCancelOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) err
 	}
 	buf.WriteString(`,"extensions":`)
 	if j.Extensions != nil {
-		buf.WriteString(`[`)
-		for i, v := range j.Extensions {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
-			}
+		buf.WriteString(`"`)
+		{
+			enc := base64.NewEncoder(base64.StdEncoding, buf)
+			enc.Write(reflect.Indirect(reflect.ValueOf(j.Extensions)).Bytes())
+			enc.Close()
 		}
-		buf.WriteString(`]`)
+		buf.WriteString(`"`)
 	} else {
 		buf.WriteString(`null`)
 	}
 	buf.WriteByte(',')
 	if j.Fee != nil {
 		if true {
+			/* Struct fall back. type=types.AssetAmount kind=struct */
 			buf.WriteString(`"fee":`)
-
-			{
-
-				err = j.Fee.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
-
+			err = buf.Encode(j.Fee)
+			if err != nil {
+				return err
 			}
 			buf.WriteByte(',')
 		}
@@ -332,7 +324,7 @@ handle_Extensions:
 	{
 
 		{
-			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
 				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
 			}
 		}
@@ -340,53 +332,15 @@ handle_Extensions:
 		if tok == fflib.FFTok_null {
 			j.Extensions = nil
 		} else {
-
-			j.Extensions = []interface{}{}
-
-			wantVal := true
-
-			for {
-
-				var tmpJExtensions interface{}
-
-				tok = fs.Scan()
-				if tok == fflib.FFTok_error {
-					goto tokerror
-				}
-				if tok == fflib.FFTok_right_brace {
-					break
-				}
-
-				if tok == fflib.FFTok_comma {
-					if wantVal == true {
-						// TODO(pquerna): this isn't an ideal error message, this handles
-						// things like [,,,] as an array value.
-						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-					}
-					continue
-				} else {
-					wantVal = true
-				}
-
-				/* handler: tmpJExtensions type=interface {} kind=interface quoted=false*/
-
-				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-
-					err = json.Unmarshal(tbuf, &tmpJExtensions)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-				}
-
-				j.Extensions = append(j.Extensions, tmpJExtensions)
-
-				wantVal = false
+			b := make([]byte, base64.StdEncoding.DecodedLen(fs.Output.Len()))
+			n, err := base64.StdEncoding.Decode(b, fs.Output.Bytes())
+			if err != nil {
+				return fs.WrapErr(err)
 			}
+
+			v := reflect.ValueOf(&j.Extensions).Elem()
+			v.SetBytes(b[0:n])
+
 		}
 	}
 
@@ -398,22 +352,16 @@ handle_Fee:
 	/* handler: j.Fee type=types.AssetAmount kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-			j.Fee = nil
-
-		} else {
-
-			if j.Fee == nil {
-				j.Fee = new(types.AssetAmount)
-			}
-
-			err = j.Fee.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.AssetAmount kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.Fee)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value

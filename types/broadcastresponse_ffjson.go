@@ -5,6 +5,7 @@ package types
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
@@ -45,15 +46,11 @@ func (j *BroadcastResponse) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	} else {
 		buf.WriteString(`,"expired":false`)
 	}
+	/* Struct fall back. type=types.SignedTransaction kind=struct */
 	buf.WriteString(`,"trx":`)
-
-	{
-
-		err = j.Trx.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.Trx)
+	if err != nil {
+		return err
 	}
 	buf.WriteByte('}')
 	return nil
@@ -376,16 +373,16 @@ handle_Trx:
 	/* handler: j.Trx type=types.SignedTransaction kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.Trx.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.SignedTransaction kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.Trx)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value

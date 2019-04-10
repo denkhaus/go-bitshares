@@ -5,6 +5,7 @@ package types
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -70,15 +71,11 @@ func (j *LimitOrder) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	fflib.FormatBits2(buf, uint64(j.ForSale), 10, false)
 	buf.WriteString(`,"deferred_fee":`)
 	fflib.FormatBits2(buf, uint64(j.DeferredFee), 10, false)
+	/* Struct fall back. type=types.Price kind=struct */
 	buf.WriteString(`,"sell_price":`)
-
-	{
-
-		err = j.SellPrice.MarshalJSONBuf(buf)
-		if err != nil {
-			return err
-		}
-
+	err = buf.Encode(&j.SellPrice)
+	if err != nil {
+		return err
 	}
 	buf.WriteByte('}')
 	return nil
@@ -436,16 +433,16 @@ handle_SellPrice:
 	/* handler: j.SellPrice type=types.Price kind=struct quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			err = j.SellPrice.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-			if err != nil {
-				return err
-			}
+		/* Falling back. type=types.Price kind=struct */
+		tbuf, err := fs.CaptureField(tok)
+		if err != nil {
+			return fs.WrapErr(err)
 		}
-		state = fflib.FFParse_after_value
+
+		err = json.Unmarshal(tbuf, &j.SellPrice)
+		if err != nil {
+			return fs.WrapErr(err)
+		}
 	}
 
 	state = fflib.FFParse_after_value

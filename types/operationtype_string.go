@@ -4,6 +4,59 @@ package types
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[OperationTypeTransfer-0]
+	_ = x[OperationTypeLimitOrderCreate-1]
+	_ = x[OperationTypeLimitOrderCancel-2]
+	_ = x[OperationTypeCallOrderUpdate-3]
+	_ = x[OperationTypeFillOrder-4]
+	_ = x[OperationTypeAccountCreate-5]
+	_ = x[OperationTypeAccountUpdate-6]
+	_ = x[OperationTypeAccountWhitelist-7]
+	_ = x[OperationTypeAccountUpgrade-8]
+	_ = x[OperationTypeAccountTransfer-9]
+	_ = x[OperationTypeAssetCreate-10]
+	_ = x[OperationTypeAssetUpdate-11]
+	_ = x[OperationTypeAssetUpdateBitasset-12]
+	_ = x[OperationTypeAssetUpdateFeedProducers-13]
+	_ = x[OperationTypeAssetIssue-14]
+	_ = x[OperationTypeAssetReserve-15]
+	_ = x[OperationTypeAssetFundFeePool-16]
+	_ = x[OperationTypeAssetSettle-17]
+	_ = x[OperationTypeAssetGlobalSettle-18]
+	_ = x[OperationTypeAssetPublishFeed-19]
+	_ = x[OperationTypeWitnessCreate-20]
+	_ = x[OperationTypeWitnessUpdate-21]
+	_ = x[OperationTypeProposalCreate-22]
+	_ = x[OperationTypeProposalUpdate-23]
+	_ = x[OperationTypeProposalDelete-24]
+	_ = x[OperationTypeWithdrawPermissionCreate-25]
+	_ = x[OperationTypeWithdrawPermissionUpdate-26]
+	_ = x[OperationTypeWithdrawPermissionClaim-27]
+	_ = x[OperationTypeWithdrawPermissionDelete-28]
+	_ = x[OperationTypeCommitteeMemberCreate-29]
+	_ = x[OperationTypeCommitteeMemberUpdate-30]
+	_ = x[OperationTypeCommitteeMemberUpdateGlobalParameters-31]
+	_ = x[OperationTypeVestingBalanceCreate-32]
+	_ = x[OperationTypeVestingBalanceWithdraw-33]
+	_ = x[OperationTypeWorkerCreate-34]
+	_ = x[OperationTypeCustom-35]
+	_ = x[OperationTypeAssert-36]
+	_ = x[OperationTypeBalanceClaim-37]
+	_ = x[OperationTypeOverrideTransfer-38]
+	_ = x[OperationTypeTransferToBlind-39]
+	_ = x[OperationTypeBlindTransfer-40]
+	_ = x[OperationTypeTransferFromBlind-41]
+	_ = x[OperationTypeAssetSettleCancel-42]
+	_ = x[OperationTypeAssetClaimFees-43]
+	_ = x[OperationTypeFBADistribute-44]
+	_ = x[OperationTypeBidCollateral-45]
+	_ = x[OperationTypeExecuteBid-46]
+}
+
 const _OperationType_name = "OperationTypeTransferOperationTypeLimitOrderCreateOperationTypeLimitOrderCancelOperationTypeCallOrderUpdateOperationTypeFillOrderOperationTypeAccountCreateOperationTypeAccountUpdateOperationTypeAccountWhitelistOperationTypeAccountUpgradeOperationTypeAccountTransferOperationTypeAssetCreateOperationTypeAssetUpdateOperationTypeAssetUpdateBitassetOperationTypeAssetUpdateFeedProducersOperationTypeAssetIssueOperationTypeAssetReserveOperationTypeAssetFundFeePoolOperationTypeAssetSettleOperationTypeAssetGlobalSettleOperationTypeAssetPublishFeedOperationTypeWitnessCreateOperationTypeWitnessUpdateOperationTypeProposalCreateOperationTypeProposalUpdateOperationTypeProposalDeleteOperationTypeWithdrawPermissionCreateOperationTypeWithdrawPermissionUpdateOperationTypeWithdrawPermissionClaimOperationTypeWithdrawPermissionDeleteOperationTypeCommitteeMemberCreateOperationTypeCommitteeMemberUpdateOperationTypeCommitteeMemberUpdateGlobalParametersOperationTypeVestingBalanceCreateOperationTypeVestingBalanceWithdrawOperationTypeWorkerCreateOperationTypeCustomOperationTypeAssertOperationTypeBalanceClaimOperationTypeOverrideTransferOperationTypeTransferToBlindOperationTypeBlindTransferOperationTypeTransferFromBlindOperationTypeAssetSettleCancelOperationTypeAssetClaimFeesOperationTypeFBADistributeOperationTypeBidCollateralOperationTypeExecuteBid"
 
 var _OperationType_index = [...]uint16{0, 21, 50, 79, 107, 129, 155, 181, 210, 237, 265, 289, 313, 345, 382, 405, 430, 459, 483, 513, 542, 568, 594, 621, 648, 675, 712, 749, 785, 822, 856, 890, 940, 973, 1008, 1033, 1052, 1071, 1096, 1125, 1153, 1179, 1209, 1239, 1266, 1292, 1318, 1341}

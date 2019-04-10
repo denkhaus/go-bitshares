@@ -3,11 +3,13 @@ package types
 //go:generate ffjson $GOFILE
 
 import (
+	"encoding/json"
+
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
 )
 
-type Extensions []interface{}
+type Extensions json.RawMessage
 
 func (p Extensions) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {

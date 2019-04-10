@@ -4,6 +4,17 @@ package types
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[AssetTypeUndefined - -1]
+	_ = x[AssetTypeCoreAsset-1]
+	_ = x[AssetTypeUIA-2]
+	_ = x[AssetTypeSmartCoin-3]
+	_ = x[AssetTypePredictionMarket-4]
+}
+
 const (
 	_AssetType_name_0 = "AssetTypeUndefined"
 	_AssetType_name_1 = "AssetTypeCoreAssetAssetTypeUIAAssetTypeSmartCoinAssetTypePredictionMarket"

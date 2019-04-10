@@ -4,6 +4,41 @@ package types
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[ObjectTypeBase-1]
+	_ = x[ObjectTypeAccount-2]
+	_ = x[ObjectTypeAsset-3]
+	_ = x[ObjectTypeForceSettlement-4]
+	_ = x[ObjectTypeCommitteeMember-5]
+	_ = x[ObjectTypeWitness-6]
+	_ = x[ObjectTypeLimitOrder-7]
+	_ = x[ObjectTypeCallOrder-8]
+	_ = x[ObjectTypeCustom-9]
+	_ = x[ObjectTypeProposal-10]
+	_ = x[ObjectTypeOperationHistory-11]
+	_ = x[ObjectTypeWithdrawPermission-12]
+	_ = x[ObjectTypeVestingBalance-13]
+	_ = x[ObjectTypeWorker-14]
+	_ = x[ObjectTypeBalance-15]
+	_ = x[ObjectTypeGlobalProperty-1]
+	_ = x[ObjectTypeDynamicGlobalProperty-2]
+	_ = x[ObjectTypeAssetDynamicData-3]
+	_ = x[ObjectTypeAssetBitAssetData-4]
+	_ = x[ObjectTypeAccountBalance-5]
+	_ = x[ObjectTypeAccountStatistics-6]
+	_ = x[ObjectTypeTransaction-7]
+	_ = x[ObjectTypeBlockSummary-8]
+	_ = x[ObjectTypeAccountTransactionHistory-9]
+	_ = x[ObjectTypeBlindedBalance-10]
+	_ = x[ObjectTypeChainProperty-11]
+	_ = x[ObjectTypeWitnessSchedule-12]
+	_ = x[ObjectTypeBudgetRecord-13]
+	_ = x[ObjectTypeSpecialAuthority-14]
+}
+
 const _ObjectType_name = "ObjectTypeBaseObjectTypeAccountObjectTypeAssetObjectTypeForceSettlementObjectTypeCommitteeMemberObjectTypeWitnessObjectTypeLimitOrderObjectTypeCallOrderObjectTypeCustomObjectTypeProposalObjectTypeOperationHistoryObjectTypeWithdrawPermissionObjectTypeVestingBalanceObjectTypeWorkerObjectTypeBalance"
 
 var _ObjectType_index = [...]uint16{0, 14, 31, 46, 71, 96, 113, 133, 152, 168, 186, 212, 240, 264, 280, 297}
