@@ -722,15 +722,26 @@ func (j *BitassetOptions) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"extensions":`)
+	if j.Extensions != nil {
+		buf.WriteString(`[`)
+		for i, v := range j.Extensions {
+			if i != 0 {
+				buf.WriteString(`,`)
+			}
 
-	{
+			{
 
-		obj, err = j.Extensions.MarshalJSON()
-		if err != nil {
-			return err
+				obj, err = v.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
+			}
 		}
-		buf.Write(obj)
-
+		buf.WriteString(`]`)
+	} else {
+		buf.WriteString(`null`)
 	}
 	buf.WriteByte('}')
 	return nil
@@ -1125,24 +1136,72 @@ handle_ShortBackingAsset:
 
 handle_Extensions:
 
-	/* handler: j.Extensions type=types.Extensions kind=struct quoted=false*/
+	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
 
 	{
-		if tok == fflib.FFTok_null {
 
-		} else {
-
-			tbuf, err := fs.CaptureField(tok)
-			if err != nil {
-				return fs.WrapErr(err)
-			}
-
-			err = j.Extensions.UnmarshalJSON(tbuf)
-			if err != nil {
-				return fs.WrapErr(err)
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
 			}
 		}
-		state = fflib.FFParse_after_value
+
+		if tok == fflib.FFTok_null {
+			j.Extensions = nil
+		} else {
+
+			j.Extensions = []Extension{}
+
+			wantVal := true
+
+			for {
+
+				var tmpJExtensions Extension
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmpJExtensions type=types.Extension kind=struct quoted=false*/
+
+				{
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						tbuf, err := fs.CaptureField(tok)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+
+						err = tmpJExtensions.UnmarshalJSON(tbuf)
+						if err != nil {
+							return fs.WrapErr(err)
+						}
+					}
+					state = fflib.FFParse_after_value
+				}
+
+				j.Extensions = append(j.Extensions, tmpJExtensions)
+
+				wantVal = false
+			}
+		}
 	}
 
 	state = fflib.FFParse_after_value

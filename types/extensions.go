@@ -9,25 +9,23 @@ import (
 	"github.com/juju/errors"
 )
 
-type Extensions struct {
+type Extension struct {
 	json.RawMessage
 }
 
+type Extensions []Extension
+
 //TODO refactor and test
 func (p Extensions) Marshal(enc *util.TypeEncoder) error {
-	if err := enc.EncodeUVarint(uint64(0)); err != nil {
+	if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
 		return errors.Annotate(err, "encode length")
 	}
 
-	// if err := enc.EncodeUVarint(uint64(len(p))); err != nil {
-	// 	return errors.Annotate(err, "encode length")
-	// }
-
-	// for _, ex := range p {
-	// 	if err := enc.Encode(ex); err != nil {
-	// 		return errors.Annotate(err, "encode Extension")
-	// 	}
-	// }
+	for _, ex := range p {
+		if err := enc.Encode(ex); err != nil {
+			return errors.Annotate(err, "encode Extension")
+		}
+	}
 
 	return nil
 }
