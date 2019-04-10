@@ -9,7 +9,9 @@ import (
 	"github.com/juju/errors"
 )
 
-type Extensions json.RawMessage
+type Extensions struct {
+	json.RawMessage
+}
 
 //TODO refactor and test
 func (p Extensions) Marshal(enc *util.TypeEncoder) error {
@@ -27,9 +29,5 @@ func (p Extensions) Marshal(enc *util.TypeEncoder) error {
 	// 	}
 	// }
 
-	return nil
-}
-
-func (p *Extensions) UnmarshalJSON(s []byte) error {
 	return nil
 }

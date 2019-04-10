@@ -5,12 +5,10 @@ package operations
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
-	"reflect"
 )
 
 // MarshalJSON marshal bytes to json - template
@@ -54,16 +52,15 @@ func (j *AssetCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		return err
 	}
 	buf.WriteString(`,"extensions":`)
-	if j.Extensions != nil {
-		buf.WriteString(`"`)
-		{
-			enc := base64.NewEncoder(base64.StdEncoding, buf)
-			enc.Write(reflect.Indirect(reflect.ValueOf(j.Extensions)).Bytes())
-			enc.Close()
+
+	{
+
+		obj, err = j.Extensions.MarshalJSON()
+		if err != nil {
+			return err
 		}
-		buf.WriteString(`"`)
-	} else {
-		buf.WriteString(`null`)
+		buf.Write(obj)
+
 	}
 	if j.IsPredictionMarket {
 		buf.WriteString(`,"is_prediction_market":true`)
@@ -417,7 +414,7 @@ handle_CommonOptions:
 
 handle_Extensions:
 
-	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
+	/* handler: j.Extensions type=types.Extensions kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
