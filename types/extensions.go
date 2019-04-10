@@ -29,7 +29,3 @@ func (p Extensions) Marshal(enc *util.TypeEncoder) error {
 
 	return nil
 }
-
-func (p *Extensions) UnmarshalJSON(s []byte) error {
-	return p.UnmarshalJSON(s)
-}
