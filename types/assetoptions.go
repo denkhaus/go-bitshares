@@ -19,7 +19,7 @@ type AssetOptions struct {
 	WhitelistAuthorities GrapheneIDs `json:"whitelist_authorities"`
 	BlacklistMarkets     GrapheneIDs `json:"blacklist_markets"`
 	WhitelistMarkets     GrapheneIDs `json:"whitelist_markets"`
-	Extensions           Extensions  `json:"extensions"`
+	// Extensions           Extensions  `json:"extensions"` //commented since not used and have different type in different gretchen's
 }
 
 func (p AssetOptions) Marshal(enc *util.TypeEncoder) error {
@@ -65,10 +65,6 @@ func (p AssetOptions) Marshal(enc *util.TypeEncoder) error {
 
 	if err := enc.Encode(p.Description); err != nil {
 		return errors.Annotate(err, "encode Description")
-	}
-
-	if err := enc.Encode(p.Extensions); err != nil {
-		return errors.Annotate(err, "encode extensions")
 	}
 
 	return nil
