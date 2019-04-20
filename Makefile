@@ -21,6 +21,7 @@ init:
 	@go get -u github.com/mitchellh/reflectwalk
 	@go get -u github.com/stretchr/objx
 	@go get -u github.com/cespare/reflex
+	@go get -u github.com/stretchr/testify
 	@go get -u github.com/bradhe/stopwatch
 
 test_api: 
