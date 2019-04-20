@@ -7,6 +7,7 @@ import (
 	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
+	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
 
 	//import operations to initialize types.OperationMap
@@ -243,6 +244,22 @@ func (suite *commonTest) Test_GetAccountHistory() {
 
 	suite.NotNil(res)
 	//logging.Dump("history >", res)
+}
+
+//for qizikd
+func (suite *commonTest) Test_GetAccountHistory_1() {
+
+	user := types.NewAccountID("1.2.1587421")
+	start := types.NewOperationHistoryID("1.11.0")
+	stop := types.NewOperationHistoryID("1.11.187658388")
+
+	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetAccountHistory")
+	}
+
+	suite.NotNil(res)
+	logging.Dump("history >", res)
 }
 
 func (suite *commonTest) Test_GetOrderBook() {

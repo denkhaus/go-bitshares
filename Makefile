@@ -31,6 +31,7 @@ init:
 	@GO111MODULE=on go get -u github.com/mitchellh/reflectwalk
 	@GO111MODULE=on go get -u github.com/stretchr/objx
 	@GO111MODULE=on go get -u github.com/stretchr/testify
+	@GO111MODULE=on go get -u github.com/cheggaaa/pb
 	@GO111MODULE=on go get -u github.com/cespare/reflex
 	@GO111MODULE=on go get -u github.com/bradhe/stopwatch
 

@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cheggaaa/pb"
 	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
+	"gopkg.in/cheggaaa/pb.v2"
 )
 
 const (
