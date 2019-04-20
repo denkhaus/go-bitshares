@@ -8,7 +8,7 @@ import (
 	"github.com/denkhaus/bitshares/util"
 	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/cheggaaa/pb.v2"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 const (
