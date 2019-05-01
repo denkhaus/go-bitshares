@@ -126,7 +126,6 @@ func (p *websocketAPI) login() (bool, error) {
 // SetSubscribeCallback - To simplify development a global subscription callback can be registered.
 // Every notification initiated by the full node will carry a particular id as defined by the user with the identifier parameter.
 func (p *websocketAPI) SetSubscribeCallback(ID uint64, clearFilter bool) error {
-
 	_, err := p.wsClient.CallAPI(p.databaseAPIID, "set_subscribe_callback", ID, clearFilter)
 	if err != nil {
 		return errors.Annotate(err, "CallAPI")

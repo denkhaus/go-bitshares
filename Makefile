@@ -40,19 +40,19 @@ test: test_operations test_api
 
 test_api: 
 	@echo "######################## -> test bitshares api"
-	-go test -cover -v ./tests -run ^TestCommon$
-	-go test -cover -v ./tests -run ^TestSubscribe$
-	-go test -cover -v ./tests -run ^TestWalletAPI$
-	-go test -cover -v ./tests -run ^TestWebsocketAPI$
-	-go test -cover -v ./types 
+	-@GO111MODULE=on go test -cover -v ./tests -run ^TestCommon$
+	-@GO111MODULE=on go test -cover -v ./tests -run ^TestSubscribe$
+	-@GO111MODULE=on go test -cover -v ./tests -run ^TestWalletAPI$
+	-@GO111MODULE=on go test -cover -v ./tests -run ^TestWebsocketAPI$
+	-@GO111MODULE=on go test -cover -v ./types 
 
 test_operations:
 	@echo "######################## -> test operations"
-	@go test -cover -v ./tests -run ^TestOperations$
+	@GO111MODULE=on go test -cover -v ./tests -run ^TestOperations$
 
 test_blocks:
 	@echo "this is a long running test, abort with Ctrl + C"
-	@go test -v ./tests -timeout 10m -run ^TestBlockRange$
+	@GO111MODULE=on go test -v ./tests -timeout 10m -run ^TestBlockRange$
 
 buildgen:
 	@echo "######################## -> build btsgen"

@@ -102,6 +102,7 @@ func (suite *walletAPITest) Test_Info() {
 // }
 
 func (suite *walletAPITest) Test_GetRelativeAccountHistory() {
+	config.SetCurrent(config.ChainIDTest)
 	hists, err := suite.TestAPI.GetRelativeAccountHistory(
 		TestAccount1ID,
 		0, 10, 0,
@@ -117,7 +118,6 @@ func (suite *walletAPITest) Test_GetRelativeAccountHistory() {
 
 func (suite *walletAPITest) Test_ReadMemo() {
 	config.SetCurrent(config.ChainIDTest)
-
 	pubKeyA, err := types.NewPublicKeyFromString(TestAccount1PubKeyActive)
 	if err != nil {
 		log.Fatal(errors.Annotate(err, "NewPublicKeyFromString [key A]"))

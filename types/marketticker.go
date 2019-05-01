@@ -2,8 +2,8 @@ package types
 
 type MarketTicker struct {
 	Time          Time    `json:"time"`
-	Base          AssetID `json:"base"`
-	Quote         AssetID `json:"quote"`
+	Base          String  `json:"base"`
+	Quote         String  `json:"quote"`
 	Latest        Float64 `json:"latest"`
 	LowestAsk     Float64 `json:"lowest_ask"`
 	HighestBid    Float64 `json:"highest_bid"`

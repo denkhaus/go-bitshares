@@ -40,8 +40,7 @@ func (p Extensions) Marshal(enc *util.TypeEncoder) error {
 
 func (p Extensions) MarshalJSON() ([]byte, error) {
 	if p.ext == nil {
-		var arr []interface{}
-		return ffjson.Marshal(arr)
+		p.ext = make([]interface{}, 0)
 	}
 
 	return ffjson.Marshal(p.ext)

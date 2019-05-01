@@ -7,7 +7,6 @@ import (
 	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/suite"
 
 	//import operations to initialize types.OperationMap
@@ -259,7 +258,7 @@ func (suite *commonTest) Test_GetAccountHistory_1() {
 	}
 
 	suite.NotNil(res)
-	logging.Dump("history >", res)
+	//logging.Dump("history >", res)
 }
 
 func (suite *commonTest) Test_GetOrderBook() {
@@ -282,8 +281,8 @@ func (suite *commonTest) Test_Get24Volume() {
 	}
 
 	suite.NotNil(res)
-	suite.Equal(AssetUSD.ID(), res.Base.ID())
-	suite.Equal(AssetBTS.ID(), res.Quote.ID())
+	suite.Equal("USD", res.Base.String())
+	suite.Equal("BTS", res.Quote.String())
 
 	//logging.Dump("test Get24Volume >", res)
 }
