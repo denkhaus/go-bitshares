@@ -5,7 +5,6 @@ package types
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
@@ -69,23 +68,6 @@ func (j *Authority) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 		buf.Write(obj)
 
 	}
-	buf.WriteString(`,"extensions":`)
-	if j.Extensions != nil {
-		buf.WriteString(`[`)
-		for i, v := range j.Extensions {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
-			}
-		}
-		buf.WriteString(`]`)
-	} else {
-		buf.WriteString(`null`)
-	}
 	buf.WriteByte('}')
 	return nil
 }
@@ -101,8 +83,6 @@ const (
 	ffjtAuthorityKeyAuths
 
 	ffjtAuthorityAddressAuths
-
-	ffjtAuthorityExtensions
 )
 
 var ffjKeyAuthorityWeightThreshold = []byte("weight_threshold")
@@ -112,8 +92,6 @@ var ffjKeyAuthorityAccountAuths = []byte("account_auths")
 var ffjKeyAuthorityKeyAuths = []byte("key_auths")
 
 var ffjKeyAuthorityAddressAuths = []byte("address_auths")
-
-var ffjKeyAuthorityExtensions = []byte("extensions")
 
 // UnmarshalJSON umarshall json - template of ffjson
 func (j *Authority) UnmarshalJSON(input []byte) error {
@@ -189,14 +167,6 @@ mainparse:
 						goto mainparse
 					}
 
-				case 'e':
-
-					if bytes.Equal(ffjKeyAuthorityExtensions, kn) {
-						currentKey = ffjtAuthorityExtensions
-						state = fflib.FFParse_want_colon
-						goto mainparse
-					}
-
 				case 'k':
 
 					if bytes.Equal(ffjKeyAuthorityKeyAuths, kn) {
@@ -213,12 +183,6 @@ mainparse:
 						goto mainparse
 					}
 
-				}
-
-				if fflib.EqualFoldRight(ffjKeyAuthorityExtensions, kn) {
-					currentKey = ffjtAuthorityExtensions
-					state = fflib.FFParse_want_colon
-					goto mainparse
 				}
 
 				if fflib.EqualFoldRight(ffjKeyAuthorityAddressAuths, kn) {
@@ -273,9 +237,6 @@ mainparse:
 
 				case ffjtAuthorityAddressAuths:
 					goto handle_AddressAuths
-
-				case ffjtAuthorityExtensions:
-					goto handle_Extensions
 
 				case ffjtAuthoritynosuchkey:
 					err = fs.SkipField(tok)
@@ -386,74 +347,6 @@ handle_AddressAuths:
 			}
 		}
 		state = fflib.FFParse_after_value
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Extensions:
-
-	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
-
-	{
-
-		{
-			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
-			}
-		}
-
-		if tok == fflib.FFTok_null {
-			j.Extensions = nil
-		} else {
-
-			j.Extensions = []interface{}{}
-
-			wantVal := true
-
-			for {
-
-				var tmpJExtensions interface{}
-
-				tok = fs.Scan()
-				if tok == fflib.FFTok_error {
-					goto tokerror
-				}
-				if tok == fflib.FFTok_right_brace {
-					break
-				}
-
-				if tok == fflib.FFTok_comma {
-					if wantVal == true {
-						// TODO(pquerna): this isn't an ideal error message, this handles
-						// things like [,,,] as an array value.
-						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-					}
-					continue
-				} else {
-					wantVal = true
-				}
-
-				/* handler: tmpJExtensions type=interface {} kind=interface quoted=false*/
-
-				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-
-					err = json.Unmarshal(tbuf, &tmpJExtensions)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-				}
-
-				j.Extensions = append(j.Extensions, tmpJExtensions)
-
-				wantVal = false
-			}
-		}
 	}
 
 	state = fflib.FFParse_after_value
@@ -806,7 +699,7 @@ mainparse:
 
 handle_Asset:
 
-	/* handler: j.Asset type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Asset type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

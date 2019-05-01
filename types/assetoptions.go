@@ -8,18 +8,18 @@ import (
 //go:generate ffjson $GOFILE
 
 type AssetOptions struct {
-	MaxSupply            Int64       `json:"max_supply"`
-	MaxMarketFee         Int64       `json:"max_market_fee"`
-	MarketFeePercent     UInt16      `json:"market_fee_percent"`
-	Flags                UInt16      `json:"flags"`
-	Description          string      `json:"description"`
-	CoreExchangeRate     Price       `json:"core_exchange_rate"`
-	IssuerPermissions    UInt16      `json:"issuer_permissions"`
-	BlacklistAuthorities GrapheneIDs `json:"blacklist_authorities"`
-	WhitelistAuthorities GrapheneIDs `json:"whitelist_authorities"`
-	BlacklistMarkets     GrapheneIDs `json:"blacklist_markets"`
-	WhitelistMarkets     GrapheneIDs `json:"whitelist_markets"`
-	Extensions           Extensions  `json:"extensions"`
+	MaxSupply            Int64      `json:"max_supply"`
+	MaxMarketFee         Int64      `json:"max_market_fee"`
+	MarketFeePercent     UInt16     `json:"market_fee_percent"`
+	Flags                UInt16     `json:"flags"`
+	Description          String     `json:"description"`
+	CoreExchangeRate     Price      `json:"core_exchange_rate"`
+	IssuerPermissions    UInt16     `json:"issuer_permissions"`
+	BlacklistAuthorities AccountIDs `json:"blacklist_authorities"`
+	WhitelistAuthorities AccountIDs `json:"whitelist_authorities"`
+	BlacklistMarkets     AccountIDs `json:"blacklist_markets"`
+	WhitelistMarkets     AccountIDs `json:"whitelist_markets"`
+	Extensions           Extensions `json:"extensions"`
 }
 
 func (p AssetOptions) Marshal(enc *util.TypeEncoder) error {

@@ -62,6 +62,8 @@ var (
 	}
 )
 
+// LatencyTester provides reliability and speed
+// testing through a collection of node endpoints and maintains the best connection.
 type LatencyTester interface {
 	Start()
 	Close() error
@@ -127,7 +129,6 @@ func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 			"database",
 			"history",
 			"network_broadcast",
-			"crypto",
 		},
 	}
 
@@ -135,6 +136,7 @@ func NewNodeStats(wsRPCEndpoint string) *NodeStats {
 	return stats
 }
 
+// Equals checks if the NodeStats belong to the same endpoint.
 func (p *NodeStats) Equals(n *NodeStats) bool {
 	return p.endpoint == n.endpoint
 }
@@ -175,10 +177,13 @@ type latencyTester struct {
 	pass             int
 }
 
+// NewLatencyTester creates a new LatencyTester and
+// allows you to always be connected to the best node.
 func NewLatencyTester(fallbackURL string) (LatencyTester, error) {
 	return NewLatencyTesterWithContext(context.Background(), fallbackURL)
 }
 
+// NewLatencyTesterWithContext - like NewLatencyTester but cancelable.
 func NewLatencyTesterWithContext(ctx context.Context, fallbackURL string) (LatencyTester, error) {
 	tmb, _ := tomb.WithContext(ctx)
 	lat := latencyTester{

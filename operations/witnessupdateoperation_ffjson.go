@@ -35,24 +35,40 @@ func (j *WitnessUpdateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
+	buf.WriteString(`{ `)
 	if j.NewSigningKey != nil {
-		buf.WriteString(`{ "new_signing_key":`)
+		if true {
+			buf.WriteString(`"new_signing_key":`)
 
-		{
+			{
 
-			obj, err = j.NewSigningKey.MarshalJSON()
-			if err != nil {
-				return err
+				obj, err = j.NewSigningKey.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
 			}
-			buf.Write(obj)
-
+			buf.WriteByte(',')
 		}
-	} else {
-		buf.WriteString(`{ "new_signing_key":null`)
 	}
-	buf.WriteString(`,"new_url":`)
-	fflib.WriteJsonString(buf, string(j.NewURL))
-	buf.WriteString(`,"witness":`)
+	if j.NewURL != nil {
+		if true {
+			buf.WriteString(`"new_url":`)
+
+			{
+
+				obj, err = j.NewURL.MarshalJSON()
+				if err != nil {
+					return err
+				}
+				buf.Write(obj)
+
+			}
+			buf.WriteByte(',')
+		}
+	}
+	buf.WriteString(`"witness":`)
 
 	{
 
@@ -322,25 +338,30 @@ handle_NewSigningKey:
 
 handle_NewURL:
 
-	/* handler: j.NewURL type=string kind=string quoted=false*/
+	/* handler: j.NewURL type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
+
+			j.NewURL = nil
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.NewURL = string(string(outBuf))
+			if j.NewURL == nil {
+				j.NewURL = new(types.String)
+			}
 
+			err = j.NewURL.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -348,7 +369,7 @@ handle_NewURL:
 
 handle_Witness:
 
-	/* handler: j.Witness type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Witness type=types.WitnessID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -373,7 +394,7 @@ handle_Witness:
 
 handle_WitnessAccount:
 
-	/* handler: j.WitnessAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.WitnessAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

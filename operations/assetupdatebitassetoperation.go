@@ -17,8 +17,8 @@ func init() {
 
 type AssetUpdateBitassetOperation struct {
 	types.OperationFee
-	AssetToUpdate types.GrapheneID      `json:"asset_to_update"`
-	Issuer        types.GrapheneID      `json:"issuer"`
+	AssetToUpdate types.AssetID         `json:"asset_to_update"`
+	Issuer        types.AccountID       `json:"issuer"`
 	Extensions    types.Extensions      `json:"extensions"`
 	NewOptions    types.BitassetOptions `json:"new_options"`
 }
@@ -54,12 +54,4 @@ func (p AssetUpdateBitassetOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAssetUpdateBitassetOperation creates a new AssetUpdateBitassetOperation
-func NewAssetUpdateBitassetOperation() *AssetUpdateBitassetOperation {
-	tx := AssetUpdateBitassetOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

@@ -27,13 +27,13 @@ func (p CCDVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 		return errors.Annotate(err, "encode VestingSeconds")
 	}
 
-	if err := enc.Encode(p.CoinSecondsEarnedLastUpdate); err != nil {
-		return errors.Annotate(err, "encode CoinSecondsEarnedLastUpdate")
-	}
+	// if err := enc.Encode(p.CoinSecondsEarnedLastUpdate); err != nil {
+	// 	return errors.Annotate(err, "encode CoinSecondsEarnedLastUpdate")
+	// }
 
-	if err := enc.Encode(p.CoinSecondsEarned); err != nil {
-		return errors.Annotate(err, "encode CoinSecondsEarned")
-	}
+	// if err := enc.Encode(p.CoinSecondsEarned); err != nil {
+	// 	return errors.Annotate(err, "encode CoinSecondsEarned")
+	// }
 
 	return nil
 }
@@ -62,7 +62,7 @@ func (p LinearVestingPolicy) Marshal(enc *util.TypeEncoder) error {
 
 type VestingPolicy struct {
 	typ  VestingPolicyType
-	data util.TypeMarshaller
+	data util.TypeMarshaler
 }
 
 func (p *VestingPolicy) UnmarshalJSON(data []byte) error {

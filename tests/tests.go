@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/denkhaus/bitshares/util"
 	"github.com/juju/errors"
@@ -14,45 +14,45 @@ import (
 )
 
 const (
-	WsFullApiUrl = "wss://node.market.rudex.org"
-	//WsFullApiUrl = "wss://bitshares.openledger.info/ws"
-	WsTestApiUrl        = "wss://node.testnet.bitshares.eu/ws"
-	RpcFullApiUrl       = "http://localhost:8095"
-	RpcTestApiUrl       = "http://localhost:8094"
-	RpcTestCustomApiUrl = "http://localhost:8093"
+	//WsFullApiUrl = "wss://node.market.rudex.org"
+	//WsFullApiUrl = "wss://api.bts.blckchnd.com"
+	WsFullApiUrl  = "wss://bitshares.openledger.info/ws"
+	WsTestApiUrl  = "wss://node.testnet.bitshares.eu/ws"
+	RpcFullApiUrl = "http://localhost:8095"
+	RpcTestApiUrl = "http://localhost:8094"
 )
 
 var (
-	UserID1         = types.NewGrapheneID("1.2.282")  //xeroc user account
-	UserID2         = types.NewGrapheneID("1.2.253")  //stan user account
-	UserID3         = types.NewGrapheneID("1.2.0")    //committee-account user account
-	UserID4         = types.NewGrapheneID("1.2.1751") //denkhaus user account
-	AssetCNY        = types.NewGrapheneID("1.3.113")  //cny asset
-	AssetBTS        = types.NewGrapheneID("1.3.0")    //bts asset
-	AssetUSD        = types.NewGrapheneID("1.3.121")  // usd asset
-	AssetTEST       = types.NewGrapheneID("1.3.0")    // test asset
-	AssetPEGFAKEUSD = types.NewGrapheneID("1.3.22")   // test asset
-	AssetBTC        = types.NewGrapheneID("1.3.103")
-	AssetSILVER     = types.NewGrapheneID("1.3.105")
-	AssetGOLD       = types.NewGrapheneID("1.3.106")
-	AssetEUR        = types.NewGrapheneID("1.3.120")
-	AssetOBITS      = types.NewGrapheneID("1.3.562")
-	AssetOpenETH    = types.NewGrapheneID("1.3.850")
-	AssetOpenLTC    = types.NewGrapheneID("1.3.859")
-	AssetOpenBTC    = types.NewGrapheneID("1.3.861")
-	AssetOpenSTEEM  = types.NewGrapheneID("1.3.973")
-	AssetOpenUSDT   = types.NewGrapheneID("1.3.1042")
-	AssetYOYOW      = types.NewGrapheneID("1.3.1093")
-	AssetRUBEL      = types.NewGrapheneID("1.3.1325")
-	AssetHERO       = types.NewGrapheneID("1.3.1362")
+	UserID1         = types.NewAccountID("1.2.282")  // xeroc user account
+	UserID2         = types.NewAccountID("1.2.253")  // stan user account
+	UserID3         = types.NewAccountID("1.2.0")    // committee-account user account
+	UserID4         = types.NewAccountID("1.2.1751") // denkhaus user account
+	AssetCNY        = types.NewAssetID("1.3.113")    // cny asset
+	AssetBTS        = types.NewAssetID("1.3.0")      // bts asset
+	AssetUSD        = types.NewAssetID("1.3.121")    // usd asset
+	AssetTEST       = types.NewAssetID("1.3.0")      // test asset
+	AssetPEGFAKEUSD = types.NewAssetID("1.3.22")     // test asset
+	AssetBTC        = types.NewAssetID("1.3.103")
+	AssetSILVER     = types.NewAssetID("1.3.105")
+	AssetGOLD       = types.NewAssetID("1.3.106")
+	AssetEUR        = types.NewAssetID("1.3.120")
+	AssetOBITS      = types.NewAssetID("1.3.562")
+	AssetOpenETH    = types.NewAssetID("1.3.850")
+	AssetOpenLTC    = types.NewAssetID("1.3.859")
+	AssetOpenBTC    = types.NewAssetID("1.3.861")
+	AssetOpenSTEEM  = types.NewAssetID("1.3.973")
+	AssetOpenUSDT   = types.NewAssetID("1.3.1042")
+	AssetYOYOW      = types.NewAssetID("1.3.1093")
+	AssetRUBEL      = types.NewAssetID("1.3.1325")
+	AssetHERO       = types.NewAssetID("1.3.1362")
 
-	SettleOrder1      = types.NewGrapheneID("1.4.1655")       // random SettleOrder ObjectID
-	CommiteeMember1   = types.NewGrapheneID("1.5.15")         // random CommiteeMember ObjectID
-	LimitOrder1       = types.NewGrapheneID("1.7.75961600")   // random LimitOrder ObjectID
-	CallOrder1        = types.NewGrapheneID("1.8.4582")       // random CallOrder ObjectID
-	OperationHistory1 = types.NewGrapheneID("1.11.187698971") // random OperationHistory ObjectID
-	Balance1          = types.NewGrapheneID("1.15.1")         // random Balance ObjectID
-	BitAssetDataCNY   = types.NewGrapheneID("2.4.13")         // cny bitasset data id
+	SettleOrder1      = types.NewForceSettlementID("1.4.1655")        // random SettleOrder ObjectID
+	CommitteeMember1  = types.NewCommitteeMemberID("1.5.15")          // random CommitteeMember ObjectID
+	LimitOrder1       = types.NewLimitOrderID("1.7.75961600")         // random LimitOrder ObjectID
+	CallOrder1        = types.NewCallOrderID("1.8.4582")              // random CallOrder ObjectID
+	OperationHistory1 = types.NewOperationHistoryID("1.11.187698971") // random OperationHistory ObjectID
+	Balance1          = types.NewBalanceID("1.15.1")                  // random Balance ObjectID
+	BitAssetDataCNY   = types.NewAssetBitAssetDataID("2.4.13")        // cny bitasset data id
 
 	TestAccount1UserName      = "denk-haus"
 	TestAccount1Password      = "denkhaus-testnet"
@@ -60,8 +60,8 @@ var (
 	TestAccount1PrivKeyActive = "5Hx8KiHLnc3pDLkwe2jujkTTJev72n3Qx7xtyaRNBsJDuejzh9u"
 	TestAccount1PubKeyOwner   = "TEST5yXqEBShUgcVm7Mve8Fg4RzQ2ftPpmo77aMbz884eX9aeGVvwD"
 	TestAccount1PrivKeyOwner  = "5JyuWmopuyxFyvM9xm8fxXyujzfVnsg9cvE6z3pcib5NW1Av4rP"
-	TestAccount1PrivKeyMemo   = "TEST5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk"
-	TestAccount1ID            = types.NewGrapheneID("1.2.3464")
+	TestAccount1PubKeyMemo    = "TEST5zzvbDtkbUVU1gFFsKqCE55U7JbjTp6mTh1usFv7KGgXL7HDQk"
+	TestAccount1ID            = types.NewAccountID("1.2.3464")
 
 	TestAccount2UserName      = "denk-baum"
 	TestAccount2Password      = "denkhaus-testnet"
@@ -70,7 +70,7 @@ var (
 	TestAccount2PubKeyOwner   = "TEST8Yqc82JvQfThZJLSMKdhJ1ZhsT9L58tB47ETiJQrB1yg1ygtwu"
 	TestAccount2PrivKeyOwner  = "5K55UKUQicrdnNdnmfoSoW8zZNhCdkP2jcT73sLxn8tu8K2N58p"
 	TestAccount2PubKeyMemo    = "TEST5Z3vsgH6xj6HLXcsU38yo4TyoZs9AUzpfbaXbuxsAYPbutWvEP"
-	TestAccount2ID            = types.NewGrapheneID("1.2.3496")
+	TestAccount2ID            = types.NewAccountID("1.2.3496")
 
 	TestAccount3UserName      = "bs-test"
 	TestAccount3Password      = "denkhaus-test"
@@ -78,11 +78,11 @@ var (
 	TestAccount3PrivKeyActive = "5JTge2oTwFqfNPhUrrm6upheByG2VXvaXBAqWdDUvK2CsygMG3Z"
 	TestAccount3PubKeyOwner   = "BTS56fy8qpkLzNoguGMPgPNkkznxnx2woEg1qPq7E6gF2SeGSRyK5"
 	TestAccount3PrivKeyOwner  = "5JqmjeakPoTz3ComQ7Jgg11jHxywfkJHZPhMJoBomZLrZSfRAvr"
-	TestAccount3ID            = types.NewGrapheneID("1.2.391614")
+	TestAccount3ID            = types.NewAccountID("1.2.391614")
 )
 
-func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
-	ref, err := api.WalletSerializeTransaction(tx)
+func CompareTransactions(api bitshares.WalletAPI, tx *types.SignedTransaction, debug bool) (string, string, error) {
+	ref, err := api.SerializeTransaction(tx)
 	if err != nil {
 		return "", "", errors.Annotate(err, "SerializeTransaction")
 	}
@@ -96,8 +96,8 @@ func CompareTransactions(api api.BitsharesAPI, tx *types.SignedTransaction, debu
 	return ref, hex.EncodeToString(buf.Bytes()), nil
 }
 
-func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.BitsharesAPI {
-	api := api.New(wsAPIEndpoint, rpcAPIEndpoint)
+func NewWebsocketTestAPI(t *testing.T, wsAPIEndpoint string) bitshares.WebsocketAPI {
+	api := bitshares.NewWebsocketAPI(wsAPIEndpoint)
 	if err := api.Connect(); err != nil {
 		assert.FailNow(t, err.Error(), "Connect")
 	}
@@ -105,6 +105,15 @@ func NewTestAPI(t *testing.T, wsAPIEndpoint, rpcAPIEndpoint string) api.Bitshare
 	api.OnError(func(err error) {
 		assert.FailNow(t, err.Error(), "OnError")
 	})
+
+	return api
+}
+
+func NewWalletTestAPI(t *testing.T, rpcEndpoint string) bitshares.WalletAPI {
+	api := bitshares.NewWalletAPI(rpcEndpoint)
+	if err := api.Connect(); err != nil {
+		assert.FailNow(t, err.Error(), "Connect")
+	}
 
 	return api
 }

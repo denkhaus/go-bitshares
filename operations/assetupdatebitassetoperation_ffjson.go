@@ -57,21 +57,15 @@ func (j *AssetUpdateBitassetOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) 
 
 	}
 	buf.WriteString(`,"extensions":`)
-	if j.Extensions != nil {
-		buf.WriteString(`[`)
-		for i, v := range j.Extensions {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-			/* Interface types must use runtime reflection. type=interface {} kind=interface */
-			err = buf.Encode(v)
-			if err != nil {
-				return err
-			}
+
+	{
+
+		obj, err = j.Extensions.MarshalJSON()
+		if err != nil {
+			return err
 		}
-		buf.WriteString(`]`)
-	} else {
-		buf.WriteString(`null`)
+		buf.Write(obj)
+
 	}
 	/* Struct fall back. type=types.BitassetOptions kind=struct */
 	buf.WriteString(`,"new_options":`)
@@ -302,7 +296,7 @@ mainparse:
 
 handle_AssetToUpdate:
 
-	/* handler: j.AssetToUpdate type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AssetToUpdate type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -327,7 +321,7 @@ handle_AssetToUpdate:
 
 handle_Issuer:
 
-	/* handler: j.Issuer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Issuer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -352,67 +346,24 @@ handle_Issuer:
 
 handle_Extensions:
 
-	/* handler: j.Extensions type=types.Extensions kind=slice quoted=false*/
+	/* handler: j.Extensions type=types.Extensions kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Extensions", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
-			j.Extensions = nil
+
 		} else {
 
-			j.Extensions = []interface{}{}
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			wantVal := true
-
-			for {
-
-				var tmpJExtensions interface{}
-
-				tok = fs.Scan()
-				if tok == fflib.FFTok_error {
-					goto tokerror
-				}
-				if tok == fflib.FFTok_right_brace {
-					break
-				}
-
-				if tok == fflib.FFTok_comma {
-					if wantVal == true {
-						// TODO(pquerna): this isn't an ideal error message, this handles
-						// things like [,,,] as an array value.
-						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-					}
-					continue
-				} else {
-					wantVal = true
-				}
-
-				/* handler: tmpJExtensions type=interface {} kind=interface quoted=false*/
-
-				{
-					/* Falling back. type=interface {} kind=interface */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-
-					err = json.Unmarshal(tbuf, &tmpJExtensions)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-				}
-
-				j.Extensions = append(j.Extensions, tmpJExtensions)
-
-				wantVal = false
+			err = j.Extensions.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
 			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

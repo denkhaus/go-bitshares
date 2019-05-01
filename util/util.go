@@ -1,7 +1,9 @@
 package util
 
 import (
+	"crypto/sha512"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -9,10 +11,17 @@ import (
 
 	"time"
 
+	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
+	"golang.org/x/crypto/ripemd160"
 )
 
 func ToBytes(in interface{}) []byte {
+	if msg, ok := in.(*json.RawMessage); ok {
+		b, _ := msg.MarshalJSON()
+		return b
+	}
+
 	b, err := ffjson.Marshal(in)
 	if err != nil {
 		panic("ToBytes: unable to marshal input")
@@ -115,4 +124,29 @@ func ToPrecisionString(value float64, precision int) string {
 	val := ToFixed(value, precision)
 	ft := fmt.Sprintf("%%.%df", precision)
 	return fmt.Sprintf(ft, val)
+}
+
+func Ripemd160(in []byte) ([]byte, error) {
+	h := ripemd160.New()
+
+	if _, err := h.Write(in); err != nil {
+		return nil, errors.Annotate(err, "Write")
+	}
+
+	sum := h.Sum(nil)
+	return sum, nil
+}
+
+func Ripemd160Checksum(in []byte) ([]byte, error) {
+	buf, err := Ripemd160(in)
+	if err != nil {
+		return nil, errors.Annotate(err, "Ripemd160")
+	}
+
+	return buf[:4], nil
+}
+
+func Sha512Checksum(in []byte) ([]byte, error) {
+	buf := sha512.Sum512(in)
+	return buf[:4], nil
 }

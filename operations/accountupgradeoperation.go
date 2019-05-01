@@ -17,7 +17,7 @@ func init() {
 
 type AccountUpgradeOperation struct {
 	types.OperationFee
-	AccountToUpgrade        types.GrapheneID `json:"account_to_upgrade"`
+	AccountToUpgrade        types.AccountID  `json:"account_to_upgrade"`
 	Extensions              types.Extensions `json:"extensions"`
 	UpgradeToLifetimeMember bool             `json:"upgrade_to_lifetime_member"`
 }
@@ -26,7 +26,21 @@ func (p AccountUpgradeOperation) Type() types.OperationType {
 	return types.OperationTypeAccountUpgrade
 }
 
-//TODO: validate order
+func (p AccountUpgradeOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if maf, ok := params["membership_annual_fee"]; ok {
+		if err := enc.Encode(types.UInt64(maf.(float64))); err != nil {
+			return errors.Annotate(err, "encode MembershipAnnualFee")
+		}
+	}
+	if mlf, ok := params["membership_lifetime_fee"]; ok {
+		if err := enc.Encode(types.UInt64(mlf.(float64))); err != nil {
+			return errors.Annotate(err, "encode MembershipLifetimeFee")
+		}
+	}
+
+	return nil
+}
+
 func (p AccountUpgradeOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
@@ -49,12 +63,4 @@ func (p AccountUpgradeOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAccountUpgradeOperation creates a new AccountUpgradeOperation
-func NewAccountUpgradeOperation() *AccountUpgradeOperation {
-	tx := AccountUpgradeOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

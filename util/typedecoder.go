@@ -8,7 +8,11 @@ import (
 	"github.com/juju/errors"
 )
 
-type TypeUnmarshaller interface {
+var (
+	ErrCannotDecodeNilValue = errors.New("cannot decode nil value")
+)
+
+type TypeUnmarshaler interface {
 	Unmarshal(enc *TypeDecoder) error
 }
 
@@ -40,7 +44,7 @@ func (p *TypeDecoder) DecodeNumber(v interface{}) error {
 
 func (p *TypeDecoder) Decode(v interface{}) error {
 	if v == nil {
-		return nil
+		return ErrCannotDecodeNilValue
 	}
 
 	val := reflect.ValueOf(v)
@@ -48,11 +52,11 @@ func (p *TypeDecoder) Decode(v interface{}) error {
 		return errors.New("v must be a pointer to a valid decode target")
 	}
 
-	trg := val.Elem().Interface()
-	if m, ok := trg.(TypeUnmarshaller); ok {
+	if m, ok := v.(TypeUnmarshaler); ok {
 		return m.Unmarshal(p)
 	}
 
+	trg := val.Elem().Interface()
 	switch trg.(type) {
 	case int8:
 		return p.DecodeNumber(v)

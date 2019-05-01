@@ -115,6 +115,34 @@ func (p Memo) Decrypt(priv *PrivateKey) (string, error) {
 	return string(msg), nil
 }
 
+// func (p Memo) cypherBlock(sec []byte) ([]byte, cipher.Block, error) {
+// 	//ss := sha512.Sum512(sec)
+
+// 	var seed []byte
+// 	seed = append(seed, []byte(strconv.FormatUint(uint64(p.Nonce), 10))...)
+// 	seed = append(seed, []byte(hex.EncodeToString(sec[:]))...) //[]byte(hex.EncodeToString(ss[:]))...)
+
+// 	sd := sha512.Sum512(seed)
+// 	hash := hex.EncodeToString(sd[:])
+
+// 	iv, err := hex.DecodeString(string(hash[64:96]))
+// 	if err != nil {
+// 		return nil, nil, errors.Annotate(err, "DecodeString [iv]")
+// 	}
+
+// 	key, err := hex.DecodeString(string(hash[:64]))
+// 	if err != nil {
+// 		return nil, nil, errors.Annotate(err, "DecodeString [key]")
+// 	}
+
+// 	blk, err := aes.NewCipher(key)
+// 	if err != nil {
+// 		return nil, nil, errors.Annotate(err, "NewCipher")
+// 	}
+
+// 	return iv, blk, nil
+// }
+
 func (p Memo) cypherBlock(sec []byte) ([]byte, cipher.Block, error) {
 	ss := sha512.Sum512(sec)
 

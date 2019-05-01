@@ -45,11 +45,38 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 
 	}
 	buf.WriteString(`,"registrar_name":`)
-	fflib.WriteJsonString(buf, string(j.RegistrarName))
+
+	{
+
+		obj, err = j.RegistrarName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"referrer_name":`)
-	fflib.WriteJsonString(buf, string(j.ReferrerName))
+
+	{
+
+		obj, err = j.ReferrerName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	buf.WriteString(`,"lifetime_referrer_name":`)
-	fflib.WriteJsonString(buf, string(j.LifetimeReferrerName))
+
+	{
+
+		obj, err = j.LifetimeReferrerName.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	/* Struct fall back. type=types.VestingBalance kind=struct */
 	buf.WriteString(`,"cashback_balance":`)
 	err = buf.Encode(&j.CashbackBalance)
@@ -139,10 +166,14 @@ func (j *AccountInfo) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 			if i != 0 {
 				buf.WriteString(`,`)
 			}
-			/* Struct fall back. type=types.SettleOrder kind=struct */
-			err = buf.Encode(&v)
-			if err != nil {
-				return err
+
+			{
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 		buf.WriteString(`]`)
@@ -543,25 +574,24 @@ handle_Account:
 
 handle_RegistrarName:
 
-	/* handler: j.RegistrarName type=string kind=string quoted=false*/
+	/* handler: j.RegistrarName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.RegistrarName = string(string(outBuf))
-
+			err = j.RegistrarName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -569,25 +599,24 @@ handle_RegistrarName:
 
 handle_ReferrerName:
 
-	/* handler: j.ReferrerName type=string kind=string quoted=false*/
+	/* handler: j.ReferrerName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.ReferrerName = string(string(outBuf))
-
+			err = j.ReferrerName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -595,25 +624,24 @@ handle_ReferrerName:
 
 handle_LifetimeReferrerName:
 
-	/* handler: j.LifetimeReferrerName type=string kind=string quoted=false*/
+	/* handler: j.LifetimeReferrerName type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.LifetimeReferrerName = string(string(outBuf))
-
+			err = j.LifetimeReferrerName.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value
@@ -913,13 +941,13 @@ handle_CallOrders:
 
 handle_SettleOrders:
 
-	/* handler: j.SettleOrders type=types.SettleOrders kind=slice quoted=false*/
+	/* handler: j.SettleOrders type=types.ForceSettlementOrders kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for SettleOrders", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ForceSettlementOrders", tok))
 			}
 		}
 
@@ -927,13 +955,13 @@ handle_SettleOrders:
 			j.SettleOrders = nil
 		} else {
 
-			j.SettleOrders = []SettleOrder{}
+			j.SettleOrders = []ForceSettlementOrder{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJSettleOrders SettleOrder
+				var tmpJSettleOrders ForceSettlementOrder
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -954,19 +982,19 @@ handle_SettleOrders:
 					wantVal = true
 				}
 
-				/* handler: tmpJSettleOrders type=types.SettleOrder kind=struct quoted=false*/
+				/* handler: tmpJSettleOrders type=types.ForceSettlementOrder kind=struct quoted=false*/
 
 				{
-					/* Falling back. type=types.SettleOrder kind=struct */
-					tbuf, err := fs.CaptureField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
+					if tok == fflib.FFTok_null {
 
-					err = json.Unmarshal(tbuf, &tmpJSettleOrders)
-					if err != nil {
-						return fs.WrapErr(err)
+					} else {
+
+						err = tmpJSettleOrders.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+						if err != nil {
+							return err
+						}
 					}
+					state = fflib.FFParse_after_value
 				}
 
 				j.SettleOrders = append(j.SettleOrders, tmpJSettleOrders)
@@ -1001,13 +1029,13 @@ handle_Statistics:
 
 handle_Assets:
 
-	/* handler: j.Assets type=types.GrapheneIDs kind=slice quoted=false*/
+	/* handler: j.Assets type=types.AssetIDs kind=slice quoted=false*/
 
 	{
 
 		{
 			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for GrapheneIDs", tok))
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for AssetIDs", tok))
 			}
 		}
 
@@ -1015,13 +1043,13 @@ handle_Assets:
 			j.Assets = nil
 		} else {
 
-			j.Assets = []GrapheneID{}
+			j.Assets = []AssetID{}
 
 			wantVal := true
 
 			for {
 
-				var tmpJAssets GrapheneID
+				var tmpJAssets AssetID
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -1042,7 +1070,7 @@ handle_Assets:
 					wantVal = true
 				}
 
-				/* handler: tmpJAssets type=types.GrapheneID kind=struct quoted=false*/
+				/* handler: tmpJAssets type=types.AssetID kind=struct quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {

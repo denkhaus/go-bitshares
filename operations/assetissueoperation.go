@@ -17,15 +17,31 @@ func init() {
 
 type AssetIssueOperation struct {
 	types.OperationFee
-	Issuer         types.GrapheneID  `json:"issuer"`
-	IssueToAccount types.GrapheneID  `json:"issue_to_account"`
+	Issuer         types.AccountID   `json:"issuer"`
+	IssueToAccount types.AccountID   `json:"issue_to_account"`
 	AssetToIssue   types.AssetAmount `json:"asset_to_issue"`
-	Memo           *types.Memo       `json:"memo"`
+	Memo           *types.Memo       `json:"memo,omitempty"`
 	Extensions     types.Extensions  `json:"extensions"`
 }
 
 func (p AssetIssueOperation) Type() types.OperationType {
 	return types.OperationTypeAssetIssue
+}
+
+func (p AssetIssueOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p AssetIssueOperation) Marshal(enc *util.TypeEncoder) error {
@@ -62,12 +78,4 @@ func (p AssetIssueOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAssetIssueOperation creates a new AssetIssueOperation
-func NewAssetIssueOperation() *AssetIssueOperation {
-	tx := AssetIssueOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/operations"
@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	bts    = types.NewGrapheneID("1.3.0")
-	cny    = types.NewGrapheneID("1.3.113")
+	bts    = types.NewAssetID("1.3.0")
+	cny    = types.NewAssetID("1.3.113")
 	keyBag *crypto.KeyBag
-	seller *types.GrapheneID
+	seller types.GrapheneObject
 )
 
 const (
@@ -28,18 +28,27 @@ const (
 func init() {
 	// init is called before the API is initialized,
 	// hence must define current chain config explicitly.
-	config.SetCurrentConfig(config.ChainIDBTS)
-	seller = types.NewGrapheneID(
-		os.Getenv("BTS_TEST_ACCOUNT"),
-	)
+	config.SetCurrent(config.ChainIDBTS)
+
+	sellerAcctID := os.Getenv("BTS_TEST_ACCOUNT")
+	if sellerAcctID == "" {
+		log.Fatalf("please set env var %q", "BTS_TEST_ACCOUNT")
+	}
+	seller = types.NewAccountID(sellerAcctID)
+
+	testWIF := os.Getenv("BTS_TEST_WIF")
+	if sellerAcctID == "" {
+		log.Fatalf("please set env var %q", "BTS_TEST_WIF")
+	}
+
 	keyBag = crypto.NewKeyBag()
-	if err := keyBag.Add(os.Getenv("BTS_TEST_WIF")); err != nil {
+	if err := keyBag.Add(testWIF); err != nil {
 		log.Fatal(errors.Annotate(err, "Add [wif]"))
 	}
 }
 
 func main() {
-	api := api.New(wsFullApiUrl, "")
+	api := bitshares.NewWebsocketAPI(wsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		log.Fatal(errors.Annotate(err, "OnConnect"))
 	}
@@ -50,20 +59,19 @@ func main() {
 
 	op := operations.LimitOrderCreateOperation{
 		FillOrKill: false,
-		Seller:     *seller,
+		Seller:     types.AccountIDFromObject(seller),
 		Extensions: types.Extensions{},
 		AmountToSell: types.AssetAmount{
 			Amount: 100,
-			Asset:  *bts,
+			Asset:  types.AssetIDFromObject(bts),
 		},
 		MinToReceive: types.AssetAmount{
 			Amount: 1000000,
-			Asset:  *cny,
+			Asset:  types.AssetIDFromObject(cny),
 		},
 	}
 
 	op.Expiration.Set(24 * time.Hour)
-
 	tx, err := api.BuildSignedTransaction(keyBag, bts, &op)
 	if err != nil {
 		log.Fatal(errors.Annotate(err, "BuildSignedTransaction"))
@@ -73,5 +81,5 @@ func main() {
 		log.Fatal(errors.Annotate(err, "BroadcastTransaction"))
 	}
 
-	fmt.Println("operation successfull broadcasted")
+	fmt.Println("operation successful broadcasted")
 }

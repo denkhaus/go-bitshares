@@ -4,6 +4,21 @@ package types
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[AssetPermissionChargeMarketFee-1]
+	_ = x[AssetPermissionWhiteList-2]
+	_ = x[AssetPermissionOverrideAuthority-4]
+	_ = x[AssetPermissionTransferRestricted-8]
+	_ = x[AssetPermissionDisableForceSettle-16]
+	_ = x[AssetPermissionGlobalSettle-32]
+	_ = x[AssetPermissionDisableConfidential-64]
+	_ = x[AssetPermissionWitnessFedAsset-128]
+	_ = x[AssetPermissionComiteeFedAsset-256]
+}
+
 const (
 	_AssetPermission_name_0 = "AssetPermissionChargeMarketFeeAssetPermissionWhiteList"
 	_AssetPermission_name_1 = "AssetPermissionOverrideAuthority"

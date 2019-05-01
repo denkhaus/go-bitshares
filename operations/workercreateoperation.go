@@ -20,7 +20,7 @@ type WorkerCreateOperation struct {
 	DailyPay      types.UInt64            `json:"daily_pay"`
 	Initializer   types.WorkerInitializer `json:"initializer"`
 	Name          string                  `json:"name"`
-	Owner         types.GrapheneID        `json:"owner"`
+	Owner         types.AccountID         `json:"owner"`
 	URL           string                  `json:"url"`
 	WorkBeginDate types.Time              `json:"work_begin_date"`
 	WorkEndDate   types.Time              `json:"work_end_date"`
@@ -68,10 +68,4 @@ func (p WorkerCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewWorkerCreateOperation creates a new WorkerCreateOperation
-func NewWorkerCreateOperation() *WorkerCreateOperation {
-	tx := WorkerCreateOperation{}
-	return &tx
 }

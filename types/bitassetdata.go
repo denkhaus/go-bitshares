@@ -13,7 +13,7 @@ type BitassetOptions struct {
 	ForceSettlementDelaySec      UInt32     `json:"force_settlement_delay_sec"`
 	ForceSettlementOffsetPercent UInt16     `json:"force_settlement_offset_percent"`
 	MaximumForceSettlementVolume UInt16     `json:"maximum_force_settlement_volume"`
-	ShortBackingAsset            GrapheneID `json:"short_backing_asset"`
+	ShortBackingAsset            AssetID    `json:"short_backing_asset"`
 	Extensions                   Extensions `json:"extensions"`
 }
 
@@ -50,13 +50,13 @@ func (p BitassetOptions) Marshal(enc *util.TypeEncoder) error {
 }
 
 type BitAssetData struct {
-	ID                       GrapheneID      `json:"id"`
-	MembershipExpirationDate Time            `json:"current_feed_publication_time"`
-	IsPredictionMarket       bool            `json:"is_prediction_market"`
-	SettlementPrice          Price           `json:"settlement_price"`
-	Feeds                    AssetFeeds      `json:"feeds"`
-	Options                  BitassetOptions `json:"options"`
-	CurrentFeed              PriceFeed       `json:"current_feed"`
-	ForcedSettledVolume      UInt64          `json:"force_settled_volume"`
-	SettlementFund           UInt64          `json:"settlement_fund"`
+	ID                       AssetBitAssetDataID `json:"id"`
+	MembershipExpirationDate Time                `json:"current_feed_publication_time"`
+	IsPredictionMarket       bool                `json:"is_prediction_market"`
+	SettlementPrice          Price               `json:"settlement_price"`
+	Feeds                    AssetFeeds          `json:"feeds"`
+	Options                  BitassetOptions     `json:"options"`
+	CurrentFeed              PriceFeed           `json:"current_feed"`
+	ForcedSettledVolume      UInt64              `json:"force_settled_volume"`
+	SettlementFund           UInt64              `json:"settlement_fund"`
 }

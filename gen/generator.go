@@ -8,15 +8,12 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/gen/data"
 	"github.com/denkhaus/bitshares/tests"
 	"github.com/denkhaus/bitshares/types"
-	"github.com/denkhaus/bitshares/util"
-	"github.com/denkhaus/gojson"
 	"github.com/denkhaus/logging"
 	"github.com/juju/errors"
 	"github.com/pquerna/ffjson/ffjson"
@@ -26,10 +23,6 @@ import (
 	// importing this initializes sample data fetching
 	"github.com/denkhaus/bitshares/gen/samples"
 )
-
-type Unmarshalable interface {
-	UnmarshalJSON(input []byte) error
-}
 
 const (
 	samplesDir    = "samples"
@@ -42,25 +35,6 @@ var (
 	sampleMetaTemplate *template.Template
 	genChan            = make(chan GenData, 200)
 	tb                 = tomb.Tomb{}
-
-	// do not change order here
-	knownTypes = []Unmarshalable{
-		//&types.AccountOptions{},
-		// &types.Asset{},
-		&types.AssetAmount{},
-		&types.AssetFeed{},
-		// &types.AssetOptions{},
-		&types.GrapheneID{},
-		//&types.BitAssetDataOptions{},
-		&types.Authority{},
-		//&types.Memo{},
-		&types.Price{},
-		&types.PriceFeed{},
-		//&types.Votes{},
-		&types.Time{},
-		//&types.PublicKey{},
-		//&types.Account{},
-	}
 )
 
 type GenData struct {
@@ -74,7 +48,7 @@ func main() {
 	defer close(genChan)
 
 	logging.Info("connect api")
-	api := api.New(tests.WsFullApiUrl, tests.RpcFullApiUrl)
+	api := bitshares.NewWebsocketAPI(tests.WsFullApiUrl)
 	if err := api.Connect(); err != nil {
 		handleError(errors.Annotate(err, "Connect"))
 	}
@@ -83,7 +57,6 @@ func main() {
 		handleError(errors.Annotate(err, "OnError"))
 	})
 
-	//init templates
 	logging.Info("parse templates")
 
 	tmpl, err := template.ParseFiles("templates/meta.go.tmpl")
@@ -114,7 +87,6 @@ func main() {
 		handleError(errors.Annotate(err, "init datastore"))
 	}
 
-	//TODO: save last scanned block and reapply
 	block := uint64(samples.LastScannedBlock)
 
 	logging.Infof("loop blocks, starting from %d", block)
@@ -125,7 +97,12 @@ func main() {
 			handleError(errors.Annotate(err, "GetBlock"))
 		}
 
-		m := objx.New(resp)
+		var data map[string]interface{}
+		if ffjson.Unmarshal(*resp, &data); err != nil {
+			handleError(errors.Annotate(err, "Unmarshal [resp]"))
+		}
+
+		m := objx.New(data)
 		trxs := m.Get("transactions")
 
 		// enumerate Transactions
@@ -186,37 +163,6 @@ func generate(ch chan GenData) error {
 		default:
 		}
 	}
-}
-
-func generateOpData(d GenData) error {
-	samples, err := data.GetSamplesByType(d.Type)
-	if err != nil {
-		return errors.Annotate(err, "GetSampleByType")
-	}
-
-	for _, s := range samples {
-		sample, err := strconv.Unquote(s)
-		if err != nil {
-			return errors.Annotate(err, "Unquote")
-		}
-
-		//fmt.Printf("generate struct by sample %+v\n", sample)
-
-		buf, err := gojson.GenerateWithTypeGuessing(
-			strings.NewReader(sample),
-			gojson.ParseJson, d.Type.OperationName(),
-			"operations", []string{"json"}, true, true,
-			guessStructType,
-		)
-
-		if err != nil {
-			return errors.Annotate(err, "GenerateWithTypeGuessing")
-		}
-
-		fmt.Println("generated struct ", string(buf))
-	}
-
-	return nil
 }
 
 func generateSampleDataFile(d GenData, sampleData string) error {
@@ -307,7 +253,6 @@ func generateSampleMainFile(d GenData) error {
 }
 
 func generateSampleData(d GenData) error {
-
 	if d.SampleIdx == 0 {
 		if err := generateSampleMainFile(d); err != nil {
 			return errors.Annotate(err, "generateSampleMainFile")
@@ -344,89 +289,4 @@ func handleError(err error) {
 	}
 
 	os.Exit(1)
-}
-
-func guessStructType(value interface{}, suggestedType string) (string, error) {
-	//util.Dump("valueToGuess", value)
-	//	util.DumpJSON("suggestedType", suggestedType)
-
-	for _, t := range knownTypes {
-		v, err := ffjson.Marshal(value)
-		if err != nil {
-			return "", errors.Annotate(err, "Marshal")
-		}
-
-		//make local copy of known type
-		typ := t
-
-		//	util.Dump("data", v)
-		if err := typ.UnmarshalJSON(v); err == nil {
-			// util.Dump("compare-1", typ)
-			// util.Dump("compare-2", value)
-
-			switch o := typ.(type) {
-			case *types.GrapheneID:
-				if value.(string) == o.String() {
-					return "types.GrapheneID", nil
-				}
-			case *types.Time:
-				if value.(string) == o.String() {
-					return "types.Time", nil
-				}
-			// case *types.PublicKey:
-			// 	if value.(string) == o.String() {
-			// 		return "types.PublicKey", nil
-			// 	}
-			case *types.AccountOptions:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.AccountOptions", nil
-				}
-			case *types.AssetAmount:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.AssetAmount", nil
-				}
-			case *types.Authority:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.Authority", nil
-				}
-			case *types.Memo:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.Memo", nil
-				}
-			// case *types.Votes:
-			// 	if bytes.Equal(v, util.ToBytes(typ)) {
-			// 		return "types.Votes", nil
-			// 	}
-			case *types.Price:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.Price", nil
-				}
-			case *types.PriceFeed:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.PriceFeed", nil
-				}
-			case *types.AssetFeed:
-				if bytes.Equal(v, util.ToBytes(typ)) {
-					return "types.AssetFeed", nil
-				}
-			}
-			// if val1, ok := value.(map[string]interface{}); ok {
-			// 	val2 := util.ToMap(typ)
-
-			// 	util.Dump("compare-1", val1)
-			// 	util.Dump("compare-2", val2)
-
-			// 	if reflect.DeepEqual(val1, val2) {
-			// 		util.Dump("solved", typ)
-			// 		return "lala", nil
-			// 	}
-			// }
-			// name := reflect.ValueOf(typ).Type().Name()
-			// util.Dump("solved", typ)
-			// util.Dump("typeName", name)
-			//o1 := util.ToMap(value)
-		}
-	}
-
-	return suggestedType, nil
 }

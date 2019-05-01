@@ -273,7 +273,7 @@ mainparse:
 
 handle_ID:
 
-	/* handler: j.ID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.ID type=types.CallOrderID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -298,7 +298,7 @@ handle_ID:
 
 handle_Borrower:
 
-	/* handler: j.Borrower type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Borrower type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

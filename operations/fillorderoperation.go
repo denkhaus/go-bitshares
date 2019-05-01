@@ -18,8 +18,8 @@ func init() {
 //virtual order
 type FillOrderOperation struct {
 	types.OperationFee
-	OrderID   types.GrapheneID  `json:"order_id"`
-	AccountID types.GrapheneID  `json:"account_id"`
+	OrderID   types.ObjectID    `json:"order_id"`
+	AccountID types.AccountID   `json:"account_id"`
 	Pays      types.AssetAmount `json:"pays"`
 	Receives  types.AssetAmount `json:"receives"`
 	IsMaker   bool              `json:"is_maker"`
@@ -30,7 +30,9 @@ func (p FillOrderOperation) Type() types.OperationType {
 	return types.OperationTypeFillOrder
 }
 
-//TODO: something is still wrong here!
+func (p FillOrderOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	return nil
+}
 
 func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
@@ -38,23 +40,23 @@ func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	if err := enc.Encode(p.Fee); err != nil {
-		return errors.Annotate(err, "encode fee")
+		return errors.Annotate(err, "encode Fee")
 	}
 
 	if err := enc.Encode(p.OrderID); err != nil {
-		return errors.Annotate(err, "encode orderid")
+		return errors.Annotate(err, "encode OrderID")
 	}
 
 	if err := enc.Encode(p.AccountID); err != nil {
-		return errors.Annotate(err, "encode accountid")
+		return errors.Annotate(err, "encode AccountID")
 	}
 
 	if err := enc.Encode(p.Pays); err != nil {
-		return errors.Annotate(err, "encode pays")
+		return errors.Annotate(err, "encode Pays")
 	}
 
 	if err := enc.Encode(p.Receives); err != nil {
-		return errors.Annotate(err, "encode receives")
+		return errors.Annotate(err, "encode Receives")
 	}
 
 	if err := enc.Encode(p.FillPrice); err != nil {
@@ -66,9 +68,4 @@ func (p FillOrderOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewFillOrderOperation creates a new FillOrderOperation
-func NewFillOrderOperation() *FillOrderOperation {
-	return &FillOrderOperation{}
 }

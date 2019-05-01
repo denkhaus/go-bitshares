@@ -8,6 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	BTSNullKey = "BTS1111111111111111111111111111111114T1Anm"
+)
+
 var keys = []string{
 	"BTS6K35Bajw29N4fjP4XADHtJ7bEj2xHJ8CoY2P2s1igXTB5oMBhR",
 	"BTS4txNeAoSWcDX7oWceKppMb956z5oRx6mQyCJXCUB7aUh1EJp5y",
@@ -22,13 +26,25 @@ var keys = []string{
 }
 
 func TestNewPublicKey(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 	for _, k := range keys {
 		key, err := NewPublicKeyFromString(k)
 		if err != nil {
 			assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
 		}
 
+		assert.NotNil(t, key)
 		assert.Equal(t, k, key.String())
 	}
+}
+
+func TestNullPublicKey(t *testing.T) {
+	config.SetCurrent(config.ChainIDBTS)
+	key, err := NewPublicKeyFromString(BTSNullKey)
+	if err != nil {
+		assert.FailNow(t, errors.Annotate(err, "NewPublicKeyFromString").Error())
+	}
+
+	assert.NotNil(t, key)
+	assert.Equal(t, BTSNullKey, key.String())
 }

@@ -19,7 +19,7 @@ type CallOrderUpdateOperation struct {
 	types.OperationFee
 	DeltaCollateral types.AssetAmount               `json:"delta_collateral"`
 	DeltaDebt       types.AssetAmount               `json:"delta_debt"`
-	FundingAccount  types.GrapheneID                `json:"funding_account"`
+	FundingAccount  types.AccountID                 `json:"funding_account"`
 	Extensions      types.CallOrderUpdateExtensions `json:"extensions"`
 }
 
@@ -53,12 +53,4 @@ func (p CallOrderUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-func NewCallOrderUpdateOperation(acct types.GrapheneID) *CallOrderUpdateOperation {
-	op := CallOrderUpdateOperation{
-		FundingAccount: acct,
-	}
-
-	return &op
 }

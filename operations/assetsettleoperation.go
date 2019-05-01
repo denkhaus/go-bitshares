@@ -17,7 +17,7 @@ func init() {
 
 type AssetSettleOperation struct {
 	types.OperationFee
-	Account    types.GrapheneID  `json:"account"`
+	Account    types.AccountID   `json:"account"`
 	Amount     types.AssetAmount `json:"amount"`
 	Extensions types.Extensions  `json:"extensions"`
 }
@@ -48,12 +48,4 @@ func (p AssetSettleOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAssetSettleOperation creates a new AssetSettleOperation
-func NewAssetSettleOperation() *AssetSettleOperation {
-	tx := AssetSettleOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

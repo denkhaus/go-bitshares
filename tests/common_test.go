@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/types"
 	"github.com/stretchr/testify/suite"
@@ -15,14 +15,13 @@ import (
 
 type commonTest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
+	TestAPI bitshares.WebsocketAPI
 }
 
 func (suite *commonTest) SetupTest() {
-	suite.TestAPI = NewTestAPI(
+	suite.TestAPI = NewWebsocketTestAPI(
 		suite.T(),
 		WsFullApiUrl,
-		RpcFullApiUrl,
 	)
 }
 
@@ -60,27 +59,37 @@ func (suite *commonTest) Test_GetAccountBalances() {
 }
 
 func (suite *commonTest) Test_GetAccounts() {
-	res, err := suite.TestAPI.GetAccounts(UserID2) //, UserID3, UserID4)
+	res, err := suite.TestAPI.GetAccounts(UserID2, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccounts")
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 1)
+	suite.Len(res, 3)
 
 	//logging.Dump("get accounts >", res)
 }
 
 func (suite *commonTest) Test_GetFullAccounts() {
-	res, err := suite.TestAPI.GetFullAccounts(UserID2)
+	res, err := suite.TestAPI.GetFullAccounts(UserID2, UserID3, UserID4)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetFullAccounts")
 	}
 
 	suite.NotNil(res)
-	suite.Len(res, 1)
+	suite.Len(res, 3)
 
 	//logging.Dump("get full accounts >", res)
+}
+
+func (suite *commonTest) Test_GetTicker() {
+	res, err := suite.TestAPI.GetTicker(AssetCNY, AssetBTS)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetTicker")
+	}
+
+	suite.NotNil(res)
+	//logging.Dump("get_ticker >", res)
 }
 
 func (suite *commonTest) Test_GetObjects() {
@@ -92,7 +101,7 @@ func (suite *commonTest) Test_GetObjects() {
 		// CallOrder1,
 		// SettleOrder1,
 		OperationHistory1,
-		CommiteeMember1,
+		CommitteeMember1,
 		Balance1,
 	)
 
@@ -106,13 +115,34 @@ func (suite *commonTest) Test_GetObjects() {
 }
 
 func (suite *commonTest) Test_GetBlock() {
-	res, err := suite.TestAPI.GetBlock(33217575) //26867161)
+	res, err := suite.TestAPI.GetBlock(33217575)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetBlock")
 	}
 
 	suite.NotNil(res)
 	//logging.Dump("get_block >", res)
+}
+
+func (suite *commonTest) Test_GetBlockHeader() {
+	res, err := suite.TestAPI.GetBlockHeader(33217575)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetBlockHeader")
+	}
+
+	suite.NotNil(res)
+	//logging.Dump("get_block_header >", res)
+}
+
+func (suite *commonTest) Test_GetTransaction() {
+	res, err := suite.TestAPI.GetTransaction(33217575, 1)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetTransaction")
+	}
+
+	suite.NotNil(res)
+	suite.Equal(res.RefBlockNum, types.UInt16(56357))
+	//logging.Dump("get_transaction >", res)
 }
 
 func (suite *commonTest) Test_GetDynamicGlobalProperties() {
@@ -179,8 +209,8 @@ func (suite *commonTest) Test_GetMarginPositions() {
 	//logging.Dump("marginpositions >", res)
 }
 
-func (suite *commonTest) Test_GetSettleOrders() {
-	res, err := suite.TestAPI.GetSettleOrders(AssetCNY, 50)
+func (suite *commonTest) Test_GetForceSettlementOrders() {
+	res, err := suite.TestAPI.GetForceSettlementOrders(AssetCNY, 50)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetSettleOrders")
 	}
@@ -202,9 +232,25 @@ func (suite *commonTest) Test_ListAssets() {
 
 func (suite *commonTest) Test_GetAccountHistory() {
 
-	user := types.NewGrapheneID("1.2.96393")
-	start := types.NewGrapheneID("1.11.187698971")
-	stop := types.NewGrapheneID("1.11.187658388")
+	user := types.NewAccountID("1.2.96393")
+	start := types.NewOperationHistoryID("1.11.187698971")
+	stop := types.NewOperationHistoryID("1.11.187658388")
+
+	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetAccountHistory")
+	}
+
+	suite.NotNil(res)
+	//logging.Dump("history >", res)
+}
+
+//for qizikd
+func (suite *commonTest) Test_GetAccountHistory_1() {
+
+	user := types.NewAccountID("1.2.1587421")
+	start := types.NewOperationHistoryID("1.11.0")
+	stop := types.NewOperationHistoryID("1.11.187658388")
 
 	res, err := suite.TestAPI.GetAccountHistory(user, stop, 30, start)
 	if err != nil {
@@ -235,8 +281,8 @@ func (suite *commonTest) Test_Get24Volume() {
 	}
 
 	suite.NotNil(res)
-	suite.Equal(*AssetUSD, res.Base)
-	suite.Equal(*AssetBTS, res.Quote)
+	suite.Equal("USD", res.Base.String())
+	suite.Equal("BTS", res.Quote.String())
 
 	//logging.Dump("test Get24Volume >", res)
 }

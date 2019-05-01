@@ -17,10 +17,10 @@ func init() {
 
 type AssetUpdateFeedProducersOperation struct {
 	types.OperationFee
-	AssetToUpdate    types.GrapheneID  `json:"asset_to_update"`
-	Extensions       types.Extensions  `json:"extensions"`
-	Issuer           types.GrapheneID  `json:"issuer"`
-	NewFeedProducers types.GrapheneIDs `json:"new_feed_producers"`
+	AssetToUpdate    types.AssetID    `json:"asset_to_update"`
+	Extensions       types.Extensions `json:"extensions"`
+	Issuer           types.AccountID  `json:"issuer"`
+	NewFeedProducers types.AccountIDs `json:"new_feed_producers"`
 }
 
 func (p AssetUpdateFeedProducersOperation) Type() types.OperationType {
@@ -53,12 +53,4 @@ func (p AssetUpdateFeedProducersOperation) Marshal(enc *util.TypeEncoder) error 
 	}
 
 	return nil
-}
-
-//NewAssetUpdateFeedProducersOperation creates a new AssetUpdateFeedProducersOperation
-func NewAssetUpdateFeedProducersOperation() *AssetUpdateFeedProducersOperation {
-	tx := AssetUpdateFeedProducersOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

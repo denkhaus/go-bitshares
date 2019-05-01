@@ -17,9 +17,9 @@ func init() {
 
 type VestingBalanceWithdrawOperation struct {
 	types.OperationFee
-	Amount         types.AssetAmount `json:"amount"`
-	Owner          types.GrapheneID  `json:"owner"`
-	VestingBalance types.GrapheneID  `json:"vesting_balance"`
+	Amount         types.AssetAmount      `json:"amount"`
+	Owner          types.AccountID        `json:"owner"`
+	VestingBalance types.VestingBalanceID `json:"vesting_balance"`
 }
 
 func (p VestingBalanceWithdrawOperation) Type() types.OperationType {
@@ -48,10 +48,4 @@ func (p VestingBalanceWithdrawOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewVestingBalanceWithdrawOperation creates a new VestingBalanceWithdrawOperation
-func NewVestingBalanceWithdrawOperation() *VestingBalanceWithdrawOperation {
-	tx := VestingBalanceWithdrawOperation{}
-	return &tx
 }

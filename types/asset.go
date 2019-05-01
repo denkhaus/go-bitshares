@@ -5,20 +5,11 @@ package types
 type Assets []Asset
 
 type Asset struct {
-	ID                 GrapheneID   `json:"id"`
-	Symbol             string       `json:"symbol"`
-	Precision          int          `json:"precision"`
-	Issuer             GrapheneID   `json:"issuer"`
-	DynamicAssetDataID GrapheneID   `json:"dynamic_asset_data_id"`
-	BitassetDataID     GrapheneID   `json:"bitasset_data_id"`
-	Options            AssetOptions `json:"options"`
-}
-
-//NewAsset creates a new Asset object
-func NewAsset(id GrapheneID) *Asset {
-	ass := Asset{
-		ID: id,
-	}
-
-	return &ass
+	ID                 AssetID             `json:"id"`
+	Symbol             String              `json:"symbol"`
+	Precision          int                 `json:"precision"`
+	Issuer             AccountID           `json:"issuer"`
+	DynamicAssetDataID AssetDynamicDataID  `json:"dynamic_asset_data_id"`
+	BitassetDataID     AssetBitAssetDataID `json:"bitasset_data_id"`
+	Options            AssetOptions        `json:"options"`
 }

@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	config.SetCurrentConfig(config.ChainIDBTS)
+	config.SetCurrent(config.ChainIDBTS)
 
 	pubKeyA, err := types.NewPublicKeyFromString(pubKeyAString)
 	if err != nil {
@@ -34,7 +34,7 @@ func main() {
 	memo := types.Memo{
 		From:  *pubKeyA,
 		To:    *pubKeyB,
-		Nonce: types.UInt64(rand.Int63()),
+		Nonce: types.UInt64(rand.Uint64()),
 	}
 
 	privKeyA, err := types.NewPrivateKeyFromWif(privKeyAWif)
@@ -61,5 +61,4 @@ func main() {
 	}
 
 	fmt.Printf("decrypted memo is %q\n", memoDst)
-
 }

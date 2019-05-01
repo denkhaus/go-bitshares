@@ -17,8 +17,8 @@ func init() {
 
 type AccountWhitelistOperation struct {
 	types.OperationFee
-	AccountToList      types.GrapheneID `json:"account_to_list"`
-	AuthorizingAccount types.GrapheneID `json:"authorizing_account"`
+	AccountToList      types.AccountID  `json:"account_to_list"`
+	AuthorizingAccount types.AccountID  `json:"authorizing_account"`
 	Extensions         types.Extensions `json:"extensions"`
 	NewListing         types.UInt8      `json:"new_listing"`
 }
@@ -54,12 +54,4 @@ func (p AccountWhitelistOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAccountWhitelistOperation creates a new AccountWhitelistOperation
-func NewAccountWhitelistOperation() *AccountWhitelistOperation {
-	tx := AccountWhitelistOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

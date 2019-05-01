@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/denkhaus/bitshares/api"
+	"github.com/denkhaus/bitshares"
 	"github.com/denkhaus/bitshares/config"
 	"github.com/denkhaus/bitshares/crypto"
 	"github.com/denkhaus/bitshares/operations"
@@ -13,12 +13,14 @@ import (
 
 type websocketAPITest struct {
 	suite.Suite
-	TestAPI api.BitsharesAPI
-	KeyBag  *crypto.KeyBag
+	WebsocketAPI bitshares.WebsocketAPI
+	WalletAPI    bitshares.WalletAPI
+	KeyBag       *crypto.KeyBag
 }
 
 func (suite *websocketAPITest) SetupSuite() {
-	suite.TestAPI = NewTestAPI(suite.T(), WsTestApiUrl, RpcTestApiUrl)
+	suite.WebsocketAPI = NewWebsocketTestAPI(suite.T(), WsTestApiUrl)
+	suite.WalletAPI = NewWalletTestAPI(suite.T(), RpcTestApiUrl)
 
 	suite.KeyBag = crypto.NewKeyBag()
 	if err := suite.KeyBag.Add(TestAccount1PrivKeyActive); err != nil {
@@ -28,16 +30,26 @@ func (suite *websocketAPITest) SetupSuite() {
 	if err := suite.KeyBag.Add(TestAccount2PrivKeyActive); err != nil {
 		suite.FailNow(err.Error(), "KeyBag.Add 2")
 	}
+
+	if err := suite.WalletAPI.Unlock("123456"); err != nil {
+		suite.FailNow(err.Error(), "Unlock")
+	}
 }
 
 func (suite *websocketAPITest) TearDownSuite() {
-	if err := suite.TestAPI.Close(); err != nil {
-		suite.FailNow(err.Error(), "Close")
+	if err := suite.WebsocketAPI.Close(); err != nil {
+		suite.FailNow(err.Error(), "Close [ws]")
+	}
+	if err := suite.WalletAPI.Lock(); err != nil {
+		suite.FailNow(err.Error(), "Lock")
+	}
+	if err := suite.WalletAPI.Close(); err != nil {
+		suite.FailNow(err.Error(), "Close [wallet]")
 	}
 }
 
 func (suite *websocketAPITest) Test_ChainConfig() {
-	res, err := suite.TestAPI.GetChainID()
+	res, err := suite.WebsocketAPI.GetChainID()
 	if err != nil {
 		suite.FailNow(err.Error(), "GetChainID")
 	}
@@ -50,13 +62,13 @@ func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 1000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
@@ -65,25 +77,71 @@ func (suite *websocketAPITest) Test_BuildSignedTransaction() {
 	suite.compareTransaction(trx, false)
 }
 
+func (suite *websocketAPITest) Test_TransferExtended() {
+	props, err := suite.WebsocketAPI.GetDynamicGlobalProperties()
+	if err != nil {
+		suite.FailNow(err.Error(), "GetDynamicGlobalProperties")
+	}
+
+	trx, err := types.NewSignedTransactionWithBlockData(props)
+	if err != nil {
+		suite.FailNow(err.Error(), "NewSignedTransactionWithBlockData")
+	}
+
+	trx.Operations = types.Operations{
+		&operations.TransferOperation{
+			Extensions: types.Extensions{},
+			Amount: types.AssetAmount{
+				Amount: 100000,
+				Asset:  types.AssetIDFromObject(AssetTEST),
+			},
+			From: types.AccountIDFromObject(TestAccount1ID),
+			To:   types.AccountIDFromObject(TestAccount2ID),
+		},
+	}
+
+	// logging.SetDebug(true)
+	// defer logging.SetDebug(false)
+
+	fees, err := suite.WebsocketAPI.GetRequiredFees(trx.Operations, AssetTEST)
+	if err != nil {
+		suite.FailNow(err.Error(), "GetRequiredFees")
+	}
+
+	if err := trx.Operations.ApplyFees(fees); err != nil {
+		suite.FailNow(err.Error(), "ApplyFees")
+	}
+
+	suite.compareTransaction(trx, false)
+
+	res, err := suite.WalletAPI.SignTransaction(trx, true)
+	if err != nil {
+		suite.FailNow(err.Error(), "SignTransaction")
+	}
+
+	_ = res
+	//logging.Dump("transfer <", res)
+}
+
 func (suite *websocketAPITest) Test_SignAndVerify() {
 	op := operations.TransferOperation{
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 1000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
 
 	suite.compareTransaction(trx, false)
 
-	v, err := suite.TestAPI.VerifySignedTransaction(suite.KeyBag, trx)
+	v, err := crypto.VerifySignedTransaction(suite.KeyBag, trx)
 	if err != nil {
 		suite.FailNow(err.Error(), "VerifySignedTransaction")
 	}
@@ -96,13 +154,13 @@ func (suite *websocketAPITest) Test_Transfer() {
 		Extensions: types.Extensions{},
 		Amount: types.AssetAmount{
 			Amount: 100000,
-			Asset:  *AssetTEST,
+			Asset:  types.AssetIDFromObject(AssetTEST),
 		},
-		From: *TestAccount2ID,
-		To:   *TestAccount1ID,
+		From: types.AccountIDFromObject(TestAccount2ID),
+		To:   types.AccountIDFromObject(TestAccount1ID),
 	}
 
-	trx, err := suite.TestAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
+	trx, err := suite.WebsocketAPI.BuildSignedTransaction(suite.KeyBag, AssetTEST, &op)
 	if err != nil {
 		suite.FailNow(err.Error(), "BuildSignedTransaction")
 	}
@@ -111,13 +169,12 @@ func (suite *websocketAPITest) Test_Transfer() {
 	suite.compareTransaction(trx, false)
 
 	//suite.TestAPI.SetDebug(true)
-	if err := suite.TestAPI.BroadcastTransaction(trx); err != nil {
+	if err := suite.WebsocketAPI.BroadcastTransaction(trx); err != nil {
 		suite.FailNow(err.Error(), "BroadcastTransaction")
 	}
 }
-
 func (suite *websocketAPITest) Test_GetAccountBalances() {
-	res, err := suite.TestAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
+	res, err := suite.WebsocketAPI.GetAccountBalances(TestAccount1ID, AssetTEST)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 1")
 	}
@@ -127,7 +184,7 @@ func (suite *websocketAPITest) Test_GetAccountBalances() {
 
 	//util.Dump("test amount TestAccount1 >", res)
 
-	res, err = suite.TestAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
+	res, err = suite.WebsocketAPI.GetAccountBalances(TestAccount2ID, AssetTEST)
 	if err != nil {
 		suite.FailNow(err.Error(), "GetAccountBalances 2")
 	}
@@ -139,7 +196,7 @@ func (suite *websocketAPITest) Test_GetAccountBalances() {
 }
 
 func (suite *websocketAPITest) compareTransaction(tx *types.SignedTransaction, debug bool) {
-	ref, test, err := CompareTransactions(suite.TestAPI, tx, debug)
+	ref, test, err := CompareTransactions(suite.WalletAPI, tx, debug)
 	if err != nil {
 		suite.FailNow(err.Error(), "Compare Transactions")
 	}

@@ -17,8 +17,8 @@ func init() {
 
 type TransferOperation struct {
 	types.OperationFee
-	From       types.GrapheneID  `json:"from"`
-	To         types.GrapheneID  `json:"to"`
+	From       types.AccountID   `json:"from"`
+	To         types.AccountID   `json:"to"`
 	Amount     types.AssetAmount `json:"amount"`
 	Memo       *types.Memo       `json:"memo,omitempty"`
 	Extensions types.Extensions  `json:"extensions"`
@@ -26,6 +26,22 @@ type TransferOperation struct {
 
 func (p TransferOperation) Type() types.OperationType {
 	return types.OperationTypeTransfer
+}
+
+func (p TransferOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p TransferOperation) Marshal(enc *util.TypeEncoder) error {
@@ -62,12 +78,4 @@ func (p TransferOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewTransferOperation creates a new TransferOperation
-func NewTransferOperation() *TransferOperation {
-	tx := TransferOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

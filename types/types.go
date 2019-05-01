@@ -1,11 +1,5 @@
 package types
 
-//go:generate stringer -type=OperationType
-//go:generate stringer -type=ObjectType
-//go:generate stringer -type=AssetType
-//go:generate stringer -type=SpaceType
-//go:generate stringer -type=AssetPermission
-
 import (
 	"crypto/aes"
 	"crypto/cipher"
@@ -22,7 +16,7 @@ import (
 )
 
 var (
-	ErrRPCClientNotInitialized      = fmt.Errorf("RPC client is not initialized")
+	//	ErrRPCClientNotInitialized      = fmt.Errorf("RPC client is not initialized")
 	ErrNotImplemented               = fmt.Errorf("not implemented")
 	ErrInvalidInputType             = fmt.Errorf("invalid input type")
 	ErrInvalidInputLength           = fmt.Errorf("invalid input length")
@@ -35,7 +29,7 @@ var (
 	ErrNoVerifyingKeyFound          = fmt.Errorf("no verifying key found")
 	ErrInvalidDigestLength          = fmt.Errorf("invalid digest length")
 	ErrInvalidPrivateKeyCurve       = fmt.Errorf("invalid PrivateKey curve")
-	ErrCurrentChainConfigIsNotSet   = fmt.Errorf("current chain config is not set")
+	ErrChainConfigIsUndefined       = fmt.Errorf("chain config is undefined")
 )
 
 var (
@@ -90,75 +84,70 @@ const (
 	AssetTypePredictionMarket
 )
 
-type SpaceType Int8
+type OperationType UInt8
 
 const (
-	SpaceTypeUndefined SpaceType = -1
-	SpaceTypeProtocol  SpaceType = iota
-	SpaceTypeImplementation
-)
-
-type OperationType Int8
-
-const (
-	OperationTypeTransfer OperationType = iota
-	OperationTypeLimitOrderCreate
-	OperationTypeLimitOrderCancel
-	OperationTypeCallOrderUpdate
-	OperationTypeFillOrder
-	OperationTypeAccountCreate
-	OperationTypeAccountUpdate
-	OperationTypeAccountWhitelist
-	OperationTypeAccountUpgrade
-	OperationTypeAccountTransfer ///
-	OperationTypeAssetCreate
-	OperationTypeAssetUpdate
-	OperationTypeAssetUpdateBitasset
-	OperationTypeAssetUpdateFeedProducers
-	OperationTypeAssetIssue
-	OperationTypeAssetReserve
-	OperationTypeAssetFundFeePool
-	OperationTypeAssetSettle
-	OperationTypeAssetGlobalSettle ///
-	OperationTypeAssetPublishFeed
-	OperationTypeWitnessCreate
-	OperationTypeWitnessUpdate
-	OperationTypeProposalCreate
-	OperationTypeProposalUpdate
-	OperationTypeProposalDelete
-	OperationTypeWithdrawPermissionCreate              ///
-	OperationTypeWithdrawPermissionUpdate              ///
-	OperationTypeWithdrawPermissionClaim               ///
-	OperationTypeWithdrawPermissionDelete              ///
-	OperationTypeCommitteeMemberCreate                 ///
-	OperationTypeCommitteeMemberUpdate                 ///
-	OperationTypeCommitteeMemberUpdateGlobalParameters ///
-	OperationTypeVestingBalanceCreate
-	OperationTypeVestingBalanceWithdraw
-	OperationTypeWorkerCreate
-	OperationTypeCustom ///
-	OperationTypeAssert ///
-	OperationTypeBalanceClaim
-	OperationTypeOverrideTransfer
-	OperationTypeTransferToBlind   ///
-	OperationTypeBlindTransfer     ///
-	OperationTypeTransferFromBlind ///
-	OperationTypeAssetSettleCancel ///
-	OperationTypeAssetClaimFees    ///
-	OperationTypeFBADistribute     ///
-	OperationTypeBidCollateral
-	OperationTypeExecuteBid ///
+	OperationTypeTransfer                              OperationType = iota //0
+	OperationTypeLimitOrderCreate                                           //1
+	OperationTypeLimitOrderCancel                                           //2
+	OperationTypeCallOrderUpdate                                            //3
+	OperationTypeFillOrder                                                  //4
+	OperationTypeAccountCreate                                              //5
+	OperationTypeAccountUpdate                                              //6
+	OperationTypeAccountWhitelist                                           //7
+	OperationTypeAccountUpgrade                                             //8
+	OperationTypeAccountTransfer                                            //9
+	OperationTypeAssetCreate                                                //10
+	OperationTypeAssetUpdate                                                //11
+	OperationTypeAssetUpdateBitasset                                        //12
+	OperationTypeAssetUpdateFeedProducers                                   //13
+	OperationTypeAssetIssue                                                 //14
+	OperationTypeAssetReserve                                               //15
+	OperationTypeAssetFundFeePool                                           //16
+	OperationTypeAssetSettle                                                //17
+	OperationTypeAssetGlobalSettle                                          //18
+	OperationTypeAssetPublishFeed                                           //19
+	OperationTypeWitnessCreate                                              //20
+	OperationTypeWitnessUpdate                                              //21
+	OperationTypeProposalCreate                                             //22
+	OperationTypeProposalUpdate                                             //23
+	OperationTypeProposalDelete                                             //24
+	OperationTypeWithdrawPermissionCreate                                   //25
+	OperationTypeWithdrawPermissionUpdate                                   //26
+	OperationTypeWithdrawPermissionClaim                                    //27
+	OperationTypeWithdrawPermissionDelete                                   //28
+	OperationTypeCommitteeMemberCreate                                      //29
+	OperationTypeCommitteeMemberUpdate                                      //30
+	OperationTypeCommitteeMemberUpdateGlobalParameters                      //31
+	OperationTypeVestingBalanceCreate                                       //32
+	OperationTypeVestingBalanceWithdraw                                     //33
+	OperationTypeWorkerCreate                                               //34
+	OperationTypeCustom                                                     //35
+	OperationTypeAssert                                                     //36
+	OperationTypeBalanceClaim                                               //37
+	OperationTypeOverrideTransfer                                           //38
+	OperationTypeTransferToBlind                                            //39
+	OperationTypeBlindTransfer                                              ///40
+	OperationTypeTransferFromBlind                                          //41
+	OperationTypeAssetSettleCancel                                          ///42
+	OperationTypeAssetClaimFees                                             //43
+	OperationTypeFBADistribute                                              ///44
+	OperationTypeBidCollateral                                              //45
+	OperationTypeExecuteBid                                                 ///46
 )
 
 func (p OperationType) OperationName() string {
 	return fmt.Sprintf("%sOperation", p.String()[13:])
 }
 
-type ObjectType Int8
+type SpaceType UInt8
 
 const (
-	ObjectTypeUndefined ObjectType = -1
+	SpaceTypeProtocol SpaceType = iota + 1
+	SpaceTypeImplementation
 )
+
+type ObjectType UInt8
 
 //for SpaceTypeProtocol
 const (
@@ -166,7 +155,7 @@ const (
 	ObjectTypeAccount
 	ObjectTypeAsset
 	ObjectTypeForceSettlement
-	ObjectTypeCommiteeMember
+	ObjectTypeCommitteeMember
 	ObjectTypeWitness
 	ObjectTypeLimitOrder
 	ObjectTypeCallOrder
@@ -509,8 +498,41 @@ func (t Time) IsZero() bool {
 	return t.Time.IsZero()
 }
 
-type Buffer []byte
+type String struct {
+	data string
+}
+
+func (p String) MarshalJSON() ([]byte, error) {
+	return ffjson.Marshal(p.data)
+}
+
+func (p String) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.EncodeString(p.data); err != nil {
+		return errors.Annotate(err, "encode data")
+	}
+	return nil
+}
+
+func (p *String) UnmarshalJSON(data []byte) error {
+	if err := ffjson.Unmarshal(data, &p.data); err != nil {
+		return errors.Annotate(err, "Unmarshal")
+	}
+	return nil
+}
+
+func (p *String) Unmarshal(dec *util.TypeDecoder) error {
+	if err := dec.DecodeString(&p.data); err != nil {
+		return errors.Annotate(err, "decode data")
+	}
+	return nil
+}
+
+func (p String) String() string {
+	return p.data
+}
+
 type Buffers []Buffer
+type Buffer []byte
 
 func (p *Buffer) UnmarshalJSON(data []byte) error {
 	var b string
@@ -619,8 +641,25 @@ func (p *Buffer) Decrypt(cipherKey []byte) ([]byte, error) {
 	return buf, nil
 }
 
+type FixedBuffer struct {
+	Buffer
+}
+
+func (p FixedBuffer) Marshal(enc *util.TypeEncoder) error {
+	if err := enc.Encode(p.Bytes()); err != nil {
+		return errors.Annotate(err, "encode bytes")
+	}
+
+	return nil
+}
+
 func BufferFromString(data string) (b Buffer, err error) {
 	b = Buffer{}
 	err = b.FromString(data)
 	return
 }
+
+type Unmarshalable interface {
+	UnmarshalJSON(input []byte) error
+}
+type M map[string]interface{}

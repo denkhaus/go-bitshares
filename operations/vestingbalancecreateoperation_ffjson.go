@@ -316,7 +316,7 @@ handle_Amount:
 
 handle_Creator:
 
-	/* handler: j.Creator type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Creator type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -341,7 +341,7 @@ handle_Creator:
 
 handle_Owner:
 
-	/* handler: j.Owner type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Owner type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

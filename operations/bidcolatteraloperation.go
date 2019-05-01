@@ -18,7 +18,7 @@ func init() {
 type BidCollateralOperation struct {
 	types.OperationFee
 	AdditionalCollateral types.AssetAmount `json:"additional_collateral"`
-	Bidder               types.GrapheneID  `json:"bidder"`
+	Bidder               types.AccountID   `json:"bidder"`
 	DebtCovered          types.AssetAmount `json:"debt_covered"`
 	Extensions           types.Extensions  `json:"extensions"`
 }
@@ -53,12 +53,4 @@ func (p BidCollateralOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewBidCollateralOperation creates a new BidCollateralOperation
-func NewBidCollateralOperation() *BidCollateralOperation {
-	tx := BidCollateralOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

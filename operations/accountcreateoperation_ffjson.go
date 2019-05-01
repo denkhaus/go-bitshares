@@ -71,7 +71,16 @@ func (j *AccountCreateOperation) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		return err
 	}
 	buf.WriteString(`,"name":`)
-	fflib.WriteJsonString(buf, string(j.Name))
+
+	{
+
+		obj, err = j.Name.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+
+	}
 	/* Struct fall back. type=types.AccountCreateExtensions kind=struct */
 	buf.WriteString(`,"extensions":`)
 	err = buf.Encode(&j.Extensions)
@@ -382,7 +391,7 @@ mainparse:
 
 handle_Registrar:
 
-	/* handler: j.Registrar type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Registrar type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -407,7 +416,7 @@ handle_Registrar:
 
 handle_Referrer:
 
-	/* handler: j.Referrer type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Referrer type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -497,25 +506,24 @@ handle_Active:
 
 handle_Name:
 
-	/* handler: j.Name type=string kind=string quoted=false*/
+	/* handler: j.Name type=types.String kind=struct quoted=false*/
 
 	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
 		if tok == fflib.FFTok_null {
 
 		} else {
 
-			outBuf := fs.Output.Bytes()
+			tbuf, err := fs.CaptureField(tok)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 
-			j.Name = string(string(outBuf))
-
+			err = j.Name.UnmarshalJSON(tbuf)
+			if err != nil {
+				return fs.WrapErr(err)
+			}
 		}
+		state = fflib.FFParse_after_value
 	}
 
 	state = fflib.FFParse_after_value

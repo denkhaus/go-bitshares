@@ -6,23 +6,25 @@ import (
 	"time"
 
 	"github.com/bradhe/stopwatch"
+	"github.com/denkhaus/logging"
 	"github.com/stretchr/testify/assert"
 
 	// register operations
 
 	_ "github.com/denkhaus/bitshares/operations"
-	"github.com/denkhaus/logging"
 )
 
 func TestBlockRange(t *testing.T) {
+	websocketAPI := NewWebsocketTestAPI(t, WsFullApiUrl)
+	defer websocketAPI.Close()
 
-	api := NewTestAPI(t, WsFullApiUrl, RpcFullApiUrl)
-	defer api.Close()
+	walletAPI := NewWalletTestAPI(t, RpcFullApiUrl)
+	defer walletAPI.Close()
 
-	block := uint64(26880164)
+	block := uint64(26881053)
 
 	for {
-		bl, err := api.GetBlock(block)
+		bl, err := websocketAPI.GetBlock(block)
 		if err != nil {
 			assert.FailNow(t, err.Error(), "GetBlock")
 		}
@@ -32,7 +34,7 @@ func TestBlockRange(t *testing.T) {
 		watch := stopwatch.Start()
 
 		for _, tx := range bl.Transactions {
-			ref, test, err := CompareTransactions(api, &tx, false)
+			ref, test, err := CompareTransactions(walletAPI, &tx, false)
 			if err != nil {
 				logging.Dump("trx", tx)
 				assert.FailNow(t, err.Error(), "CompareTransactions")

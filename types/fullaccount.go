@@ -12,23 +12,23 @@ import (
 type FullAccountInfos []FullAccountInfo
 
 type FullAccountInfo struct {
-	ID          GrapheneID
+	ID          AccountID
 	AccountInfo AccountInfo
 }
 
 type AccountInfo struct {
-	Account              Account           `json:"account"`
-	RegistrarName        string            `json:"registrar_name"`
-	ReferrerName         string            `json:"referrer_name"`
-	LifetimeReferrerName string            `json:"lifetime_referrer_name"`
-	CashbackBalance      VestingBalance    `json:"cashback_balance"`
-	Balances             AccountBalances   `json:"balances"`
-	VestingBalances      VestingBalances   `json:"vesting_balances"`
-	LimitOrders          LimitOrders       `json:"limit_orders"`
-	CallOrders           CallOrders        `json:"call_orders"`
-	SettleOrders         SettleOrders      `json:"settle_orders"`
-	Statistics           AccountStatistics `json:"statistics"`
-	Assets               GrapheneIDs       `json:"assets"`
+	Account              Account               `json:"account"`
+	RegistrarName        String                `json:"registrar_name"`
+	ReferrerName         String                `json:"referrer_name"`
+	LifetimeReferrerName String                `json:"lifetime_referrer_name"`
+	CashbackBalance      VestingBalance        `json:"cashback_balance"`
+	Balances             AccountBalances       `json:"balances"`
+	VestingBalances      VestingBalances       `json:"vesting_balances"`
+	LimitOrders          LimitOrders           `json:"limit_orders"`
+	CallOrders           CallOrders            `json:"call_orders"`
+	SettleOrders         ForceSettlementOrders `json:"settle_orders"`
+	Statistics           AccountStatistics     `json:"statistics"`
+	Assets               AssetIDs              `json:"assets"`
 	//Proposals            []interface{}   `json:"proposals"`
 	//Withdraws            []interface{}   `json:"withdraws"`
 	// Votes                Votes   `json:"votes"`

@@ -12,6 +12,7 @@ import (
 	"github.com/pquerna/ffjson/ffjson"
 )
 
+//An Address is a shortened non-reversable hash of a PublicKey.
 type Address struct {
 	prefix   string
 	data     []byte
@@ -41,7 +42,7 @@ func (p Address) MarshalJSON() ([]byte, error) {
 }
 
 func (p Address) Marshal(enc *util.TypeEncoder) error {
-	return enc.Encode(p.Bytes())
+	return enc.Encode(p.data)
 }
 
 func (p Address) String() string {
@@ -74,12 +75,15 @@ func NewAddress(pub *PublicKey) (*Address, error) {
 	return &ad, nil
 }
 
-//NewAddress creates a new Address from string
-//e.g.("BTSFN9r6VYzBK8EKtMewfNbfiGCr56pHDBFi")
+// NewAddressFromString creates a new Address from string
+// e.g.("BTSFN9r6VYzBK8EKtMewfNbfiGCr56pHDBFi")
 func NewAddressFromString(add string) (*Address, error) {
-	cnf := config.CurrentConfig()
-	prefixChain := cnf.Prefix()
+	cnf := config.Current()
+	if cnf == nil {
+		return nil, ErrChainConfigIsUndefined
+	}
 
+	prefixChain := cnf.Prefix
 	prefix := add[:len(prefixChain)]
 
 	if prefix != prefixChain {

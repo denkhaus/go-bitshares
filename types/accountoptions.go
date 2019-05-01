@@ -9,7 +9,7 @@ import (
 
 type AccountOptions struct {
 	MemoKey       PublicKey  `json:"memo_key"`
-	VotingAccount GrapheneID `json:"voting_account"`
+	VotingAccount AccountID  `json:"voting_account"`
 	NumWitness    UInt16     `json:"num_witness"`
 	NumCommittee  UInt16     `json:"num_committee"`
 	Votes         Votes      `json:"votes"`

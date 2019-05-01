@@ -70,7 +70,7 @@ var sharedSecrets = [][]interface{}{
 }
 
 func Test_SharedSecrets(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDGPH)
+	config.SetCurrent(config.ChainIDGPH)
 
 	for _, tst := range sharedSecrets {
 		priv, err := NewPrivateKeyFromWif(tst[0].(string))
@@ -98,7 +98,7 @@ func Test_SharedSecrets(t *testing.T) {
 }
 
 func Test_MemoDecrypt(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDGPH)
+	config.SetCurrent(config.ChainIDGPH)
 
 	for _, tst := range testCases {
 		from, err := NewPublicKeyFromString(tst["fromPub"])
@@ -144,7 +144,7 @@ func Test_MemoDecrypt(t *testing.T) {
 }
 
 func Test_MemoEncrypt(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDGPH)
+	config.SetCurrent(config.ChainIDGPH)
 
 	for _, tst := range testCases {
 

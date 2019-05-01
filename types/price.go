@@ -22,11 +22,10 @@ func (p Price) Valid() bool {
 
 func (p Price) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(p.Base); err != nil {
-		return errors.Annotate(err, "encode amount")
+		return errors.Annotate(err, "encode Base")
 	}
-
 	if err := enc.Encode(p.Quote); err != nil {
-		return errors.Annotate(err, "encode asset")
+		return errors.Annotate(err, "encode Quote")
 	}
 
 	return nil

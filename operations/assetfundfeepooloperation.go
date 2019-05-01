@@ -18,9 +18,9 @@ func init() {
 type AssetFundFeePoolOperation struct {
 	types.OperationFee
 	Amount      types.UInt64     `json:"amount"`
-	AssetID     types.GrapheneID `json:"asset_id"`
+	AssetID     types.AssetID    `json:"asset_id"`
 	Extensions  types.Extensions `json:"extensions"`
-	FromAccount types.GrapheneID `json:"from_account"`
+	FromAccount types.AccountID  `json:"from_account"`
 }
 
 func (p AssetFundFeePoolOperation) Type() types.OperationType {
@@ -53,12 +53,4 @@ func (p AssetFundFeePoolOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewAssetFundFeePoolOperation creates a new AssetFundFeePoolOperation
-func NewAssetFundFeePoolOperation() *AssetFundFeePoolOperation {
-	tx := AssetFundFeePoolOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

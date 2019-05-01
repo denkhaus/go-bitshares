@@ -19,13 +19,29 @@ type ProposalCreateOperation struct {
 	types.OperationFee
 	ExpirationTime      types.Time                     `json:"expiration_time"`
 	Extensions          types.Extensions               `json:"extensions"`
-	FeePayingAccount    types.GrapheneID               `json:"fee_paying_account"`
+	FeePayingAccount    types.AccountID                `json:"fee_paying_account"`
 	ReviewPeriodSeconds *types.UInt32                  `json:"review_period_seconds,omitempty"`
 	ProposedOps         types.OperationEnvelopeHolders `json:"proposed_ops"`
 }
 
 func (p ProposalCreateOperation) Type() types.OperationType {
 	return types.OperationTypeProposalCreate
+}
+
+func (p ProposalCreateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p ProposalCreateOperation) Marshal(enc *util.TypeEncoder) error {
@@ -62,12 +78,4 @@ func (p ProposalCreateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewProposalCreateOperation creates a new ProposalCreateOperation
-func NewProposalCreateOperation() *ProposalCreateOperation {
-	tx := ProposalCreateOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

@@ -311,7 +311,7 @@ handle_URL:
 
 handle_WitnessAccount:
 
-	/* handler: j.WitnessAccount type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.WitnessAccount type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

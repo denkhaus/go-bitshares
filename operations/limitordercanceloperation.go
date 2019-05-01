@@ -17,9 +17,9 @@ func init() {
 
 type LimitOrderCancelOperation struct {
 	types.OperationFee
-	FeePayingAccount types.GrapheneID `json:"fee_paying_account"`
-	Order            types.GrapheneID `json:"order"`
-	Extensions       types.Extensions `json:"extensions"`
+	FeePayingAccount types.AccountID    `json:"fee_paying_account"`
+	Order            types.LimitOrderID `json:"order"`
+	Extensions       types.Extensions   `json:"extensions"`
 }
 
 func (p LimitOrderCancelOperation) Type() types.OperationType {
@@ -30,31 +30,18 @@ func (p LimitOrderCancelOperation) Marshal(enc *util.TypeEncoder) error {
 	if err := enc.Encode(int8(p.Type())); err != nil {
 		return errors.Annotate(err, "encode OperationType")
 	}
-
 	if err := enc.Encode(p.Fee); err != nil {
-		return errors.Annotate(err, "encode fee")
+		return errors.Annotate(err, "encode Fee")
 	}
-
 	if err := enc.Encode(p.FeePayingAccount); err != nil {
-		return errors.Annotate(err, "encode from")
+		return errors.Annotate(err, "encode FeePayingAccount")
 	}
-
 	if err := enc.Encode(p.Order); err != nil {
-		return errors.Annotate(err, "encode to")
+		return errors.Annotate(err, "encode Order")
 	}
-
 	if err := enc.Encode(p.Extensions); err != nil {
-		return errors.Annotate(err, "encode extensions")
+		return errors.Annotate(err, "encode Extensions")
 	}
 
 	return nil
-}
-
-func NewLimitOrderCancelOperation(order types.GrapheneID) *LimitOrderCancelOperation {
-	op := LimitOrderCancelOperation{
-		Extensions: types.Extensions{},
-		Order:      order,
-	}
-
-	return &op
 }

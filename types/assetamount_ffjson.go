@@ -215,7 +215,7 @@ handle_Amount:
 
 handle_Asset:
 
-	/* handler: j.Asset type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.Asset type=types.AssetID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

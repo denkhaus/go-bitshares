@@ -20,7 +20,7 @@ var (
 )
 
 func Test_SignatureVerify(t *testing.T) {
-	config.SetCurrentConfig(config.ChainIDTest)
+	config.SetCurrent(config.ChainIDTest)
 
 	for _, ds := range digSig {
 		digHex := ds[0]

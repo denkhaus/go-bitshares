@@ -1,24 +1,31 @@
 package api
 
-import "log"
+//go:generate ffjson $GOFILE
 
-type NotifyFunc func(msg interface{}) error
+import (
+	"encoding/json"
+	"log"
+)
+
+type SubscribeCallback func(msg interface{}) error
+type BlockAppliedCallback func(blockID string) error
 type ErrorFunc func(error)
 
 type WebsocketClient interface {
 	IsConnected() bool
 	OnError(fn ErrorFunc)
-	OnNotify(subscriberID int, fn NotifyFunc) error
+	Subscribe(apiID int, method string, fn SubscribeCallback, args ...interface{}) (*json.RawMessage, error)
 	Call(method string, args []interface{}) (*RPCCall, error)
-	CallAPI(apiID int, method string, args ...interface{}) (interface{}, error)
+	CallAPI(apiID int, method string, args ...interface{}) (*json.RawMessage, error)
 	Close() error
 	Connect() error
 }
 
+// ffjson: skip
 type RPCCall struct {
 	Method  string
 	Request rpcRequest
-	Reply   interface{}
+	Reply   *json.RawMessage
 	Error   error
 	Done    chan *RPCCall
 }
@@ -32,16 +39,11 @@ func (call *RPCCall) done() {
 	}
 }
 
+// ffjson: skip
 type rpcRequest struct {
 	Method string        `json:"method"`
 	Params []interface{} `json:"params"`
 	ID     uint64        `json:"id"`
-}
-
-func (p *rpcRequest) reset() {
-	p.ID = 0
-	p.Params = nil
-	p.Method = ""
 }
 
 type ResponseErrorContext struct {
@@ -53,6 +55,7 @@ type ResponseErrorContext struct {
 	ThreadName string `json:"thread_name"`
 	Timestamp  string `json:"timestamp"`
 }
+
 type ResponseErrorStack struct {
 	Context ResponseErrorContext `json:"context"`
 	Format  string               `json:"format"`
@@ -76,64 +79,19 @@ func (p ResponseError) Error() string {
 	return p.Message
 }
 
-//wallet API uses string id ???
 type rpcResponseString struct {
-	ID     string        `json:"id"`
-	Result interface{}   `json:"result,omitempty"`
-	Error  ResponseError `json:"error"`
-}
-
-func (p rpcResponseString) HasError() bool {
-	return p.Error.Code != 0
+	ID     string           `json:"id"`
+	Result *json.RawMessage `json:"result,omitempty"`
+	Error  *ResponseError   `json:"error,omitempty"`
 }
 
 type rpcResponse struct {
-	ID     uint64        `json:"id"`
-	Result interface{}   `json:"result"`
-	Error  ResponseError `json:"error"`
+	ID     uint64           `json:"id"`
+	Result *json.RawMessage `json:"result,omitempty"`
+	Error  *ResponseError   `json:"error,omitempty"`
 }
 
-func (p rpcResponse) Is(in interface{}) bool {
-	if data, ok := in.(map[string]interface{}); ok {
-		if _, ok := data["id"]; ok {
-			if _, ok := data["result"]; ok {
-				return true
-			}
-			if _, ok := data["error"]; ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (p rpcResponse) HasError() bool {
-	return p.Error.Code != 0
-}
-
-func (p *rpcResponse) reset() {
-	p.Error = ResponseError{}
-	p.Result = nil
-	p.ID = 0
-}
-
-type rpcNotify struct {
-	Method string      `json:"method"`
-	Params interface{} `json:"params"`
-}
-
-func (p rpcNotify) Is(in interface{}) bool {
-	if data, ok := in.(map[string]interface{}); ok {
-		if _, ok := data["method"]; ok {
-			if _, ok := data["params"]; ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (p *rpcNotify) reset() {
-	p.Method = ""
-	p.Params = nil
+type rpcSubscriptionResponse struct {
+	Method string        `json:"method"`
+	Params []interface{} `json:"params"`
 }

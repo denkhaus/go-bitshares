@@ -17,19 +17,35 @@ func init() {
 
 type ProposalUpdateOperation struct {
 	types.OperationFee
-	ActiveApprovalsToAdd    types.GrapheneIDs `json:"active_approvals_to_add"`
-	ActiveApprovalsToRemove types.GrapheneIDs `json:"active_approvals_to_remove"`
-	Extensions              types.Extensions  `json:"extensions"`
-	FeePayingAccount        types.GrapheneID  `json:"fee_paying_account"`
-	KeyApprovalsToAdd       types.GrapheneIDs `json:"key_approvals_to_add"`
-	KeyApprovalsToRemove    types.GrapheneIDs `json:"key_approvals_to_remove"`
-	OwnerApprovalsToAdd     types.GrapheneIDs `json:"owner_approvals_to_add"`
-	OwnerApprovalsToRemove  types.GrapheneIDs `json:"owner_approvals_to_remove"`
-	Proposal                types.GrapheneID  `json:"proposal"`
+	ActiveApprovalsToAdd    types.AccountIDs `json:"active_approvals_to_add"`
+	ActiveApprovalsToRemove types.AccountIDs `json:"active_approvals_to_remove"`
+	OwnerApprovalsToAdd     types.AccountIDs `json:"owner_approvals_to_add"`
+	OwnerApprovalsToRemove  types.AccountIDs `json:"owner_approvals_to_remove"`
+	Extensions              types.Extensions `json:"extensions"`
+	FeePayingAccount        types.AccountID  `json:"fee_paying_account"`
+	KeyApprovalsToAdd       types.PublicKeys `json:"key_approvals_to_add"`
+	KeyApprovalsToRemove    types.PublicKeys `json:"key_approvals_to_remove"`
+	Proposal                types.ProposalID `json:"proposal"`
 }
 
 func (p ProposalUpdateOperation) Type() types.OperationType {
 	return types.OperationTypeProposalUpdate
+}
+
+func (p ProposalUpdateOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	if fee, ok := params["fee"]; ok {
+		if err := enc.Encode(types.UInt64(fee.(float64))); err != nil {
+			return errors.Annotate(err, "encode Fee")
+		}
+	}
+
+	if ppk, ok := params["price_per_kbyte"]; ok {
+		if err := enc.Encode(types.UInt32(ppk.(float64))); err != nil {
+			return errors.Annotate(err, "encode PricePerKByte")
+		}
+	}
+
+	return nil
 }
 
 func (p ProposalUpdateOperation) Marshal(enc *util.TypeEncoder) error {
@@ -78,12 +94,4 @@ func (p ProposalUpdateOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewProposalUpdateOperation creates a new ProposalUpdateOperation
-func NewProposalUpdateOperation() *ProposalUpdateOperation {
-	tx := ProposalUpdateOperation{
-		Extensions: types.Extensions{},
-	}
-	return &tx
 }

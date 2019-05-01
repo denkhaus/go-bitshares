@@ -342,7 +342,7 @@ mainparse:
 
 handle_OrderID:
 
-	/* handler: j.OrderID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.OrderID type=types.ObjectID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -367,7 +367,7 @@ handle_OrderID:
 
 handle_AccountID:
 
-	/* handler: j.AccountID type=types.GrapheneID kind=struct quoted=false*/
+	/* handler: j.AccountID type=types.AccountID kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {

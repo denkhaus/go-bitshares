@@ -17,14 +17,18 @@ func init() {
 
 type BalanceClaimOperation struct {
 	types.OperationFee
-	BalanceToClaim   types.GrapheneID  `json:"balance_to_claim"`
+	BalanceToClaim   types.BalanceID   `json:"balance_to_claim"`
 	BalanceOwnerKey  types.PublicKey   `json:"balance_owner_key"`
-	DepositToAccount types.GrapheneID  `json:"deposit_to_account"`
+	DepositToAccount types.AccountID   `json:"deposit_to_account"`
 	TotalClaimed     types.AssetAmount `json:"total_claimed"`
 }
 
 func (p BalanceClaimOperation) Type() types.OperationType {
 	return types.OperationTypeBalanceClaim
+}
+
+func (p BalanceClaimOperation) MarshalFeeScheduleParams(params types.M, enc *util.TypeEncoder) error {
+	return nil
 }
 
 func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
@@ -53,10 +57,4 @@ func (p BalanceClaimOperation) Marshal(enc *util.TypeEncoder) error {
 	}
 
 	return nil
-}
-
-//NewBalanceClaimOperation creates a new BalanceClaimOperation
-func NewBalanceClaimOperation() *BalanceClaimOperation {
-	tx := BalanceClaimOperation{}
-	return &tx
 }
