@@ -60,10 +60,10 @@ var (
 			ID:        ChainIDObelisk,
 		},
 		ChainConfig{
-			"name":           "Karma",
-			"core_asset":     "KRM",
-			"address_prefix": "KRM",
-			"chain_id":       ChainIDKarma,
+			Name:      "Karma",
+			CoreAsset: "KRM",
+			Prefix:    "KRM",
+			ID:        ChainIDKarma,
 		},
 	}
 )
