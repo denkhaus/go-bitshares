@@ -40,7 +40,16 @@ func (p *SimpleClientProvider) CallAPI(apiID int, method string, args ...interfa
 		}
 	}
 
-	return p.WebsocketClient.CallAPI(apiID, method, args...)
+	rawMessage, err := p.WebsocketClient.CallAPI(apiID, method, args...)
+	if err != nil {
+		return nil, errors.Annotate(err, "call api error")
+	}
+
+	if rawMessage == nil {
+		return nil, errors.New("raw message returned is nil")
+	}
+
+	return rawMessage, err
 }
 
 type BestNodeClientProvider struct {
