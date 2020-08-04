@@ -1,4 +1,4 @@
-# bitshares
+# go-bitshares
 
 A Bitshares API consuming a websocket connection to an active full node or a RPC connection to your `cli_wallet`. 
 Look for several examples in [examples](/examples) and [tests](/tests) folder. This is work in progress. To mitigate breaking changes, please use tagged branches. New tagged branches will be created for breaking changes. No additional cgo dependencies for transaction signing required. Use it at your own risk. 
@@ -6,7 +6,7 @@ Look for several examples in [examples](/examples) and [tests](/tests) folder. T
 ## install
 
 ```bash
-go get -u github.com/denkhaus/bitshares
+go get -u github.com/denkhaus/go-bitshares
 ```
 
 Install dev-dependencies with
