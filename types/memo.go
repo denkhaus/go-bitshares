@@ -63,9 +63,9 @@ func (p *Memo) Encrypt(priv *PrivateKey, msg string) error {
 	raw := digest[:4]
 	raw = append(raw, buf...)
 
-	if len(raw)%16 != 0 {
-		raw = pad(raw, 16)
-	}
+	//if len(raw)%16 != 0 {
+	raw = pad(raw, 16)
+	//}
 
 	dst := make([]byte, len(raw))
 	mode.CryptBlocks(dst, raw)
